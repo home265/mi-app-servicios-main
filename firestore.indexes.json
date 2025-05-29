@@ -1,0 +1,24 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "paginas_amarillas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "provincia",        "order": "ASCENDING" },
+        { "fieldPath": "localidad",        "order": "ASCENDING" },
+        { "fieldPath": "activa",           "order": "ASCENDING" },
+        { "fieldPath": "fechaExpiracion",  "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "anuncios",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "creatorId", "order": "ASCENDING" },
+        { "fieldPath": "status",    "order": "ASCENDING" },
+        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

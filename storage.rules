@@ -1,0 +1,79 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Helper: User is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    // Helper: User is the owner via path segment
+    function isOwner(pathUserId) {
+      return isAuthenticated() && request.auth.uid == pathUserId;
+    }
+
+    // Selfies: {userId} en la ruta es el UID del dueño.
+    match /selfies/{userId}/{fileName} {
+      allow read: if isOwner(userId); // Solo el dueño puede leer su selfie
+      allow write: if isOwner(userId) &&
+                      request.resource.size < 2 * 1024 * 1024 && // Max 2MB
+                      request.resource.contentType.matches('image/.*');
+      allow delete: if isOwner(userId);
+    }
+
+    // Reglas para el bucket de paginas_amarillas
+    match /paginas_amarillas/{creatorId}/{allPaths=**} {
+      // cualquiera puede leer/descargar
+      allow read: if true;
+      // subir/borrar solo el dueño
+      allow write: if request.auth != null
+                   && request.auth.uid == creatorId;
+    }
+
+    // Elementos de Anuncios: {anuncioId} es el ID del anuncio.
+    // Se verifica que el usuario sea el creatorId del anuncio en Firestore.
+    match /anuncios_elementos/{anuncioId}/fondos/{fileName} {
+      allow read: if true; // Suelen ser públicos
+      allow write: if isAuthenticated() &&
+                      get(/databases/(default)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid &&
+                      request.resource.size < 3 * 1024 * 1024 && // Max 3MB
+                      request.resource.contentType.matches('image/.*');
+      allow delete: if isAuthenticated() &&
+                       get(/databases/(default)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid;
+    }
+
+    match /anuncios_elementos/{anuncioId}/{screenIndex}/{fileName} {
+      allow read: if true;
+      allow write: if isAuthenticated() &&
+                      get(/databases/(default)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid &&
+                      request.resource.size < 2 * 1024 * 1024 && // Max 2MB
+                      request.resource.contentType.matches('image/.*');
+      allow delete: if isAuthenticated() &&
+                       get(/databases/(default)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid;
+    }
+
+    // Capturas de pantalla de Anuncios
+    match /capturas_anuncios/{anuncioId}/{fileName} {
+      allow read: if true; // Suelen ser públicas
+      allow write: if isAuthenticated() &&
+                      get(/databases/(default)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid &&
+                      request.resource.contentType.matches('image/jpeg'); // Asumiendo JPG
+      allow delete: if isAuthenticated() &&
+                       get(/databases/(default)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid;
+    }
+
+    // Si tienes CVs como archivos PDF: {userId} es el dueño del CV.
+    // match /cvs/{userId}/{cvFileName} {
+    //   allow read: if isOwner(userId) ||
+    //                  (isAuthenticated() && (
+    //                     exists(/databases/(default)/documents/prestadores/$(request.auth.uid)) ||
+    //                     exists(/databases/(default)/documents/comercios/$(request.auth.uid))
+    //                  ));
+    //   allow write: if isOwner(userId) &&
+    //                   request.resource.size < 2 * 1024 * 1024 && // Max 2MB
+    //                   request.resource.contentType.matches('application/pdf');
+    //   allow delete: if isOwner(userId);
+    // }
+  }
+}

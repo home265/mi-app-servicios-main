@@ -1,0 +1,132 @@
+{
+    "rubros": [
+      {
+        "nombre": "Salud",
+        "subrubros": [
+          "Médico Clínico",
+          "Oftalmólogos",
+          "Gastroenterólogos",
+          "Odontólogos",
+          "Cardiólogo",
+          "Otorrinolaringólogo",
+          "Ópticas",
+          "Clínicas",
+          "Análisis Clínicos",
+          "Diagnóstico por Imágenes",
+          "Farmacias",
+          "Emergencias Médicas",
+          "Traumatologo",
+          "Pediatra",
+          "Kinesiologo",
+          "Fisioterapeuta",
+          "Psicologo",
+          "Psiquiatra"
+        ]
+      },
+      {
+        "nombre": "Bienestar",
+        "subrubros": [
+          "Peluquerías",
+          "Manicuras",
+          "Depilación",
+          "Yoga",
+          "Personal Training",
+          "Gimnasios",
+          "Podología",
+          "Barbería",
+          "Deportes"
+        ]
+      },
+      {
+        "nombre": "Servicios Profesionales",
+        "subrubros": [
+          "Abogado",
+          "Arquitecto",
+          "Escribano",
+          "Contador",
+          "Ingeniero Industrial",
+          "Ingeniero Eléctrico",
+          "Ingeniero Electrónico",
+          "Ingeniero Agrónomo",
+          "Diseñador Gráfico"
+        ]
+      },
+      {
+        "nombre": "Construcción",
+        "subrubros": []
+      },
+      {
+        "nombre": "Ferretería",
+        "subrubros": []
+      },
+      {
+        "nombre": "Electricidad",
+        "subrubros": []
+      },
+      {
+        "nombre": "Artículos de Electrónica",
+        "subrubros": []
+      },
+      {
+        "nombre": "Pinturería",
+        "subrubros": []
+      },
+      {
+        "nombre": "Transporte de Cargas",
+        "subrubros": []
+      },
+      {
+        "nombre": "Librerías",
+        "subrubros": []
+      },
+      {
+        "nombre": "Artículos de Limpieza",
+        "subrubros": []
+      },
+      {
+        "nombre": "Repuestos de Automotores",
+        "subrubros": []
+      },
+      {
+        "nombre": "Lubricentros",
+        "subrubros": []
+      },
+      {
+        "nombre": "Lavadero de Autos",
+        "subrubros": []
+      },
+      {
+        "nombre": "Restaurantes y Bares",
+        "subrubros": []
+      },
+      {
+        "nombre": "Comidas para Llevar",
+        "subrubros": []
+      },
+      {
+        "nombre": "Dietéticas",
+        "subrubros": []
+      },
+      {
+        "nombre": "Jugueterías",
+        "subrubros": []
+      },
+      {
+        "nombre": "Cotillón",
+        "subrubros": []
+      },
+      {
+        "nombre": "Musicalización de Eventos",
+        "subrubros": []
+      },
+      {
+        "nombre": "Catering",
+        "subrubros": []
+      },
+      {
+        "nombre": "Insumos Agrícolas",
+        "subrubros": []
+      }
+    ]
+  }
+  

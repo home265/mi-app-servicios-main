@@ -1,0 +1,65 @@
+// src/lib/firebase/firestore.ts
+import { doc, deleteDoc, getDoc, DocumentSnapshot } from 'firebase/firestore';
+import { db } from './config'; // Tu instancia exportada de firestore (db)
+
+// Lista de posibles colecciones de usuarios (mantener consistente con Providers.tsx)
+const USER_COLLECTIONS = ['usuarios_generales', 'prestadores', 'comercios'];
+
+/**
+ * Determina la colección correcta para un usuario basado en su rol o intentando encontrar el documento.
+ * @param uid El UID del usuario.
+ * @param rol (Opcional) El rol conocido del usuario.
+ * @returns El nombre de la colección donde se encontró el usuario, o null.
+ */
+async function findUserCollection(uid: string, rol?: string): Promise<string | null> {
+    if (rol) {
+        switch (rol) {
+            case 'prestador': return 'prestadores';
+            case 'comercio': return 'comercios';
+            case 'usuario': // Asumiendo que 'usuario' mapea a 'usuarios_generales'
+            default: return 'usuarios_generales';
+        }
+    } else {
+        // Si no se conoce el rol, intentar buscar en las colecciones
+        console.warn("findUserCollection: No se proporcionó rol, buscando en todas las colecciones...");
+        for (const collectionName of USER_COLLECTIONS) {
+            const docRef = doc(db, collectionName, uid);
+            const docSnap: DocumentSnapshot = await getDoc(docRef);
+            if (docSnap.exists()) {
+                console.log(`findUserCollection: Usuario encontrado en ${collectionName}`);
+                return collectionName;
+            }
+        }
+        return null; // No encontrado
+    }
+}
+
+
+/**
+ * Borra el documento de perfil de usuario de la colección correcta en Firestore.
+ * @param uid El UID del usuario a borrar.
+ * @param rol (Opcional pero recomendado) El rol del usuario para encontrar la colección rápidamente.
+ * @returns Promise<void>
+ * @throws Si no se encuentra la colección o falla el borrado.
+ */
+export const deleteUserProfile = async (uid: string, rol?: string): Promise<void> => {
+  const collectionName = await findUserCollection(uid, rol);
+  
+  if (!collectionName) {
+      console.error(`No se pudo determinar la colección para el usuario con UID: ${uid}`);
+      // Podríamos no lanzar un error si el documento ya no existe, pero sí si no sabemos dónde buscar.
+      // Depende de cómo quieras manejarlo. Por ahora, lanzaremos un error si no se sabe la colección.
+      throw new Error("No se pudo encontrar la colección del perfil de usuario.");
+  }
+
+  const userDocRef = doc(db, collectionName, uid);
+
+  try {
+    // Verificar si existe antes de borrar podría ser útil, pero deleteDoc no falla si no existe.
+    await deleteDoc(userDocRef);
+    console.log(`Documento de usuario borrado de Firestore (${collectionName}/${uid}) exitosamente.`);
+  } catch (error) {
+    console.error(`Error al borrar documento de usuario de Firestore (${collectionName}/${uid}):`, error);
+    throw new Error("Error al borrar el perfil de la base de datos."); // Error genérico
+  }
+};

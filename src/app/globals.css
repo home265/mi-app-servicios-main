@@ -1,0 +1,124 @@
+/* src/app/globals.css */
+@import "tailwindcss";
+
+:root {
+  /* --- MODO CLARO (Colores por defecto) --- */
+  --color-fondo: #F2F3F5;
+  --color-primario: #1E88E5;
+  --color-secundario: #FFA726;
+  --color-texto-principal: #212121;
+  --color-texto-secundario: #616161;
+  --color-tarjeta: #FFFFFF;
+  --color-error: #D32F2F;
+  --color-borde-tarjeta: #8B5CF6; /* NUEVO: Violeta para borde en modo claro */
+}
+
+/* --- MODO OSCURO --- */
+.dark {
+  --color-fondo: #121212;
+  --color-primario: #90CAF9;
+  --color-secundario: #A5D6A7;
+  --color-texto-principal: #E0E0E0;
+  --color-texto-secundario: #BDBDBD;
+  --color-tarjeta: #2a2a2a; /* Dejamos este un poco más claro que el fondo */
+  --color-error: #EF5350;
+  --color-borde-tarjeta: #A78BFA; /* NUEVO: Violeta más claro para borde en modo oscuro */
+}
+
+/* ... (resto de tu globals.css igual) ... */
+body {
+  background-color: var(--color-fondo);
+  color: var(--color-texto-principal);
+  font-family: theme('fontFamily.sans');
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: var(--color-primario);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+@layer base {
+  html,
+  :host {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+}
+
+@layer base {
+  [data-nextjs-dialog-backdrop] {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+}
+
+/* --- ANIMACIONES PARA EFECTOS DEL REEL DE PREVISUALIZACIÓN --- */
+/* Añade esto al final de tu archivo globals.css */
+
+/* Efecto FadeIn */
+@keyframes fadeInAnimation {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.anim-fadeIn {
+  animation-name: fadeInAnimation;
+  animation-duration: 0.7s; /* Duración de la animación del efecto */
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards; /* Mantiene el estado final después de la animación */
+}
+
+/* Efecto ZoomIn */
+@keyframes zoomInAnimation {
+  from {
+    opacity: 0;
+    transform: scale(0.85); /* Inicia un poco más pequeño */
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.anim-zoomIn {
+  animation-name: zoomInAnimation;
+  animation-duration: 0.7s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+/* Efecto SlideInFromLeft */
+@keyframes slideInFromLeftAnimation {
+  from {
+    opacity: 0;
+    transform: translateX(-30%); /* Inicia deslizando desde la izquierda */
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.anim-slideInFromLeft {
+  animation-name: slideInFromLeftAnimation;
+  animation-duration: 0.7s;
+  animation-timing-function: ease-out;
+  animation-fill-mode: forwards;
+}
+
+/* Efecto Pulse */
+@keyframes pulseAnimation {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.03); } /* Un pulso sutil */
+  100% { transform: scale(1); }
+}
+.anim-pulse {
+  animation-name: pulseAnimation;
+  animation-duration: 0.8s; /* Duración del pulso */
+  animation-timing-function: ease-in-out;
+  /* No 'forwards' aquí para que vuelva a la normalidad.
+     La animación se aplica una vez. */
+}

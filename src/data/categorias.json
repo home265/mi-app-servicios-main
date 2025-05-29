@@ -1,0 +1,80 @@
+{
+    "categorias": [
+      {
+        "nombre": "Albañil",
+        "subcategorias": ["General", "Ceramista", "Techista"]
+      },
+      {
+        "nombre": "Mecánico",
+        "subcategorias": ["General", "Electricidad del Automotor", "Caños de Escape", "Electrónica Automotor", "Inyección", "Frenos"]
+      },
+      {
+        "nombre": "Auxilio Mecánico",
+        "subcategorias": ["Grúas", "Mecánica a domicilio"]
+      },
+      {
+        "nombre": "Carpintero",
+        "subcategorias": ["Trabajos generales", "Techista", "Ebanistería", "Muebles a Medida"]
+      },
+      {
+        "nombre": "Cerrajero",
+        "subcategorias": ["General", "A Domicilio"]
+      },
+      {
+        "nombre": "Cuidadores de Adultos Mayores",
+        "subcategorias": []
+      },
+      {
+        "nombre": "Niñeras",
+        "subcategorias": []
+      },
+      {
+        "nombre": "Electricista",
+        "subcategorias": ["General", "Domiciliario", "Industrial"]
+      },
+      {
+        "nombre": "Gasista",
+        "subcategorias": ["General", "Domiciliaria", "Industrial", "Matriculado"]
+      },
+      {
+        "nombre": "Jardinero",
+        "subcategorias": ["Mantenimiento General", "Instalación de riego"]
+      },
+      {
+        "nombre": "Limpieza Domiciliaria",
+        "subcategorias": []
+      },
+      {
+        "nombre": "Pintor",
+        "subcategorias": ["General", "De Altura", "Industrial"]
+      },
+      {
+        "nombre": "Plomero",
+        "subcategorias": ["General", "Industrial"]
+      },
+      {
+        "nombre": "Técnicos Electrónicos",
+        "subcategorias": ["General", "Computadoras", "Industrial", "Electrodomésticos"]
+      },
+      {
+        "nombre": "Piletas",
+        "subcategorias": ["Mantenimiento", "Construcción", "Limpieza"]
+      },
+      {
+        "nombre": "Maquinista",
+        "subcategorias": ["General", "Excavadoras", "Tractores"]
+      },
+      {
+        "nombre": "Veterinario",
+        "subcategorias": ["General", "Animales de Granja"]
+      },
+      {
+        "nombre": "Repartidor",
+        "subcategorias": ["Moto", "Bicicleta", "Auto"]
+      },
+      {
+        "nombre": "Herrero",
+        "subcategorias": ["Herrería General", "Herrería Industrial"]
+      }
+    ]
+  }

@@ -1,0 +1,7 @@
+# Archivos y carpetas que normalmente no queremos subir
+.git/
+node_modules/
+*.log
+
+# ---- REGLA CLAVE PARA EL .env ----
+!functions/.env
