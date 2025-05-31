@@ -20,6 +20,7 @@
     }
   ],
   "hosting": {
+    "site": "mi-app-servicios-3326e",   
     "source": ".",
     "ignore": [
       "firebase.json",
@@ -28,7 +29,11 @@
     ],
     "frameworksBackend": {
       "region": "us-central1"
-    }
+    },
+    "rewrites": [
+      { "source": "/api/**", "function": "ssrmiappservicios3326e" },
+      { "source": "**",      "function": "ssrmiappservicios3326e" }
+    ]
   },
   "storage": {
     "rules": "storage.rules"
