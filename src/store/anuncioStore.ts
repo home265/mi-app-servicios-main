@@ -1,4 +1,6 @@
 // src/store/anuncioStore.ts
+'use client';
+
 import { create } from 'zustand';
 import type { PlanId, CampaniaId } from '@/lib/constants/anuncios'; // Asegúrate que la ruta a tus tipos es correcta
 
