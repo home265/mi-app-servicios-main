@@ -1,4 +1,3 @@
-// src/app/(ads)/editor/tools/TextTool.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -12,11 +11,10 @@ import fontsData from '@/data/fonts.json';
 // (Opcional pero recomendado) Definir un tipo para los objetos de fuente
 interface FontOption {
   name: string;
-  categoria?: string; // Si tu JSON tiene estas propiedades
-  uso?: string;       // Si tu JSON tiene estas propiedades
+  categoria?: string;
+  uso?: string;
 }
 const typedFontsData: FontOption[] = fontsData;
-
 
 interface TextToolProps {
   initial?: TextElement;
@@ -45,17 +43,17 @@ export default function TextTool({ initial, onConfirm, onClose }: TextToolProps)
       fontFamily,
       fontSizePct,
     });
-    onClose(); 
+    onClose();
   };
 
   return (
     <div
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-40"
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50"
       onClick={onClose}
     >
       <div
         className="bg-[var(--color-tarjeta)] p-5 rounded-lg shadow-xl w-full max-w-sm text-[var(--color-texto-principal)]"
-        onClick={(e) => e.stopPropagation()}
+        onClick={e => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-semibold">
@@ -64,14 +62,19 @@ export default function TextTool({ initial, onConfirm, onClose }: TextToolProps)
           {initial?.id && (
             <DeleteElementButton
               elementId={initial.id}
-              onElementDeleted={onClose} 
+              onElementDeleted={onClose}
             />
           )}
         </div>
 
         <div className="space-y-4">
           <div>
-            <label htmlFor="text-tool-content" className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1">Contenido:</label>
+            <label
+              htmlFor="text-tool-content"
+              className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1"
+            >
+              Contenido:
+            </label>
             <input
               id="text-tool-content"
               type="text"
@@ -82,7 +85,12 @@ export default function TextTool({ initial, onConfirm, onClose }: TextToolProps)
             />
           </div>
           <div>
-            <label htmlFor="text-tool-color" className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1">Color:</label>
+            <label
+              htmlFor="text-tool-color"
+              className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1"
+            >
+              Color:
+            </label>
             <input
               id="text-tool-color"
               type="color"
@@ -92,29 +100,36 @@ export default function TextTool({ initial, onConfirm, onClose }: TextToolProps)
             />
           </div>
           <div>
-            <label htmlFor="text-tool-font" className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1">Fuente:</label>
+            <label
+              htmlFor="text-tool-font"
+              className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1"
+            >
+              Fuente:
+            </label>
             <select
               id="text-tool-font"
               value={fontFamily}
               onChange={e => setFontFamily(e.target.value)}
               className="w-full p-2 rounded-md bg-[var(--color-input)] border border-[var(--color-borde-input)] focus:ring-primario focus:border-primario"
             >
-              {/* PASO 3: Generar las opciones de fuente dinámicamente */}
               {typedFontsData.map(font => (
                 <option
                   key={font.name}
                   value={font.name}
-                  // Estilo para previsualizar la fuente en la opción
                   style={{ fontFamily: font.name, fontSize: '1rem' }}
                 >
-                  {font.name} {/* Puedes cambiarlo a "HOLA - {font.name}" si prefieres */}
+                  {font.name}
                 </option>
               ))}
             </select>
           </div>
           <div>
-            <label htmlFor="text-tool-size" className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1">
-              Tamaño (% del alto del canvas): <span className="font-semibold">{fontSizePct}%</span>
+            <label
+              htmlFor="text-tool-size"
+              className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1"
+            >
+              Tamaño (% del alto del canvas):{' '}
+              <span className="font-semibold">{fontSizePct}%</span>
             </label>
             <input
               id="text-tool-size"
@@ -129,7 +144,9 @@ export default function TextTool({ initial, onConfirm, onClose }: TextToolProps)
           </div>
         </div>
         <div className="mt-6 flex justify-end space-x-3">
-          <Button variant="secondary" onClick={onClose}>Cancelar</Button>
+          <Button variant="secondary" onClick={onClose}>
+            Cancelar
+          </Button>
           <Button variant="primary" onClick={handleConfirm}>
             {initial ? 'Guardar Cambios' : 'Agregar Texto'}
           </Button>

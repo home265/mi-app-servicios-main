@@ -1,4 +1,3 @@
-// src/app/(ads)/editor/tools/ColorTool.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -27,7 +26,7 @@ export default function ColorTool({ initial, onConfirm, onClose }: ColorToolProp
   };
 
   return (
-    <div className="absolute bottom-4 left-4 bg-black text-white p-4 rounded-lg shadow-lg w-full max-w-xs max-h-[80vh] overflow-auto">
+    <div className="absolute bottom-4 left-4 z-50 bg-black text-white p-4 rounded-lg shadow-lg w-full max-w-xs max-h-[80vh] overflow-auto">
       <h2 className="text-lg font-semibold mb-2">Color de fondo</h2>
       <div className="mb-4">
         <label className="block text-sm mb-1">Seleccionar color:</label>

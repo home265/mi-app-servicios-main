@@ -1,4 +1,3 @@
-// src/app/(ads)/editor/tools/ImageBackgroundTool.tsx
 'use client';
 
 import React, { useState, useRef } from 'react'; // useRef añadido
@@ -10,7 +9,7 @@ import { UploadCloud } from 'lucide-react'; // Icono para el botón de subir
 interface ImageBackgroundToolProps {
   // Si se edita, 'initial' debería tener el src actual.
   // No se necesita 'id' aquí porque un fondo de imagen es único por pantalla y se reemplaza.
-  initial?: Partial<Omit<ImageBackgroundElement, 'id' | 'tipo'>>; 
+  initial?: Partial<Omit<ImageBackgroundElement, 'id' | 'tipo'>>;
   onConfirm: (elementData: Omit<ImageBackgroundElement, 'id' | 'tipo'> & { tipo: 'fondoImagen' }) => void;
   onClose: () => void;
 }
@@ -72,14 +71,14 @@ export default function ImageBackgroundTool({ initial, onConfirm, onClose }: Ima
 
   return (
     // Mantengo tu estilo de panel fijo en la esquina inferior, adaptando los colores.
-    <div className="absolute bottom-4 left-4 bg-[var(--color-tarjeta)] text-[var(--color-texto-principal)] p-4 rounded-lg shadow-lg w-full max-w-xs max-h-[calc(100vh-8rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800">
+    <div className="absolute bottom-4 left-4 z-50 bg-[var(--color-tarjeta)] text-[var(--color-texto-principal)] p-4 rounded-lg shadow-lg w-full max-w-xs max-h-[calc(100vh-8rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800">
       <div className="flex justify-between items-center mb-3"> {/* Ajustado mb-3 */}
         <h3 className="text-lg font-semibold"> {/* Título modificado */}
           {initial?.src ? 'Cambiar Imagen de Fondo' : 'Imagen de Fondo'}
         </h3>
         {/* No se añade botón de eliminar aquí, ya que la acción es reemplazar o usar otra herramienta (Color/Gradiente) */}
       </div>
-      
+
       <div className="space-y-4">
         {/* MEJORA UI: Botón para subir imagen e input de archivo oculto */}
         <div>
@@ -118,7 +117,7 @@ export default function ImageBackgroundTool({ initial, onConfirm, onClose }: Ima
                 alt="Preview imagen de fondo"
                 fill
                 className="object-cover" // Para fondo, 'cover' suele ser lo deseado para llenar el espacio
-                unoptimized={typeof src === 'string' && src.startsWith('data:')} 
+                unoptimized={typeof src === 'string' && src.startsWith('data:')}
               />
             </div>
           </div>
@@ -127,7 +126,7 @@ export default function ImageBackgroundTool({ initial, onConfirm, onClose }: Ima
       </div>
 
       <div className="mt-6 flex justify-end space-x-2">
-        <Button variant="secondary" onClick={onClose}>Cancelar</Button> 
+        <Button variant="secondary" onClick={onClose}>Cancelar</Button>
         <Button variant="primary" onClick={handleConfirm} disabled={!src}>
           {initial?.src ? 'Aplicar Cambios' : 'Establecer Fondo'}
         </Button>

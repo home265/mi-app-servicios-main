@@ -1,4 +1,3 @@
-// src/app/(ads)/editor/tools/GradientBackgroundTool.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -33,7 +32,7 @@ export default function GradientBackgroundTool({ initial, onConfirm, onClose }: 
   };
 
   return (
-    <div className="absolute bottom-4 left-4 bg-black text-white p-4 rounded-lg shadow-lg w-full max-w-xs max-h-[80vh] overflow-auto">
+    <div className="absolute bottom-4 left-4 z-50 bg-black text-white p-4 rounded-lg shadow-lg w-full max-w-xs max-h-[80vh] overflow-auto">
       <h2 className="text-lg font-semibold mb-4">Fondo degradado</h2>
       <div className="space-y-4">
         <div>

@@ -1,4 +1,3 @@
-// src/app/(ads)/editor/tools/CurvedTextTool.tsx
 'use client';
 
 import React, { useState } from 'react';
@@ -16,7 +15,6 @@ interface FontOption {
   uso?: string;
 }
 const typedFontsData: FontOption[] = fontsData;
-
 
 interface CurvedTextToolProps {
   initial?: CurvedTextElement;
@@ -53,7 +51,7 @@ export default function CurvedTextTool({ initial, onConfirm, onClose }: CurvedTe
   };
 
   return (
-    <div className="absolute bottom-4 left-4 bg-[var(--color-tarjeta)] text-[var(--color-texto-principal)] p-4 rounded-lg shadow-lg w-full max-w-xs max-h-[calc(100vh-8rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800">
+    <div className="absolute bottom-4 left-4 z-50 bg-[var(--color-tarjeta)] text-[var(--color-texto-principal)] p-4 rounded-lg shadow-lg w-full max-w-xs max-h-[calc(100vh-8rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800">
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold">
           {initial ? 'Editar Texto Curvo' : 'Agregar Texto Curvo'}
@@ -95,15 +93,13 @@ export default function CurvedTextTool({ initial, onConfirm, onClose }: CurvedTe
             onChange={e => setFontFamily(e.target.value)}
             className="w-full p-2 rounded-md bg-[var(--color-input)] border border-[var(--color-borde-input)] focus:ring-primario focus:border-primario"
           >
-            {/* PASO 3: Generar las opciones de fuente dinámicamente */}
             {typedFontsData.map(font => (
               <option
                 key={font.name}
                 value={font.name}
-                // Estilo para previsualizar la fuente en la opción
                 style={{ fontFamily: font.name, fontSize: '1rem' }}
               >
-                {font.name} {/* Puedes cambiarlo a "HOLA - {font.name}" si prefieres */}
+                {font.name}
               </option>
             ))}
           </select>
