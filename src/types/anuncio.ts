@@ -81,4 +81,4 @@ export interface Anuncio {
   elementosPorPantalla?: Record<string, Elemento[]>;
 }
 
-export { Timestamp };
+export { Timestamp, type PlanId, type CampaniaId };

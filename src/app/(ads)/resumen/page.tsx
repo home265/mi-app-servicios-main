@@ -1,14 +1,14 @@
 // src/app/(ads)/resumen/page.tsx
 'use client';
 
-import React, { useState } from 'react'; // useEffect eliminado, useState añadido para isLoading
+import React, { useState, useEffect } from 'react'; // useEffect re-añadido
 import { useRouter, useSearchParams } from 'next/navigation';
-import Card from '@/app/components/ui/Card';
-import Button from '@/app/components/ui/Button';
-import { planes, campanias, Plan, Campania } from '@/lib/constants/anuncios';
+import Card from '@/app/components/ui/Card'; // Asegúrate que la ruta es correcta
+import Button from '@/app/components/ui/Button'; // Asegúrate que la ruta es correcta
+import { planes, campanias, Plan, Campania, PlanId, CampaniaId } from '@/lib/constants/anuncios'; // Tipos PlanId y CampaniaId importados para claridad
 import { useAnuncioStore } from '@/store/anuncioStore';
-import { updateAnuncio } from '@/lib/services/anunciosService'; // Para actualizar el borrador
-import type { Anuncio } from '@/types/anuncio'; // Para el tipo Anuncio
+import { updateAnuncio } from '@/lib/services/anunciosService';
+import type { Anuncio } from '@/types/anuncio';
 
 export default function ResumenPage() {
   const router = useRouter();
@@ -16,123 +16,147 @@ export default function ResumenPage() {
 
   const borradorId = searchParams.get('borradorId');
 
-  const planIdFromStore = useAnuncioStore(state => state.planId);
-  const campaniaIdFromStore = useAnuncioStore(state => state.campaniaId);
+  // Valores del store. Con 'persist', estos se hidratarán desde localStorage.
+  const planIdFromStore: PlanId | null = useAnuncioStore(state => state.planId);
+  const campaniaIdFromStore: CampaniaId | null = useAnuncioStore(state => state.campaniaId);
+  const screensCountFromStore = useAnuncioStore(state => state.screensCount); // Para handleContinuar
   const resetAnuncioStore = useAnuncioStore(state => state.reset);
 
-  const [isLoadingUpdate, setIsLoadingUpdate] = useState<boolean>(false); // Estado para la actualización
+  const [isLoadingUpdate, setIsLoadingUpdate] = useState<boolean>(false);
+  const [mounted, setMounted] = useState<boolean>(false); // Flag para el montaje en cliente
 
-  // Redirecciones si faltan datos en el store (sin useEffect)
-  if (planIdFromStore === null) {
-    console.log('ResumenPage: Falta planId, redirigiendo a /planes...');
-    if (typeof window !== 'undefined') {
-      router.replace(borradorId ? `/planes?borradorId=${borradorId}` : '/planes');
-    }
-    return <div className="min-h-screen bg-fondo text-texto p-4 flex items-center justify-center"><p>Redirigiendo...</p></div>;
-  }
-  if (campaniaIdFromStore === null) {
-    console.log('ResumenPage: Falta campaniaId, redirigiendo a /campanas...');
-    if (typeof window !== 'undefined') {
-      router.replace(borradorId ? `/campanas?borradorId=${borradorId}` : '/campanas');
-    }
-    return <div className="min-h-screen bg-fondo text-texto p-4 flex items-center justify-center"><p>Redirigiendo...</p></div>;
-  }
+  useEffect(() => {
+    setMounted(true); // Se activa solo en el cliente después del montaje inicial
+  }, []);
 
-  const plan: Plan | undefined = planes.find(p => p.id === planIdFromStore);
-  const campania: Campania | undefined = campanias.find(c => c.id === campaniaIdFromStore);
+  // Derivamos planSeleccionado y campaniaSeleccionada después del montaje
+  // y cuando los IDs del store estén disponibles y sean válidos.
+  // Estos serán undefined si los IDs son null o no válidos, lo que ayudará en la lógica de carga/redirección.
+  const planSeleccionado: Plan | undefined = mounted
+    ? planes.find(p => p.id === planIdFromStore)
+    : undefined;
+  const campaniaSeleccionada: Campania | undefined = mounted
+    ? campanias.find(c => c.id === campaniaIdFromStore)
+    : undefined;
 
-  if (!plan || !campania) {
-    console.error('ResumenPage: Plan o campaña no encontrados en las constantes. planId:', planIdFromStore, 'campaniaId:', campaniaIdFromStore);
-    if (typeof window !== 'undefined') {
-      // Redirigir a planes, manteniendo el borradorId si existe, ya que algo está mal con la selección
-      router.replace(borradorId ? `/planes?borradorId=${borradorId}&error=configuracion_invalida` : '/planes?error=configuracion_invalida');
-    }
-    return <div className="min-h-screen bg-fondo text-texto p-4 flex items-center justify-center"><p>Error en la configuración. Redirigiendo...</p></div>;
-  }
-
-  const baseTotal = plan.priceARS * campania.months;
-  const totalWithDiscount = Math.round(baseTotal * (1 - campania.discount));
-
-  const handleContinuar = async () => {
-    console.log('ResumenPage: handleContinuar - FUNCIÓN INVOCADA');
-    
-    // Si estamos editando un borrador existente, actualizamos su plan y campaña en Firebase
-    if (borradorId) {
-      setIsLoadingUpdate(true);
-      try {
-        // Preparamos los datos para actualizar.
-        // Es crucial que maxScreens se actualice según el nuevo plan.
-        const datosActualizados: Partial<Omit<Anuncio, "id" | "creatorId" | "createdAt">> = {
-          plan: plan.id, // planIdFromStore es lo mismo que plan.id
-          campaniaId: campania.id, // campaniaIdFromStore es lo mismo que campania.id
-          maxScreens: plan.maxImages, // Actualizar maxScreens según el plan seleccionado
-          // campaignDurationDays también podría recalcularse aquí si depende de la campaña
-          campaignDurationDays: campania.months * 30, // Asumiendo 30 días por mes
-        };
-
-        console.log(`ResumenPage: Actualizando borrador ${borradorId} con:`, datosActualizados);
-        await updateAnuncio(borradorId, datosActualizados);
-        console.log(`ResumenPage: Borrador ${borradorId} actualizado exitosamente.`);
-        
-        // Aquí es donde se necesitaría la lógica compleja si maxScreens se reduce
-        // y hay que limpiar elementosPorPantalla y capturas de pantallas sobrantes.
-        // Por ahora, solo actualizamos los campos principales del Anuncio.
-
-      } catch (error) {
-        console.error("ResumenPage: Error al actualizar el borrador:", error);
-        setIsLoadingUpdate(false);
-        // Mostrar un mensaje de error al usuario es importante aquí
-        alert(`Error al guardar los cambios en el borrador: ${error instanceof Error ? error.message : "Error desconocido"}`);
-        return; // No continuar si la actualización falla
+  // useEffect para la lógica de redirección
+  useEffect(() => {
+    if (mounted) {
+      if (!planIdFromStore) {
+        console.log('ResumenPage (cliente): Falta planId, redirigiendo a /planes...');
+        router.replace(borradorId ? `/planes?borradorId=${borradorId}` : '/planes');
+      } else if (!campaniaIdFromStore) {
+        console.log('ResumenPage (cliente): Falta campaniaId, redirigiendo a /campanas...');
+        router.replace(borradorId ? `/campanas?borradorId=${borradorId}&planId=${planIdFromStore}` : `/campanas?planId=${planIdFromStore}`);
+      } else if (!planSeleccionado) {
+        // planIdFromStore existe pero no es un ID válido en `planes`
+        console.error(`ResumenPage (cliente): planId "${planIdFromStore}" del store no es válido. Redirigiendo a /planes...`);
+        router.replace(borradorId ? `/planes?borradorId=${borradorId}` : '/planes');
+      } else if (!campaniaSeleccionada) {
+        // campaniaIdFromStore existe pero no es un ID válido en `campanias`
+        console.error(`ResumenPage (cliente): campaniaId "${campaniaIdFromStore}" del store no es válido. Redirigiendo a /campanas...`);
+        router.replace(borradorId ? `/campanas?borradorId=${borradorId}&planId=${planIdFromStore}` : `/campanas?planId=${planIdFromStore}`);
       }
-      setIsLoadingUpdate(false);
     }
-    
-    const rutaSiguiente = borradorId ? `/resumen/count?borradorId=${borradorId}` : '/resumen/count';
-    console.log(`ResumenPage: Navegando a ${rutaSiguiente}`);
-    router.push(rutaSiguiente);
-  };
+  }, [mounted, planIdFromStore, campaniaIdFromStore, planSeleccionado, campaniaSeleccionada, borradorId, router]);
 
   const handleVolverACampanas = () => {
-    if (borradorId) {
-      router.push(`/campanas?borradorId=${borradorId}`);
+    // Aseguramos que planIdFromStore sea válido antes de usarlo en la URL
+    if (planIdFromStore) {
+      router.push(borradorId ? `/campanas?borradorId=${borradorId}&planId=${planIdFromStore}` : `/campanas?planId=${planIdFromStore}`);
     } else {
-      router.push('/campanas');
+      // Si por alguna razón planIdFromStore es null aquí (no debería si la lógica de redirección funciona),
+      // al menos redirigir a /planes para evitar errores.
+      router.push(borradorId ? `/planes?borradorId=${borradorId}` : '/planes');
     }
   };
+
+  const handleContinuar = async () => {
+    if (!planSeleccionado || !campaniaSeleccionada || screensCountFromStore === null) {
+      console.error('ResumenPage: Faltan datos para continuar (plan, campaña o screensCount).');
+      // Podrías añadir una notificación al usuario aquí.
+      return;
+    }
+
+    setIsLoadingUpdate(true);
+    try {
+      if (borradorId) {
+        // Actualizar el borrador existente
+        const updateData: Partial<Anuncio> = {
+          plan: planSeleccionado.id,
+          campaniaId: campaniaSeleccionada.id,
+          maxScreens: screensCountFromStore, // Asumiendo que screensCountFromStore es el maxScreens deseado
+          // campaignDurationDays se podría recalcular aquí si es necesario, o ya estar en el borrador
+        };
+        await updateAnuncio(borradorId, updateData);
+        console.log('ResumenPage: Borrador actualizado con éxito.');
+      }
+      // Navegar a la siguiente página (selección de cantidad de imágenes/pantallas)
+      // Llevamos todos los IDs relevantes en la URL para mantener el contexto.
+      router.push(`/resumen/count?planId=${planSeleccionado.id}&campaniaId=${campaniaSeleccionada.id}${borradorId ? `&borradorId=${borradorId}` : ''}`);
+    } catch (error) {
+      console.error('ResumenPage: Error al actualizar el borrador o continuar:', error);
+      // Aquí podrías mostrar una notificación de error al usuario.
+    } finally {
+      setIsLoadingUpdate(false);
+    }
+  };
+
+  // Muestra el loader si el componente aún no se ha montado en el cliente,
+  // o si planSeleccionado o campaniaSeleccionada aún no están definidos (lo que
+  // indica que la data del store aún no está lista o es inválida, y una redirección
+  // debería estar en proceso a través del useEffect).
+  if (!mounted || !planSeleccionado || !campaniaSeleccionada) {
+    return (
+      <div className="min-h-screen bg-fondo text-texto p-4 flex items-center justify-center">
+        <p className="text-xl">Cargando resumen del anuncio...</p>
+      </div>
+    );
+  }
+
+  // Si llegamos aquí, planSeleccionado y campaniaSeleccionada están definidos y son válidos.
+  const precioTotalConDescuento = planSeleccionado.priceARS * campaniaSeleccionada.months * (1 - campaniaSeleccionada.discount);
 
   return (
     <div className="min-h-screen bg-fondo text-texto p-4 flex flex-col items-center">
       <h1 className="text-3xl font-bold text-primario mb-8 text-center">
-        {borradorId ? 'Confirma los Cambios del Anuncio' : 'Resumen de tu Selección'}
+        Resumen de tu Anuncio
       </h1>
-      <Card className="w-full max-w-2xl p-6 mb-8 shadow-xl">
-        <div className="space-y-4">
+
+      <Card className="w-full max-w-2xl p-6 shadow-lg">
+        <div className="space-y-6">
           <div>
-            <h2 className="text-xl font-semibold text-texto-principal">Plan: {plan.name}</h2>
-            <p className="text-sm text-texto-secundario">Precio mensual: ${plan.priceARS.toLocaleString('es-AR')} ARS</p>
-            <p className="text-sm text-texto-secundario">Duración anuncio (total): {plan.durationSeconds} segundos</p>
-            <p className="text-sm text-texto-secundario">Imágenes máximas: {plan.maxImages}</p>
-            <p className="text-sm text-texto-secundario">Se mostrará: {plan.displayMode === 'inicio' ? 'Al inicio de la app' : 'En secciones aleatorias'}</p>
+            <h2 className="text-xl font-semibold text-texto- একটু mb-2">Plan Seleccionado</h2>
+            <p><span className="font-medium">Nombre:</span> {planSeleccionado.name}</p>
+            <p><span className="font-medium">Precio Base Mensual:</span> ${planSeleccionado.priceARS.toLocaleString('es-AR')} ARS</p>
+            <p><span className="font-medium">Imágenes Máximas por Pantalla:</span> {planSeleccionado.maxImages}</p>
+            <p><span className="font-medium">Duración por Imagen:</span> {planSeleccionado.durationSeconds}s</p>
           </div>
-          <hr className="border-borde-tarjeta"/>
+
+          <hr className="border-border-muted" />
+
           <div>
-            <h2 className="text-xl font-semibold text-texto-principal">Campaña: {campania.name}</h2>
-            <p className="text-sm text-texto-secundario">Duración: {campania.months} {campania.months > 1 ? 'meses' : 'mes'}</p>
-            <p className="text-sm text-texto-secundario">Descuento: {campania.discount * 100}%</p>
+            <h2 className="text-xl font-semibold text-texto- একটু mb-2">Campaña Seleccionada</h2>
+            <p><span className="font-medium">Tipo:</span> {campaniaSeleccionada.name}</p>
+            <p><span className="font-medium">Duración:</span> {campaniaSeleccionada.months} {campaniaSeleccionada.months > 1 ? 'meses' : 'mes'}</p>
+            <p><span className="font-medium">Descuento Aplicado:</span> {campaniaSeleccionada.discount * 100}%</p>
           </div>
-          <hr className="border-borde-tarjeta"/>
-          <div className="pt-2">
-            <p className="text-lg font-semibold text-texto-principal">
-              Total a pagar: <span className="text-primario">${totalWithDiscount.toLocaleString('es-AR')} ARS</span>
+
+          <hr className="border-border-muted" />
+
+          <div>
+            <h2 className="text-2xl font-bold text-primario mb-3">Costo Total Estimado</h2>
+            <p className="text-3xl font-bold text-texto mb-1">
+              ${precioTotalConDescuento.toLocaleString('es-AR')} ARS
             </p>
             <p className="text-xs text-texto-muted">
-              (Este es el costo total por {campania.months} {campania.months > 1 ? 'meses' : 'mes'} de servicio con el plan y campaña seleccionados)
+              (Este es el costo total por {campaniaSeleccionada.months} {campaniaSeleccionada.months > 1 ? 'meses' : 'mes'} de servicio con el plan y campaña seleccionados)
             </p>
           </div>
         </div>
       </Card>
-      <div className="flex flex-col sm:flex-row gap-4 w-full max-w-2xl">
+
+      <div className="flex flex-col sm:flex-row gap-4 w-full max-w-2xl mt-8">
         <Button
           variant="outline"
           onClick={handleVolverACampanas}
@@ -145,8 +169,8 @@ export default function ResumenPage() {
           variant="secondary"
           onClick={() => {
             console.log('ResumenPage: Botón "Cancelar y Empezar de Nuevo" presionado.');
-            resetAnuncioStore(); // Limpia el store local
-            // El borrador en Firebase NO se elimina aquí. Solo a través del editor.
+            resetAnuncioStore(); // Limpia el store local (y localStorage debido a persist)
+            // El borrador en Firebase NO se elimina aquí.
             router.replace('/bienvenida'); // Usar replace para una "salida limpia" del flujo
           }}
           disabled={isLoadingUpdate}
