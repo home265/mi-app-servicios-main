@@ -11,7 +11,7 @@ import React, {
 import Konva from 'konva';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import type { UploadMetadata } from 'firebase/storage'; // <--- IMPORTAR UploadMetadata
+import type { UploadMetadata } from 'firebase/storage';
 
 import {
   useEditorStore,
@@ -44,6 +44,7 @@ import EditorCanvas from './EditorCanvas';
 import Toolbar, { type ToolId } from './Toolbar';
 import Button from '@/app/components/ui/Button';
 
+// ... (importaciones de TextTool, CurvedTextTool, etc. y dataURLtoBlob sin cambios)
 const TextTool = dynamic(() => import('../tools/TextTool'), { ssr: false });
 const CurvedTextTool = dynamic(() => import('../tools/CurvedTextTool'), { ssr: false });
 const ColorTool = dynamic(() => import('../tools/ColorTool'), { ssr: false });
@@ -80,6 +81,7 @@ async function dataURLtoBlob(dataurl: string): Promise<Blob> {
   return blob;
 }
 
+
 interface EditorConCargaProps {
   anuncioParaCargar: {
     id: string;
@@ -93,7 +95,7 @@ interface EditorConCargaProps {
     campaniaId?: Anuncio['campaniaId'];
     provincia: string;
     localidad: string;
-    creatorId: string; // Asegúrate de que este campo se pase desde EditorLoaderClient
+    creatorId: string;
   };
 }
 
@@ -102,7 +104,7 @@ const EMPTY_ARRAY_EDITOR_ELEMENTS: EditorElement[] = [];
 export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProps) {
   const router = useRouter();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const currentUser = useUserStore(state => state.currentUser); // Para obtener el UID del creador si es necesario
+  const currentUser = useUserStore(state => state.currentUser); 
 
   const [showExitModal, setShowExitModal] = useState<boolean>(false);
   const [isProcessingExit, setIsProcessingExit] = useState<boolean>(false);
@@ -121,7 +123,9 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
   const screensCount = useEditorStore(state => state.screensCount);
   const selectedElementId = useEditorStore(state => state.selectedElementIdForEdit);
   const elementsByScreenFromStore = useEditorStore(state => state.elementsByScreen);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const animationEffectsByScreenFromStore = useEditorStore(state => state.animationEffectsByScreen);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const durationsByScreenFromStore = useEditorStore(state => state.durationsByScreen);
 
   const elementsOfCurrentScreen = useMemo(() => {
@@ -164,6 +168,7 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
     setIsEditorInitialized(true);
   }, [anuncioParaCargar, resetEditorStore, loadAnuncioData]);
 
+  // ... (useEffect de selectedElementId, useEffect de frozenCanvasDimensions sin cambios) ...
   ReactUseEffect(() => {
     if (selectedElementId) {
       const elementToEdit = elementsOfCurrentScreen.find(el => el.id === selectedElementId);
@@ -220,6 +225,7 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
     };
   }, [activeTool, stageRef, frozenCanvasDimensions]);
 
+
   const handleSelectTool = useCallback((toolId: ToolId | null) => {
     console.log(`[handleSelectTool] Solicitud para herramienta: ${toolId}. Herramienta activa actual: ${activeTool}. Elemento seleccionado: ${useEditorStore.getState().selectedElementIdForEdit}`);
     if (activeTool === toolId && toolId !== 'effects') {
@@ -235,7 +241,7 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
   }, [activeTool, setSelectedElementForEdit]);
 
   const handleCloseTool = useCallback(() => {
-    const currentActive = activeTool; // Capturar el valor actual antes de cambiarlo
+    const currentActive = activeTool;
     const currentSelected = useEditorStore.getState().selectedElementIdForEdit;
     console.log(`[handleCloseTool] Cerrando herramienta activa: ${currentActive}. Deseleccionando elemento si existe (${currentSelected}).`);
     setActiveTool(null);
@@ -259,13 +265,15 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
   }, [updateElement, addElement, handleCloseTool]);
 
   const procesarYGuardarPantallaActual = useCallback(async (): Promise<boolean> => {
-    console.log(`[procesarYGuardarPantallaActual] Iniciando para pantalla ${currentScreenIndex}. Anuncio ID: ${anuncioParaCargar.id}`);
+    // Usar el currentScreenIndex del store para asegurar que es el más actualizado
+    const pantallaAGuardarIndex = useEditorStore.getState().currentScreenIndex;
+    console.log(`[procesarYGuardarPantallaActual] Iniciando para pantalla ${pantallaAGuardarIndex}. Anuncio ID: ${anuncioParaCargar.id}`);
+    
     if (!stageRef.current) {
       alert("Error interno: Referencia al canvas no encontrada para guardar pantalla.");
       console.error("[procesarYGuardarPantallaActual] stageRef.current es null.");
       return false;
     }
-    // AHORA INCLUIMOS creatorId EN LA VALIDACIÓN
     if (!anuncioParaCargar.id || !anuncioParaCargar.plan || !anuncioParaCargar.provincia || !anuncioParaCargar.localidad || !anuncioParaCargar.creatorId) {
         alert("Error interno: Faltan datos del anuncio (ID, plan, provincia, localidad, creatorId) para procesar la pantalla.");
         console.error("[procesarYGuardarPantallaActual] Faltan datos críticos de anuncioParaCargar:", anuncioParaCargar);
@@ -274,28 +282,25 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
 
     let newStorageImageUrl = '';
     try {
-      console.log("[procesarYGuardarPantallaActual] Generando dataURL del canvas...");
+      console.log(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Generando dataURL del canvas...`);
       const dataUrl = stageRef.current.toDataURL({ mimeType: 'image/jpeg', quality: 0.8 });
       if (!dataUrl) {
-        console.error("[procesarYGuardarPantallaActual] toDataURL devolvió null o undefined.");
+        console.error(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] toDataURL devolvió null o undefined.`);
         alert("Error al generar la imagen de la pantalla.");
         return false;
       }
-      console.log("[procesarYGuardarPantallaActual] Data URL (primeros 100 chars):", dataUrl.substring(0,100)+"...");
+      console.log(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Data URL (primeros 100 chars):`, dataUrl.substring(0,100)+"...");
 
       const imageBlob = await dataURLtoBlob(dataUrl);
-      const imagePath = `capturas_anuncios/${anuncioParaCargar.id}/screen_${currentScreenIndex}_${Date.now()}.jpg`;
+      const imagePath = `capturas_anuncios/${anuncioParaCargar.id}/screen_${pantallaAGuardarIndex}_${Date.now()}.jpg`;
       
-      // ----- INICIO CAMBIO METADATOS -----
-      const metadataForStorage: UploadMetadata = { // Especificar tipo
-        customMetadata: {
-          'ownerUid': anuncioParaCargar.creatorId // Usar el creatorId del anuncio
-        }
+      const metadataForStorage: UploadMetadata = {
+        customMetadata: { 'ownerUid': anuncioParaCargar.creatorId }
       };
-      console.log("[procesarYGuardarPantallaActual] Subiendo imagen a Storage en path:", imagePath, "con metadatos:", metadataForStorage);
-      newStorageImageUrl = await uploadFileAndGetURL(imageBlob, imagePath, metadataForStorage); // Pasar metadatos
-      // ----- FIN CAMBIO METADATOS -----
-      console.log("[procesarYGuardarPantallaActual] Imagen subida a Storage. URL:", newStorageImageUrl);
+      console.log(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Subiendo imagen a Storage en path:`, imagePath, "con metadatos:", metadataForStorage);
+      
+      newStorageImageUrl = await uploadFileAndGetURL(imageBlob, imagePath, metadataForStorage);
+      console.log(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Imagen subida a Storage. URL:`, newStorageImageUrl);
 
       const planSeleccionado = planes.find(p => p.id === anuncioParaCargar.plan);
       const campaniaSeleccionada = anuncioParaCargar.campaniaId
@@ -303,7 +308,7 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
         : undefined;
 
       if (!planSeleccionado) {
-        console.error("[procesarYGuardarPantallaActual] Plan seleccionado no encontrado:", anuncioParaCargar.plan);
+        console.error(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Plan seleccionado no encontrado:`, anuncioParaCargar.plan);
         alert("Error: Datos del plan no encontrados para este anuncio.");
         if (newStorageImageUrl) deleteFileByUrl(newStorageImageUrl).catch(console.error);
         return false;
@@ -313,74 +318,76 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
         ? campaniaSeleccionada.months * 30
         : anuncioParaCargar.maxScreens * (planSeleccionado.durationSeconds / anuncioParaCargar.maxScreens);
 
-      const currentAnimationEffect = animationEffectsByScreenFromStore[currentScreenIndex];
-      const currentDuration = durationsByScreenFromStore[currentScreenIndex];
+      // Leer los estados del store para la pantalla correcta
+      const sCount = useEditorStore.getState().screensCount;
+      const effectForScreen = useEditorStore.getState().animationEffectsByScreen[pantallaAGuardarIndex];
+      const durationForScreen = useEditorStore.getState().durationsByScreen[pantallaAGuardarIndex];
+
       let durationSecondsCalc: number;
       let totalExposureCalc: number;
 
-      if (typeof currentDuration === 'number' && currentDuration > 0) {
-        durationSecondsCalc = currentDuration;
-        totalExposureCalc = screensCount * currentDuration;
+      if (typeof durationForScreen === 'number' && durationForScreen > 0) {
+        durationSecondsCalc = durationForScreen;
+        totalExposureCalc = sCount * durationForScreen;
       } else {
         totalExposureCalc = planSeleccionado.durationSeconds;
-        durationSecondsCalc = screensCount > 0 ? totalExposureCalc / screensCount : totalExposureCalc;
+        durationSecondsCalc = sCount > 0 ? totalExposureCalc / sCount : totalExposureCalc;
       }
-      console.log(`[procesarYGuardarPantallaActual] Duración pantalla ${currentScreenIndex}: ${durationSecondsCalc}s, Exposición total: ${totalExposureCalc}s`);
+      console.log(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Duración: ${durationSecondsCalc}s, Exposición total: ${totalExposureCalc}s`);
 
       const capturaDataPayload: Omit<Captura, 'createdAt' | 'screenIndex'> & { screenIndex: number } = {
         imageUrl: newStorageImageUrl,
-        screenIndex: currentScreenIndex,
+        screenIndex: pantallaAGuardarIndex,
         plan: anuncioParaCargar.plan,
         campaignDurationDays: campaignDurationDays,
         provincia: anuncioParaCargar.provincia,
         localidad: anuncioParaCargar.localidad,
-        animationEffect: currentAnimationEffect,
+        animationEffect: effectForScreen,
         durationSeconds: durationSecondsCalc,
         totalExposure: totalExposureCalc,
       };
-      console.log("[procesarYGuardarPantallaActual] Payload de la captura para Firestore:", capturaDataPayload);
+      console.log(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Payload de la captura para Firestore:`, capturaDataPayload);
 
-      const existingCapturaInfo = await getCapturaByScreenIndex(anuncioParaCargar.id, currentScreenIndex);
+      const existingCapturaInfo = await getCapturaByScreenIndex(anuncioParaCargar.id, pantallaAGuardarIndex);
       let oldImageUrlToDelete: string | undefined = undefined;
 
       if (existingCapturaInfo) {
         oldImageUrlToDelete = existingCapturaInfo.data.imageUrl;
-        console.log(`[procesarYGuardarPantallaActual] Actualizando captura existente ID: ${existingCapturaInfo.id}. URL antigua: ${oldImageUrlToDelete}`);
+        console.log(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Actualizando captura existente ID: ${existingCapturaInfo.id}. URL antigua: ${oldImageUrlToDelete}`);
         const { screenIndex: _idx, ...dataToUpdate } = capturaDataPayload;
         await updateCapturaService(anuncioParaCargar.id, existingCapturaInfo.id, dataToUpdate);
       } else {
-        console.log(`[procesarYGuardarPantallaActual] Creando nueva captura para pantalla ${currentScreenIndex}.`);
+        console.log(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Creando nueva captura.`);
         await addCaptura(anuncioParaCargar.id, capturaDataPayload);
       }
 
-      const currentScreenEditorElements = useEditorStore.getState().elementsByScreen[currentScreenIndex] || [];
+      const currentScreenEditorElements = useEditorStore.getState().elementsByScreen[pantallaAGuardarIndex] || [];
       const elementosParaDb: Elemento[] = currentScreenEditorElements.map(editorEl => {
         const { id: _id, ...restOfElemento } = editorEl;
         return restOfElemento as Elemento;
       });
-      elementosGuardadosRef.current[String(currentScreenIndex)] = elementosParaDb;
-      console.log(`[procesarYGuardarPantallaActual] Elementos de pantalla ${currentScreenIndex} actualizados en ref local:`, JSON.parse(JSON.stringify(elementosParaDb)));
+      elementosGuardadosRef.current[String(pantallaAGuardarIndex)] = elementosParaDb;
+      console.log(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Elementos actualizados en ref local:`, JSON.parse(JSON.stringify(elementosParaDb)));
 
       if (oldImageUrlToDelete && oldImageUrlToDelete !== newStorageImageUrl && !oldImageUrlToDelete.startsWith('data:')) {
-        console.log(`[procesarYGuardarPantallaActual] Programando borrado asíncrono de imagen antigua de Storage: ${oldImageUrlToDelete}`);
+        console.log(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Programando borrado asíncrono de imagen antigua: ${oldImageUrlToDelete}`);
         deleteFileByUrl(oldImageUrlToDelete).catch(err =>
           console.error(`[procesarYGuardarPantallaActual] Error ASÍNCRONO borrando imagen antigua ${oldImageUrlToDelete}:`, err)
         );
       }
-      console.log(`[procesarYGuardarPantallaActual] Pantalla ${currentScreenIndex} procesada y guardada (referencia de captura en Firestore). Retornando true.`);
+      console.log(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Procesada y guardada. Retornando true.`);
       return true;
 
     } catch (error) {
-      console.error(`[procesarYGuardarPantallaActual] Error procesando pantalla ${currentScreenIndex}:`, error);
-      // El alert ahora usará el mensaje de error completo de Firebase si es un FirebaseError
+      console.error(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Error procesando:`, error);
       let errorMessage = 'Error desconocido.';
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      alert(`Error al guardar la pantalla ${currentScreenIndex + 1}: ${errorMessage}`);
+      alert(`Error al guardar la pantalla ${pantallaAGuardarIndex + 1}: ${errorMessage}`);
       
       if (newStorageImageUrl) {
-        console.warn(`[procesarYGuardarPantallaActual] Error después de subir imagen ${newStorageImageUrl}, intentando borrarla de Storage.`);
+        console.warn(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Error después de subir ${newStorageImageUrl}, intentando borrarla.`);
         deleteFileByUrl(newStorageImageUrl).catch(delErr =>
           console.error('[procesarYGuardarPantallaActual] Error adicional borrando imagen nueva tras fallo:', delErr)
         );
@@ -388,11 +395,9 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
       return false;
     }
   }, [
-    anuncioParaCargar,
-    currentScreenIndex,
-    animationEffectsByScreenFromStore,
-    durationsByScreenFromStore,
-    screensCount,
+    anuncioParaCargar, // Dependencia principal para IDs y datos del anuncio
+    // currentScreenIndex se lee del store al inicio de la función para frescura
+    // Lo mismo para animationEffectsByScreenFromStore, durationsByScreenFromStore, screensCount
   ]);
 
   const handleSaveCurrentScreenOnly = useCallback(async () => {
@@ -412,50 +417,80 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
   }, [procesarYGuardarPantallaActual, activeTool, setSelectedElementForEdit]);
 
   const handleNextOrFinalize = useCallback(async () => {
-    const isLast = currentScreenIndex >= screensCount - 1;
-    console.log(`[handleNextOrFinalize] Iniciando. Pantalla actual: ${currentScreenIndex}, Es la última: ${isLast}`);
+    const CS_INDEX = useEditorStore.getState().currentScreenIndex;
+    const S_COUNT = useEditorStore.getState().screensCount;
+    const isLast = CS_INDEX >= S_COUNT - 1 && S_COUNT > 0;
+
+    console.log(`[handleNextOrFinalize] ----- INICIO -----`);
+    console.log(`[handleNextOrFinalize] currentScreenIndex (store): ${CS_INDEX}, screensCount (store): ${S_COUNT}, Es la última: ${isLast}`);
+    console.log(`[handleNextOrFinalize] activeTool (local): ${activeTool}, selectedElementId (store): ${useEditorStore.getState().selectedElementIdForEdit}`);
     
     setIsProcessingScreen(true);
+    console.log(`[handleNextOrFinalize] isProcessingScreen = true`);
 
-    if (activeTool) setActiveTool(null);
-    if (useEditorStore.getState().selectedElementIdForEdit) setSelectedElementForEdit(null);
+    if (activeTool) {
+      console.log(`[handleNextOrFinalize] Cerrando herramienta activa: ${activeTool}`);
+      setActiveTool(null);
+    }
+    if (useEditorStore.getState().selectedElementIdForEdit) {
+      console.log(`[handleNextOrFinalize] Deseleccionando elemento: ${useEditorStore.getState().selectedElementIdForEdit}`);
+      setSelectedElementForEdit(null);
+    }
 
+    console.log(`[handleNextOrFinalize] Llamando a procesarYGuardarPantallaActual() para pantalla ${CS_INDEX}...`);
     const success = await procesarYGuardarPantallaActual();
+    console.log(`[handleNextOrFinalize] procesarYGuardarPantallaActual() retornó: ${success} para pantalla ${CS_INDEX}`);
 
     if (success) {
-      if (isLast) {
-        console.log("[handleNextOrFinalize] Es la última pantalla. Mostrando modal de finalizar.");
+      const currentIsLast = useEditorStore.getState().currentScreenIndex >= useEditorStore.getState().screensCount - 1 && useEditorStore.getState().screensCount > 0;
+      // ^ Re-evaluar isLast con el índice que podría haber sido actualizado por goToNextScreenInStore si no fuera la última.
+      // Sin embargo, si success=true y currentIsLast=false, llamamos a goToNextScreenInStore.
+      // Si success=true y currentIsLast=true, mostramos modal.
+      if (currentIsLast) { // Si después de guardar, sigue siendo la última (o era la última)
+        console.log("[handleNextOrFinalize] Es la última pantalla Y SE GUARDÓ BIEN. Mostrando modal de finalizar.");
         setShowFinalizarModal(true);
       } else {
-        console.log("[handleNextOrFinalize] Pasando a la siguiente pantalla.");
+        console.log("[handleNextOrFinalize] NO es la última pantalla y SE GUARDÓ BIEN. Pasando a la siguiente pantalla.");
         goToNextScreenInStore();
       }
+    } else {
+      console.warn(`[handleNextOrFinalize] procesarYGuardarPantallaActual() falló para pantalla ${CS_INDEX}. No se avanza ni se muestra modal.`);
     }
+    
     setIsProcessingScreen(false);
-    console.log("[handleNextOrFinalize] Finalizado.");
+    console.log(`[handleNextOrFinalize] isProcessingScreen = false`);
+    console.log(`[handleNextOrFinalize] ----- FIN -----`);
   }, [
-    currentScreenIndex,
-    screensCount,
     procesarYGuardarPantallaActual,
     goToNextScreenInStore,
-    activeTool,
+    activeTool, 
     setSelectedElementForEdit
   ]);
   
   const handleFinalizarAnuncioCompleto = useCallback(async () => {
-    console.log("[handleFinalizarAnuncioCompleto] Iniciando finalización del anuncio completo. Anuncio ID:", anuncioParaCargar.id);
+    const anuncioIdActual = anuncioParaCargar.id;
+    console.log("[handleFinalizarAnuncioCompleto] Iniciando finalización del anuncio completo. Anuncio ID:", anuncioIdActual);
     setShowFinalizarModal(false);
     setIsProcessingScreen(true);
 
+    // --- INICIO CAMBIO PARA EVITAR DUPLICACIÓN ---
+    // Ya NO llamamos a procesarYGuardarPantallaActual() aquí explícitamente.
+    // Se asume que handleNextOrFinalize ya guardó la pantalla actual (la última)
+    // antes de que se mostrara el modal y se llamara a esta función.
+    console.log("[handleFinalizarAnuncioCompleto] Se asume que la última pantalla ya fue procesada por handleNextOrFinalize, que llamó a procesarYGuardarPantallaActual.");
+    // ----- FIN CAMBIO PARA EVITAR DUPLICACIÓN -----
+
     try {
+      // elementosGuardadosRef.current ya debería tener los datos de todas las pantallas,
+      // incluyendo la última procesada por handleNextOrFinalize.
       console.log("[handleFinalizarAnuncioCompleto] Elementos finales a guardar en el Anuncio:", JSON.parse(JSON.stringify(elementosGuardadosRef.current)));
-      await updateAnuncioService(anuncioParaCargar.id, {
-        elementosPorPantalla: elementosGuardadosRef.current,
+      await updateAnuncioService(anuncioIdActual, {
+        elementosPorPantalla: elementosGuardadosRef.current, // Esto debe tener los datos de TODAS las pantallas
         status: 'pendingPayment',
       });
       console.log("[handleFinalizarAnuncioCompleto] Anuncio actualizado con todos los elementos y estado pendingPayment.");
       alert('¡Anuncio completado y listo para el pago! Serás redirigido a la previsualización.');
-      router.push(`/preview/${anuncioParaCargar.id}`);
+      router.push(`/preview/${anuncioIdActual}`);
     } catch (error) {
       console.error('[handleFinalizarAnuncioCompleto] Error al actualizar el anuncio para finalizar:', error);
       alert(`Error CRÍTICO al finalizar el anuncio: ${(error instanceof Error) ? error.message : 'Error desconocido.'}`);
@@ -463,8 +498,9 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
       setIsProcessingScreen(false);
       console.log("[handleFinalizarAnuncioCompleto] Finalizado.");
     }
-  }, [anuncioParaCargar.id, router]);
+  }, [anuncioParaCargar.id, router]); // Se quita procesarYGuardarPantallaActual de las dependencias aquí porque ya no se llama directamente
 
+  // ... (Callbacks handlePreviewAnuncio, handleOpenExitModal, handleChangePlanCampania, handleConfirmExitAction sin cambios) ...
   const handlePreviewAnuncio = useCallback(() => {
     console.log("[handlePreviewAnuncio] Solicitud de previsualización.");
     if (anuncioParaCargar && anuncioParaCargar.id) {
@@ -507,25 +543,31 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
     if (action === 'saveAndExit') {
       try {
         console.log("[handleConfirmExitAction] Intentando guardar ANTES de salir...");
-        const guardadoOk = await procesarYGuardarPantallaActual();
-        if (guardadoOk) {
+        // Procesar y guardar la pantalla actual ANTES de intentar actualizar el anuncio principal
+        const guardadoPantallaOk = await procesarYGuardarPantallaActual();
+        
+        if (guardadoPantallaOk) {
             console.log("[handleConfirmExitAction] Elementos a guardar en el Anuncio al salir:", elementosGuardadosRef.current);
             await updateAnuncioService(anuncioId, {
                 elementosPorPantalla: elementosGuardadosRef.current,
+                // No cambiamos el status aquí, solo guardamos el progreso del draft
             });
             console.log(`[handleConfirmExitAction] Borrador ${anuncioId} guardado. Redirigiendo a mis-anuncios.`);
             router.push('/mis-anuncios');
         } else {
-            throw new Error("Fallo al guardar la pantalla actual antes de salir.");
+            // Si falla el guardado de la pantalla actual, no proceder con el guardado del anuncio
+            throw new Error("Fallo al guardar la pantalla actual antes de salir. El anuncio no se guardó completamente.");
         }
       } catch (error) {
         console.error("[handleConfirmExitAction] Error al guardar el borrador antes de salir:", error);
-        alert(`No se pudo guardar el progreso antes de salir: ${error instanceof Error ? error.message : "Intente de nuevo."}`);
+        // La alerta ya se muestra en procesarYGuardarPantallaActual si falló allí, o aquí si falla updateAnuncioService
+        if (!(error instanceof Error && error.message.includes("pantalla"))) {
+            alert(`No se pudo guardar el progreso antes de salir: ${error instanceof Error ? error.message : "Intente de nuevo."}`);
+        }
       } finally {
         setIsProcessingExit(false);
       }
     } else if (action === 'deleteAndExit') {
-      // ... (lógica de deleteAndExit sin cambios)
       if (anuncioParaCargar.status !== 'draft') {
         alert("Solo se pueden eliminar anuncios en estado 'borrador'.");
         setIsProcessingExit(false);
@@ -554,6 +596,10 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
       }
     }
   }, [anuncioParaCargar, procesarYGuardarPantallaActual, router, resetAnuncioConfigStore, resetEditorStore]);
+
+
+  // ... (JSX de renderizado: if !isEditorInitialized, renderActiveTool, y el return principal con Sidebar, Toolbar, Modales, etc.,
+  // permanecen IGUALES a la última versión completa que te proporcioné. Los cambios clave están en los callbacks de arriba.)
 
   if (!isEditorInitialized || !anuncioParaCargar) {
     return (
@@ -658,7 +704,7 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
             activeTool={activeTool}
             onPrev={goToPrevScreenInStore}
             onNext={handleNextOrFinalize}
-            onPreview={handleFinalizarAnuncioCompleto}
+            onPreview={handleNextOrFinalize} // <-- CAMBIO: Toolbar "Finalizar" también llama a handleNextOrFinalize
             isLastScreen={isLastScreenValue}
             currentScreen={currentScreenIndex + 1}
             totalScreens={screensCount}
