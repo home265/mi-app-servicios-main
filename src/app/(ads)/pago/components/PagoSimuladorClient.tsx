@@ -82,7 +82,7 @@ export default function PagoSimuladorClient({
   };
 
   const handleContinueAfterSuccess = () => {
-    router.push('/(main)/bienvenida'); // Ajusta esta ruta
+    router.push('/bienvenida'); // Ajusta esta ruta
   };
 
   return (

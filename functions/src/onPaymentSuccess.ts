@@ -1,97 +1,81 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
-import { Timestamp } from 'firebase-admin/firestore'; // Importación explícita
+import { Timestamp } from 'firebase-admin/firestore';
 
-// Inicializa la app de Firebase Admin si no está inicializada
 if (admin.apps.length === 0) {
   admin.initializeApp();
 }
 
-// Define una interfaz para el cuerpo del request para mayor claridad y seguridad de tipos
 interface PaymentSuccessRequestBody {
-  anuncioId?: string; // anuncioId es opcional para poder validar su existencia
+  anuncioId?: string;
 }
 
-// Define un tipo para errores personalizados que pueden incluir un código de estado HTTP
 interface HttpError extends Error {
   status?: number;
 }
 
-/**
- * Webhook para confirmar pago de anuncio.
- * - Espera recibir en el body: { anuncioId: string }
- * - Espera un header 'X-Webhook-Secret' para autenticación (temporalmente comentado para pruebas).
- * - Marca el anuncio como 'active' y calcula startDate/endDate.
- * - Es idempotente: si el anuncio ya está activo, no realiza cambios.
- */
+// --- INICIO SECCIÓN CORS MODIFICADA ---
+// Lista de orígenes permitidos
+const allowedOrigins = [
+  'http://localhost:3000',                     // Para desarrollo local
+  'https://mi-app-servicios-3326e.web.app'   // <--- TU DOMINIO DE PRODUCCIÓN AÑADIDO
+  // Puedes añadir más orígenes si es necesario (ej. tus URLs de preview de Firebase Hosting)
+  // 'https://<tu-proyecto>.web.app',
+  // 'https://<tu-proyecto>.firebaseapp.com',
+];
+
 export const onPaymentSuccess = functions.https.onRequest(async (req, res) => {
-  // --- INICIO DE LA SECCIÓN AÑADIDA PARA CORS ---
-  // Orígenes permitidos. Para desarrollo, incluye localhost.
-  // ¡IMPORTANTE! En producción, reemplaza 'http://localhost:3000' o añade tu dominio de producción.
-  const allowedOrigins = [
-    'http://localhost:3000',
-    // 'https://tu-dominio-de-produccion.com' // Ejemplo para producción
-  ];
   const origin = req.headers.origin as string;
 
+  // Establecer cabeceras CORS si el origen está permitido
   if (allowedOrigins.includes(origin)) {
     res.set('Access-Control-Allow-Origin', origin);
+  } else if (origin) { // Si el origen existe pero no está permitido, aún así es bueno manejar OPTIONS
+    console.warn(`onPaymentSuccess: Origen ${origin} no está en allowedOrigins.`);
+    // Podrías no setear 'Access-Control-Allow-Origin' aquí o setearlo a un valor que no lo permita,
+    // pero para OPTIONS, usualmente se responde positivamente si el método es OPTIONS.
+  } else {
+    console.warn(`onPaymentSuccess: No se detectó header 'origin' en la solicitud.`);
   }
 
-  // Manejar solicitudes preflight OPTIONS
+  // Siempre manejar solicitudes preflight OPTIONS
   if (req.method === 'OPTIONS') {
-    res.set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS'); // Ajusta los métodos según necesites
-    res.set('Access-Control-Allow-Headers', 'Content-Type, X-Webhook-Secret'); // Permite las cabeceras que tu cliente envía
+    console.log('onPaymentSuccess: OPTIONS request received from:', origin || 'origen desconocido');
+    res.set('Access-Control-Allow-Methods', 'POST, GET, OPTIONS'); // Asegúrate que POST esté aquí
+    res.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Webhook-Secret'); // 'Authorization' si usas tokens, 'Content-Type' es común
     res.set('Access-Control-Max-Age', '3600'); // Cachear la respuesta preflight por 1 hora
-    res.status(204).send('');
+    res.status(204).send(''); // 204 No Content es la respuesta estándar para OPTIONS exitoso
     return;
   }
-  // --- FIN DE LA SECCIÓN AÑADIDA PARA CORS ---
+
+  // Después de manejar OPTIONS, si no es un método permitido, rechazar.
+  // Para este webhook, probablemente solo quieras POST.
+  if (req.method !== 'POST') {
+    console.log(`onPaymentSuccess: Método ${req.method} no permitido.`);
+    // El navegador ya podría haber bloqueado esto si las cabeceras OPTIONS no permitían POST,
+    // pero es una buena segunda capa de defensa.
+    res.setHeader('Allow', 'POST, OPTIONS'); // Informar al cliente qué métodos son permitidos
+    res.status(405).send({ error: 'Método no permitido. Solo se acepta POST.' });
+    return;
+  }
+  // --- FIN SECCIÓN CORS MODIFICADA ---
 
   // ────────────────────────────────────────────────────────────────────────────────
-  // SECCIÓN DE VERIFICACIÓN DE SECRETO COMENTADA TEMPORALMENTE PARA PRUEBAS
-  // (Esta sección se mantiene intacta, tal como la tenías)
+  // SECCIÓN DE VERIFICACIÓN DE SECRETO (sin cambios, la mantienes comentada)
   // ────────────────────────────────────────────────────────────────────────────────
-  // TODO: Configura la variable de entorno 'WEBHOOK_SECRET' en Firebase
-  //       (ej. `firebase functions:config:set payment.webhook_secret="TU_CLAVE_SECRETA_AQUI"`)
-  //       y DESCOMENTA esta sección si una pasarela de pago real va a usar este webhook.
-
   /*
   const expectedSecret = functions.config().payment?.webhook_secret;
-  const receivedSecret = req.headers['x-webhook-secret'];
-
-  if (!expectedSecret) {
-    console.error(
-      'Error crítico: El secreto del webhook no está configurado en las variables de entorno.'
-    );
-    res.status(500).send('Error de configuración interna del servidor.');
-    return;
-  }
-
-  if (receivedSecret !== expectedSecret) {
-    console.warn('Intento de acceso no autorizado al webhook de pago.');
-    res.status(403).send('Acceso no autorizado.'); // 403 Forbidden
-    return;
-  }
+  // ... (resto de tu lógica de secreto)
   */
   // ────────────────────────────────────────────────────────────────────────────────
-  // FIN DE LA SECCIÓN COMENTADA
-  // ────────────────────────────────────────────────────────────────────────────────
-
-  // Solo procesar requests POST (común para webhooks que envían datos)
-  // Esta verificación es ahora redundante si req.method === 'OPTIONS' ya hizo un return,
-  // pero no hace daño dejarla por si acaso o para claridad.
-  if (req.method !== 'POST') {
-    res.status(405).send('Método no permitido. Usar POST.');
-    return;
-  }
 
   try {
+    console.log('onPaymentSuccess: POST request received. Body:', req.body);
     const { anuncioId } = req.body as PaymentSuccessRequestBody;
 
-    // 2. Validación de `anuncioId`
     if (!anuncioId || typeof anuncioId !== 'string') {
-      res.status(400).send('El campo "anuncioId" es requerido y debe ser un string.');
+      console.warn('onPaymentSuccess: anuncioId no válido o faltante en el body:', anuncioId);
+      res.status(400).send({ error: 'El campo "anuncioId" es requerido y debe ser un string.' });
       return;
     }
 
@@ -99,11 +83,12 @@ export const onPaymentSuccess = functions.https.onRequest(async (req, res) => {
     const docRef = db.collection('anuncios').doc(anuncioId);
     const now = Timestamp.now();
 
-    // 3. Transacción de Firestore para leer-modificar-escribir atómicamente
     await db.runTransaction(async (transaction) => {
+      console.log(`onPaymentSuccess: Iniciando transacción para anuncioId: ${anuncioId}`);
       const snap = await transaction.get(docRef);
 
       if (!snap.exists) {
+        console.warn(`onPaymentSuccess: Anuncio con ID "${anuncioId}" no encontrado en transacción.`);
         const notFoundError = new Error(
           `Anuncio con ID "${anuncioId}" no encontrado.`
         ) as HttpError;
@@ -113,7 +98,7 @@ export const onPaymentSuccess = functions.https.onRequest(async (req, res) => {
 
       const data = snap.data();
       if (!data) {
-        // Esto no debería ocurrir si snap.exists es true, pero es una guarda adicional.
+        console.error(`onPaymentSuccess: No se pudieron obtener los datos del anuncio "${anuncioId}" a pesar de que existe.`);
         const dataError = new Error(
           `No se pudieron obtener los datos del anuncio "${anuncioId}".`
         ) as HttpError;
@@ -121,55 +106,55 @@ export const onPaymentSuccess = functions.https.onRequest(async (req, res) => {
         throw dataError;
       }
 
-      // 4. Idempotencia: Verificar si el anuncio ya está activo
       if (data.status === 'active') {
         console.log(
-          `El anuncio "${anuncioId}" ya se encuentra activo. No se requieren acciones.`
+          `onPaymentSuccess: El anuncio "${anuncioId}" ya se encuentra activo. No se requieren acciones.`
         );
-        return;
+        return; 
       }
 
-      // 5. Validación de `campaignDurationDays`
       const durationDays = data.campaignDurationDays;
       if (typeof durationDays !== 'number' || durationDays <= 0) {
+        console.warn(`onPaymentSuccess: Duración de campaña inválida (${durationDays}) para anuncio "${anuncioId}".`);
         const durationError = new Error(
           `La duración de la campaña ("campaignDurationDays": ${durationDays}) para el anuncio "${anuncioId}" no es válida o falta.`
         ) as HttpError;
-        durationError.status = 400; // Bad Request, ya que los datos del anuncio son incorrectos
+        durationError.status = 400;
         throw durationError;
       }
 
-      // 6. Cálculo de fechas
       const startDate = now;
       const endDate = Timestamp.fromDate(
         new Date(now.toDate().getTime() + durationDays * 24 * 60 * 60 * 1000)
       );
 
-      // 7. Actualizar el anuncio
+      console.log(`onPaymentSuccess: Actualizando anuncio "${anuncioId}" a activo. StartDate: ${startDate.toDate()}, EndDate: ${endDate.toDate()}`);
       transaction.update(docRef, {
         status: 'active',
         startDate: startDate,
         endDate: endDate,
-        updatedAt: now, // Actualizar la fecha de última modificación
-        paymentConfirmedAt: now, // Opcional: un campo para registrar cuándo se confirmó el pago
+        updatedAt: now,
+        paymentConfirmedAt: now,
       });
-      console.log(`Anuncio "${anuncioId}" activado exitosamente.`);
+      console.log(`onPaymentSuccess: Anuncio "${anuncioId}" marcado para activación en transacción.`);
     });
 
-    // Las cabeceras CORS ya se establecieron al principio si el origen es permitido
+    console.log(`onPaymentSuccess: Transacción completada para anuncioId: ${anuncioId}. Enviando respuesta 200.`);
+    // Las cabeceras CORS ya se establecieron al principio si el origen es permitido.
     res.status(200).send({
       message: `Anuncio "${anuncioId}" procesado y activado exitosamente (o ya estaba activo).`,
     });
 
   } catch (error: unknown) {
-    console.error(`Error en onPaymentSuccess para anuncioId "${(req.body as PaymentSuccessRequestBody)?.anuncioId || 'desconocido'}":`, error);
-    // Las cabeceras CORS ya se establecieron al principio si el origen es permitido
     const typedError = error as HttpError;
-    if (typedError.status) {
-      res.status(typedError.status).send(typedError.message);
-    } else {
-      // Mensaje genérico para errores inesperados
-      res.status(500).send('Ocurrió un error interno al procesar la solicitud.');
-    }
+    const idFromBody = (req.body as PaymentSuccessRequestBody)?.anuncioId || 'desconocido';
+    console.error(`Error en onPaymentSuccess para anuncioId "${idFromBody}":`, typedError.message, typedError.status ? `Status: ${typedError.status}` : '', error);
+    
+    // Las cabeceras CORS ya se establecieron al principio si el origen es permitido
+    // No es necesario volver a setearlas aquí a menos que quieras una lógica de error específica para CORS.
+    
+    const statusCode = typedError.status || 500;
+    const errorMessage = typedError.message || 'Ocurrió un error interno al procesar la solicitud.';
+    res.status(statusCode).send({ error: errorMessage });
   }
 });
