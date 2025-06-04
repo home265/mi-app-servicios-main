@@ -2,27 +2,18 @@
 'use client';
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
-// MODIFICADO: Importar Anuncio y getAnuncioById y AHORA useParams
+// MODIFICADO: Importar Anuncio y getAnuncioById y AHORA useParams Y listCapturas
 import type { Captura, Anuncio } from '@/types/anuncio';
-import { getAnuncioById } from '@/lib/services/anunciosService'; 
+import { getAnuncioById, listCapturas } from '@/lib/services/anunciosService'; // Asegúrate que listCapturas esté aquí
 import Image from 'next/image';
 import Link from 'next/link';
 import Button from '@/app/components/ui/Button';
 import { Play, Pause, RotateCcw, Edit3, CheckCircle, AlertTriangle, Loader2, Info } from 'lucide-react';
-import { useParams } from 'next/navigation'; // <<---- AÑADIR ESTA IMPORTACIÓN
-
-// YA NO NECESITAS ESTA INTERFAZ AQUÍ SI USAS useParams
-// interface PreviewPageProps {
-// params: {
-// anuncioId: string;
-//   };
-// }
+import { useParams } from 'next/navigation';
 
 // Componente Principal (Wrapper)
-export default function PreviewPage(/* YA NO RECIBE params COMO PROP */) {
-  const paramsHook = useParams(); // Usamos el hook
-  // paramsHook.anuncioId puede ser string o string[]. Para rutas como /preview/[id], será string.
-  // Si fuera una ruta catch-all como /preview/[...slug], sería string[].
+export default function PreviewPage() {
+  const paramsHook = useParams();
   const anuncioId = Array.isArray(paramsHook.anuncioId) ? paramsHook.anuncioId[0] : paramsHook.anuncioId;
 
   if (!anuncioId || typeof anuncioId !== 'string') {
@@ -45,11 +36,10 @@ interface PreviewClientProps {
 
 function PreviewClient({ anuncioId }: PreviewClientProps) {
   const [capturas, setCapturas] = useState<Captura[]>([]);
-  // NUEVO: Estado para almacenar el status del anuncio
   const [anuncioStatus, setAnuncioStatus] = useState<Anuncio['status'] | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [progress, setProgress] = useState(0);
-  const [isLoading, setIsLoading] = useState(true); // Carga general (capturas y anuncio)
+  const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(true);
   const [reelCompleted, setReelCompleted] = useState(false);
@@ -57,9 +47,8 @@ function PreviewClient({ anuncioId }: PreviewClientProps) {
 
   const timerRef = useRef<number | null>(null);
   const intervalRef = useRef<number | null>(null);
-  const hasFetched = useRef(false); // Para evitar doble fetch
+  const hasFetched = useRef(false);
 
-  // Cargar capturas y datos del anuncio
   useEffect(() => {
     if (hasFetched.current || !anuncioId) return;
     hasFetched.current = true;
@@ -68,45 +57,51 @@ function PreviewClient({ anuncioId }: PreviewClientProps) {
       setIsLoading(true);
       setError(null);
       setCapturas([]);
-      setAnuncioStatus(null); // Resetear status
+      setAnuncioStatus(null);
 
       try {
-        // Fetch del anuncio para obtener el status
+        console.log(`[CLIENT PREVIEW] Fetching anuncio data for ID: ${anuncioId}`);
         const anuncioData = await getAnuncioById(anuncioId);
         if (!anuncioData) {
           throw new Error("Anuncio no encontrado.");
         }
         setAnuncioStatus(anuncioData.status);
+        console.log(`[CLIENT PREVIEW] Anuncio status: ${anuncioData.status}`);
 
-        // Fetch de las capturas
-        const response = await fetch(`/api/anuncios/${anuncioId}/capturas`);
-        if (!response.ok) {
-          const text = await response.text();
-          throw new Error(`Error del servidor al cargar capturas: ${response.status} ${response.statusText}. ${text ? `Detalle: ${text}` : ''}`);
-        }
-        const capturasData: Captura[] | { error: string } = await response.json();
+        // ----- INICIO DEL CAMBIO: Cargar capturas directamente -----
+        console.log(`[CLIENT PREVIEW] Fetching capturas directamente para anuncio ID: ${anuncioId}`);
+        const capturasData = await listCapturas(anuncioId); // Llamada directa al servicio
+        console.log(`[CLIENT PREVIEW] Capturas cargadas directamente: ${capturasData.length}`);
 
-        if (Array.isArray(capturasData)) {
-          if (capturasData.length === 0) {
-            setError("No se encontraron imágenes para mostrar en este anuncio.");
+        // La función listCapturas debería devolver Captura[] o lanzar un error.
+        // No necesitamos verificar `Array.isArray` si el tipo de retorno de listCapturas es Captura[]
+        // y el manejo de errores está dentro de listCapturas o se propaga aquí.
+        if (capturasData.length === 0) {
+          // Considerar si el anuncio es 'draft' o 'pendingPayment' y aún no tiene capturas.
+          if (anuncioData.status === 'draft' || anuncioData.status === 'pendingPayment') {
+            setError("Este anuncio aún no tiene imágenes de previsualización. Por favor, completa el editor.");
           } else {
-            const sortedCapturas = capturasData.sort((a, b) => a.screenIndex - b.screenIndex);
-            setCapturas(sortedCapturas);
-            if (sortedCapturas.length > 0) {
-              setCurrentIndex(0);
-              setIsPlaying(true);
-              setReelCompleted(false);
-            }
+            setError("No se encontraron imágenes para mostrar en este anuncio.");
           }
-        } else if (capturasData && typeof capturasData.error === 'string') {
-          setError(capturasData.error);
         } else {
-          setError("No se pudieron cargar los datos de las capturas (formato inesperado).");
+          // El sort ya no es necesario si listCapturas las devuelve ordenadas.
+          // Si listCapturas no las ordena, mantenemos el sort:
+          const sortedCapturas = capturasData.sort((a, b) => a.screenIndex - b.screenIndex);
+          setCapturas(sortedCapturas);
+          if (sortedCapturas.length > 0) {
+            setCurrentIndex(0);
+            setIsPlaying(true);
+            setReelCompleted(false);
+          }
         }
+        // ----- FIN DEL CAMBIO -----
 
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : "Error desconocido al cargar.";
+        // El error "Missing or insufficient permissions" debería aparecer aquí si las reglas fallan
+        // incluso con la llamada directa del cliente (lo cual no debería pasar si el usuario es el creador).
         setError(`Error al cargar los datos: ${errorMessage}`);
+        console.error("[CLIENT PREVIEW] Error en fetchData:", err);
       } finally {
         setIsLoading(false);
       }
@@ -146,7 +141,7 @@ function PreviewClient({ anuncioId }: PreviewClientProps) {
 
     const durationSeconds = (typeof currentCaptura.durationSeconds === 'number' && currentCaptura.durationSeconds > 0)
       ? currentCaptura.durationSeconds
-      : 5;
+      : 5; // Default a 5 segundos si no está definido o es inválido
 
     const effect = currentCaptura.animationEffect;
     if (effect && effect !== 'none') {
@@ -157,7 +152,7 @@ function PreviewClient({ anuncioId }: PreviewClientProps) {
 
     setProgress(0);
     const totalMs = durationSeconds * 1000;
-    const progressInterval = 100;
+    const progressInterval = 100; // ms
     const step = totalMs > 0 ? (100 / (totalMs / progressInterval)) : 0;
 
     if (step > 0) {
@@ -165,6 +160,7 @@ function PreviewClient({ anuncioId }: PreviewClientProps) {
         setProgress(p => Math.min(p + step, 100));
       }, progressInterval);
     } else {
+      // Si la duración es 0 o inválida, completar inmediatamente.
       setProgress(100);
     }
 
@@ -174,8 +170,8 @@ function PreviewClient({ anuncioId }: PreviewClientProps) {
       } else {
         setIsPlaying(false);
         setReelCompleted(true);
-        setProgress(100);
-        setAnimationClass('');
+        setProgress(100); // Asegurar que la barra se llene al completar
+        setAnimationClass(''); // Limpiar animación al final
       }
     }, totalMs);
 
@@ -186,7 +182,8 @@ function PreviewClient({ anuncioId }: PreviewClientProps) {
 
   const handlePlayPause = useCallback(() => {
     if (reelCompleted) {
-      setCapturas(prevCapturas => [...prevCapturas]);
+      // Reiniciar el reel
+      // No es necesario setCapturas(prevCapturas => [...prevCapturas]); si las capturas no cambian
       setCurrentIndex(0);
       setReelCompleted(false);
       setIsPlaying(true);
@@ -206,12 +203,14 @@ function PreviewClient({ anuncioId }: PreviewClientProps) {
     );
   }
 
+  // El mensaje de error se mostrará formateado desde el estado `error`
   if (error) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-red-900/20 text-red-300 p-6 text-center">
         <AlertTriangle className="h-12 w-12 text-red-400 mb-4" />
         <h2 className="text-xl font-bold mb-2">¡Ups! Algo salió mal</h2>
-        <p className="mb-4 text-sm">{error}</p>
+        {/* Usar whitespace-pre-line para respetar saltos de línea si el error los tuviera */}
+        <p className="mb-4 text-sm whitespace-pre-line">{error}</p>
         <Link href="/(ads)/planes" passHref legacyBehavior>
             <a className="mt-4">
                 <Button variant="primary" className="bg-red-500 hover:bg-red-600">Volver a Planes</Button>
@@ -221,7 +220,7 @@ function PreviewClient({ anuncioId }: PreviewClientProps) {
     );
   }
 
-  if (capturas.length === 0 && !isLoading) { // Asegurar que no esté cargando
+  if (capturas.length === 0 && !isLoading) {
     return (
       <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-gray-300 p-6 text-center">
         <Info className="h-12 w-12 text-gray-500 mb-4" />
@@ -238,48 +237,51 @@ function PreviewClient({ anuncioId }: PreviewClientProps) {
   }
 
   const currentCaptura = capturas[currentIndex];
+  // Esta verificación es buena, aunque si capturas.length > 0, currentCaptura (con currentIndex = 0) debería existir.
   if (!currentCaptura) {
     return (
         <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-gray-300">
-            <p>Cargando imagen...</p>
+            <p>Cargando imagen...</p> {/* O un mensaje de error más específico */}
         </div>
     );
   }
 
-  // Lógica para mostrar el botón de pago
   const mostrarBotonPagar = anuncioStatus === 'draft' || anuncioStatus === 'pendingPayment';
 
   return (
     <div className="flex flex-col h-screen bg-black text-white overflow-hidden relative">
+      {/* Barra de Progreso */}
       <div className="absolute top-0 left-0 w-full h-1.5 bg-gray-700/50 z-20">
         <div
-          className="h-full bg-white transition-width duration-100 ease-linear"
+          className="h-full bg-white transition-all duration-100 ease-linear" // 'transition-all' para suavizar
           style={{ width: `${progress}%` }}
         />
       </div>
 
+      {/* Visor de Imagen */}
       <div className="flex-grow relative flex items-center justify-center">
+        {/* La key ahora incluye animationClass para forzar el remount si la animación cambia en la misma imagen (aunque no es el caso aquí) */}
         <Image
-          key={`${currentCaptura.imageUrl}-${currentIndex}-${animationClass}`}
+          key={`${currentCaptura.imageUrl}-${currentIndex}-${animationClass || 'no-anim'}`}
           src={currentCaptura.imageUrl}
           alt={`Captura ${currentIndex + 1} del anuncio`}
           fill
-          className={`object-contain ${animationClass}`}
-          priority={currentIndex === 0}
-          sizes="100vw"
+          className={`object-contain ${animationClass}`} // Aplicar clase de animación
+          priority={currentIndex === 0} // Priorizar carga de la primera imagen
+          sizes="100vw" // Ocupa el ancho de la ventana gráfica
           onError={(e) => {
             console.error(`PreviewClient: Error al cargar imagen ${currentCaptura.imageUrl}`, e);
-            // Podrías intentar cargar una imagen de fallback o mostrar un mensaje más específico
             setError(`No se pudo cargar la imagen para la pantalla ${currentIndex + 1}. Verifica la URL o la conexión.`);
-            setIsPlaying(false);
+            setIsPlaying(false); // Detener reproducción si una imagen falla
           }}
         />
       </div>
 
-      <div className="absolute inset-0 flex flex-col justify-between p-4 z-10">
-        <div></div> {/* Controles Superiores (Vacío) */}
+      {/* Controles Inferiores */}
+      <div className="absolute inset-0 flex flex-col justify-between p-4 z-10 pointer-events-none">
+        <div>{/* Espacio para posibles controles superiores en el futuro */}</div>
 
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-4 pointer-events-auto">
           <button
             onClick={handlePlayPause}
             className="bg-black/40 text-white p-3 rounded-full hover:bg-black/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-white"
@@ -288,36 +290,37 @@ function PreviewClient({ anuncioId }: PreviewClientProps) {
             {reelCompleted ? <RotateCcw size={28} /> : isPlaying ? <Pause size={28} /> : <Play size={28} />}
           </button>
 
-          <div className="w-full flex justify-around items-center p-3 bg-gradient-to-t from-black/70 via-black/50 to-transparent">
-            {/* MODIFICADO: El enlace al editor debe ser a la ruta correcta sin "editar" */}
-            <Link href={`/editor/${anuncioId}`} className="w-full"> {/* O la clase que necesites */}
-  <Button variant="secondary" className="w-full text-sm py-2.5 px-3"> {/* Mantén las clases en Button si son para el botón mismo */}
-    <Edit3 size={16} className="mr-1.5" />
-    Volver a Editar
-  </Button>
-</Link>
+          <div className="w-full grid grid-cols-2 gap-3 p-3 bg-gradient-to-t from-black/70 via-black/50 to-transparent">
+            <Link href={`/editor/${anuncioId}`} passHref legacyBehavior>
+              <a className="w-full">
+                <Button variant="secondary" className="w-full text-sm py-2.5 px-3">
+                  <Edit3 size={16} className="mr-1.5" />
+                  Volver a Editar
+                </Button>
+              </a>
+            </Link>
 
-            {/* MODIFICADO: Renderizado condicional del botón de pago */}
             {mostrarBotonPagar ? (
-              <Link href={`/pago/${anuncioId}`} className="w-full"> {/* O la clase que necesites */}
-  <Button variant="primary" className="w-full text-sm py-2 px-3"> {/* Mantén las clases en Button */}
-    <CheckCircle size={16} className="mr-1.5" />
-    Continuar y Pagar
-  </Button>
-</Link>
+              <Link href={`/pago/${anuncioId}`} passHref legacyBehavior>
+                <a className="w-full">
+                  <Button variant="primary" className="w-full text-sm py-2.5 px-3">
+                    <CheckCircle size={16} className="mr-1.5" />
+                    Continuar y Pagar
+                  </Button>
+                </a>
+              </Link>
             ) : (
-              anuncioStatus && ( // Mostrar información si no se muestra el botón de pagar y ya tenemos el status
-                <div className="text-center">
+              anuncioStatus && (
+                <div className="text-center col-span-1 flex flex-col justify-center items-center"> {/* Asegurar que ocupe espacio similar */}
                     <p className="text-sm font-semibold">
                         {anuncioStatus === 'active' && 'Anuncio Activo'}
                         {anuncioStatus === 'expired' && 'Anuncio Expirado'}
                         {anuncioStatus === 'cancelled' && 'Anuncio Cancelado'}
                     </p>
-                    {/* Podrías añadir un Link a "Mis Anuncios" aquí si el anuncio no es 'draft' o 'pendingPayment' */}
                     { (anuncioStatus === 'active' || anuncioStatus === 'expired' || anuncioStatus === 'cancelled') && (
-                        <Link href="/mis-anuncios" className="text-xs text-blue-400 hover:text-blue-300 mt-1">
-  Ver mis anuncios
-</Link>
+                        <Link href="/mis-anuncios" className="text-xs text-blue-400 hover:text-blue-300 mt-1 underline">
+                            Ver mis anuncios
+                        </Link>
                     )}
                 </div>
               )

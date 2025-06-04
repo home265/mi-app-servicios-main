@@ -3,16 +3,14 @@
 
 import React, { useEffect, useState } from 'react';
 import NextDynamic from 'next/dynamic';
-import { getAnuncioById, listCapturas } from '@/lib/services/anunciosService'; // Tus funciones de servicio
+import { getAnuncioById, listCapturas } from '@/lib/services/anunciosService';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { Anuncio, Captura, Elemento, ReelAnimationEffectType } from '@/types/anuncio';
-import type { Timestamp } from 'firebase/firestore'; // Importar Timestamp
+import type { Timestamp } from 'firebase/firestore';
 
-// Re-exportar Elemento puede ser útil si EditorConCarga lo usa directamente.
 export type { Elemento } from '@/types/anuncio';
 
 // Esta interfaz define la estructura de los datos que EditorConCarga espera.
-// La creamos aquí porque EditorLoaderClient es responsable de proveer estos datos.
 interface DatosAnuncioParaEditorConCarga {
   id: string;
   maxScreens: number;
@@ -25,15 +23,14 @@ interface DatosAnuncioParaEditorConCarga {
   campaniaId?: Anuncio['campaniaId'];
   provincia: string;
   localidad: string;
+  creatorId: string; // <--- Propiedad añadida
 }
 
-// Props que este componente recibirá ahora de la página del servidor (solo anuncioId)
 interface EditorLoaderClientProps {
   anuncioId: string;
 }
 
-// Cargar EditorConCarga dinámicamente
-const EditorConCarga = NextDynamic(() => import('../../components/EditorConCarga'), { // Asegúrate que la ruta sea correcta
+const EditorConCarga = NextDynamic(() => import('../../components/EditorConCarga'), {
   ssr: false,
   loading: () => (
     <div className="flex items-center justify-center h-screen">
@@ -44,11 +41,8 @@ const EditorConCarga = NextDynamic(() => import('../../components/EditorConCarga
 });
 
 export default function EditorLoaderClient({ anuncioId }: EditorLoaderClientProps) {
-  // Estado para almacenar los datos del anuncio una vez cargados
   const [datosPreparados, setDatosPreparados] = useState<DatosAnuncioParaEditorConCarga | null>(null);
-  // Estado para la carga de datos
   const [isLoading, setIsLoading] = useState(true);
-  // Estado para manejar errores durante la carga
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -61,7 +55,7 @@ export default function EditorLoaderClient({ anuncioId }: EditorLoaderClientProp
     const fetchAdData = async () => {
       setIsLoading(true);
       setError(null);
-      setDatosPreparados(null); // Limpiar datos previos antes de una nueva carga
+      setDatosPreparados(null);
 
       try {
         console.log(`[CLIENT] EditorLoaderClient: Iniciando carga para anuncio ID: ${anuncioId}`);
@@ -69,15 +63,17 @@ export default function EditorLoaderClient({ anuncioId }: EditorLoaderClientProp
 
         if (!anuncio || !anuncio.id) {
           console.warn(`[CLIENT] EditorLoaderClient: Anuncio con ID ${anuncioId} no encontrado o sin 'id'.`);
-          // Usamos el mismo formato de error que la imagen que me mostraste
           setError(`No se pudieron obtener los detalles necesarios para editar el anuncio (ID: ${anuncioId}). Detalle del error: Anuncio no encontrado. Esto puede deberse a que el anuncio no existe o a un problema de permisos.`);
+          setIsLoading(false); // Asegurar que isLoading se actualiza
           return;
         }
         console.log(`[CLIENT] EditorLoaderClient: Anuncio cargado: status=${anuncio.status}, creatorId=${anuncio.creatorId}, plan=${anuncio.plan}`);
 
-        if (!anuncio.plan || !anuncio.provincia || !anuncio.localidad) {
-            console.error(`[CLIENT] EditorLoaderClient: Datos críticos faltantes en el anuncio cargado (plan, provincia, o localidad). Anuncio:`, anuncio);
-            setError(`Error: Datos incompletos en el anuncio cargado (ID: ${anuncioId}). Faltan plan, provincia o localidad.`);
+        // Validar campos críticos, incluyendo creatorId
+        if (!anuncio.plan || !anuncio.provincia || !anuncio.localidad || !anuncio.creatorId) {
+            console.error(`[CLIENT] EditorLoaderClient: Datos críticos faltantes en el anuncio cargado (plan, provincia, localidad, o creatorId). Anuncio:`, anuncio);
+            setError(`Error: Datos incompletos en el anuncio cargado (ID: ${anuncioId}). Faltan plan, provincia, localidad o creatorId.`);
+            setIsLoading(false); // Asegurar que isLoading se actualiza
             return;
         }
 
@@ -97,39 +93,36 @@ export default function EditorLoaderClient({ anuncioId }: EditorLoaderClientProp
         const convertTimestampToDate = (timestamp: Timestamp | Date | undefined): Date | undefined => {
           if (!timestamp) return undefined;
           if (timestamp instanceof Date) return timestamp;
-          // Comprobación segura de la función toDate
           if (timestamp && typeof (timestamp as Timestamp).toDate === 'function') {
             return (timestamp as Timestamp).toDate();
           }
           console.warn('[CLIENT] EditorLoaderClient: Tipo de fecha inesperado, no se pudo convertir:', timestamp);
-          return undefined; // Devolver undefined si no se puede convertir
+          return undefined;
         };
         
-        // Construir el objeto con los datos listos para EditorConCarga
         setDatosPreparados({
-          id: anuncio.id as string, // anuncio.id ya fue validado arriba
+          id: anuncio.id, 
           maxScreens: anuncio.maxScreens,
           elementosPorPantalla: anuncio.elementosPorPantalla || {},
           animationEffectsPorPantalla: animationEffectsPorPantalla,
           status: anuncio.status,
           startDate: convertTimestampToDate(anuncio.startDate),
           endDate: convertTimestampToDate(anuncio.endDate),
-          plan: anuncio.plan, // Ya validado que existe
-          campaniaId: anuncio.campaniaId, // Es opcional, puede ser undefined
-          provincia: anuncio.provincia, // Ya validado que existe
-          localidad: anuncio.localidad, // Ya validado que existe
+          plan: anuncio.plan,
+          campaniaId: anuncio.campaniaId,
+          provincia: anuncio.provincia,
+          localidad: anuncio.localidad,
+          creatorId: anuncio.creatorId, // <--- CAMBIO: creatorId añadido al objeto
         });
 
       } catch (err) {
-        // Este catch es crucial para los errores de permisos de Firestore
         console.error(`[CLIENT] EditorLoaderClient: Error CRÍTICO al cargar datos para el anuncio ${anuncioId}:`, err);
         let detail = "Error desconocido.";
         if (err instanceof Error) {
-            detail = err.message; // Este message contendrá "Missing or insufficient permissions"
+            detail = err.message;
         } else if (typeof err === 'string') {
             detail = err;
         }
-        // Formateamos el error para que coincida con tu captura de pantalla
         setError(`No se pudieron obtener los detalles necesarios para editar el anuncio (ID: ${anuncioId}). Detalle del error: ${detail}. Esto puede deberse a un problema de permisos o a que el anuncio no existe. Por favor, verifica las reglas de seguridad de Firebase o contacta a soporte.`);
       } finally {
         setIsLoading(false);
@@ -137,9 +130,8 @@ export default function EditorLoaderClient({ anuncioId }: EditorLoaderClientProp
     };
 
     fetchAdData();
-  }, [anuncioId]); // El useEffect se re-ejecuta si anuncioId cambia
+  }, [anuncioId]);
 
-  // Estado de Carga
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -149,30 +141,26 @@ export default function EditorLoaderClient({ anuncioId }: EditorLoaderClientProp
     );
   }
 
-  // Estado de Error (muestra el mensaje como en tu captura)
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8 text-center min-h-screen flex flex-col justify-center items-center">
         <h1 className="text-2xl font-bold text-red-500 mb-4">Error al Cargar Datos del Anuncio</h1>
-        {/* Mostramos el mensaje de error formateado */}
         <p className="text-texto-secundario whitespace-pre-line">{error}</p>
       </div>
     );
   }
 
-  // Si no hay datos preparados (y no hay error ni está cargando)
   if (!datosPreparados) {
-    // Esto podría ser un estado transitorio o un error no manejado explícitamente arriba.
-    // Es una salvaguarda.
-    console.error("EditorLoaderClient: No hay datos preparados para renderizar y no hay error explícito.");
+    console.error("EditorLoaderClient: No hay datos preparados para renderizar y no hay error explícito, pero tampoco está cargando.");
+    // Este caso podría indicar un flujo inesperado o un error no capturado que dejó datosPreparados como null.
+    // Devolver un mensaje de error genérico o específico si se puede deducir más.
     return (
         <div className="flex items-center justify-center h-screen text-orange-500">
-            <p>Advertencia: No se pudieron preparar los datos del anuncio para el editor.</p>
+            <p>Advertencia: No se pudieron preparar completamente los datos del anuncio para el editor. Intenta recargar la página.</p>
         </div>
     );
   }
   
-  // Si todo está bien y los datos están listos, renderizar EditorConCarga
   return (
     <div className="editor-page-layout">
       <EditorConCarga anuncioParaCargar={datosPreparados} />
