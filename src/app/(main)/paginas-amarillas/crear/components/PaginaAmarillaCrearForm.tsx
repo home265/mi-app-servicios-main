@@ -171,6 +171,7 @@ const PaginaAmarillaCrearForm: React.FC = () => {
       subRubro: subRubroPayload || null,
       categoria: categoriaPayload || null,
       subCategoria: subCategoriaPayload || null,
+      activa: true,
     };
 
     try {

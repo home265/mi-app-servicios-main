@@ -13,6 +13,7 @@ import {
   QueryConstraint,
   DocumentData,
   Query,
+  orderBy,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import {
@@ -43,13 +44,20 @@ export type CreatePaginaAmarillaDTO = Omit<
   | 'ultimaModificacion'
   | 'contadorEdicionesAnual'
   | 'inicioCicloEdiciones'
-  | 'activa'
+  | 'activa'              // ← seguimos omitiendo la versión “completa”
 > & {
-  // 'horarios' ya está definido en PaginaAmarillaData como HorariosDeAtencion | null | undefined
-  // por lo que Omit lo mantendrá. Solo nos aseguramos que si se incluye, sea del tipo correcto o null.
+  /** Opcional: horarios serializados o nulos. */
   horarios?: HorariosDeAtencion | null;
-  imagenPortadaUrl?: string | null; // Aseguramos que también pueda ser null
+
+  /** URL de la portada (null si el usuario no subió imagen). */
+  imagenPortadaUrl?: string | null;
+
+  /** Bandera que indica si la tarjeta está visible en búsquedas.
+   *  Se crea como `true`; la Cloud Function la pondrá `false`
+   *  cuando corresponda (caducidad, pérdida de anuncio activo, etc.). */
+  activa?: boolean;       // ← nuevo campo opcional
 };
+
 
 export type UpdatePaginaAmarillaDTO = Partial<
   Omit<
@@ -210,32 +218,44 @@ export const listPaginasAmarillasByFilter = async (
 ): Promise<PaginaAmarillaData[]> => {
   const qc: QueryConstraint[] = [];
 
-  if (filtros.provincia) qc.push(where('provincia', '==', filtros.provincia));
-  if (filtros.localidad) qc.push(where('localidad', '==', filtros.localidad));
-  if (filtros.rol) qc.push(where('creatorRole', '==', filtros.rol));
+  if (filtros.provincia)   qc.push(where('provincia',   '==', filtros.provincia));
+  if (filtros.localidad)   qc.push(where('localidad',   '==', filtros.localidad));
+  if (filtros.rol)         qc.push(where('creatorRole', '==', filtros.rol));
 
-  // Ajuste para búsqueda generalizada por rubro/subRubro o categoria/subCategoria
-  // sin importar el rol si no se especifica.
-  if (filtros.rubro) qc.push(where('rubro', '==', filtros.rubro));
-  if (filtros.subRubro) qc.push(where('subRubro', '==', filtros.subRubro));
-  if (filtros.categoria) qc.push(where('categoria', '==', filtros.categoria));
+  // Búsqueda por rubro/categoría
+  if (filtros.rubro)        qc.push(where('rubro',        '==', filtros.rubro));
+  if (filtros.subRubro)     qc.push(where('subRubro',     '==', filtros.subRubro));
+  if (filtros.categoria)    qc.push(where('categoria',    '==', filtros.categoria));
   if (filtros.subCategoria) qc.push(where('subCategoria', '==', filtros.subCategoria));
-  
+
   if (typeof filtros.realizaEnvios === 'boolean') {
     qc.push(where('realizaEnvios', '==', filtros.realizaEnvios));
   }
 
+  /* ---------------------------------------------------------------
+     Siempre filtramos por 'activa'; si no se pasa, asumimos true.
+  --------------------------------------------------------------- */
   qc.push(where('activa', '==', filtros.activa ?? true));
-  // Solo filtramos por fecha de expiración si se buscan activas (o si activa no se especifica)
+
+  /* ---------------------------------------------------------------
+     Si la consulta es por activas (o no se especifica), añadimos la
+     condición de vigencia en fechaExpiracion.
+  --------------------------------------------------------------- */
   if (filtros.activa === undefined || filtros.activa === true) {
     qc.push(where('fechaExpiracion', '>', Timestamp.now()));
   }
+
+  /* ---------------------------------------------------------------
+     orderBy garantiza que Firestore use SIEMPRE el mismo índice
+     (provincia, localidad, activa, fechaExpiracion ASC).
+  --------------------------------------------------------------- */
+  qc.push(orderBy('fechaExpiracion', 'asc'));
 
   const q: Query<DocumentData> = query(
     collection(db, PAGINAS_AMARILLAS_COLLECTION),
     ...qc,
   );
+
   const snap = await getDocs(q);
-  // Aseguramos que los datos mapeados también se traten como PaginaAmarillaData
   return snap.docs.map((d) => d.data() as PaginaAmarillaData);
 };

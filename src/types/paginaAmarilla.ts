@@ -1,22 +1,30 @@
 // src/types/paginaAmarilla.ts
 import { Timestamp } from 'firebase/firestore';
-// Importamos el nuevo tipo principal para la configuración de horarios de toda la semana
 import { HorariosDeAtencion } from './horarios';
 
+/* -------------------------------------------------------------------------- */
+/*                                   ROLES                                    */
+/* -------------------------------------------------------------------------- */
 export type RolPaginaAmarilla = 'prestador' | 'comercio';
 
+/* -------------------------------------------------------------------------- */
+/*                     ESTRUCTURA COMPLETA DEL DOCUMENTO                      */
+/* -------------------------------------------------------------------------- */
 export interface PaginaAmarillaData {
   creatorId: string;
   creatorRole: RolPaginaAmarilla;
   nombrePublico: string;
   provincia: string;
   localidad: string;
+
   fechaCreacion: Timestamp;
   fechaExpiracion: Timestamp;
   ultimaModificacion: Timestamp;
   contadorEdicionesAnual: number;
   inicioCicloEdiciones: Timestamp;
+
   activa: boolean;
+
   tituloCard?: string | null;
   subtituloCard?: string | null;
   descripcion?: string | null;
@@ -27,29 +35,56 @@ export interface PaginaAmarillaData {
   enlaceInstagram?: string | null;
   enlaceFacebook?: string | null;
   direccionVisible?: string | null;
+
   rubro?: string | null;
   subRubro?: string | null;
   categoria?: string | null;
   subCategoria?: string | null;
-  // Actualizamos el tipo de 'horarios' para usar la nueva estructura
-  horarios?: HorariosDeAtencion | null; // Puede ser null o undefined si no se establecen
+
+  horarios?: HorariosDeAtencion | null;
   realizaEnvios?: boolean | null;
 }
 
-// Tipo para pasar a Client Components, con fechas como strings
-// y horarios también serializados si es necesario (aunque HorariosDeAtencion ya es serializable)
+/* -------------------------------------------------------------------------- */
+/*              TIPO SERIALIZABLE PARA PASAR A LOS CLIENT COMPONENTS          */
+/* -------------------------------------------------------------------------- */
 export interface SerializablePaginaAmarillaData
   extends Omit<
     PaginaAmarillaData,
-    'fechaCreacion' | 'fechaExpiracion' | 'ultimaModificacion' | 'inicioCicloEdiciones'
+    | 'fechaCreacion'
+    | 'fechaExpiracion'
+    | 'ultimaModificacion'
+    | 'inicioCicloEdiciones'
   > {
-  fechaCreacion: string;        // ISOString
-  fechaExpiracion: string;      // ISOString
-  ultimaModificacion: string;   // ISOString
-  inicioCicloEdiciones: string; // ISOString
-  // La propiedad 'horarios' se hereda de PaginaAmarillaData con el tipo HorariosDeAtencion | null
+  fechaCreacion: string;
+  fechaExpiracion: string;
+  ultimaModificacion: string;
+  inicioCicloEdiciones: string;
 }
 
+/* -------------------------------------------------------------------------- */
+/*                DTO PARA CREAR UNA NUEVA PUBLICACIÓN DESDE EL FORM          */
+/* -------------------------------------------------------------------------- */
+/** Campos requeridos en la creación de una página amarilla.
+ *  Se omiten los timestamps y contadores que el backend inicializa.
+ *  `activa` se crea como `true`; se marca opcional para no romper llamadas
+ *  anteriores y para permitir asignarlo internamente si fuese necesario. */
+export interface CreatePaginaAmarillaDTO
+  extends Omit<
+    PaginaAmarillaData,
+    | 'fechaCreacion'
+    | 'fechaExpiracion'
+    | 'ultimaModificacion'
+    | 'contadorEdicionesAnual'
+    | 'inicioCicloEdiciones'
+    | 'activa'
+  > {
+  activa?: boolean;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                 FILTROS                                   */
+/* -------------------------------------------------------------------------- */
 export interface PaginaAmarillaFiltros {
   provincia?: string;
   localidad?: string;
@@ -61,6 +96,4 @@ export interface PaginaAmarillaFiltros {
   activa?: boolean;
   realizaEnvios?: boolean;
   terminoBusqueda?: string;
-  // No solemos filtrar directamente por la estructura compleja de horarios aquí,
-  // pero podrías añadir un filtro como 'abiertoAhora?: boolean' que se calcularía en el backend.
 }
