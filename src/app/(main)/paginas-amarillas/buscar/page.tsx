@@ -74,7 +74,9 @@ const parseQueryParamsToFiltros = (
 /*  Client-side logic                                                   */
 /* -------------------------------------------------------------------- */
 const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router       = useRouter();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const pathname     = usePathname();
   const searchParams = useSearchParams();
 
@@ -88,8 +90,14 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
   const [mensajeError,  setMensajeError]  = useState<string | null>(null);
   const [hasSearched,   setHasSearched]   = useState(false);
 
+  /* ref que impide duplicar petición simultánea */
+  const peticionEnCurso = React.useRef<boolean>(false);
+
   /* ----------------------- BUSCAR ----------------------- */
   const handleBuscar = async (nuevosFiltros: PaginaAmarillaFiltros) => {
+    if (peticionEnCurso.current) return;
+    peticionEnCurso.current = true;
+
     console.log('[handleBuscar] filtros recibidos', nuevosFiltros);
     setEstadoCarga('loading');
     setMensajeError(null);
@@ -99,10 +107,13 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
     const qs = construirQueryString(nuevosFiltros);
     console.log('[handleBuscar] queryString generado', qs);
 
-    router.push(
-      qs ? `${pathname}?${qs}` : pathname,
-      { scroll: false },      // ← evita un segundo render completo
-    );
+    /* ----------------------------------------------------------------
+       IMPORTANTE:
+       - Quitamos router.push para evitar que Next.js remonte el
+         componente (lo que borraba el estado y provocaba el parpadeo).
+       - Si en el futuro quieres reflejar los filtros en la URL,
+         usa un store global o React Query para persistir resultados.
+    ---------------------------------------------------------------- */
 
     try {
       const res = await fetch(`/api/paginas-amarillas?${qs}`);
@@ -110,7 +121,7 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
 
       if (!res.ok) {
         const { error } = await res.json();
-        throw new Error(error || `Error ${res.status}`);
+        throw new Error(error || `Error del servidor: ${res.status}`);
       }
 
       const data: PaginaAmarillaData[] = await res.json();
@@ -124,6 +135,8 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
       );
       setEstadoCarga('error');
       setPublicaciones([]);
+    } finally {
+      peticionEnCurso.current = false;
     }
   };
 
