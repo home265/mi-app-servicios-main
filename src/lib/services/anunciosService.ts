@@ -1,3 +1,4 @@
+// src/lib/services/anunciosService.ts
 import {
   collection,
   doc,
@@ -10,13 +11,14 @@ import {
   orderBy,
   Timestamp,
   Query,
-  limit, // Importado para getExistingDraft y getCapturaByScreenIndex
-  writeBatch, // Importado para deleteAnuncio
-  deleteDoc, // Importado para deleteAnuncio
-  DocumentData, // Importado para el tipado en addDoc si es necesario
+  limit,           // Importado para getExistingDraft y getCapturaByScreenIndex
+  writeBatch,      // Importado para deleteAnuncio
+  deleteDoc,       // Importado para deleteAnuncio
+  DocumentData,    // Importado para el tipado en addDoc
 } from "firebase/firestore";
 import { db } from "../firebase/config";
 import { Anuncio, Captura, Elemento } from "../../types/anuncio";
+import { deleteFileByUrl } from "../firebase/storage";   // ← nuevo import
 
 const ANUNCIOS_COLLECTION = "anuncios";
 const CAPTURAS_SUBCOLLECTION = "capturas";
@@ -29,12 +31,16 @@ export interface AnuncioFilter {
   creatorId?: string;
 }
 
+/* -------------------------------------------------------------------------- */
+/*                   CRUD PRINCIPAL ­– DOCUMENTO ANUNCIO                      */
+/* -------------------------------------------------------------------------- */
+
 /**
  * Crea un anuncio en estado 'draft' y retorna su ID.
  * Inicializa elementosPorPantalla para la pantalla "0" si no se provee.
  */
 export async function createDraftAnuncio(
-  anuncioData: Omit<Anuncio, "id" | "createdAt" | "updatedAt"> // Este tipo ya excluye 'id'
+  anuncioData: Omit<Anuncio, "id" | "createdAt" | "updatedAt">
 ): Promise<string> {
   const now = Timestamp.now();
 
@@ -44,9 +50,10 @@ export async function createDraftAnuncio(
       ? anuncioData.elementosPorPantalla
       : { "0": [] };
 
-  // Usamos directamente anuncioData y añadimos los campos de timestamp.
-  // El tipo resultante incluye los campos de anuncioData más createdAt y updatedAt.
-  const newAnuncioToSave: Omit<Anuncio, "id" | "createdAt" | "updatedAt"> & {
+  const newAnuncioToSave: Omit<
+    Anuncio,
+    "id" | "createdAt" | "updatedAt"
+  > & {
     createdAt: Timestamp;
     updatedAt: Timestamp;
   } = {
@@ -57,12 +64,12 @@ export async function createDraftAnuncio(
   };
 
   const anunciosColRef = collection(db, ANUNCIOS_COLLECTION);
-  // El tipo de newAnuncioToSave es compatible con lo que Firestore espera para un nuevo documento.
-  // Si TypeScript se quejara por alguna especificidad de addDoc, un 'as DocumentData' podría ser un último recurso,
-  // pero idealmente la inferencia de tipos o un tipo más explícito para la colección lo maneja.
-  const docRef = await addDoc(anunciosColRef, newAnuncioToSave as DocumentData); // Se añade 'as DocumentData' por si acaso, es una práctica común con addDoc genérico
+  const docRef = await addDoc(
+    anunciosColRef,
+    newAnuncioToSave as DocumentData
+  );
 
-  // Añadimos el ID al documento después de crearlo
+  // se añade el campo id al documento
   await updateDoc(doc(db, ANUNCIOS_COLLECTION, docRef.id), { id: docRef.id });
   return docRef.id;
 }
@@ -88,6 +95,7 @@ export async function getAnuncioById(
 
 /**
  * Actualiza campos de un anuncio.
+ * Si el anuncio ya está 'active', preserva ese estado para evitar volver a obligar al pago.
  */
 export async function updateAnuncio(
   anuncioId: string,
@@ -96,17 +104,32 @@ export async function updateAnuncio(
   if (!anuncioId) {
     throw new Error("updateAnuncio: anuncioId no proporcionado.");
   }
+
   const docRef = doc(db, ANUNCIOS_COLLECTION, anuncioId);
+
+  /* ------------------------------------------------------------------ */
+  /*  1) Consultamos el documento actual para conocer su status.        */
+  /* ------------------------------------------------------------------ */
+  const currentSnap = await getDoc(docRef);
+  const currentStatus =
+    currentSnap.exists() ? (currentSnap.data() as Pick<Anuncio, "status">).status : undefined;
+
+  /* ------------------------------------------------------------------ */
+  /*  2) Construimos el payload a actualizar; si ya está activo         */
+  /*     forzamos a que permanezca 'active'.                            */
+  /* ------------------------------------------------------------------ */
   const dataToUpdate = {
     ...data,
+    ...(currentStatus === "active" ? { status: "active" as const } : {}),
     updatedAt: Timestamp.now(),
   };
+
   await updateDoc(docRef, dataToUpdate);
 }
 
-/**
- * Lista anuncios según filtros opcionales.
- */
+/* -------------------------------------------------------------------------- */
+/*                         LISTADO / FILTRO DE ANUNCIOS                       */
+/* -------------------------------------------------------------------------- */
 export async function listAnunciosByFilter(
   filter: AnuncioFilter = {}
 ): Promise<Anuncio[]> {
@@ -130,20 +153,19 @@ export async function listAnunciosByFilter(
     queryConstraints.push(where("creatorId", "==", filter.creatorId));
   }
 
-  if (queryConstraints.length > 0) {
-    q = query(anunciosColRef, ...queryConstraints);
-  } else {
-    q = query(anunciosColRef);
-  }
+  // eslint-disable-next-line prefer-const
+  q =
+    queryConstraints.length > 0
+      ? query(anunciosColRef, ...queryConstraints)
+      : query(anunciosColRef);
 
   const snap = await getDocs(q);
-  return snap.docs.map((docSnap) => {
-    return { ...docSnap.data(), id: docSnap.id } as Anuncio;
-  });
+  return snap.docs.map((docSnap) => ({ ...docSnap.data(), id: docSnap.id } as Anuncio));
 }
 
-// --- Funciones de Captura ---
-
+/* -------------------------------------------------------------------------- */
+/*                        CRUD ­– SUBCOLECCIÓN CAPTURAS                       */
+/* -------------------------------------------------------------------------- */
 /**
  * Agrega una nueva captura a la subcolección de un anuncio.
  */
@@ -154,7 +176,6 @@ export async function addCaptura(
   if (!anuncioId) {
     throw new Error("addCaptura: anuncioId no proporcionado.");
   }
-  const now = Timestamp.now();
   const capturasColRef = collection(
     db,
     ANUNCIOS_COLLECTION,
@@ -162,12 +183,10 @@ export async function addCaptura(
     CAPTURAS_SUBCOLLECTION
   );
 
-  const newCapturaToSave: Captura = {
+  const docRef = await addDoc(capturasColRef, {
     ...capturaData,
-    createdAt: now,
-  };
-
-  const docRef = await addDoc(capturasColRef, newCapturaToSave);
+    createdAt: Timestamp.now(),
+  });
   return docRef.id;
 }
 
@@ -191,7 +210,7 @@ export async function listCapturas(anuncioId: string): Promise<Captura[]> {
 }
 
 /**
- * Encuentra el ID y los datos de la primera captura para un anuncio y screenIndex específicos.
+ * Obtiene la primera captura que coincida con screenIndex.
  */
 export const getCapturaByScreenIndex = async (
   anuncioId: string,
@@ -202,9 +221,7 @@ export const getCapturaByScreenIndex = async (
     return null;
   }
   if (typeof screenIndex !== "number" || screenIndex < 0) {
-    console.error(
-      `getCapturaByScreenIndex: screenIndex inválido: ${screenIndex}`
-    );
+    console.error(`getCapturaByScreenIndex: screenIndex inválido: ${screenIndex}`);
     return null;
   }
 
@@ -239,7 +256,7 @@ export const getCapturaByScreenIndex = async (
 };
 
 /**
- * Actualiza los datos de un documento de captura existente.
+ * Actualiza los datos de una captura y, si la URL de imagen cambia, borra la anterior en Storage.
  */
 export const updateCaptura = async (
   anuncioId: string,
@@ -262,10 +279,32 @@ export const updateCaptura = async (
       CAPTURAS_SUBCOLLECTION,
       capturaId
     );
+
+    /* --------------------------------------------------------------- */
+    /* 1. Leemos la captura actual para obtener la URL previa          */
+    /* --------------------------------------------------------------- */
+    const prevSnap = await getDoc(capturaRef);
+    const prevUrl = prevSnap.exists()
+      ? (prevSnap.data() as Captura).imageUrl
+      : undefined;
+
+    /* --------------------------------------------------------------- */
+    /* 2. Actualizamos la captura                                      */
+    /* --------------------------------------------------------------- */
     await updateDoc(capturaRef, data);
     console.log(
       `Captura ${capturaId} actualizada exitosamente para anuncio ${anuncioId}.`
     );
+
+    /* --------------------------------------------------------------- */
+    /* 3. Si cambió la URL, eliminamos el archivo anterior en Storage  */
+    /* --------------------------------------------------------------- */
+    const newUrl = "imageUrl" in data ? data.imageUrl : undefined;
+    if (newUrl && prevUrl && newUrl !== prevUrl) {
+      deleteFileByUrl(prevUrl).catch((err) =>
+        console.error(`Error al borrar la imagen previa (${prevUrl}):`, err)
+      );
+    }
   } catch (error) {
     console.error(
       `Error actualizando captura ${capturaId} para anuncio ${anuncioId}:`,
@@ -275,11 +314,12 @@ export const updateCaptura = async (
   }
 };
 
-// --- NUEVAS FUNCIONES ---
+/* -------------------------------------------------------------------------- */
+/*                         UTILIDADES EXTRA / BORRADOR                        */
+/* -------------------------------------------------------------------------- */
 
 /**
- * Obtiene el borrador de anuncio existente para un usuario.
- * Devuelve el objeto Anuncio completo o null si no existe.
+ * Devuelve el primer borrador de anuncio existente para un usuario, o null.
  */
 export async function getExistingDraft(
   creatorId: string
@@ -312,9 +352,8 @@ export async function getExistingDraft(
 }
 
 /**
- * Elimina un anuncio y todas sus capturas asociadas de Firestore.
- * NOTA: La eliminación de imágenes de Firebase Storage no se incluye aquí
- * y debería manejarse por separado (idealmente con una Cloud Function).
+ * Elimina un anuncio y todas sus capturas en Firestore.
+ * (El borrado de las imágenes en Storage lo puedes manejar con Cloud Functions).
  */
 export async function deleteAnuncio(anuncioId: string): Promise<void> {
   if (!anuncioId) {
@@ -329,23 +368,15 @@ export async function deleteAnuncio(anuncioId: string): Promise<void> {
 
     if (!capturasSnapshot.empty) {
       const batch = writeBatch(db);
-      capturasSnapshot.docs.forEach((docSnapshot) => {
-        batch.delete(docSnapshot.ref);
-      });
+      capturasSnapshot.docs.forEach((docSnapshot) => batch.delete(docSnapshot.ref));
       await batch.commit();
-      console.log(
-        `Subcolección de capturas para anuncio ${anuncioId} eliminada.`
-      );
+      console.log(`Subcolección de capturas para anuncio ${anuncioId} eliminada.`);
     }
 
     await deleteDoc(anuncioRef);
-    console.log(
-      `Anuncio ${anuncioId} eliminado exitosamente de Firestore.`
-    );
+    console.log(`Anuncio ${anuncioId} eliminado exitosamente de Firestore.`);
   } catch (error) {
     console.error(`Error eliminando el anuncio ${anuncioId} de Firestore:`, error);
-    throw new Error(
-      `No se pudo eliminar el anuncio ${anuncioId} de Firestore.`
-    );
+    throw new Error(`No se pudo eliminar el anuncio ${anuncioId} de Firestore.`);
   }
 }

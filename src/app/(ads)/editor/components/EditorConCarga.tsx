@@ -196,34 +196,40 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
   }, [selectedElementId, elementsOfCurrentScreen, activeTool, setSelectedElementForEdit]);
 
   ReactUseEffect(() => {
-    let animationFrameId: number | undefined;
-    const updateDimensions = () => {
-      const stageNode = stageRef.current;
-      if (stageNode && stageNode.width() > 0 && stageNode.height() > 0) {
-        setFrozenCanvasDimensions(prevDims => {
-          if (!prevDims || prevDims.width !== stageNode.width() || prevDims.height !== stageNode.height()) {
-            return { width: stageNode.width(), height: stageNode.height() };
-          }
-          return prevDims;
-        });
-      } else {
-        setFrozenCanvasDimensions(prevDims => (prevDims === null ? null : null));
-      }
-    };
-    if (activeTool === 'effects') {
-      updateDimensions();
-      animationFrameId = requestAnimationFrame(updateDimensions);
-    } else {
-      if(frozenCanvasDimensions !== null) {
-        setFrozenCanvasDimensions(null);
+  /** Mantendrá el ID del frame activo */
+  let animationFrameId: number | undefined;
+
+  /**  
+   * Bucle que se repite hasta que el Stage tenga un
+   * tamaño > 0 × 0 o hasta que la herramienta “effects”
+   * deje de estar activa.  
+   */
+  const measureUntilReady = () => {
+    const stageNode = stageRef.current;
+    if (stageNode) {
+      const w = stageNode.width();
+      const h = stageNode.height();
+
+      if (w > 0 && h > 0) {
+        setFrozenCanvasDimensions({ width: w, height: h });
+        return;                     // ← ¡Listo! Salimos del loop
       }
     }
-    return () => {
-      if (typeof animationFrameId === 'number') {
-        cancelAnimationFrame(animationFrameId);
-      }
-    };
-  }, [activeTool, stageRef, frozenCanvasDimensions]);
+    animationFrameId = requestAnimationFrame(measureUntilReady);
+  };
+
+  if (activeTool === 'effects') {
+    measureUntilReady();
+  } else {
+    setFrozenCanvasDimensions(null);
+  }
+
+  return () => {
+    if (typeof animationFrameId === 'number') {
+      cancelAnimationFrame(animationFrameId);
+    }
+  };
+}, [activeTool]);
 
 
   const handleSelectTool = useCallback((toolId: ToolId | null) => {
@@ -295,8 +301,12 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
       const imagePath = `capturas_anuncios/${anuncioParaCargar.id}/screen_${pantallaAGuardarIndex}_${Date.now()}.jpg`;
       
       const metadataForStorage: UploadMetadata = {
-        customMetadata: { 'ownerUid': anuncioParaCargar.creatorId }
-      };
+  contentType: 'image/jpeg',
+  customMetadata: {
+    ownerUid: anuncioParaCargar.creatorId,
+  },
+};
+
       console.log(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Subiendo imagen a Storage en path:`, imagePath, "con metadatos:", metadataForStorage);
       
       newStorageImageUrl = await uploadFileAndGetURL(imageBlob, imagePath, metadataForStorage);
@@ -468,37 +478,79 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
   ]);
   
   const handleFinalizarAnuncioCompleto = useCallback(async () => {
-    const anuncioIdActual = anuncioParaCargar.id;
-    console.log("[handleFinalizarAnuncioCompleto] Iniciando finalización del anuncio completo. Anuncio ID:", anuncioIdActual);
-    setShowFinalizarModal(false);
-    setIsProcessingScreen(true);
+  const anuncioIdActual = anuncioParaCargar.id;
+  console.log(
+    '[handleFinalizarAnuncioCompleto] Iniciando finalización del anuncio completo. Anuncio ID:',
+    anuncioIdActual
+  );
+  setShowFinalizarModal(false);
+  setIsProcessingScreen(true);
 
-    // --- INICIO CAMBIO PARA EVITAR DUPLICACIÓN ---
-    // Ya NO llamamos a procesarYGuardarPantallaActual() aquí explícitamente.
-    // Se asume que handleNextOrFinalize ya guardó la pantalla actual (la última)
-    // antes de que se mostrara el modal y se llamara a esta función.
-    console.log("[handleFinalizarAnuncioCompleto] Se asume que la última pantalla ya fue procesada por handleNextOrFinalize, que llamó a procesarYGuardarPantallaActual.");
-    // ----- FIN CAMBIO PARA EVITAR DUPLICACIÓN -----
+  // --- INICIO CAMBIO PARA EVITAR DUPLICACIÓN ---
+  console.log(
+    '[handleFinalizarAnuncioCompleto] Se asume que la última pantalla ya fue procesada por handleNextOrFinalize, que llamó a procesarYGuardarPantallaActual.'
+  );
+  // ---- FIN CAMBIO PARA EVITAR DUPLICACIÓN -----
 
-    try {
-      // elementosGuardadosRef.current ya debería tener los datos de todas las pantallas,
-      // incluyendo la última procesada por handleNextOrFinalize.
-      console.log("[handleFinalizarAnuncioCompleto] Elementos finales a guardar en el Anuncio:", JSON.parse(JSON.stringify(elementosGuardadosRef.current)));
-      await updateAnuncioService(anuncioIdActual, {
-        elementosPorPantalla: elementosGuardadosRef.current, // Esto debe tener los datos de TODAS las pantallas
-        status: 'pendingPayment',
-      });
-      console.log("[handleFinalizarAnuncioCompleto] Anuncio actualizado con todos los elementos y estado pendingPayment.");
-      alert('¡Anuncio completado y listo para el pago! Serás redirigido a la previsualización.');
-      router.push(`/preview/${anuncioIdActual}`);
-    } catch (error) {
-      console.error('[handleFinalizarAnuncioCompleto] Error al actualizar el anuncio para finalizar:', error);
-      alert(`Error CRÍTICO al finalizar el anuncio: ${(error instanceof Error) ? error.message : 'Error desconocido.'}`);
-    } finally {
-      setIsProcessingScreen(false);
-      console.log("[handleFinalizarAnuncioCompleto] Finalizado.");
+  try {
+    /* -----------------------------------------------------------------
+       1️⃣  Construimos el payload SIN forzar status por defecto
+    ------------------------------------------------------------------ */
+    const payload: {
+      elementosPorPantalla: typeof elementosGuardadosRef.current;
+      status?: 'pendingPayment';
+    } = {
+      elementosPorPantalla: elementosGuardadosRef.current,
+    };
+
+    /* -----------------------------------------------------------------
+       2️⃣  Sólo los anuncios que NO estén activos pasan a pendingPayment
+    ------------------------------------------------------------------ */
+    if (anuncioParaCargar.status !== 'active') {
+      payload.status = 'pendingPayment';
     }
-  }, [anuncioParaCargar.id, router]); // Se quita procesarYGuardarPantallaActual de las dependencias aquí porque ya no se llama directamente
+
+    console.log(
+      '[handleFinalizarAnuncioCompleto] Elementos finales a guardar en el Anuncio:',
+      JSON.parse(JSON.stringify(elementosGuardadosRef.current))
+    );
+
+    await updateAnuncioService(anuncioIdActual, payload);
+    console.log(
+      '[handleFinalizarAnuncioCompleto] Anuncio actualizado con todos los elementos.'
+    );
+
+    /* -----------------------------------------------------------------
+       3️⃣  Redirección según estado previo
+    ------------------------------------------------------------------ */
+    if (anuncioParaCargar.status === 'active') {
+  alert('¡Cambios guardados! Volvemos a tu anuncio.');
+  // Mostramos la versión actualizada en la página de previsualización
+  router.push(`/preview/${anuncioIdActual}?edit=ok`);
+} else {
+  alert(
+    '¡Anuncio completado y listo para el pago! Serás redirigido a la previsualización.'
+  );
+  // Flujo normal de pago para borradores
+  router.push(`/preview/${anuncioIdActual}`);
+}
+
+  } catch (error) {
+    console.error(
+      '[handleFinalizarAnuncioCompleto] Error al actualizar el anuncio para finalizar:',
+      error
+    );
+    alert(
+      `Error CRÍTICO al finalizar el anuncio: ${
+        error instanceof Error ? error.message : 'Error desconocido.'
+      }`
+    );
+  } finally {
+    setIsProcessingScreen(false);
+    console.log('[handleFinalizarAnuncioCompleto] Finalizado.');
+  }
+}, [anuncioParaCargar.id, anuncioParaCargar.status, router]);
+
 
   // ... (Callbacks handlePreviewAnuncio, handleOpenExitModal, handleChangePlanCampania, handleConfirmExitAction sin cambios) ...
   const handlePreviewAnuncio = useCallback(() => {

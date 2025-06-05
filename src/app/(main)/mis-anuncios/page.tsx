@@ -226,7 +226,7 @@ export default function MisAnunciosPage() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
           <h1 className="text-2xl sm:text-3xl font-bold text-[var(--color-texto-principal)]">Mis Anuncios</h1>
-          <Link href="/(ads)/planes" className="w-full sm:w-auto bg-primario text-white px-6 py-3 rounded-lg shadow hover:bg-primario-dark transition-colors font-semibold text-center">
+          <Link href="/planes" className="w-full sm:w-auto bg-primario text-white px-6 py-3 rounded-lg shadow hover:bg-primario-dark transition-colors font-semibold text-center">
               Crear Nuevo Anuncio
           </Link>
         </div>
@@ -260,7 +260,7 @@ export default function MisAnunciosPage() {
             <p className="text-xl text-[var(--color-texto-secundario)] mb-4">
               Aún no tienes anuncios creados.
             </p>
-            <Link href="/(ads)/planes" className="bg-primario text-white px-6 py-3 rounded-lg shadow hover:bg-primario-dark transition-colors font-semibold">
+            <Link href="/planes" className="bg-primario text-white px-6 py-3 rounded-lg shadow hover:bg-primario-dark transition-colors font-semibold">
               ¡Crea tu Primer Anuncio!
             </Link>
           </div>

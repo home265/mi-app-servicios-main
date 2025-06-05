@@ -211,7 +211,7 @@ function PreviewClient({ anuncioId }: PreviewClientProps) {
         <h2 className="text-xl font-bold mb-2">¡Ups! Algo salió mal</h2>
         {/* Usar whitespace-pre-line para respetar saltos de línea si el error los tuviera */}
         <p className="mb-4 text-sm whitespace-pre-line">{error}</p>
-        <Link href="/(ads)/planes" passHref legacyBehavior>
+        <Link href="/planes" passHref legacyBehavior>
             <a className="mt-4">
                 <Button variant="primary" className="bg-red-500 hover:bg-red-600">Volver a Planes</Button>
             </a>
@@ -227,7 +227,7 @@ function PreviewClient({ anuncioId }: PreviewClientProps) {
         <h2 className="text-xl font-bold mb-2">Previsualización no disponible</h2>
         <p className="mb-4 text-sm">No se encontraron imágenes para este anuncio o aún se están procesando.</p>
         <p className="mb-4 text-xs">Status del Anuncio: {anuncioStatus || 'No disponible'}</p>
-        <Link href="/(ads)/planes" passHref legacyBehavior>
+        <Link href="/planes" passHref legacyBehavior>
             <a className="mt-4">
                 <Button variant="secondary">Crear otro anuncio</Button>
             </a>
@@ -290,42 +290,54 @@ function PreviewClient({ anuncioId }: PreviewClientProps) {
             {reelCompleted ? <RotateCcw size={28} /> : isPlaying ? <Pause size={28} /> : <Play size={28} />}
           </button>
 
-          <div className="w-full grid grid-cols-2 gap-3 p-3 bg-gradient-to-t from-black/70 via-black/50 to-transparent">
-            <Link href={`/editor/${anuncioId}`} passHref legacyBehavior>
-              <a className="w-full">
-                <Button variant="secondary" className="w-full text-sm py-2.5 px-3">
-                  <Edit3 size={16} className="mr-1.5" />
-                  Volver a Editar
-                </Button>
-              </a>
-            </Link>
+          <div className="w-full grid grid-cols-3 gap-3 p-3 bg-gradient-to-t from-black/70 via-black/50 to-transparent">
+  {/* ① Volver a editar */}
+  <Link href={`/editor/${anuncioId}`} passHref legacyBehavior>
+    <a className="w-full">
+      <Button variant="secondary" className="w-full text-sm py-2.5 px-3">
+        <Edit3 size={16} className="mr-1.5" />
+        Volver a Editar
+      </Button>
+    </a>
+  </Link>
 
-            {mostrarBotonPagar ? (
-              <Link href={`/pago/${anuncioId}`} passHref legacyBehavior>
-                <a className="w-full">
-                  <Button variant="primary" className="w-full text-sm py-2.5 px-3">
-                    <CheckCircle size={16} className="mr-1.5" />
-                    Continuar y Pagar
-                  </Button>
-                </a>
-              </Link>
-            ) : (
-              anuncioStatus && (
-                <div className="text-center col-span-1 flex flex-col justify-center items-center"> {/* Asegurar que ocupe espacio similar */}
-                    <p className="text-sm font-semibold">
-                        {anuncioStatus === 'active' && 'Anuncio Activo'}
-                        {anuncioStatus === 'expired' && 'Anuncio Expirado'}
-                        {anuncioStatus === 'cancelled' && 'Anuncio Cancelado'}
-                    </p>
-                    { (anuncioStatus === 'active' || anuncioStatus === 'expired' || anuncioStatus === 'cancelled') && (
-                        <Link href="/mis-anuncios" className="text-xs text-blue-400 hover:text-blue-300 mt-1 underline">
-                            Ver mis anuncios
-                        </Link>
-                    )}
-                </div>
-              )
-            )}
-          </div>
+  {/* ② Pagar o estado del anuncio */}
+  {mostrarBotonPagar ? (
+    <Link href={`/pago/${anuncioId}`} passHref legacyBehavior>
+      <a className="w-full">
+        <Button variant="primary" className="w-full text-sm py-2.5 px-3">
+          <CheckCircle size={16} className="mr-1.5" />
+          Continuar y Pagar
+        </Button>
+      </a>
+    </Link>
+  ) : (
+    anuncioStatus && (
+      <div className="text-center flex flex-col justify-center items-center">
+        <p className="text-sm font-semibold">
+          {anuncioStatus === 'active' && 'Anuncio Activo'}
+          {anuncioStatus === 'expired' && 'Anuncio Expirado'}
+          {anuncioStatus === 'cancelled' && 'Anuncio Cancelado'}
+        </p>
+        {(anuncioStatus === 'active' || anuncioStatus === 'expired' || anuncioStatus === 'cancelled') && (
+          <Link href="/mis-anuncios" className="text-xs text-blue-400 hover:text-blue-300 mt-1 underline">
+            Ver mis anuncios
+          </Link>
+        )}
+      </div>
+    )
+  )}
+
+  {/* ③ Ir al inicio / bienvenida */}
+  <Link href="/bienvenida" passHref legacyBehavior>
+    <a className="w-full">
+      <Button variant="outline" className="w-full text-sm py-2.5 px-3">
+        Salir
+      </Button>
+    </a>
+  </Link>
+</div>
+
         </div>
       </div>
     </div>
