@@ -1,14 +1,19 @@
+// src/app/empleados/page.tsx
+
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/store/userStore';
 import {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   collection,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   doc,
   getDoc,
   getDocs,
   query,
   where,
+  collectionGroup // ¡Asegúrate de importar collectionGroup!
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 
@@ -19,6 +24,7 @@ import Card from '@/app/components/ui/Card';
 import Logo from '@/app/components/ui/Logo';
 
 /* ---------- tipo mínimo del documento CV ---------- */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface CvDoc {
   rubros?: string[];
   descripcion?: string;
@@ -28,25 +34,17 @@ export default function EmpleadosPage() {
   const router = useRouter();
   const { currentUser } = useUserStore();
 
-  /* --- acceso solo para prestador o comercio --- */
-  useEffect(() => {
-    if (
-      !currentUser ||
-      (currentUser.rol !== 'prestador' && currentUser.rol !== 'comercio')
-    ) {
-      router.replace('/bienvenida');
-    }
-  }, [currentUser, router]);
-
-  /* --- formulario de filtro --- */
   const [rubroSel, setRubroSel] = useState<string[]>([]);
   const [cargando, setCargando] = useState(false);
   const [resultados, setResultados] = useState<CvCardData[]>([]);
 
-  if (
-    !currentUser ||
-    (currentUser.rol !== 'prestador' && currentUser.rol !== 'comercio')
-  ) {
+  useEffect(() => {
+    if (!currentUser || (currentUser.rol !== 'prestador' && currentUser.rol !== 'comercio')) {
+      router.replace('/bienvenida');
+    }
+  }, [currentUser, router]);
+
+  if (!currentUser || (currentUser.rol !== 'prestador' && currentUser.rol !== 'comercio')) {
     return null;
   }
 
@@ -54,49 +52,70 @@ export default function EmpleadosPage() {
   const localidad = currentUser.localidad.nombre;
 
   const handleBuscar = async () => {
+    console.log('handleBuscar: Iniciando búsqueda...');
     setCargando(true);
     setResultados([]);
 
-    /* 1. consulta usuarios_generales filtrando por localidad */
-    let q = query(
-      collection(db, 'usuarios_generales'),
-      where('localidad.provinciaNombre', '==', provincia),
-      where('localidad.nombre', '==', localidad)
-    );
+    try {
+      /* 1. Usamos una Collection Group Query para buscar en todos los 'cv' */
+      let q = query(
+        collectionGroup(db, 'cv'), // La magia sucede aquí
+        where('localidad.provinciaNombre', '==', provincia),
+        where('localidad.nombre', '==', localidad)
+      );
+      
+      console.log(`handleBuscar: Query base para ${localidad}, ${provincia}`);
 
-    /* si hay rubro seleccionado, filtra también por él (requiere índice) */
-    if (rubroSel.length === 1) {
-      q = query(q, where('cv.main.rubros', 'array-contains', rubroSel[0]));
-    }
+      /* 2. Si se seleccionó un rubro, lo añadimos al filtro */
+      if (rubroSel.length === 1) {
+        const selectedRubro = rubroSel[0];
+        q = query(q, where('rubros', 'array-contains', selectedRubro));
+        console.log(`handleBuscar: Filtrando por rubro: ${selectedRubro}`);
+      }
 
-    const snap = await getDocs(q);
-    const results: CvCardData[] = [];
+      const cvsSnap = await getDocs(q);
+      console.log(`handleBuscar: Se encontraron ${cvsSnap.docs.length} CVs.`);
 
-    /* 2. para cada usuario, trae su CV main */
-    await Promise.all(
-      snap.docs.map(async (userDoc) => {
-        const cvSnap = await getDoc(
-          doc(db, 'usuarios_generales', userDoc.id, 'cv', 'main')
-        );
-        if (!cvSnap.exists()) return;
+      if (cvsSnap.empty) {
+        setResultados([]);
+        setCargando(false);
+        return;
+      }
+      
+      /* 3. Para cada CV, obtenemos el perfil de su usuario "padre" */
+      const promises = cvsSnap.docs.map(async (cvDoc) => {
+        const parentUserRef = cvDoc.ref.parent.parent;
+        if (!parentUserRef) return null;
 
-        const profile = userDoc.data();
-        const cv = cvSnap.data() as CvDoc; // ✅ tipado explícito
+        const profileSnap = await getDoc(parentUserRef);
+        if (!profileSnap.exists()) return null;
 
-        results.push({
-          uid: userDoc.id,
+        const cv = cvDoc.data();
+        const profile = profileSnap.data();
+
+        return {
+          uid: profileSnap.id,
           collection: 'usuarios_generales',
           nombre: `${profile.nombre} ${profile.apellido}`,
           selfieURL: profile.selfieURL,
           rubros: cv.rubros ?? [],
           descripcion: cv.descripcion ?? '',
           telefono: ''
-        });
-      })
-    );
+        };
+      });
 
-    setResultados(results);
-    setCargando(false);
+      const results = (await Promise.all(promises)).filter(Boolean) as CvCardData[];
+
+      console.log('handleBuscar: Resultados finales:', results);
+      setResultados(results);
+
+    } catch (error) {
+      console.error("handleBuscar: Error durante la búsqueda:", error);
+      alert("Ocurrió un error al buscar. Revisa la consola para más detalles.");
+    } finally {
+      setCargando(false);
+      console.log('handleBuscar: Búsqueda finalizada.');
+    }
   };
 
   /* ====================================================== */
@@ -111,7 +130,7 @@ export default function EmpleadosPage() {
           <label className="block font-medium mb-1">Rubro (opcional)</label>
           <SelectorCategoriasEmpleo
             value={rubroSel}
-            onChange={(arr) => setRubroSel(arr.slice(0, 1))} /* solo uno */
+            onChange={(arr) => setRubroSel(arr.slice(0, 1))}
           />
         </div>
 
@@ -123,7 +142,12 @@ export default function EmpleadosPage() {
       {/* Resultados */}
       <div className="w-full max-w-md space-y-4">
         {resultados.map((u) => (
-          <CvCard key={u.uid} user={u} />
+          <CvCard
+            key={u.uid}
+            user={u}
+            // Aquí pasamos el rubro buscado para que se pueda destacar
+            highlightRubro={rubroSel.length === 1 ? rubroSel[0] : undefined}
+          />
         ))}
 
         {!cargando && resultados.length === 0 && (

@@ -1,3 +1,4 @@
+// src/app/components/cv/CvModal.tsx
 'use client';
 import React, { useEffect, useState } from 'react';
 import Avatar from '@/app/components/common/Avatar';
@@ -7,29 +8,30 @@ import { db } from '@/lib/firebase/config';
 
 interface CvModalProps {
   uid: string;
-  collection: string;   // 'usuarios_generales'
+  collection: string;
   onClose: () => void;
+  highlightRubro?: string; // 1. AÑADIMOS ESTO para que pueda recibir el rubro
 }
 
 interface CvDoc {
-  descripcion? : string;
-  telefonoAlt? : string;
-  rubros?      : string[];
-  estudios?    : Record<string, string>;
+  descripcion?: string;
+  telefonoAlt?: string;
+  rubros?: string[];
+  estudios?: Record<string, string>;
 }
 
 /* campos del usuario que mostramos en el modal */
 interface ProfileDoc {
-  nombre       : string;
-  apellido     : string;
-  selfieURL    : string;
+  nombre: string;
+  apellido: string;
+  selfieURL: string;
   localidad?: {
     nombre: string;
     provinciaNombre: string;
   };
 }
 
-export default function CvModal({ uid, collection, onClose }: CvModalProps) {
+export default function CvModal({ uid, collection, onClose, highlightRubro }: CvModalProps) { // 2. LO RECIBIMOS AQUÍ
   const [profile, setProfile] = useState<ProfileDoc | null>(null);
   const [cv, setCv] = useState<CvDoc | null>(null);
 
@@ -52,11 +54,13 @@ export default function CvModal({ uid, collection, onClose }: CvModalProps) {
   if (!profile || !cv) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-      <Card className="w-96 max-h-[90vh] overflow-y-auto space-y-4">
-        <button className="self-end text-gray-500" onClick={onClose}>
-          &times;
-        </button>
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto space-y-4">
+        <div className="flex justify-end -mb-4">
+            <button className="text-gray-500 dark:text-gray-400 text-2xl" onClick={onClose}>
+                &times;
+            </button>
+        </div>
 
         {/* Cabecera */}
         <div className="flex items-center space-x-3">
@@ -65,30 +69,38 @@ export default function CvModal({ uid, collection, onClose }: CvModalProps) {
             <h2 className="text-xl font-semibold">
               {profile.nombre} {profile.apellido}
             </h2>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               {profile.localidad?.nombre}, {profile.localidad?.provinciaNombre}
             </p>
           </div>
         </div>
 
         {/* Descripción */}
-        {cv.descripcion && <p className="whitespace-pre-wrap">{cv.descripcion}</p>}
+        {cv.descripcion && <p className="whitespace-pre-wrap text-sm">{cv.descripcion}</p>}
 
         {/* Rubros */}
         <div>
-          <h3 className="font-medium">Rubros</h3>
-          <ul className="list-disc list-inside text-sm">
-            {cv.rubros?.map((r) => <li key={r}>{r}</li>)}
+          <h3 className="font-medium mb-1">Rubros</h3>
+          <ul className="list-disc list-inside text-sm space-y-1">
+            {cv.rubros?.map((r) => (
+              <li
+                key={r}
+                // 3. AQUÍ OCURRE LA MAGIA: Si el rubro es el que se buscó, le ponemos un estilo especial.
+                className={r === highlightRubro ? 'font-bold text-[var(--color-primario)]' : ''}
+              >
+                {r}
+              </li>
+            ))}
           </ul>
         </div>
 
         {/* Estudios */}
-        {cv.estudios && (
+        {cv.estudios && Object.values(cv.estudios).some(v => v) && (
           <div>
             <h3 className="font-medium">Estudios</h3>
-            {Object.entries(cv.estudios).map(([k, v]) => (
-              <p key={k} className="text-sm capitalize">
-                {k}: {v || '—'}
+            {Object.entries(cv.estudios).filter(([, v]) => v).map(([k, v]) => (
+              <p key={k} className="text-sm">
+                <span className="capitalize font-semibold">{k}:</span> {v}
               </p>
             ))}
           </div>
@@ -96,10 +108,10 @@ export default function CvModal({ uid, collection, onClose }: CvModalProps) {
 
         {/* Contacto alternativo */}
         {cv.telefonoAlt && (
-          <p className="text-sm">
-            <span className="font-medium">Teléfono: </span>
-            {cv.telefonoAlt}
-          </p>
+          <div>
+            <h3 className="font-medium">Teléfono alternativo</h3>
+            <p className="text-sm">{cv.telefonoAlt}</p>
+          </div>
         )}
       </Card>
     </div>
