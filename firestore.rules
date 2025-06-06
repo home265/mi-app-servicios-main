@@ -3,174 +3,168 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    // Helper: User is authenticated
+    // =====================================================================
+    // Funciones de Ayuda (No cambian)
+    // =====================================================================
     function isAuthenticated() {
       return request.auth != null;
     }
 
-    // Helper: User is the owner of the document via userId
     function isOwner(userId) {
       return request.auth.uid == userId;
     }
 
-    // Helper: Check if the currently authenticated user has a specific role
     function userHasRole(expectedRole) {
       return isAuthenticated() && (
         (exists(/databases/$(database)/documents/usuarios_generales/$(request.auth.uid)) &&
-           get(/databases/$(database)/documents/usuarios_generales/$(request.auth.uid)).data.rol == expectedRole)
+          get(/databases/$(database)/documents/usuarios_generales/$(request.auth.uid)).data.rol == expectedRole)
         ||
         (exists(/databases/$(database)/documents/prestadores/$(request.auth.uid)) &&
-           get(/databases/$(database)/documents/prestadores/$(request.auth.uid)).data.rol == expectedRole)
+          get(/databases/$(database)/documents/prestadores/$(request.auth.uid)).data.rol == expectedRole)
         ||
         (exists(/databases/$(database)/documents/comercios/$(request.auth.uid)) &&
-           get(/databases/$(database)/documents/comercios/$(request.auth.uid)).data.rol == expectedRole)
-        // || (exists(/databases/$(database)/documents/admins/$(request.auth.uid)) && // Example for admins collection
-        // get(/databases/$(database)/documents/admins/$(request.auth.uid)).data.rol == expectedRole)
+          get(/databases/$(database)/documents/comercios/$(request.auth.uid)).data.rol == expectedRole)
       );
     }
 
-    // Helper: Check if the authenticated user is a 'prestador' or 'comercio'
     function isProviderOrCommerce() {
       return isAuthenticated() && (
         (exists(/databases/$(database)/documents/prestadores/$(request.auth.uid)) &&
-           get(/databases/$(database)/documents/prestadores/$(request.auth.uid)).data.rol == 'prestador')
+          get(/databases/$(database)/documents/prestadores/$(request.auth.uid)).data.rol == 'prestador')
         ||
         (exists(/databases/$(database)/documents/comercios/$(request.auth.uid)) &&
-           get(/databases/$(database)/documents/comercios/$(request.auth.uid)).data.rol == 'comercio')
+          get(/databases/$(database)/documents/comercios/$(request.auth.uid)).data.rol == 'comercio')
       );
     }
 
-    // User Collections
+    // =====================================================================
+    // REGLA MAESTRA PARA LOS CVs (Esta es la corrección)
+    // =====================================================================
+    // Esta única regla controla todo el acceso al grupo de colecciones 'cv'.
+    match /{path=**}/cv/{cvId} {
+      // Permite LEER si es un comercio/prestador O si es el dueño del CV.
+      allow read: if isProviderOrCommerce() || (isAuthenticated() && request.auth.uid == resource.data.uid);
+
+      // Permite ESCRIBIR (crear, editar, borrar) únicamente si es el dueño del CV.
+      allow write: if isAuthenticated() && request.auth.uid == resource.data.uid;
+    }
+
+
+    // =====================================================================
+    // Colecciones de Usuarios (Sin la regla específica de /cv/main)
+    // =====================================================================
     match /usuarios_generales/{userId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isOwner(userId) &&
-                       request.resource.data.uid == userId &&
-                       request.resource.data.rol == 'usuario';
-      allow update: if isAuthenticated() && isOwner(userId) &&
-                       request.resource.data.rol == resource.data.rol &&
-                       request.resource.data.uid == resource.data.uid;
+      allow create: if isAuthenticated() && isOwner(userId) && request.resource.data.uid == userId && request.resource.data.rol == 'usuario';
+      allow update: if isAuthenticated() && isOwner(userId) && request.resource.data.rol == resource.data.rol && request.resource.data.uid == resource.data.uid;
       allow delete: if isAuthenticated() && isOwner(userId);
 
-      match /cv/main {
-        allow read: if isAuthenticated() && (isOwner(userId) || isProviderOrCommerce());
-        allow create: if isAuthenticated() && isOwner(userId); // Added if
-        allow update: if isAuthenticated() && isOwner(userId); // Added if
-        allow delete: if isAuthenticated() && isOwner(userId); // Added if
-      }
+      // La regla para /cv/main se elimina de aquí. Ya la maneja la regla maestra de arriba.
 
       match /notifications/{notificationId} {
-        allow read: if isAuthenticated() && isOwner(userId); // Added if
-        allow update: if isAuthenticated() && isOwner(userId); // Added if
+        allow read: if isAuthenticated() && isOwner(userId);
+        allow update: if isAuthenticated() && isOwner(userId);
         allow create: if false; // Managed by Cloud Functions
         allow delete: if false; // Managed by Cloud Functions
       }
-
       match /reviews_as_provider/{reviewId} {
         allow read: if true; // Reviews are public
         allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
-        allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid; // Added if
-        allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid; // Added if
+        allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid;
+        allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
       }
       match /reviews_as_user/{reviewId} {
         allow read: if true; // Reviews are public
         allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
-        allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid; // Added if
-        allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid; // Added if
+        allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid;
+        allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
       }
     }
 
     match /prestadores/{userId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isOwner(userId) &&
-                       request.resource.data.uid == userId &&
-                       request.resource.data.rol == 'prestador';
-      allow update: if isAuthenticated() && isOwner(userId) &&
-                       request.resource.data.rol == resource.data.rol &&
-                       request.resource.data.uid == resource.data.uid;
+      allow create: if isAuthenticated() && isOwner(userId) && request.resource.data.uid == userId && request.resource.data.rol == 'prestador';
+      allow update: if isAuthenticated() && isOwner(userId) && request.resource.data.rol == resource.data.rol && request.resource.data.uid == resource.data.uid;
       allow delete: if isAuthenticated() && isOwner(userId);
 
+      // La regla de /cv se elimina de aquí.
+      
       match /notifications/{notificationId} {
-        allow read: if isAuthenticated() && isOwner(userId); // Added if
-        allow update: if isAuthenticated() && isOwner(userId); // Added if
+        allow read: if isAuthenticated() && isOwner(userId);
+        allow update: if isAuthenticated() && isOwner(userId);
         allow create: if false;
         allow delete: if false;
       }
       match /reviews_as_provider/{reviewId} {
         allow read: if true;
         allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
-        allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid; // Added if
-        allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid; // Added if
+        allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid;
+        allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
       }
       match /reviews_as_user/{reviewId} {
         allow read: if true;
         allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
-        allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid; // Added if
-        allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid; // Added if
+        allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid;
+        allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
       }
     }
 
     match /comercios/{userId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isOwner(userId) &&
-                       request.resource.data.uid == userId &&
-                       request.resource.data.rol == 'comercio';
-      allow update: if isAuthenticated() && isOwner(userId) &&
-                       request.resource.data.rol == resource.data.rol &&
-                       request.resource.data.uid == resource.data.uid;
+      allow create: if isAuthenticated() && isOwner(userId) && request.resource.data.uid == userId && request.resource.data.rol == 'comercio';
+      allow update: if isAuthenticated() && isOwner(userId) && request.resource.data.rol == resource.data.rol && request.resource.data.uid == resource.data.uid;
       allow delete: if isAuthenticated() && isOwner(userId);
+      
+      // La regla de /cv se elimina de aquí.
 
       match /notifications/{notificationId} {
-        allow read: if isAuthenticated() && isOwner(userId); // Added if
-        allow update: if isAuthenticated() && isOwner(userId); // Added if
+        allow read: if isAuthenticated() && isOwner(userId);
+        allow update: if isAuthenticated() && isOwner(userId);
         allow create: if false;
         allow delete: if false;
       }
       match /reviews_as_provider/{reviewId} {
         allow read: if true;
         allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
-        allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid; // Added if
-        allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid; // Added if
+        allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid;
+        allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
       }
       match /reviews_as_user/{reviewId} {
         allow read: if true;
         allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
-        allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid; // Added if
-        allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid; // Added if
+        allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid;
+        allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
       }
     }
 
-    // Anuncios Collection
+    // =====================================================================
+    // OTRAS COLECCIONES (No cambian)
+    // =====================================================================
     match /anuncios/{anuncioId} {
       allow read: if (resource.data.status == 'active') ||
-                     (isAuthenticated() && resource.data.creatorId == request.auth.uid) ||
-                     userHasRole('administrador');
+                       (isAuthenticated() && resource.data.creatorId == request.auth.uid) ||
+                       userHasRole('administrador');
       allow create: if isAuthenticated() &&
-                       request.resource.data.creatorId == request.auth.uid &&
-                       isProviderOrCommerce();
+                         request.resource.data.creatorId == request.auth.uid &&
+                         isProviderOrCommerce();
       allow update: if isAuthenticated() && resource.data.creatorId == request.auth.uid;
       allow delete: if isAuthenticated() && resource.data.creatorId == request.auth.uid;
 
       match /capturas/{capturaId} {
         allow read: if (get(/databases/$(database)/documents/anuncios/$(anuncioId)).data.status == 'active') ||
-                     (isAuthenticated() && get(/databases/$(database)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid);
+                         (isAuthenticated() && get(/databases/$(database)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid);
         allow create: if isAuthenticated() &&
-                       request.resource.data.creatorId == request.auth.uid &&
-                       get(/databases/$(database)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid;
-        allow update: if isAuthenticated() && get(/databases/$(database)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid; // Added if
-        allow delete: if isAuthenticated() && get(/databases/$(database)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid; // Added if
+                           request.resource.data.creatorId == request.auth.uid &&
+                           get(/databases/$(database)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid;
+        allow update: if isAuthenticated() && get(/databases/$(database)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid;
+        allow delete: if isAuthenticated() && get(/databases/$(database)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid;
       }
     }
 
-    // Reglas para la colección paginas_amarillas
-   match /paginas_amarillas/{creatorId} {
-      // cualquiera puede leer
+    match /paginas_amarillas/{creatorId} {
       allow read: if true;
-      // creación solo por el dueño
-      allow create: if request.auth != null
-                    && request.auth.uid == creatorId;
-      // actualización y borrado solo por el dueño
-      allow update, delete: if request.auth != null
-                            && request.auth.uid == creatorId;
+      allow create: if request.auth != null && request.auth.uid == creatorId;
+      allow update, delete: if request.auth != null && request.auth.uid == creatorId;
     }
   }
 }

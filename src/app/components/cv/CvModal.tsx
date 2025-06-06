@@ -1,6 +1,6 @@
 // src/app/components/cv/CvModal.tsx
 'use client';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react'; // 1. Se añade 'useMemo'
 import Avatar from '@/app/components/common/Avatar';
 import Card from '@/app/components/ui/Card';
 import { doc, getDoc } from 'firebase/firestore';
@@ -10,7 +10,7 @@ interface CvModalProps {
   uid: string;
   collection: string;
   onClose: () => void;
-  highlightRubro?: string; // 1. AÑADIMOS ESTO para que pueda recibir el rubro
+  highlightRubro?: string;
 }
 
 interface CvDoc {
@@ -20,7 +20,6 @@ interface CvDoc {
   estudios?: Record<string, string>;
 }
 
-/* campos del usuario que mostramos en el modal */
 interface ProfileDoc {
   nombre: string;
   apellido: string;
@@ -31,25 +30,43 @@ interface ProfileDoc {
   };
 }
 
-export default function CvModal({ uid, collection, onClose, highlightRubro }: CvModalProps) { // 2. LO RECIBIMOS AQUÍ
+export default function CvModal({ uid, collection, onClose, highlightRubro }: CvModalProps) {
   const [profile, setProfile] = useState<ProfileDoc | null>(null);
   const [cv, setCv] = useState<CvDoc | null>(null);
 
   useEffect(() => {
     (async () => {
-      /* perfil */
       const profileSnap = await getDoc(doc(db, collection, uid));
       if (profileSnap.exists()) {
         setProfile(profileSnap.data() as ProfileDoc);
       }
-
-      /* cv */
       const cvSnap = await getDoc(doc(db, 'usuarios_generales', uid, 'cv', 'main'));
       if (cvSnap.exists()) {
         setCv(cvSnap.data() as CvDoc);
       }
     })();
   }, [uid, collection]);
+
+  // 2. Creamos una nueva lista de rubros ordenada
+  const rubrosOrdenados = useMemo(() => {
+    // Si no hay CV o no hay rubros, devolvemos una lista vacía
+    if (!cv?.rubros) return [];
+    
+    // Si no se está destacando ningún rubro, devolvemos la lista tal como viene
+    if (!highlightRubro) return cv.rubros;
+
+    // Si hay que destacar uno, lo buscamos y lo ponemos al principio
+    const lista = [...cv.rubros];
+    const indice = lista.indexOf(highlightRubro);
+
+    if (indice > -1) {
+      const itemDestacado = lista.splice(indice, 1)[0];
+      lista.unshift(itemDestacado);
+    }
+    
+    return lista;
+  }, [cv?.rubros, highlightRubro]);
+
 
   if (!profile || !cv) return null;
 
@@ -82,10 +99,10 @@ export default function CvModal({ uid, collection, onClose, highlightRubro }: Cv
         <div>
           <h3 className="font-medium mb-1">Rubros</h3>
           <ul className="list-disc list-inside text-sm space-y-1">
-            {cv.rubros?.map((r) => (
+            {/* 3. Usamos la nueva lista ordenada para mostrar los rubros */}
+            {rubrosOrdenados.map((r) => (
               <li
                 key={r}
-                // 3. AQUÍ OCURRE LA MAGIA: Si el rubro es el que se buscó, le ponemos un estilo especial.
                 className={r === highlightRubro ? 'font-bold text-[var(--color-primario)]' : ''}
               >
                 {r}
