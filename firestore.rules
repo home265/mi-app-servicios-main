@@ -4,7 +4,7 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // =====================================================================
-    // Funciones de Ayuda (No cambian)
+    // Funciones de Ayuda (Sin cambios)
     // =====================================================================
     function isAuthenticated() {
       return request.auth != null;
@@ -38,20 +38,16 @@ service cloud.firestore {
     }
 
     // =====================================================================
-    // REGLA MAESTRA PARA LOS CVs (Esta es la corrección)
+    // REGLA MAESTRA PARA LOS CVs (Se mantiene la del archivo actual)
     // =====================================================================
-    // Esta única regla controla todo el acceso al grupo de colecciones 'cv'.
     match /{path=**}/cv/{cvId} {
-      // Permite LEER si es un comercio/prestador O si es el dueño del CV.
       allow read: if isProviderOrCommerce() || (isAuthenticated() && request.auth.uid == resource.data.uid);
-
-      // Permite ESCRIBIR (crear, editar, borrar) únicamente si es el dueño del CV.
       allow write: if isAuthenticated() && request.auth.uid == resource.data.uid;
     }
 
 
     // =====================================================================
-    // Colecciones de Usuarios (Sin la regla específica de /cv/main)
+    // Colecciones de Usuarios
     // =====================================================================
     match /usuarios_generales/{userId} {
       allow read: if isAuthenticated();
@@ -59,26 +55,32 @@ service cloud.firestore {
       allow update: if isAuthenticated() && isOwner(userId) && request.resource.data.rol == resource.data.rol && request.resource.data.uid == resource.data.uid;
       allow delete: if isAuthenticated() && isOwner(userId);
 
-      // La regla para /cv/main se elimina de aquí. Ya la maneja la regla maestra de arriba.
-
+      // INICIO DE SECCIÓN MODIFICADA: Restaurada a la versión funcional
       match /notifications/{notificationId} {
-        allow read: if isAuthenticated() && isOwner(userId);
+        allow read:   if isAuthenticated() && isOwner(userId);
+        allow create: if isAuthenticated();
         allow update: if isAuthenticated() && isOwner(userId);
-        allow create: if false; // Managed by Cloud Functions
-        allow delete: if false; // Managed by Cloud Functions
+        allow delete: if isAuthenticated() && isOwner(userId);
+      }
+      match /contactPendings/{pendingId} {
+        allow read:   if isAuthenticated() && isOwner(userId);
+        allow create: if isAuthenticated();
+        allow update: if isAuthenticated() && isOwner(userId);
+        allow delete: if isAuthenticated() && isOwner(userId);
       }
       match /reviews_as_provider/{reviewId} {
-        allow read: if true; // Reviews are public
+        allow read: if true; 
         allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
         allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid;
         allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
       }
       match /reviews_as_user/{reviewId} {
-        allow read: if true; // Reviews are public
+        allow read: if true; 
         allow create: if isAuthenticated() && request.resource.data.authorId == request.auth.uid;
         allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid;
         allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
       }
+      // FIN DE SECCIÓN MODIFICADA
     }
 
     match /prestadores/{userId} {
@@ -86,14 +88,19 @@ service cloud.firestore {
       allow create: if isAuthenticated() && isOwner(userId) && request.resource.data.uid == userId && request.resource.data.rol == 'prestador';
       allow update: if isAuthenticated() && isOwner(userId) && request.resource.data.rol == resource.data.rol && request.resource.data.uid == resource.data.uid;
       allow delete: if isAuthenticated() && isOwner(userId);
-
-      // La regla de /cv se elimina de aquí.
       
+      // INICIO DE SECCIÓN MODIFICADA: Restaurada a la versión funcional
       match /notifications/{notificationId} {
-        allow read: if isAuthenticated() && isOwner(userId);
+        allow read:   if isAuthenticated() && isOwner(userId);
+        allow create: if isAuthenticated();
         allow update: if isAuthenticated() && isOwner(userId);
-        allow create: if false;
-        allow delete: if false;
+        allow delete: if isAuthenticated() && isOwner(userId);
+      }
+      match /contactPendings/{pendingId} {
+        allow read:   if isAuthenticated() && isOwner(userId);
+        allow create: if isAuthenticated();
+        allow update: if isAuthenticated() && isOwner(userId);
+        allow delete: if isAuthenticated() && isOwner(userId);
       }
       match /reviews_as_provider/{reviewId} {
         allow read: if true;
@@ -107,6 +114,7 @@ service cloud.firestore {
         allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid;
         allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
       }
+      // FIN DE SECCIÓN MODIFICADA
     }
 
     match /comercios/{userId} {
@@ -114,14 +122,19 @@ service cloud.firestore {
       allow create: if isAuthenticated() && isOwner(userId) && request.resource.data.uid == userId && request.resource.data.rol == 'comercio';
       allow update: if isAuthenticated() && isOwner(userId) && request.resource.data.rol == resource.data.rol && request.resource.data.uid == resource.data.uid;
       allow delete: if isAuthenticated() && isOwner(userId);
-      
-      // La regla de /cv se elimina de aquí.
 
+      // INICIO DE SECCIÓN MODIFICADA: Restaurada a la versión funcional
       match /notifications/{notificationId} {
-        allow read: if isAuthenticated() && isOwner(userId);
+        allow read:   if isAuthenticated() && isOwner(userId);
+        allow create: if isAuthenticated();
         allow update: if isAuthenticated() && isOwner(userId);
-        allow create: if false;
-        allow delete: if false;
+        allow delete: if isAuthenticated() && isOwner(userId);
+      }
+      match /contactPendings/{pendingId} {
+        allow read:   if isAuthenticated() && isOwner(userId);
+        allow create: if isAuthenticated();
+        allow update: if isAuthenticated() && isOwner(userId);
+        allow delete: if isAuthenticated() && isOwner(userId);
       }
       match /reviews_as_provider/{reviewId} {
         allow read: if true;
@@ -135,10 +148,11 @@ service cloud.firestore {
         allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid;
         allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
       }
+      // FIN DE SECCIÓN MODIFICADA
     }
 
     // =====================================================================
-    // OTRAS COLECCIONES (No cambian)
+    // OTRAS COLECCIONES (Sin cambios, se mantiene la del archivo actual)
     // =====================================================================
     match /anuncios/{anuncioId} {
       allow read: if (resource.data.status == 'active') ||
@@ -153,9 +167,10 @@ service cloud.firestore {
       match /capturas/{capturaId} {
         allow read: if (get(/databases/$(database)/documents/anuncios/$(anuncioId)).data.status == 'active') ||
                          (isAuthenticated() && get(/databases/$(database)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid);
+        
         allow create: if isAuthenticated() &&
-                           request.resource.data.creatorId == request.auth.uid &&
                            get(/databases/$(database)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid;
+                           
         allow update: if isAuthenticated() && get(/databases/$(database)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid;
         allow delete: if isAuthenticated() && get(/databases/$(database)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid;
       }

@@ -300,12 +300,16 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
       const imageBlob = await dataURLtoBlob(dataUrl);
       const imagePath = `capturas_anuncios/${anuncioParaCargar.id}/screen_${pantallaAGuardarIndex}_${Date.now()}.jpg`;
       
+      // ===================================================================
+      // LÍNEA CORREGIDA
+      // ===================================================================
       const metadataForStorage: UploadMetadata = {
-  contentType: 'image/jpeg',
-  customMetadata: {
-    ownerUid: anuncioParaCargar.creatorId,
-  },
-};
+        contentType: 'image/jpeg',
+        customMetadata: {
+          creatorId: anuncioParaCargar.creatorId, // <-- Se cambió 'ownerUid' por 'creatorId'
+        },
+      };
+      // ===================================================================
 
       console.log(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Subiendo imagen a Storage en path:`, imagePath, "con metadatos:", metadataForStorage);
       

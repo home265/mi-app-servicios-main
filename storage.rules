@@ -28,11 +28,24 @@ service firebase.storage {
       allow read: if true;
       // subir/borrar solo el dueño
       allow write: if request.auth != null
-                   && request.auth.uid == creatorId;
+                      && request.auth.uid == creatorId;
     }
 
+    // ===================================================================
+    // INICIO DE LA SECCIÓN AÑADIDA
+    // ===================================================================
+    // Reglas para las imágenes de portada de Páginas Amarillas
+    match /paginas_amarillas_portadas/{creatorId}/{fileName} {
+      allow read: if true; // Las portadas son públicas
+
+      // Permite escribir o borrar solo si el usuario es el dueño de la carpeta
+      allow write, delete: if isAuthenticated() && request.auth.uid == creatorId;
+    }
+    // ===================================================================
+    // FIN DE LA SECCIÓN AÑADIDA
+    // ===================================================================
+
     // Elementos de Anuncios: {anuncioId} es el ID del anuncio.
-    // Se verifica que el usuario sea el creatorId del anuncio en Firestore.
     match /anuncios_elementos/{anuncioId}/fondos/{fileName} {
       allow read: if true; // Suelen ser públicos
       allow write: if isAuthenticated() &&
@@ -43,7 +56,7 @@ service firebase.storage {
                        get(/databases/(default)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid;
     }
 
-    match /anuncios_elementos/{anuncioId}/{screenIndex}/{fileName} {
+    match /anuncios_elementos/{anunciosId}/{screenIndex}/{fileName} {
       allow read: if true;
       allow write: if isAuthenticated() &&
                       get(/databases/(default)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid &&
@@ -53,23 +66,26 @@ service firebase.storage {
                        get(/databases/(default)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid;
     }
 
+    // SECCIÓN FINAL Y CORREGIDA (de la conversación anterior)
     // Capturas de pantalla de Anuncios
     match /capturas_anuncios/{anuncioId}/{fileName} {
       allow read: if true; // Suelen ser públicas
-      allow write: if isAuthenticated() &&
-                      get(/databases/(default)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid &&
-                      request.resource.contentType.matches('image/jpeg'); // Asumiendo JPG
-      allow delete: if isAuthenticated() &&
-                       get(/databases/(default)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid;
+
+      // Permite subir un archivo si el usuario adjunta su ID en los metadatos
+      allow write: if isAuthenticated() && request.resource.metadata.creatorId == request.auth.uid;
+
+      // Permite borrar un archivo si el ID del usuario coincide con el 'creatorId'
+      // que está guardado en los metadatos del propio archivo.
+      allow delete: if isAuthenticated() && resource.metadata.creatorId == request.auth.uid;
     }
 
     // Si tienes CVs como archivos PDF: {userId} es el dueño del CV.
     // match /cvs/{userId}/{cvFileName} {
     //   allow read: if isOwner(userId) ||
-    //                  (isAuthenticated() && (
-    //                     exists(/databases/(default)/documents/prestadores/$(request.auth.uid)) ||
-    //                     exists(/databases/(default)/documents/comercios/$(request.auth.uid))
-    //                  ));
+    //                 (isAuthenticated() && (
+    //                   exists(/databases/(default)/documents/prestadores/$(request.auth.uid)) ||
+    //                   exists(/databases/(default)/documents/comercios/$(request.auth.uid))
+    //                 ));
     //   allow write: if isOwner(userId) &&
     //                   request.resource.size < 2 * 1024 * 1024 && // Max 2MB
     //                   request.resource.contentType.matches('application/pdf');
