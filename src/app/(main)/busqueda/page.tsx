@@ -145,7 +145,7 @@ export default function BusquedaPage() {
         subcategoria: subcategoria ?? '',
         description,
         senderName: userName,
-        avatarUrl: userAvatar || '/logo.png',
+        avatarUrl: userAvatar || '/logo1.png',
         timestamp: Date.now(),
       };
 

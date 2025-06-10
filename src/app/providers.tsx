@@ -55,7 +55,7 @@ const LoadingScreen = ({
 }) => (
   <div className="flex flex-col items-center justify-center min-h-screen bg-black text-white">
     <motion.img
-      src="/logo.png"
+      src="/logo1.png"
       alt="App Logo"
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}

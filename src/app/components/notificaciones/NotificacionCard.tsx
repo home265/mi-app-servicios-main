@@ -44,7 +44,7 @@ export default function NotificacionCard({
       avatarUrl = p.senderAvatarUrl;
     }
   }
-  const avatarSrc = avatarUrl || '/logo.png';
+  const avatarSrc = avatarUrl || '/logo1.png';
 
   /* ───── Botones según tipo de notificación ───── */
   const map = {
@@ -108,7 +108,7 @@ export default function NotificacionCard({
             fill
             sizes="48px"
             className={
-              avatarSrc === '/logo.png' ? 'object-contain p-1' : 'object-cover'
+              avatarSrc === '/logo1.png' ? 'object-contain p-1' : 'object-cover'
             }
           />
         )}

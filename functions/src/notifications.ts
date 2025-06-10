@@ -6,7 +6,7 @@ import { CloudTasksClient } from '@google-cloud/tasks';
 
 // <--- NUEVO: URL base de tu aplicación y URL del ícono de notificación
 const APP_BASE_URL = "https://mi-app-servicios-3326e.web.app";
-const DEFAULT_NOTIFICATION_ICON_URL = `${APP_BASE_URL}/logo.png`; // Asumiendo que tienes public/logo.png en tu frontend
+const DEFAULT_NOTIFICATION_ICON_URL = `${APP_BASE_URL}/logo1.png`; // Asumiendo que tienes public/logo1.png en tu frontend
 
 ////////////////////////////////////////////////////////////////////////////////
 // Inicialización
@@ -456,7 +456,7 @@ export const sendContactFollowupTask = onRequest(async (req, res) => {
 
   const followupPayload: Payload = {
     senderName: 'Co-Dy-S',
-    avatarUrl: '/logo.png', // Esta URL es relativa, para la push se usará DEFAULT_NOTIFICATION_ICON_URL
+    avatarUrl: '/logo1.png', // Esta URL es relativa, para la push se usará DEFAULT_NOTIFICATION_ICON_URL
     description: `¡Hola! Solo queríamos saber si pudiste contactar a ${pending.providerName} y si llegaron a un acuerdo sobre el trabajo/servicio.`
   };
   

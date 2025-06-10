@@ -8,10 +8,10 @@ export default function SeleccionarRegistroPage() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-fondo text-texto p-4">
       <div className="mb-8 md:mb-12">
         <Image
-          src="/logo.png"
+          src="/logo1.png"
           alt="Logo Mi App Servicios"
-          width={263} // ANCHO REAL ORIGINAL de tu archivo logo.png
-          height={176} // ALTO REAL ORIGINAL de tu archivo logo.png
+          width={263} // ANCHO REAL ORIGINAL de tu archivo logo1.png
+          height={176} // ALTO REAL ORIGINAL de tu archivo logo1.png
           priority
           className="w-32 h-auto md:w-40 md:h-auto" // Tailwind: Ancho responsivo, alto automático
                                                    // w-32 (128px), md:w-40 (160px)

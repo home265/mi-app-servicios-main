@@ -26,10 +26,10 @@ export default function SplashScreenPage() {
         `}
       >
         <Image
-          src="/logo.png"
+          src="/logo1.png"
           alt="Logo Mi App Servicios"
-          width={263} // ANCHO REAL ORIGINAL de tu archivo logo.png
-          height={176} // ALTO REAL ORIGINAL de tu archivo logo.png
+          width={263} // ANCHO REAL ORIGINAL de tu archivo logo1.png
+          height={176} // ALTO REAL ORIGINAL de tu archivo logo1.png
           priority
           className="w-36 h-auto md:w-44 md:h-auto" // Tailwind: Ancho responsivo, alto automático
                                                    // w-36 (144px), md:w-44 (176px)

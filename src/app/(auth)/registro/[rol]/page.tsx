@@ -30,7 +30,7 @@ export default function RegistroRolPage() {
     <div className="flex flex-col items-center w-full min-h-screen bg-fondo text-texto px-4 pt-8 pb-20 md:pt-12">
       <div className="mb-8">
         <Image
-          src="/logo.png"
+          src="/logo1.png"
           alt="Logo Mi App Servicios" // Posible línea para error de comillas si tus reglas son estrictas
           width={263}
           height={176}

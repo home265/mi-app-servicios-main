@@ -92,7 +92,7 @@ export default function PinEntryPage() {
     <div className="flex flex-col items-center justify-center min-h-screen bg-fondo text-texto p-4">
       <div className="w-full max-w-md p-8 space-y-8 bg-tarjeta rounded-xl shadow-xl text-center">
         <Image 
-            src="/logo.png" 
+            src="/logo1.png" 
             alt="Logo de la App" 
             width={120} 
             height={80} 
