@@ -1,31 +1,31 @@
 /* src/app/globals.css */
 @import "tailwindcss";
 
+/* --- MODO CLARO (Tu nueva paleta de colores) --- */
 :root {
-  /* --- MODO CLARO (Colores por defecto) --- */
-  --color-fondo: #F2F3F5;
-  --color-primario: #1E88E5;
-  --color-secundario: #FFA726;
-  --color-texto-principal: #212121;
-  --color-texto-secundario: #616161;
-  --color-tarjeta: #FFFFFF;
-  --color-error: #D32F2F;
-  --color-borde-tarjeta: #8B5CF6; /* NUEVO: Violeta para borde en modo claro */
+  --color-fondo: #F9F3D9;             /* Crema */
+  --color-primario: #307268;          /* Verde Oscuro */
+  --color-secundario: #EFC71D;        /* Amarillo */
+  --color-texto-principal: #2c4b46;   /* Un verde más oscuro y legible para textos */
+  --color-texto-secundario: #6e8380;  /* Un verde/gris para textos de menor importancia */
+  --color-tarjeta: #FFFFFF;           /* Blanco puro para las tarjetas, para que resalten */
+  --color-error: #D32F2F;             /* Rojo de error estándar */
+  --color-borde-tarjeta: #E2D2BF;      /* Beige para los bordes */
 }
 
-/* --- MODO OSCURO --- */
+/* --- MODO OSCURO (Adaptación de tu nueva paleta) --- */
 .dark {
-  --color-fondo: #121212;
-  --color-primario: #90CAF9;
-  --color-secundario: #A5D6A7;
-  --color-texto-principal: #E0E0E0;
-  --color-texto-secundario: #BDBDBD;
-  --color-tarjeta: #2a2a2a; /* Dejamos este un poco más claro que el fondo */
-  --color-error: #EF5350;
-  --color-borde-tarjeta: #A78BFA; /* NUEVO: Violeta más claro para borde en modo oscuro */
+  --color-fondo: #1a3b36;             /* Fondo de verde muy oscuro */
+  --color-primario: #EFC71D;          /* El amarillo resalta como primario en modo oscuro */
+  --color-secundario: #E2D2BF;        /* Beige como secundario */
+  --color-texto-principal: #F9F3D9;   /* El texto principal es el color crema, muy legible */
+  --color-texto-secundario: #BBC8CA;  /* Gris azulado para texto secundario */
+  --color-tarjeta: #254e48;           /* Un verde oscuro ligeramente más claro para las tarjetas */
+  --color-error: #EF5350;             /* Rojo de error claro para que se vea en fondos oscuros */
+  --color-borde-tarjeta: #307268;      /* Verde oscuro para bordes */
 }
 
-/* ... (resto de tu globals.css igual) ... */
+/* El resto de tu archivo globals.css se mantiene igual */
 body {
   background-color: var(--color-fondo);
   color: var(--color-texto-principal);

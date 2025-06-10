@@ -3,13 +3,15 @@ import Image from 'next/image';
 
 export default function Logo() {
   return (
-    <div className="relative w-40 h-24 md:w-48 md:h-28">
+    // Duplicamos los valores de ancho para que el logo se vea más grande.
+    <div className="relative w-80 h-48 md:w-96 md:h-56">
       <Image
         src="/logo.png"
-        alt="Logo Mi App Servicios"
+        alt="Logo de CODYS"
         fill
-        sizes="(max-width: 768px) 160px, 192px"
+        sizes="(max-width: 768px) 320px, 384px"
         className="object-contain"
+        priority
       />
     </div>
   );

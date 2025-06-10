@@ -2,6 +2,8 @@
 import './globals.css';
 import { Providers } from './providers';
 import {
+  // --- 1. AQUÍ AGREGAMOS BARLOW A TU LISTA DE FUENTES ---
+  Barlow,
   Roboto,
   Lato,
   Oswald,
@@ -31,11 +33,10 @@ import {
   Covered_By_Your_Grace,
 } from 'next/font/google';
 
-// --- Configuración de todas tus fuentes ---
-
+// --- Mantenemos la configuración de todas tus fuentes para el editor ---
 const roboto = Roboto({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-roboto' });
 const lato = Lato({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-lato' });
-const oswald = Oswald({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-oswald' }); // Oswald es variable, puedes especificar pesos o rangos.
+const oswald = Oswald({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-oswald' });
 const openSans = Open_Sans({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-open-sans' });
 const montserrat = Montserrat({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-montserrat' });
 const raleway = Raleway({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-raleway' });
@@ -51,7 +52,7 @@ const dancingScript = Dancing_Script({ subsets: ['latin'], weight: ['400', '700'
 const playfairDisplay = Playfair_Display({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-playfair-display' });
 const indieFlower = Indie_Flower({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-indie-flower' });
 const bebasNeue = Bebas_Neue({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-bebas-neue' });
-const fredoka = Fredoka({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-fredoka' }); // Fredoka es variable, puedes ajustar los pesos
+const fredoka = Fredoka({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-fredoka' });
 const abrilFatface = Abril_Fatface({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-abril-fatface' });
 const luckiestGuy = Luckiest_Guy({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-luckiest-guy' });
 const creepster = Creepster({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-creepster' });
@@ -61,10 +62,19 @@ const chewy = Chewy({ subsets: ['latin'], weight: '400', display: 'swap', variab
 const rockSalt = Rock_Salt({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-rock-salt' });
 const coveredByYourGrace = Covered_By_Your_Grace({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-covered-by-your-grace' });
 
+// --- 2. AQUÍ AÑADIMOS LA CONFIGURACIÓN PARA BARLOW ---
+const barlow = Barlow({
+  subsets: ['latin'],
+  weight: ['400', '700'], // Cargamos el grosor normal y el "bold" o negrita
+  display: 'swap',
+  variable: '--font-barlow', // Esta es la variable que conectamos en tailwind.config.ts
+});
+
 
 export const metadata = {
-  title: 'Mi App de Servicios',
-  description: 'Encuentra servicios y comercios locales en tu área.',
+  // Te sugiero actualizar esto para que coincida con tu nueva marca
+  title: 'CODYS | Tu red de confianza',
+  description: 'Conectamos necesidades con soluciones.',
 };
 
 export default function RootLayout({
@@ -76,7 +86,9 @@ export default function RootLayout({
     <html
       lang="es"
       suppressHydrationWarning
+      // --- 3. AÑADIMOS LA VARIABLE DE BARLOW A LA LISTA, SIN QUITAR NINGUNA OTRA ---
       className={`
+        ${barlow.variable}
         ${roboto.variable}
         ${lato.variable}
         ${oswald.variable}
@@ -110,7 +122,9 @@ export default function RootLayout({
         {/* next/font se encarga de inyectar los estilos de fuente necesarios aquí.
             No se necesitan las etiquetas <link> manuales a Google Fonts. */}
       </head>
-      <body>
+      {/* Aplicamos Barlow como clase principal al BODY para que sea la fuente por defecto.
+          Las otras fuentes siguen estando disponibles para tu editor, como querías. */}
+      <body className={barlow.className}>
         <Providers>
           <main>
             {children}

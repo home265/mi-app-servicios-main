@@ -38,12 +38,10 @@ service cloud.firestore {
     }
 
     // =====================================================================
-    // REGLA MAESTRA PARA LOS CVs (Se mantiene la del archivo actual)
+    // REGLA MAESTRA PARA LOS CVs (ELIMINADA)
+    // Se elimina el siguiente bloque que causaba el error de permisos.
     // =====================================================================
-    match /{path=**}/cv/{cvId} {
-      allow read: if isProviderOrCommerce() || (isAuthenticated() && request.auth.uid == resource.data.uid);
-      allow write: if isAuthenticated() && request.auth.uid == resource.data.uid;
-    }
+    // match /{path=**}/cv/{cvId} { ... }
 
 
     // =====================================================================
@@ -54,8 +52,16 @@ service cloud.firestore {
       allow create: if isAuthenticated() && isOwner(userId) && request.resource.data.uid == userId && request.resource.data.rol == 'usuario';
       allow update: if isAuthenticated() && isOwner(userId) && request.resource.data.rol == resource.data.rol && request.resource.data.uid == resource.data.uid;
       allow delete: if isAuthenticated() && isOwner(userId);
+      
+      // INICIO DE LA SECCIÓN CORREGIDA PARA CVs
+      // Se añade la regla anidada y segura para los CVs aquí.
+      // Esta regla no falla si el documento no existe.
+      match /cv/{cvId} { // o /cv/main si siempre se llama así
+          allow read: if isAuthenticated() && (isOwner(userId) || isProviderOrCommerce());
+          allow write: if isAuthenticated() && isOwner(userId);
+      }
+      // FIN DE LA SECCIÓN CORREGIDA PARA CVs
 
-      // INICIO DE SECCIÓN MODIFICADA: Restaurada a la versión funcional
       match /notifications/{notificationId} {
         allow read:   if isAuthenticated() && isOwner(userId);
         allow create: if isAuthenticated();
@@ -80,7 +86,6 @@ service cloud.firestore {
         allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid;
         allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
       }
-      // FIN DE SECCIÓN MODIFICADA
     }
 
     match /prestadores/{userId} {
@@ -89,7 +94,6 @@ service cloud.firestore {
       allow update: if isAuthenticated() && isOwner(userId) && request.resource.data.rol == resource.data.rol && request.resource.data.uid == resource.data.uid;
       allow delete: if isAuthenticated() && isOwner(userId);
       
-      // INICIO DE SECCIÓN MODIFICADA: Restaurada a la versión funcional
       match /notifications/{notificationId} {
         allow read:   if isAuthenticated() && isOwner(userId);
         allow create: if isAuthenticated();
@@ -114,7 +118,6 @@ service cloud.firestore {
         allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid;
         allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
       }
-      // FIN DE SECCIÓN MODIFICADA
     }
 
     match /comercios/{userId} {
@@ -123,7 +126,6 @@ service cloud.firestore {
       allow update: if isAuthenticated() && isOwner(userId) && request.resource.data.rol == resource.data.rol && request.resource.data.uid == resource.data.uid;
       allow delete: if isAuthenticated() && isOwner(userId);
 
-      // INICIO DE SECCIÓN MODIFICADA: Restaurada a la versión funcional
       match /notifications/{notificationId} {
         allow read:   if isAuthenticated() && isOwner(userId);
         allow create: if isAuthenticated();
@@ -148,11 +150,10 @@ service cloud.firestore {
         allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid;
         allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
       }
-      // FIN DE SECCIÓN MODIFICADA
     }
 
     // =====================================================================
-    // OTRAS COLECCIONES (Sin cambios, se mantiene la del archivo actual)
+    // OTRAS COLECCIONES (Sin cambios)
     // =====================================================================
     match /anuncios/{anuncioId} {
       allow read: if (resource.data.status == 'active') ||

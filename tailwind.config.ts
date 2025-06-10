@@ -10,6 +10,7 @@ const config: Config = {
   darkMode: 'class',
   theme: {
     extend: {
+      // --- ESTA SECCIÓN DE COLORES ESTÁ PERFECTA Y NO SE TOCA ---
       colors: {
         'fondo': 'var(--color-fondo)',
         'primario': 'var(--color-primario)',
@@ -21,14 +22,20 @@ const config: Config = {
         },
         'tarjeta': 'var(--color-tarjeta)',
         'error': 'var(--color-error)',
-        'borde-tarjeta': 'var(--color-borde-tarjeta)', // NUEVO MAPEADO
+        'borde-tarjeta': 'var(--color-borde-tarjeta)',
       },
+      // --- AQUÍ ESTÁ EL ÚNICO CAMBIO ---
       fontFamily: {
-        sans: ['ui-sans-serif', 'system-ui', /* ... resto de fuentes ... */],
+        // Le decimos a la aplicación que la fuente por defecto ('sans')
+        // ahora es 'Barlow', a través de una variable que pondremos en el archivo layout.tsx.
+        sans: ['var(--font-barlow)', 'ui-sans-serif', 'system-ui'],
+
+        // La fuente 'mono' se mantiene exactamente igual por si se usa para algo.
         mono: ['ui-monospace', 'SFMono-Regular', /* ... resto de fuentes ... */],
       },
     },
   },
+  // --- LA SECCIÓN DE PLUGINS SE QUEDA VACÍA, TAL COMO LA TENÍAS ---
   plugins: [],
 };
 
