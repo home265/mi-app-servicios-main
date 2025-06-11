@@ -497,56 +497,107 @@ export default function SelfiePage() {
 
   // 7. Finalizar Registro (sin cambios)
   // ... (código de finalizar registro como antes) ...
-  const handleFinalizarRegistro = async (selfieData: string | null) => {
-    console.log("SelfiePage: handleFinalizarRegistro - Iniciado.");
-    if (!formData || !rol || !selfieData) {
-      setError("Faltan datos esenciales para finalizar el registro."); 
-      setIsProcessingAction(false); setUiMessage("Error de datos al finalizar."); 
-      console.error("SelfiePage: handleFinalizarRegistro - Faltan datos. formData:", !!formData, "rol:", !!rol, "selfieData:", !!selfieData);
-      return;
+ //=============== INICIO DE LA SOLUCIÓN DEFINITIVA ===============
+
+// 1. Define una interfaz para el documento que se guardará en Firestore.
+// Puedes colocarla justo encima de la función handleFinalizarRegistro.
+interface UserDocumentData {
+  uid: string;
+  email: string | undefined;
+  nombre: string | null;
+  apellido: string | null;
+  rol: string | null;
+  telefono: string | null;
+  localidad: { id: string; nombre: string; provinciaNombre: string } | null;
+  selfieURL: string;
+  hashedPin: string | null;
+  fechaRegistro: string;
+  activo: boolean;
+  // Campos de rol opcionales
+  categoria?: { categoria: string; subcategoria: string | null } | null;
+  rubro?: { rubro: string; subrubro: string | null } | null;
+  matricula?: string | null;
+  cuilCuit?: string | null;
+  descripcion?: string | null;
+}
+
+// 2. Reemplaza tu función handleFinalizarRegistro con esta versión mejorada.
+const handleFinalizarRegistro = async (selfieData: string | null) => {
+  console.log("SelfiePage: handleFinalizarRegistro - Iniciado.");
+  if (!formData || !rol || !selfieData) {
+    setError("Faltan datos esenciales para finalizar el registro.");
+    setIsProcessingAction(false);
+    setUiMessage("Error de datos al finalizar.");
+    console.error("SelfiePage: handleFinalizarRegistro - Faltan datos. formData:", !!formData, "rol:", !!rol, "selfieData:", !!selfieData);
+    return;
+  }
+  if (!formData.email || !formData.contrasena || !formData.pin) {
+    setError("Email, contraseña o PIN no encontrados en los datos del formulario.");
+    setIsProcessingAction(false);
+    setUiMessage("Error de credenciales al finalizar.");
+    console.error("SelfiePage: handleFinalizarRegistro - Faltan email, contraseña o pin.");
+    return;
+  }
+  setIsProcessingAction(true);
+  setUiMessage("Creando tu cuenta y guardando datos...");
+
+  try {
+    const salt = await bcrypt.genSalt(10);
+    const hashedPin = await bcrypt.hash(formData.pin, salt);
+    const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.contrasena);
+    const user = userCredential.user;
+    console.log("SelfiePage: handleFinalizarRegistro - Usuario creado en Firebase Auth. UID:", user.uid);
+
+    const response = await fetch(selfieData);
+    const selfieBlob = await response.blob();
+    const selfieStorageRef = ref(storage, `selfies/${user.uid}/profile.jpg`);
+    await uploadBytes(selfieStorageRef, selfieBlob);
+    const selfieURL = await getDownloadURL(selfieStorageRef);
+    console.log("SelfiePage: handleFinalizarRegistro - Selfie subida a Firebase Storage. URL:", selfieURL);
+
+    // Crea el objeto base con el tipado explícito de la interfaz que definimos
+    const userDataToSave: UserDocumentData = {
+      uid: user.uid,
+      email: formData.email,
+      nombre: formData.nombre || null,
+      apellido: formData.apellido || null,
+      rol: rol,
+      telefono: formData.telefono || null,
+      localidad: formData.localidad || null,
+      selfieURL: selfieURL,
+      hashedPin: hashedPin,
+      fechaRegistro: new Date().toISOString(),
+      activo: true,
+    };
+
+    // Agrega las propiedades de rol de forma condicional y segura
+    if (rol === 'prestador') {
+      userDataToSave.categoria = formData.seleccionCategoria || null;
+      userDataToSave.matricula = formData.matricula || null;
+      userDataToSave.cuilCuit = formData.cuilCuit || null;
+      userDataToSave.descripcion = formData.descripcion || null;
+    } else if (rol === 'comercio') {
+      userDataToSave.rubro = formData.seleccionRubro || null;
+      userDataToSave.matricula = formData.matricula || null;
+      userDataToSave.cuilCuit = formData.cuilCuit || null;
+      userDataToSave.descripcion = formData.descripcion || null;
     }
-    if (!formData.email || !formData.contrasena || !formData.pin) {
-      setError("Email, contraseña o PIN no encontrados en los datos del formulario."); 
-      setIsProcessingAction(false); setUiMessage("Error de credenciales al finalizar."); 
-      console.error("SelfiePage: handleFinalizarRegistro - Faltan email, contraseña o pin.");
-      return;
-    }
-    setIsProcessingAction(true); setUiMessage("Creando tu cuenta y guardando datos...");
 
-    try {
-      const salt = await bcrypt.genSalt(10); const hashedPin = await bcrypt.hash(formData.pin, salt);
-      const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.contrasena);
-      const user = userCredential.user;
-      console.log("SelfiePage: handleFinalizarRegistro - Usuario creado en Firebase Auth. UID:", user.uid);
+    let collectionName = 'usuarios_generales';
+    if (rol === 'prestador') collectionName = 'prestadores';
+    else if (rol === 'comercio') collectionName = 'comercios';
+    
+    // Ahora userDataToSave es un objeto perfectamente tipado y sin 'undefined'
+    await setDoc(doc(db, collectionName, user.uid), userDataToSave);
+    console.log(`SelfiePage: handleFinalizarRegistro - Datos de usuario guardados en Firestore en colección: ${collectionName}`);
 
-      const response = await fetch(selfieData); const selfieBlob = await response.blob();
-      const selfieStorageRef = ref(storage, `selfies/${user.uid}/profile.jpg`);
-      await uploadBytes(selfieStorageRef, selfieBlob);
-      const selfieURL = await getDownloadURL(selfieStorageRef);
-      console.log("SelfiePage: handleFinalizarRegistro - Selfie subida a Firebase Storage. URL:", selfieURL);
-
-      const userDataToSave = {
-        uid: user.uid, email: formData.email, nombre: formData.nombre, apellido: formData.apellido,
-        rol: rol, telefono: formData.telefono, localidad: formData.localidad,
-        ...(rol === 'prestador' && { categoria: formData.seleccionCategoria, matricula: formData.matricula, cuilCuit: formData.cuilCuit, descripcion: formData.descripcion }),
-        ...(rol === 'comercio' && { rubro: formData.seleccionRubro, matricula: formData.matricula, cuilCuit: formData.cuilCuit, descripcion: formData.descripcion }),
-        selfieURL: selfieURL, hashedPin: hashedPin, fechaRegistro: new Date().toISOString(),
-        activo: true, 
-      };
-      let collectionName = 'usuarios_generales';
-      if (rol === 'prestador') collectionName = 'prestadores'; 
-      else if (rol === 'comercio') collectionName = 'comercios';
-      
-      await setDoc(doc(db, collectionName, user.uid), userDataToSave);
-      console.log(`SelfiePage: handleFinalizarRegistro - Datos de usuario guardados en Firestore en colección: ${collectionName}`);
-
-      setUiMessage("¡Registro exitoso! Redirigiendo..."); 
-      setIsProcessingAction(false);
-      setTimeout(() => router.push('/bienvenida'), 2000);
-    } catch (err) { 
-      console.error("SelfiePage: handleFinalizarRegistro - Error en finalización de registro:", err);
-      let friendlyErrorMsg = "Ocurrió un error al finalizar tu registro.";
-      if (err && typeof err === 'object' && 'code' in err && 'message' in err && typeof (err as { message?: unknown }).message === 'string') {
+    setUiMessage("¡Registro exitoso! Redirigiendo...");
+    setIsProcessingAction(false);
+    setTimeout(() => router.push('/bienvenida'), 2000);
+  } catch (err) {
+    console.error("SelfiePage: handleFinalizarRegistro - Error en finalización de registro:", err);
+    let friendlyErrorMsg = "Ocurrió un error al finalizar tu registro.";
+    if (err && typeof err === 'object' && 'code' in err && 'message' in err && typeof (err as { message?: unknown }).message === 'string') {
         const firebaseError = err as { code: string; message: string };
         switch (firebaseError.code) {
           case 'auth/email-already-in-use': friendlyErrorMsg = "Este correo electrónico ya está en uso."; break;
@@ -554,9 +605,11 @@ export default function SelfiePage() {
           default: friendlyErrorMsg = `Error de Firebase: ${firebaseError.message}`;
         }
       } else if (err instanceof Error) { friendlyErrorMsg = err.message; }
-      setError(friendlyErrorMsg); setUiMessage("Error en el registro."); setIsProcessingAction(false);
-    }
-  };
+    setError(friendlyErrorMsg); setUiMessage("Error en el registro."); setIsProcessingAction(false);
+  }
+};
+
+//=============== FIN DE LA SOLUCIÓN DEFINITIVA ===============
 
 
   // --- Renderizado (AJUSTADO) ---
