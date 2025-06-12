@@ -1,11 +1,15 @@
 // src/app/(ads)/editor/tools/AdvancedEffectsTool.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { useEditorStore, type EditorElement } from '../hooks/useEditorStore'; // Ajusta la ruta si es necesario
-import type { ReelAnimationEffectType } from '@/types/anuncio';               // Ajusta la ruta si es necesario
-import Button from '@/app/components/ui/Button';                             // Ajusta la ruta si es necesario
-import MiniCanvasPreview from '../components/previews/MiniCanvasPreview';    // Ajusta la ruta si es necesario
+import React, { useState, useEffect, useRef } from 'react';
+import { useEditorStore, type EditorElement } from '../hooks/useEditorStore';
+import type { ReelAnimationEffectType } from '@/types/anuncio';
+import Button from '@/app/components/ui/Button';
+import MiniCanvasPreview from '../components/previews/MiniCanvasPreview';
+
+// Dimensiones base del panel para el cálculo de la escala
+const NATURAL_CONTENT_WIDTH = 440; // en píxeles
+const PREVIEW_WIDTH_IN_PANEL = 200; // Ancho para la preview dentro del panel
 
 interface AdvancedEffectsToolProps {
   elementsForPreview: EditorElement[];
@@ -25,8 +29,6 @@ const animationEffectOptions: {
   { id: 'pulse',              label: 'Latido' },
 ];
 
-const PREVIEW_WIDTH = 224; // Ancho del MiniCanvasPreview en píxeles
-
 export default function AdvancedEffectsTool({
   elementsForPreview,
   baseCanvasWidth,
@@ -36,111 +38,111 @@ export default function AdvancedEffectsTool({
   const setAnimationEffectForCurrentScreen = useEditorStore(
     (state) => state.setAnimationEffectForCurrentScreen
   );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const currentScreenIndex   = useEditorStore((state) => state.currentScreenIndex);
-  const animationEffectsByScreen = useEditorStore(
-    (state) => state.animationEffectsByScreen
-  );
 
-  const initiallySelectedEffect =
-    animationEffectsByScreen[currentScreenIndex];
+  // MEJORA UX: Obtenemos el efecto actualmente seleccionado desde el store.
+  // Esta es la única fuente de verdad para saber qué efecto está activo.
+  const currentSelectedEffect = useEditorStore(
+    (state) => state.animationEffectsByScreen[state.currentScreenIndex]
+  ) || 'none';
 
-  const [hoveredEffect, setHoveredEffect] = useState<
-    ReelAnimationEffectType | null
-  >(null);
+  // MEJORA UX: Se elimina por completo la lógica de 'hoveredEffect'.
+  // const [hoveredEffect, setHoveredEffect] = useState<ReelAnimationEffectType | null>(null);
+  // const effectToDisplayInPreview = hoveredEffect !== null ? hoveredEffect : initiallySelectedEffect ?? 'none';
 
-  const effectToDisplayInPreview =
-    hoveredEffect !== null ? hoveredEffect : initiallySelectedEffect ?? 'none';
-
-  const handleSelectEffect = (effectId: ReelAnimationEffectType) => {
-    setAnimationEffectForCurrentScreen(effectId);
-    onClose();
-  };
+  // Lógica de escala (se mantiene, funciona bien)
+  const panelWrapperRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
 
   useEffect(() => {
-    setHoveredEffect(null);
-  }, [initiallySelectedEffect]);
+    const wrapper = panelWrapperRef.current;
+    if (!wrapper) return;
+    const observer = new ResizeObserver(() => {
+      const availableWidth = wrapper.offsetWidth;
+      if (availableWidth < NATURAL_CONTENT_WIDTH) {
+        setScale(availableWidth / NATURAL_CONTENT_WIDTH);
+      } else {
+        setScale(1);
+      }
+    });
+    observer.observe(wrapper);
+    const availableWidth = wrapper.offsetWidth;
+    if (availableWidth < NATURAL_CONTENT_WIDTH) {
+      setScale(availableWidth / NATURAL_CONTENT_WIDTH);
+    }
+    return () => observer.disconnect();
+  }, []);
 
+  // La función de selección es ahora muy simple: solo guarda el efecto.
+  const handleSelectEffect = (effectId: ReelAnimationEffectType) => {
+    setAnimationEffectForCurrentScreen(effectId);
+  };
+  
   return (
-    <div
-      /* -----------------------------------------------------------------
-         Nuevo layout responsive:
-         • fixed para que siempre permanezca visible
-         • inset-x-2 deja 0.5 rem de margen lateral (8 px) en móviles
-         • bottom-4 / sm:bottom-8 separa del borde en distintos breakpoints
-         • w-[calc(100%-1rem)] ocupa todo el ancho menos esos márgenes
-         • sm:max-w-md mantiene el ancho anterior en pantallas ≥ 640 px
-      -------------------------------------------------------------------*/
-      className="fixed inset-x-2 bottom-4 mx-auto sm:bottom-8
-                 w-[calc(100%-1rem)] sm:max-w-md
-                 bg-gray-800 text-white p-4 rounded-lg shadow-2xl
-                 max-h-[70vh] flex flex-col gap-4"
-    >
-      <h2 className="text-lg font-semibold text-center mb-2">
-        Aplicar Efecto de Animación
-      </h2>
+    // Contenedor de posicionamiento y wrapper para medir (se mantiene)
+    <div className="fixed inset-x-0 bottom-4 flex justify-center items-center pointer-events-none">
+      <div
+        ref={panelWrapperRef}
+        className="w-[calc(100%-1rem)] max-w-[440px] pointer-events-auto"
+      >
+        {/* El panel que será escalado (se mantiene) */}
+        <div
+          style={{ transform: `scale(${scale})`, transformOrigin: 'bottom center' }}
+        >
+          {/* Contenido real del panel con layout y tamaño fijos (se mantiene) */}
+          <div className="bg-gray-800 text-white p-4 rounded-lg shadow-2xl flex flex-col gap-4">
+            <h2 className="text-lg font-semibold text-center shrink-0">
+              Aplicar Efecto de Animación
+            </h2>
+            
+            {/* Layout siempre lado a lado (se mantiene) */}
+            <div className="grid grid-cols-2 gap-4">
+              
+              {/* Columna 1 - Preview */}
+              <div className="flex flex-col items-center justify-center p-2 bg-gray-900 rounded-md">
+                <p className="text-xs text-gray-400 mb-2">Previsualización:</p>
+                {baseCanvasWidth > 0 && baseCanvasHeight > 0 ? (
+                  <MiniCanvasPreview
+                    elements={elementsForPreview}
+                    baseWidth={baseCanvasWidth}
+                    baseHeight={baseCanvasHeight}
+                    previewWidth={PREVIEW_WIDTH_IN_PANEL}
+                    // MEJORA UX: La previsualización ahora SIEMPRE muestra el efecto seleccionado
+                    applyingEffect={currentSelectedEffect}
+                    backgroundColor="#000"
+                  />
+                ) : ( <div style={{width: PREVIEW_WIDTH_IN_PANEL}} className="aspect-[9/16] bg-black" /> )}
+              </div>
 
-      <div className="flex flex-col md:flex-row gap-4 flex-grow overflow-hidden">
-        {/* Lista de efectos */}
-        <div className="md:w-1/2 pr-2 overflow-y-auto max-h-[50vh] md:max-h-full custom-scrollbar">
-          <div className="grid grid-cols-2 gap-3">
-            {animationEffectOptions.map((option) => (
-              <button
-                key={option.id}
-                onMouseEnter={() => setHoveredEffect(option.id)}
-                onMouseLeave={() => setHoveredEffect(null)}
-                onClick={() => handleSelectEffect(option.id)}
-                className={`flex flex-col items-center justify-center p-3 border-2 rounded-md h-20
-                            hover:border-primario-hover transition-colors duration-150
-                            ${
-                              (effectToDisplayInPreview === option.id &&
-                                hoveredEffect === option.id) ||
-                              (initiallySelectedEffect === option.id &&
-                                hoveredEffect === null)
-                                ? 'border-primario bg-primario/30'
-                                : 'border-gray-600 bg-gray-700 hover:bg-gray-600'
-                            }`}
-                title={option.label}
-              >
-                <span className="text-sm text-center block w-full">
-                  {option.label}
-                </span>
-              </button>
-            ))}
+              {/* Columna 2 - Botones */}
+              <div className="grid grid-cols-2 gap-3 content-start">
+                {animationEffectOptions.map((option) => (
+                  <button
+                    key={option.id}
+                    // MEJORA UX: Se eliminan onMouseEnter y onMouseLeave
+                    onClick={() => handleSelectEffect(option.id)}
+                    className={`flex items-center justify-center p-3 border-2 rounded-md h-20 transition-colors
+                                ${
+                                  // MEJORA UX: El resaltado del botón ahora solo depende de si
+                                  // su 'id' es igual al efecto guardado en el store.
+                                  currentSelectedEffect === option.id
+                                    ? 'border-primario bg-primario/30'
+                                    : 'border-gray-600 bg-gray-700 hover:bg-gray-600'
+                                }`}
+                    title={option.label}
+                  >
+                    <span className="text-sm text-center">{option.label}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-auto pt-3 flex justify-end border-t border-gray-700">
+              <Button variant="secondary" onClick={onClose}>Cerrar</Button>
+            </div>
           </div>
         </div>
-
-        {/* Preview del efecto */}
-        <div className="md:w-1/2 flex flex-col items-center justify-center p-2 bg-gray-900 rounded">
-          <p className="text-xs text-gray-400 mb-2">
-            Previsualización del efecto:
-          </p>
-          {baseCanvasWidth > 0 && baseCanvasHeight > 0 ? (
-            <MiniCanvasPreview
-              elements={elementsForPreview}
-              baseWidth={baseCanvasWidth}
-              baseHeight={baseCanvasHeight}
-              previewWidth={PREVIEW_WIDTH}
-              applyingEffect={effectToDisplayInPreview}
-              backgroundColor="#000"
-            />
-          ) : (
-            <div
-              style={{
-                width: PREVIEW_WIDTH,
-                height: (PREVIEW_WIDTH * 9) / 16,
-              }}
-              className="flex items-center justify-center bg-black text-gray-500 text-xs"
-            >
-              Cargando preview...
-            </div>
-          )}
-        </div>
-      </div>
-
-      <div className="mt-auto pt-3 flex justify-end border-t border-gray-700">
-        <Button variant="secondary" onClick={onClose}>
-          Cerrar
-        </Button>
       </div>
     </div>
   );
