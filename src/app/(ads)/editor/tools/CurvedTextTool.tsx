@@ -4,17 +4,25 @@ import React, { useState } from 'react';
 import Button from '@/app/components/ui/Button';
 import type { CurvedTextElement } from '../hooks/useEditorStore';
 import DeleteElementButton from '../components/ui/DeleteElementButton';
-
-// PASO 1: Importar los datos de las fuentes
 import fontsData from '@/data/fonts.json';
 
-// (Opcional pero recomendado) Definir un tipo para los objetos de fuente
+// Tipo para los objetos de fuente
 interface FontOption {
   name: string;
   categoria?: string;
   uso?: string;
 }
 const typedFontsData: FontOption[] = fontsData;
+
+// --- LISTA DE CURVAS MODIFICADA ---
+// Se ha reemplazado "Inclinado Arriba" por "Círculo"
+const curvePresets = [
+  { id: 'arc-up', name: 'Arco Arriba', path: 'M10,80 Q100,20 190,80' },
+  { id: 'arc-down', name: 'Arco Abajo', path: 'M10,40 Q100,100 190,40' },
+  { id: 'wave', name: 'Onda Suave', path: 'M10,60 Q60,10 110,60 T190,60' },
+  // La siguiente línea es la que ha sido reemplazada
+  { id: 'circle', name: 'Círculo', path: 'M 50,60 A 50,50 0 1,1 150,60 A 50,50 0 1,1 50,60' },
+];
 
 interface CurvedTextToolProps {
   initial?: CurvedTextElement;
@@ -25,12 +33,11 @@ interface CurvedTextToolProps {
 export default function CurvedTextTool({ initial, onConfirm, onClose }: CurvedTextToolProps) {
   const [text, setText] = useState(initial?.text || 'Texto Curvo');
   const [color, setColor] = useState(initial?.color || '#ffffff');
-  // PASO 2: Actualizar el valor inicial de fontFamily para usar una fuente de tu JSON
   const [fontFamily, setFontFamily] = useState(
     initial?.fontFamily || (typedFontsData.length > 0 ? typedFontsData[0].name : 'Arial')
   );
   const [fontSizePct, setFontSizePct] = useState(initial?.fontSizePct ?? 8);
-  const [curvePath, setCurvePath] = useState(initial?.curvePath || 'M10,70 Q90,10 190,70');
+  const [curvePath, setCurvePath] = useState(initial?.curvePath || curvePresets[0].path);
 
   const handleConfirm = () => {
     const curvedTextData = {
@@ -45,100 +52,130 @@ export default function CurvedTextTool({ initial, onConfirm, onClose }: CurvedTe
       fontSizePct,
       curvePath,
     };
-    console.log("[CurvedTextTool.tsx] Datos enviados a onConfirm:", JSON.parse(JSON.stringify(curvedTextData)));
     onConfirm(curvedTextData);
     onClose();
   };
 
   return (
-    <div className="absolute bottom-4 left-4 z-50 bg-[var(--color-tarjeta)] text-[var(--color-texto-principal)] p-4 rounded-lg shadow-lg w-full max-w-xs max-h-[calc(100vh-8rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="text-lg font-semibold">
-          {initial ? 'Editar Texto Curvo' : 'Agregar Texto Curvo'}
-        </h3>
-        {initial?.id && (
-          <DeleteElementButton
-            elementId={initial.id}
-            onElementDeleted={onClose}
-          />
-        )}
-      </div>
+    <div
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50"
+      onClick={onClose}
+    >
+      <div
+        className="bg-[var(--color-tarjeta)] p-5 rounded-lg shadow-xl w-full max-w-sm text-[var(--color-texto-principal)]"
+        onClick={e => e.stopPropagation()}
+      >
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-xl font-semibold">
+            {initial ? 'Editar Texto Curvo' : 'Agregar Texto Curvo'}
+          </h3>
+          {initial?.id && (
+            <DeleteElementButton
+              elementId={initial.id}
+              onElementDeleted={onClose}
+            />
+          )}
+        </div>
 
-      <div className="space-y-3">
-        <div>
-          <label htmlFor="curved-text-content" className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1">Contenido:</label>
-          <input
-            id="curved-text-content"
-            type="text"
-            value={text}
-            onChange={e => setText(e.target.value)}
-            className="w-full p-2 rounded-md bg-[var(--color-input)] border border-[var(--color-borde-input)] focus:ring-primario focus:border-primario placeholder-[var(--color-texto-secundario)] opacity-80"
-          />
+        <div className="space-y-4">
+          {/* Controles de Texto, Color, Fuente y Tamaño (sin cambios) */}
+          <div>
+            <label htmlFor="curved-text-content" className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1">Contenido:</label>
+            <input
+              id="curved-text-content"
+              type="text"
+              value={text}
+              onChange={e => setText(e.target.value)}
+              className="w-full p-2 rounded-md bg-[var(--color-input)] border border-[var(--color-borde-input)] focus:ring-primario focus:border-primario placeholder-[var(--color-texto-secundario)] opacity-80"
+            />
+          </div>
+          <div>
+            <label htmlFor="curved-text-color" className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1">Color:</label>
+            <input
+              id="curved-text-color"
+              type="color"
+              value={color}
+              onChange={e => setColor(e.target.value)}
+              className="w-full h-10 p-0.5 rounded-md border border-[var(--color-borde-input)] bg-[var(--color-input)] cursor-pointer"
+            />
+          </div>
+          <div>
+            <label htmlFor="curved-text-font" className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1">Fuente:</label>
+            <select
+              id="curved-text-font"
+              value={fontFamily}
+              onChange={e => setFontFamily(e.target.value)}
+              className="w-full p-2 rounded-md bg-[var(--color-input)] border border-[var(--color-borde-input)] focus:ring-primario focus:border-primario"
+            >
+              {typedFontsData.map(font => (
+                <option
+                  key={font.name}
+                  value={font.name}
+                  style={{ fontFamily: font.name, fontSize: '1rem' }}
+                >
+                  {font.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label htmlFor="curved-text-size" className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1">
+              Tamaño (relativo %): <span className="font-semibold">{fontSizePct}%</span>
+            </label>
+            <input
+              id="curved-text-size"
+              type="range"
+              min="2"
+              max="25"
+              step="0.5"
+              value={fontSizePct}
+              onChange={e => setFontSizePct(Number(e.target.value))}
+              className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primario"
+            />
+          </div>
+
+          {/* Botones visuales con la nueva opción "Círculo" */}
+          <div>
+            <label className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-2">
+              Forma de la Curva:
+            </label>
+            <div className="grid grid-cols-4 gap-2">
+              {curvePresets.map((preset) => (
+                <button
+                  key={preset.id}
+                  onClick={() => setCurvePath(preset.path)}
+                  title={preset.name} // Tooltip para accesibilidad
+                  className={`h-16 border-2 rounded-md transition-colors flex items-center justify-center ${
+                    curvePath === preset.path
+                      ? 'border-primario bg-primario/20'
+                      : 'border-[var(--color-borde-input)] bg-[var(--color-input)] hover:border-gray-500'
+                  }`}
+                >
+                  <svg
+                    width="48"
+                    height="48"
+                    viewBox="0 0 200 120" // Un canvas SVG interno consistente para todas las curvas
+                    className="stroke-current text-[var(--color-texto-principal)]"
+                  >
+                    <path
+                      d={preset.path}
+                      strokeWidth="12"
+                      fill="transparent"
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                </button>
+              ))}
+            </div>
+          </div>
         </div>
-        <div>
-          <label htmlFor="curved-text-color" className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1">Color:</label>
-          <input
-            id="curved-text-color"
-            type="color"
-            value={color}
-            onChange={e => setColor(e.target.value)}
-            className="w-full h-10 p-0.5 rounded-md border border-[var(--color-borde-input)] bg-[var(--color-input)] cursor-pointer"
-          />
+        
+        <div className="mt-6 flex justify-end space-x-3">
+          <Button variant="secondary" onClick={onClose}>Cancelar</Button>
+          <Button variant="primary" onClick={handleConfirm} disabled={!text.trim()}>
+            {initial ? 'Guardar Cambios' : 'Agregar Texto Curvo'}
+          </Button>
         </div>
-        <div>
-          <label htmlFor="curved-text-font" className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1">Fuente:</label>
-          <select
-            id="curved-text-font"
-            value={fontFamily}
-            onChange={e => setFontFamily(e.target.value)}
-            className="w-full p-2 rounded-md bg-[var(--color-input)] border border-[var(--color-borde-input)] focus:ring-primario focus:border-primario"
-          >
-            {typedFontsData.map(font => (
-              <option
-                key={font.name}
-                value={font.name}
-                style={{ fontFamily: font.name, fontSize: '1rem' }}
-              >
-                {font.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label htmlFor="curved-text-size" className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1">
-            Tamaño (relativo %): <span className="font-semibold">{fontSizePct}%</span>
-          </label>
-          <input
-            id="curved-text-size"
-            type="range"
-            min="2"
-            max="25"
-            step="0.5"
-            value={fontSizePct}
-            onChange={e => setFontSizePct(Number(e.target.value))}
-            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primario"
-          />
-        </div>
-        <div>
-          <label htmlFor="curved-text-path" className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1">Path de curva (SVG):</label>
-          <textarea
-            id="curved-text-path"
-            value={curvePath}
-            onChange={e => setCurvePath(e.target.value)}
-            placeholder="Ej: M10,70 Q90,10 190,70"
-            className="w-full p-2 rounded-md bg-[var(--color-input)] border border-[var(--color-borde-input)] text-sm resize-none focus:ring-primario focus:border-primario placeholder-[var(--color-texto-secundario)] opacity-80"
-            rows={3}
-          />
-          <p className="text-xs text-[var(--color-texto-secundario)] opacity-80 mt-1">
-            Ej: <code className="text-[var(--color-texto-principal)] opacity-90 bg-black/20 px-1 rounded">M10,70 Q90,10 190,70</code>
-          </p>
-        </div>
-      </div>
-      <div className="mt-6 flex justify-end space-x-2">
-        <Button variant="secondary" onClick={onClose}>Cancelar</Button>
-        <Button variant="primary" onClick={handleConfirm} disabled={!text.trim() || !curvePath.trim()}>
-          {initial ? 'Guardar Cambios' : 'Agregar Texto Curvo'}
-        </Button>
       </div>
     </div>
   );

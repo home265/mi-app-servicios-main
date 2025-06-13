@@ -19,13 +19,13 @@ export type ToolId =
   | 'subimage'
   | 'effects';
 
-// Interfaz de Props
+// Interfaz de Props actualizada para mayor flexibilidad
 export interface ToolbarProps {
   activeTool: ToolId | null;
   onSelectTool?: (tool: ToolId | null) => void;
   onPrev?: () => void;
   onNext?: () => void;
-  onPreview?: () => void; // Botón de Finalizar/Siguiente
+  onPreview?: () => void; // en la última pantalla, esta es la acción de Finalizar
   isLastScreen?: boolean;
   currentScreen?: number;
   totalScreens?: number;
@@ -36,6 +36,13 @@ export interface ToolbarProps {
   // Prop para Cambiar Plan/Campaña
   onChangePlanCampania?: () => void;
   showChangePlanCampaniaButton?: boolean;
+  // --- NUEVAS PROPS PARA PERSONALIZAR TEXTOS ---
+  /** Texto para el botón de avanzar (ej. "Guardar y Continuar") */
+  nextButtonText?: string;
+  /** Si se provee, reemplaza el icono de Salir por un botón de texto */
+  exitButtonText?: string;
+  /** Si se provee, reemplaza el icono de Configuración por un botón de texto */
+  changePlanButtonText?: string;
 }
 
 export default function Toolbar({
@@ -54,9 +61,14 @@ export default function Toolbar({
   showExitEditorButton = false,
   onChangePlanCampania,
   showChangePlanCampaniaButton = false,
+  // Se asigna un valor por defecto al nuevo texto
+  nextButtonText = 'Siguiente',
+  exitButtonText,
+  changePlanButtonText,
 }: ToolbarProps) {
   const NextButtonIcon = isLastScreen ? CheckCircle : ArrowRight;
-  const nextButtonText = isLastScreen ? 'Finalizar' : 'Siguiente';
+  // Se determina el texto final del botón de la derecha
+  const finalNextButtonText = isLastScreen ? 'Finalizar' : nextButtonText;
 
   const handleNextOrFinalizeClick = useCallback(() => {
     if (disabled) return;
@@ -68,9 +80,9 @@ export default function Toolbar({
   }, [disabled, isLastScreen, onNext, onPreview]);
 
   return (
-    <div className="h-[var(--toolbar-height,60px)] bg-[var(--color-fondo-toolbar)] text-[var(--color-texto-toolbar)] shadow-md px-4 flex items-center justify-between select-none z-30 shrink-0">
+    <div className="h-[var(--toolbar-height,60px)] bg-[var(--color-fondo-toolbar)] text-[var(--color-texto-toolbar)] shadow-md px-2 md:px-4 flex items-center justify-between select-none z-30 shrink-0">
       {/* Sección Izquierda: Salir y Cambiar Plan/Campaña */}
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2">
         {showExitEditorButton && (
           <button
             onClick={() => {
@@ -81,7 +93,15 @@ export default function Toolbar({
             title="Salir del Editor"
             disabled={disabled}
           >
-            <LogOut size={20} />
+            {exitButtonText ? (
+              <span className="text-sm font-semibold px-1 whitespace-nowrap">
+                {/* Lógica responsiva para el texto del botón */}
+                <span className="hidden sm:inline">{exitButtonText}</span>
+                <span className="sm:hidden">Salir</span>
+              </span>
+            ) : (
+              <LogOut size={20} />
+            )}
           </button>
         )}
 
@@ -95,13 +115,21 @@ export default function Toolbar({
             title="Cambiar Plan/Campaña"
             disabled={disabled}
           >
-            <Settings size={20} />
+            {changePlanButtonText ? (
+              <span className="text-sm font-semibold px-1 whitespace-nowrap">
+                {/* Lógica responsiva para el texto del botón */}
+                <span className="hidden sm:inline">{changePlanButtonText}</span>
+                <span className="sm:hidden">Plan</span>
+              </span>
+            ) : (
+              <Settings size={20} />
+            )}
           </button>
         )}
       </div>
 
       {/* Sección Derecha: Navegación de Pantallas y Finalizar */}
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-2 md:space-x-3">
         <div className="hidden md:flex items-center justify-center px-2">
           {totalScreens > 0 && (
             <span className="text-sm text-[var(--color-texto-secundario)] select-none whitespace-nowrap">
@@ -124,14 +152,20 @@ export default function Toolbar({
 
         <button
           onClick={handleNextOrFinalizeClick}
-          className={`p-2 rounded text-white flex items-center space-x-1 min-w-[90px] justify-center transition-opacity ${
-            isLastScreen ? 'bg-green-500 hover:bg-green-600' : 'bg-primario hover:bg-opacity-80'
+          className={`px-3 py-2 rounded text-white flex items-center space-x-2 justify-center transition-opacity min-w-[120px] md:min-w-[150px] ${
+            isLastScreen
+              ? 'bg-green-500 hover:bg-green-600'
+              : 'bg-primario hover:bg-opacity-80'
           } disabled:opacity-50 disabled:cursor-not-allowed`}
-          aria-label={nextButtonText}
-          title={nextButtonText}
-          disabled={disabled || (isLastScreen && !onPreview) || (!isLastScreen && !onNext)}
+          aria-label={finalNextButtonText}
+          title={finalNextButtonText}
+          disabled={
+            disabled ||
+            (isLastScreen && !onPreview) ||
+            (!isLastScreen && !onNext)
+          }
         >
-          <span className="text-sm">{nextButtonText}</span>
+          <span className="text-sm font-semibold">{finalNextButtonText}</span>
           <NextButtonIcon size={18} className="shrink-0" />
         </button>
       </div>

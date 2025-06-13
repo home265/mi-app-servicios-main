@@ -67,7 +67,7 @@ const EditorCanvas = forwardRef<Konva.Stage>((_, ref) => {
   return (
     <div
       ref={containerRef}
-      className="w-full h-screen md:h-auto md:max-w-[360px] lg:max-w-[450px] mx-auto flex justify-center py-4"
+      className="bg-gray-700 shadow-lg w-full h-screen md:h-auto md:max-w-[360px] lg:max-w-[450px] mx-auto flex justify-center py-4"
     >
       {containerWidth > 0 && (
         <Stage 

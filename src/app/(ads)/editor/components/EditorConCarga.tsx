@@ -757,24 +757,31 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
       
       <div className="flex flex-col flex-1 ml-0">
         <Toolbar
-            activeTool={activeTool}
-            onPrev={goToPrevScreenInStore}
-            onNext={handleNextOrFinalize}
-            onPreview={handleNextOrFinalize} // <-- CAMBIO: Toolbar "Finalizar" también llama a handleNextOrFinalize
-            isLastScreen={isLastScreenValue}
-            currentScreen={currentScreenIndex + 1}
-            totalScreens={screensCount}
-            disabled={generalDisabledState || isProcessingScreen}
-            onExitEditor={handleOpenExitModal}
-            showExitEditorButton={true}
-            onChangePlanCampania={handleChangePlanCampania}
-            showChangePlanCampaniaButton={anuncioParaCargar.status === 'draft'}
-        />
+    activeTool={activeTool}
+    onPrev={goToPrevScreenInStore}
+    onNext={handleNextOrFinalize}
+    isLastScreen={isLastScreenValue}
+    currentScreen={currentScreenIndex + 1}
+    totalScreens={screensCount}
+    disabled={generalDisabledState || isProcessingScreen}
+    onExitEditor={handleOpenExitModal}
+    showExitEditorButton={true}
+    onChangePlanCampania={handleChangePlanCampania}
+    showChangePlanCampaniaButton={anuncioParaCargar.status === 'draft'}
+    
+    // --- LÍNEAS AÑADIDAS ---
+    // Renombramos el botón "Siguiente"
+    nextButtonText="Guardar y Continuar"
+    
+    // Pasamos los textos para los botones de la izquierda (solo en modo 'draft')
+    exitButtonText={anuncioParaCargar.status === 'draft' ? 'Salir y Guardar' : undefined}
+    changePlanButtonText={anuncioParaCargar.status === 'draft' ? 'Cambiar Plan' : undefined}
+/>
 
         {!isSidebarOpen && (
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className="fixed top-1/2 left-0 transform -translate-y-1/2 bg-primario text-white p-2 rounded-r-lg shadow-lg z-20 hover:bg-primario-hover focus:outline-none focus:ring-2 focus:ring-primario-focus"
+            className="fixed top-1/2 left-0 transform -translate-y-1/2 bg-gray-900 text-white p-2 rounded-r-lg shadow-lg z-20 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
             aria-label="Abrir menú de herramientas"
             title="Herramientas"
           >
@@ -799,21 +806,26 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
           )}
         </main>
 
-        <button
-          onClick={() => setShowGuardarModal(true)}
-          disabled={isLoadingSave || isProcessingExit || isProcessingScreen}
-          className="fixed bottom-4 right-4 z-30 bg-primario text-white px-4 py-2 rounded-lg shadow-md hover:opacity-90 disabled:opacity-50"
-        >
-          {isLoadingSave ? 'Guardando...' : 'Guardar Pantalla'}
-        </button>
+        {/* --- Renderizado condicional para los botones flotantes --- */}
+{anuncioParaCargar.status !== 'draft' && (
+  <>
+    <button
+      onClick={() => setShowGuardarModal(true)}
+      disabled={isLoadingSave || isProcessingExit || isProcessingScreen}
+      className="fixed bottom-4 right-4 z-30 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 disabled:opacity-50 w-44 border border-white/75"
+    >
+      {isLoadingSave ? 'Guardando...' : 'Guardar Pantalla'}
+    </button>
 
-        <button
-          onClick={handlePreviewAnuncio}
-          disabled={isLoadingSave || isProcessingExit || isProcessingScreen}
-          className="fixed bottom-4 left-4 z-30 bg-[var(--color-fondo-toolbar)] text-[var(--color-texto-toolbar)] px-4 py-2 rounded-lg shadow-md hover:opacity-90 disabled:opacity-50"
-        >
-          Previsualizar Anuncio
-        </button>
+    <button
+      onClick={handlePreviewAnuncio}
+      disabled={isLoadingSave || isProcessingExit || isProcessingScreen}
+      className="fixed bottom-4 left-4 z-30 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600 disabled:opacity-50 w-44 border border-white/75"
+    >
+      Previsualizar Anuncio
+    </button>
+  </>
+)}
       </div>
 
       {showGuardarModal && (
