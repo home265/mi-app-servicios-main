@@ -328,7 +328,7 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
             {errors.tituloCard && <p className="text-sm text-red-500 -mt-3 mb-3">{errors.tituloCard.message}</p>}
             <Controller name="subtituloCard" control={control} render={({ field }) => (<Input id="subtituloCard" label="Subtítulo (Opcional)" {...field} value={field.value ?? ''} />)} />
             {errors.subtituloCard && <p className="text-sm text-red-500 -mt-3 mb-3">{errors.subtituloCard.message}</p>}
-            <Controller name="descripcion" control={control} render={({ field }) => (<Textarea id="descripcion" label="Descripción" rows={4} {...field} value={field.value ?? ''} />)} />
+            <Controller name="descripcion" control={control} render={({ field }) => (<Textarea id="descripcion" spellCheck="true" label="Descripción" rows={4} {...field} value={field.value ?? ''} />)} />
             {errors.descripcion && <p className="text-sm text-red-500 -mt-3 mb-3">{errors.descripcion.message}</p>}
           </section>
 

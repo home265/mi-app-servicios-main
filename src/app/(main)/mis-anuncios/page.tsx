@@ -3,7 +3,6 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import { useUserStore } from '@/store/userStore';
 import { listAnunciosByFilter, listCapturas } from '@/lib/services/anunciosService';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -247,24 +246,18 @@ export default function MisAnunciosPage() {
 
         {/* Solo muestra el estado vacío o la lista si hay usuario */}
         {currentUserUid && anunciosConPreview.length === 0 && !isLoadingAnuncios && !error && (
-          <div className="text-center py-10">
-             <div className="relative mx-auto mb-6 h-40 w-40 sm:h-48 sm:w-48 opacity-70">
-                <Image
-                    src="/images/empty-state/no-ads.svg" // Asegúrate que esta imagen exista
-                    alt="Sin anuncios"
-                    fill
-                    className="object-contain"
-                    sizes="(max-width: 640px) 160px, 192px"
-                />
-            </div>
-            <p className="text-xl text-[var(--color-texto-secundario)] mb-4">
-              Aún no tienes anuncios creados.
-            </p>
-            <Link href="/planes" className="bg-primario text-white px-6 py-3 rounded-lg shadow hover:bg-primario-dark transition-colors font-semibold">
-              ¡Crea tu Primer Anuncio!
-            </Link>
-          </div>
-        )}
+  <div className="text-center py-10 px-6 bg-[var(--color-tarjeta)] rounded-lg shadow-md max-w-lg mx-auto">
+    <h2 className="text-xl font-semibold text-[var(--color-texto-principal)] mb-2">
+      No has creado anuncios
+    </h2>
+    <p className="text-md text-[var(--color-texto-secundario)] mb-6">
+      ¡Anímate a crear el primero para empezar a promocionarte!
+    </p>
+    <Link href="/planes" className="mt-4 inline-block bg-primario text-white px-8 py-3 rounded-lg hover:bg-primario-dark transition-colors font-medium text-sm">
+      Crear Nuevo Anuncio
+    </Link>
+  </div>
+)}
 
         {currentUserUid && anunciosConPreview.length > 0 && !isLoadingAnuncios && !error && (
           // LISTADO DE ANUNCIOS VERTICAL Y CENTRADO

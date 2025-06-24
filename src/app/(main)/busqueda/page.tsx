@@ -256,6 +256,7 @@ export default function BusquedaPage() {
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Ej: Necesito un plomero para arreglar una pérdida en el baño."
             className="block w-full px-3 py-2 bg-input text-texto-principal border border-borde-input rounded-md shadow-sm placeholder-texto-placeholder focus:outline-none focus:ring-primario focus:border-primario sm:text-sm"
+            spellCheck="true"
           />
         </div>
         <Button onClick={handleSearch} disabled={!categorySel} fullWidth>

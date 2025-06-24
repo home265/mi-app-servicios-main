@@ -3,7 +3,7 @@ import { create } from 'zustand';
 import type { Elemento } from '@/types/anuncio';
 import type { ReelAnimationEffectType } from '@/types/anuncio';
 
-// --- TIPOS DE ELEMENTOS (sin cambios) ---
+// --- TIPOS DE ELEMENTOS ---
 interface BaseEditorProps {
   id: string;
   xPct: number;
@@ -30,10 +30,24 @@ export interface ColorBackgroundElement extends BaseEditorProps {
   tipo: 'fondoColor';
   color: string;
 }
+
+// =================================================================
+// === INICIO DEL CAMBIO ===========================================
+// =================================================================
 export interface ImageBackgroundElement extends BaseEditorProps {
   tipo: 'fondoImagen';
   src: string;
+  /**
+   * Color opcional para los marcos (letterboxing) cuando la imagen
+   * no tiene la misma proporción que el lienzo.
+   * @example '#000000'
+   */
+  frameColor?: string;
 }
+// ===============================================================
+// === FIN DEL CAMBIO ==============================================
+// ===============================================================
+
 export interface SubimageElement extends BaseEditorProps {
   tipo: 'subimagen';
   src: string;
@@ -52,7 +66,7 @@ export type EditorElement =
   | SubimageElement
   | GradientBackgroundElement;
 
-// --- ANUNCIO DATA TO LOAD (sin cambios) ---
+// --- ANUNCIO DATA TO LOAD ---
 export interface AnuncioDataToLoad {
   screensCount: number;
   elementsByScreenFromDb: Record<string, Elemento[]>;
@@ -84,7 +98,7 @@ interface EditorStoreState {
   setSelectedElementForEdit: (elementId: string | null) => void;
 }
 
-// --- GENERADOR DE IDS (sin cambios) ---
+// --- GENERADOR DE IDS ---
 const generateClientSideId = (): string => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     return crypto.randomUUID();

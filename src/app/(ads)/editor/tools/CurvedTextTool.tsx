@@ -87,6 +87,7 @@ export default function CurvedTextTool({ initial, onConfirm, onClose }: CurvedTe
               value={text}
               onChange={e => setText(e.target.value)}
               className="w-full p-2 rounded-md bg-[var(--color-input)] border border-[var(--color-borde-input)] focus:ring-primario focus:border-primario placeholder-[var(--color-texto-secundario)] opacity-80"
+              spellCheck={true}
             />
           </div>
           <div>
@@ -145,11 +146,17 @@ export default function CurvedTextTool({ initial, onConfirm, onClose }: CurvedTe
                   key={preset.id}
                   onClick={() => setCurvePath(preset.path)}
                   title={preset.name} // Tooltip para accesibilidad
-                  className={`h-16 border-2 rounded-md transition-colors flex items-center justify-center ${
+                  // =================================================================
+                  // === INICIO DEL CAMBIO: CLASES DE CSS ACTUALIZADAS ================
+                  // =================================================================
+                  className={`h-16 border-2 rounded-md transition-all duration-200 flex items-center justify-center focus:outline-none ${
                     curvePath === preset.path
-                      ? 'border-primario bg-primario/20'
-                      : 'border-[var(--color-borde-input)] bg-[var(--color-input)] hover:border-gray-500'
+                      ? 'border-primario bg-primario/30 ring-2 ring-offset-2 ring-primario ring-offset-[var(--color-tarjeta)]'
+                      : 'border-transparent bg-[var(--color-input)] hover:border-gray-500'
                   }`}
+                  // ===============================================================
+                  // === FIN DEL CAMBIO ==============================================
+                  // ===============================================================
                 >
                   <svg
                     width="48"
@@ -179,4 +186,5 @@ export default function CurvedTextTool({ initial, onConfirm, onClose }: CurvedTe
       </div>
     </div>
   );
+
 }

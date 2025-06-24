@@ -360,6 +360,7 @@ const PaginaAmarillaCrearForm: React.FC = () => {
               render={({ field }) => (
                 <Textarea
                   id="descripcion"
+                  spellCheck="true"
                   label="Descripción (Párrafo)"
                   {...field}
                   value={field.value ?? ''}

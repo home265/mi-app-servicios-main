@@ -267,6 +267,7 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
               {labelDescripcion}
             </label>
             <textarea id="descripcionPrestador" rows={4}
+            spellCheck="true"
               placeholder={placeholderDescripcion}
               className="block w-full px-3 py-2 bg-fondo border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primario focus:border-primario sm:text-sm text-texto dark:text-texto-dark"
               maxLength={500}
@@ -318,6 +319,7 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
               {labelDescripcion}
             </label>
             <textarea id="descripcionComercio" rows={4}
+            spellCheck="true"
               placeholder={placeholderDescripcion}
               className="block w-full px-3 py-2 bg-fondo border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primario focus:border-primario sm:text-sm text-texto dark:text-texto-dark"
               maxLength={500}

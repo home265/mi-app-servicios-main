@@ -110,6 +110,7 @@ export default function CvPage() {
           rows={4}
           value={descripcion}
           onChange={(e) => setDescripcion(e.target.value)}
+          spellCheck="true"
         />
       </div>
   

@@ -36,8 +36,10 @@ export default function TextTool({ initial, onConfirm, onClose }: TextToolProps)
       tipo: 'texto',
       xPct: initial?.xPct ?? 10,
       yPct: initial?.yPct ?? 10,
-      widthPct: initial?.widthPct ?? 30,
-      heightPct: initial?.heightPct ?? 10,
+      // --- LÍNEAS MODIFICADAS ---
+      widthPct: initial?.widthPct ?? 80,    // Valor anterior era 30
+      heightPct: initial?.heightPct ?? 15,    // Valor anterior era 10
+      // --------------------------
       text,
       color,
       fontFamily,
@@ -82,6 +84,7 @@ export default function TextTool({ initial, onConfirm, onClose }: TextToolProps)
               onChange={e => setText(e.target.value)}
               className="w-full p-2 rounded-md bg-[var(--color-input)] border border-[var(--color-borde-input)] focus:ring-primario focus:border-primario placeholder-[var(--color-texto-secundario)] opacity-80"
               placeholder="Escribe algo..."
+              spellCheck={true}
             />
           </div>
           <div>

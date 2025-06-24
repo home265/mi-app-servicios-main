@@ -20,6 +20,7 @@ import {
   type TextElement,
   type CurvedTextElement,
   type ColorBackgroundElement,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   type ImageBackgroundElement,
   type SubimageElement,
   type GradientBackgroundElement,
@@ -45,6 +46,7 @@ import Toolbar, { type ToolId } from './Toolbar';
 import Button from '@/app/components/ui/Button';
 
 // ... (importaciones de TextTool, CurvedTextTool, etc. y dataURLtoBlob sin cambios)
+const FrameColorTool = dynamic(() => import('../tools/FrameColorTool'), { ssr: false });
 const TextTool = dynamic(() => import('../tools/TextTool'), { ssr: false });
 const CurvedTextTool = dynamic(() => import('../tools/CurvedTextTool'), { ssr: false });
 const ColorTool = dynamic(() => import('../tools/ColorTool'), { ssr: false });
@@ -633,19 +635,25 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
         "¡Atención! Estás a punto de eliminar este borrador de forma permanente. Esta acción no se puede deshacer. ¿Estás absolutamente seguro?"
       );
       if (confirmDelete) {
-        try {
-          console.log(`[handleConfirmExitAction] Confirmada eliminación del borrador ${anuncioId}.`);
-          await deleteAnuncio(anuncioId);
-          console.log(`[handleConfirmExitAction] Borrador ${anuncioId} eliminado. Reseteando stores y redirigiendo.`);
-          resetAnuncioConfigStore();
-          resetEditorStore();
-          router.push('/mis-anuncios');
-        } catch (error) {
-          console.error("[handleConfirmExitAction] Error al eliminar el borrador:", error);
-          alert(`No se pudo eliminar el borrador: ${(error instanceof Error) ? error.message : "Error desconocido"}`);
-        } finally {
-          setIsProcessingExit(false);
-        }
+        // 1. Iniciar el estado de "saliendo" para desmontar el canvas (ver cambio #2).
+        setIsProcessingExit(true);
+        setShowExitModal(false);
+
+        deleteAnuncio(anuncioId)
+          .then(() => {
+            console.log(`[handleConfirmExitAction] Borrador ${anuncioId} eliminado. Redirigiendo a bienvenida.`);
+            // 2. Redirigir a la página correcta.
+            router.push('/bienvenida');
+            // 3. Resetear los stores para la próxima sesión.
+            resetAnuncioConfigStore();
+            resetEditorStore();
+          })
+          .catch((error) => {
+            console.error("[handleConfirmExitAction] Error al eliminar el borrador:", error);
+            alert(`No se pudo eliminar el borrador: ${(error instanceof Error) ? error.message : "Error desconocido"}`);
+            // Si falla el borrado, revertir el estado de "saliendo".
+            setIsProcessingExit(false);
+          });
       } else {
         console.log("[handleConfirmExitAction] Eliminación cancelada.");
         setIsProcessingExit(false);
@@ -667,13 +675,29 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
   }
 
   const renderActiveTool = () => {
+    // Busca el elemento seleccionado actualmente en el store
     const currentSelectedId = useEditorStore.getState().selectedElementIdForEdit;
     const elementToEdit = currentSelectedId
       ? elementsOfCurrentScreen.find(el => el.id === currentSelectedId)
       : undefined;
     
+    // Si hay un elemento seleccionado y es un fondo de imagen, muestra la herramienta de marco.
+    // Esta condición tiene prioridad sobre cualquier herramienta activa en la barra lateral.
+    if (elementToEdit && elementToEdit.tipo === 'fondoImagen') {
+      return (
+        <FrameColorTool
+          key={`frame-tool-${elementToEdit.id}`}
+          element={elementToEdit}
+          onClose={handleCloseTool}
+        />
+      );
+    }
+    
+    // Si no hay ninguna herramienta activa en la barra lateral, no muestra nada.
     if (!activeTool) return null;
     
+    // Si se activa una herramienta desde la barra lateral, muestra el panel correspondiente.
+    // Esto se usa principalmente para AÑADIR nuevos elementos.
     switch (activeTool) {
       case 'text':
         return ( <TextTool key={currentSelectedId || 'new-text'} initial={elementToEdit?.tipo === 'texto' ? elementToEdit as TextElement : undefined} onConfirm={handleConfirmEditOrAddElement} onClose={handleCloseTool} /> );
@@ -682,7 +706,9 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
       case 'color':
         return ( <ColorTool key={'tool-color'} initial={elementToEdit?.tipo === 'fondoColor' ? elementToEdit as ColorBackgroundElement : undefined} onConfirm={handleConfirmEditOrAddElement} onClose={handleCloseTool} /> );
       case 'imageBackground':
-        return ( <ImageBackgroundTool key={'tool-imageBg'} initial={elementToEdit?.tipo === 'fondoImagen' ? elementToEdit as ImageBackgroundElement : undefined} onConfirm={handleConfirmEditOrAddElement} onClose={handleCloseTool} /> );
+        // Esta herramienta ahora solo se mostrará para AÑADIR un nuevo fondo de imagen,
+        // ya que la edición (clic en el marco) es capturada por la condición de arriba.
+        return ( <ImageBackgroundTool key={'tool-imageBg'} initial={undefined} onConfirm={handleConfirmEditOrAddElement} onClose={handleCloseTool} /> );
       case 'gradient':
         return ( <GradientBackgroundTool key={'tool-gradient'} initial={elementToEdit?.tipo === 'gradient' ? elementToEdit as GradientBackgroundElement : undefined} onConfirm={handleConfirmEditOrAddElement} onClose={handleCloseTool} /> );
       case 'subimage':
@@ -792,19 +818,26 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
         )}
 
         <main className="flex-1 bg-[var(--color-fondo)] overflow-hidden relative">
-          <EditorCanvas ref={stageRef} />
-          {renderActiveTool()}
-          {(isLoadingSave || isProcessingScreen || isProcessingExit) && (
-            <div className="absolute inset-0 bg-black bg-opacity-20 backdrop-blur-sm flex items-center justify-center z-[55]">
-              <div className="w-12 h-12 border-4 border-gray-200 border-t-primario rounded-full animate-spin" />
-              <p className="ml-4 text-lg text-white">
-                {isLoadingSave && 'Guardando pantalla...'}
-                {isProcessingScreen && 'Procesando...'}
-                {isProcessingExit && 'Saliendo...'}
-              </p>
-            </div>
-          )}
-        </main>
+  {/* Condicionamos el renderizado del canvas y las herramientas */}
+  { !isProcessingExit && (
+    <>
+      <EditorCanvas ref={stageRef} />
+      {renderActiveTool()}
+    </>
+  )}
+  
+  {/* El loader se mantiene igual y ahora se mostrará sobre un fondo limpio al salir */}
+  {(isLoadingSave || isProcessingScreen || isProcessingExit) && (
+    <div className="absolute inset-0 bg-black bg-opacity-20 backdrop-blur-sm flex items-center justify-center z-[55]">
+      <div className="w-12 h-12 border-4 border-gray-200 border-t-primario rounded-full animate-spin" />
+      <p className="ml-4 text-lg text-white">
+        {isLoadingSave && 'Guardando pantalla...'}
+        {isProcessingScreen && 'Procesando...'}
+        {isProcessingExit && 'Saliendo...'}
+      </p>
+    </div>
+  )}
+</main>
 
         {/* --- Renderizado condicional para los botones flotantes --- */}
 {anuncioParaCargar.status !== 'draft' && (

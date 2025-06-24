@@ -31,6 +31,7 @@ const Textarea: React.FC<TextareaProps> = ({
       <textarea
         id={id}
         className={`${baseClasses} ${borderClasses}`}
+        spellCheck="true"
         {...props}
       />
       {error && <p className="mt-1 text-xs text-red-500">{error}</p>}

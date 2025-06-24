@@ -20,6 +20,7 @@ import {
   type TextElement,
   type CurvedTextElement,
   type ColorBackgroundElement,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   type ImageBackgroundElement,
   type SubimageElement,
   type GradientBackgroundElement,
@@ -73,7 +74,7 @@ const AdvancedEffectsToolDynamic = dynamic( //
     ),
   }
 );
-
+const FrameColorTool = dynamic(() => import('../tools/FrameColorTool'), { ssr: false });
 async function dataURLtoBlob(dataurl: string): Promise<Blob> { //
   const response = await fetch(dataurl); //
   if (!response.ok) { //
@@ -543,69 +544,54 @@ export default function NuevoAnuncioPage() {
   }
 
   // --- renderActiveTool (Lógica existente, se mantiene igual) ---
-  const renderActiveTool = () => { //
-    // ... (sin cambios) ...
-        const elementToEdit = selectedElementId //
-      ? elementsOfCurrentScreen.find((el: EditorElement) => el.id === selectedElementId) //
-      : undefined; //
+  const renderActiveTool = () => {
+    // Busca el elemento seleccionado actualmente en el store
+    const elementToEdit = selectedElementId
+      ? elementsOfCurrentScreen.find((el: EditorElement) => el.id === selectedElementId)
+      : undefined;
 
-    if (!activeTool && !selectedElementId) return null; //
-    if (!activeTool && selectedElementId) return null; // Si hay seleccionado pero no herramienta, no mostrar nada //
-    if (activeTool) { //
-      switch (activeTool) { //
-        case 'text': return <TextTool //
-                  key={selectedElementId || 'new-text'} //
-                  initial={elementToEdit?.tipo === 'texto' ? elementToEdit as TextElement : undefined} //
-                  onConfirm={handleConfirmEditOrAddElement} //
-                  onClose={handleCloseTool} />; //
-        case 'curvedText': return <CurvedTextTool //
-                  key={selectedElementId || 'new-curvedtext'} //
-                  initial={elementToEdit?.tipo === 'textoCurvo' ? elementToEdit as CurvedTextElement : undefined} //
-                  onConfirm={handleConfirmEditOrAddElement} //
-                  onClose={handleCloseTool} />; //
-        case 'color': return <ColorTool //
-                  key={selectedElementId || 'new-color'} //
-                  initial={elementToEdit?.tipo === 'fondoColor' ? elementToEdit as ColorBackgroundElement : undefined} //
-                  onConfirm={handleConfirmEditOrAddElement} //
-                  onClose={handleCloseTool} />; //
-        case 'imageBackground': return <ImageBackgroundTool //
-                  key={selectedElementId || 'new-imagebg'} //
-                  initial={elementToEdit?.tipo === 'fondoImagen' ? elementToEdit as ImageBackgroundElement : undefined} //
-                  onConfirm={handleConfirmEditOrAddElement} //
-                  onClose={handleCloseTool} />; //
-        case 'gradient': return <GradientBackgroundTool //
-                  key={selectedElementId || 'new-gradient'} //
-                  initial={elementToEdit?.tipo === 'gradient' ? elementToEdit as GradientBackgroundElement : undefined} //
-                  onConfirm={handleConfirmEditOrAddElement} //
-                  onClose={handleCloseTool} />; //
-        case 'subimage': return <SubimageTool //
-                  key={selectedElementId || 'new-subimage'} //
-                  initial={elementToEdit?.tipo === 'subimagen' ? elementToEdit as SubimageElement : undefined} //
-                  onConfirm={handleConfirmEditOrAddElement} //
-                  onClose={handleCloseTool} />; //
-          case 'effects': { //
-        if (frozenCanvasDimensions && frozenCanvasDimensions.width > 0 && frozenCanvasDimensions.height > 0) { //
-          return ( //
-            <AdvancedEffectsToolDynamic //
-              elementsForPreview={elementsOfCurrentScreen}  //
-              baseCanvasWidth={frozenCanvasDimensions.width} //
-              baseCanvasHeight={frozenCanvasDimensions.height} //
-              onClose={handleCloseTool} //
-            />
-          );
-        } else { //
-          return ( //
-            <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-50">
-              <p className="text-white p-4 bg-gray-800 rounded-md">
-                Preparando previsualización de efectos...
-              </p>
-            </div>
-          );
+    // Condición prioritaria: si hay un elemento seleccionado y es un fondo de imagen,
+    // se muestra la herramienta para editar el color del marco.
+    if (elementToEdit && elementToEdit.tipo === 'fondoImagen') {
+      return (
+        <FrameColorTool
+          key={`frame-tool-${elementToEdit.id}`}
+          element={elementToEdit}
+          onClose={handleCloseTool}
+        />
+      );
+    }
+
+    // Si no hay ninguna herramienta activa seleccionada desde la barra lateral, no se muestra nada.
+    if (!activeTool) return null;
+
+    // Si hay una herramienta activa, se muestra el panel correspondiente.
+    // Esto se usa principalmente para AÑADIR nuevos elementos.
+    switch (activeTool) {
+      case 'text':
+        return ( <TextTool key={selectedElementId || 'new-text'} initial={elementToEdit?.tipo === 'texto' ? elementToEdit as TextElement : undefined} onConfirm={handleConfirmEditOrAddElement} onClose={handleCloseTool} /> );
+      case 'curvedText':
+        return ( <CurvedTextTool key={selectedElementId || 'new-curvedtext'} initial={elementToEdit?.tipo === 'textoCurvo' ? elementToEdit as CurvedTextElement : undefined} onConfirm={handleConfirmEditOrAddElement} onClose={handleCloseTool} /> );
+      case 'color':
+        return ( <ColorTool key={'tool-color'} initial={elementToEdit?.tipo === 'fondoColor' ? elementToEdit as ColorBackgroundElement : undefined} onConfirm={handleConfirmEditOrAddElement} onClose={handleCloseTool} /> );
+      case 'imageBackground':
+        // Esta herramienta ahora solo se mostrará para AÑADIR un nuevo fondo,
+        // ya que la edición (clic en el marco) es manejada por la condición de arriba.
+        return ( <ImageBackgroundTool key={'tool-imageBg'} initial={undefined} onConfirm={handleConfirmEditOrAddElement} onClose={handleCloseTool} /> );
+      case 'gradient':
+        return ( <GradientBackgroundTool key={'tool-gradient'} initial={elementToEdit?.tipo === 'gradient' ? elementToEdit as GradientBackgroundElement : undefined} onConfirm={handleConfirmEditOrAddElement} onClose={handleCloseTool} /> );
+      case 'subimage':
+        return ( <SubimageTool key={selectedElementId || 'new-subimage'} initial={elementToEdit?.tipo === 'subimagen' ? elementToEdit as SubimageElement : undefined} onConfirm={handleConfirmEditOrAddElement} onClose={handleCloseTool} /> );
+      case 'effects': {
+        if (frozenCanvasDimensions && frozenCanvasDimensions.width > 0 && frozenCanvasDimensions.height > 0) {
+          return ( <AdvancedEffectsToolDynamic elementsForPreview={elementsOfCurrentScreen}  baseCanvasWidth={frozenCanvasDimensions.width} baseCanvasHeight={frozenCanvasDimensions.height} onClose={handleCloseTool} /> );
+        } else {
+          return ( <div className="absolute inset-0 bg-black/70 flex items-center justify-center z-50"> <p className="text-white p-4 bg-gray-800 rounded-md"> Preparando previsualización de efectos... </p> </div> );
         }
       }
-      }
+      default:
+        return null;
     }
-    return null; //
   };
 
   return (

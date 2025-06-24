@@ -98,6 +98,7 @@ export default function ResenaForm({ target, onSubmitted }: ResenaFormProps) {
           <textarea
             className="w-full border border-[var(--color-borde-input)] rounded p-2 text-sm bg-[var(--color-input)] text-[var(--color-texto-principal)]"
             rows={4}
+            spellCheck="true"
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             placeholder="Escribe tu reseña..."

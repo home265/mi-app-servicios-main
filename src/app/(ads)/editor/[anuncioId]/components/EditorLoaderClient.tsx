@@ -3,6 +3,7 @@
 
 import React, { useEffect, useState } from 'react';
 import NextDynamic from 'next/dynamic';
+import { useRouter } from 'next/navigation'; // Importar useRouter
 import { getAnuncioById, listCapturas } from '@/lib/services/anunciosService';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import type { Anuncio, Captura, Elemento, ReelAnimationEffectType } from '@/types/anuncio';
@@ -10,7 +11,7 @@ import type { Timestamp } from 'firebase/firestore';
 
 export type { Elemento } from '@/types/anuncio';
 
-// Esta interfaz define la estructura de los datos que EditorConCarga espera.
+// La interfaz de datos no cambia
 interface DatosAnuncioParaEditorConCarga {
   id: string;
   maxScreens: number;
@@ -23,13 +24,14 @@ interface DatosAnuncioParaEditorConCarga {
   campaniaId?: Anuncio['campaniaId'];
   provincia: string;
   localidad: string;
-  creatorId: string; // <--- Propiedad añadida
+  creatorId: string;
 }
 
 interface EditorLoaderClientProps {
   anuncioId: string;
 }
 
+// La importación dinámica de EditorConCarga se mantiene igual
 const EditorConCarga = NextDynamic(() => import('../../components/EditorConCarga'), {
   ssr: false,
   loading: () => (
@@ -41,70 +43,66 @@ const EditorConCarga = NextDynamic(() => import('../../components/EditorConCarga
 });
 
 export default function EditorLoaderClient({ anuncioId }: EditorLoaderClientProps) {
+  // --- LÓGICA DE ESTADO SIMPLIFICADA ---
+  const router = useRouter();
   const [datosPreparados, setDatosPreparados] = useState<DatosAnuncioParaEditorConCarga | null>(null);
+  // Mantenemos isLoading para mostrar un spinner inicial y evitar un parpadeo.
   const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Eliminamos el estado de 'error', ya que ahora solo redirigimos.
 
   useEffect(() => {
-    if (!anuncioId) {
-      setError("ID de anuncio no válido o no proporcionado.");
-      setIsLoading(false);
-      return;
-    }
+    // --- LÓGICA DE CARGA Y REDIRECCIÓN ROBUSTA ---
+    let isMounted = true; // Flag para evitar actualizaciones en un componente desmontado
 
     const fetchAdData = async () => {
-      setIsLoading(true);
-      setError(null);
-      setDatosPreparados(null);
+      // Si no hay anuncioId, no hay nada que hacer, redirigir inmediatamente.
+      if (!anuncioId) {
+        router.replace('/bienvenida');
+        return;
+      }
 
       try {
-        console.log(`[CLIENT] EditorLoaderClient: Iniciando carga para anuncio ID: ${anuncioId}`);
+        console.log(`[CLIENT] Iniciando carga para anuncio ID: ${anuncioId}`);
         const anuncio = await getAnuncioById(anuncioId);
 
+        // **Punto clave**: si el anuncio no existe, redirigir y no hacer nada más.
         if (!anuncio || !anuncio.id) {
-          console.warn(`[CLIENT] EditorLoaderClient: Anuncio con ID ${anuncioId} no encontrado o sin 'id'.`);
-          setError(`No se pudieron obtener los detalles necesarios para editar el anuncio (ID: ${anuncioId}). Detalle del error: Anuncio no encontrado. Esto puede deberse a que el anuncio no existe o a un problema de permisos.`);
-          setIsLoading(false); // Asegurar que isLoading se actualiza
+          if (isMounted) {
+            console.warn(`[CLIENT] Anuncio con ID ${anuncioId} no encontrado. Redirigiendo a bienvenida.`);
+            router.replace('/bienvenida');
+          }
           return;
         }
-        console.log(`[CLIENT] EditorLoaderClient: Anuncio cargado: status=${anuncio.status}, creatorId=${anuncio.creatorId}, plan=${anuncio.plan}`);
 
-        // Validar campos críticos, incluyendo creatorId
+        // Si el anuncio existe pero le faltan datos críticos, también redirigir.
         if (!anuncio.plan || !anuncio.provincia || !anuncio.localidad || !anuncio.creatorId) {
-            console.error(`[CLIENT] EditorLoaderClient: Datos críticos faltantes en el anuncio cargado (plan, provincia, localidad, o creatorId). Anuncio:`, anuncio);
-            setError(`Error: Datos incompletos en el anuncio cargado (ID: ${anuncioId}). Faltan plan, provincia, localidad o creatorId.`);
-            setIsLoading(false); // Asegurar que isLoading se actualiza
-            return;
+          if (isMounted) {
+            console.error(`[CLIENT] Faltan datos críticos en el anuncio ${anuncioId}. Redirigiendo.`);
+            router.replace('/bienvenida');
+          }
+          return;
         }
 
-        console.log(`[CLIENT] EditorLoaderClient: Intentando cargar capturas para anuncio ID: ${anuncio.id}`);
+        // --- Si todo está OK, proceder a preparar los datos ---
         const capturasDelAnuncio = await listCapturas(anuncio.id);
-        console.log(`[CLIENT] EditorLoaderClient: Capturas cargadas: ${capturasDelAnuncio.length}`);
-
         const animationEffectsPorPantalla: Record<string, ReelAnimationEffectType | undefined> = {};
-        if (capturasDelAnuncio.length > 0) {
-          capturasDelAnuncio.forEach((captura) => {
-            if (captura.animationEffect) {
-              animationEffectsPorPantalla[String(captura.screenIndex)] = captura.animationEffect;
-            }
-          });
-        }
+        capturasDelAnuncio.forEach((captura) => {
+          if (captura.animationEffect) {
+            animationEffectsPorPantalla[String(captura.screenIndex)] = captura.animationEffect;
+          }
+        });
 
         const convertTimestampToDate = (timestamp: Timestamp | Date | undefined): Date | undefined => {
           if (!timestamp) return undefined;
           if (timestamp instanceof Date) return timestamp;
-          if (timestamp && typeof (timestamp as Timestamp).toDate === 'function') {
-            return (timestamp as Timestamp).toDate();
-          }
-          console.warn('[CLIENT] EditorLoaderClient: Tipo de fecha inesperado, no se pudo convertir:', timestamp);
-          return undefined;
+          return (timestamp as Timestamp).toDate();
         };
-        
-        setDatosPreparados({
-          id: anuncio.id, 
+
+        const datosParaEditor = {
+          id: anuncio.id,
           maxScreens: anuncio.maxScreens,
           elementosPorPantalla: anuncio.elementosPorPantalla || {},
-          animationEffectsPorPantalla: animationEffectsPorPantalla,
+          animationEffectsPorPantalla,
           status: anuncio.status,
           startDate: convertTimestampToDate(anuncio.startDate),
           endDate: convertTimestampToDate(anuncio.endDate),
@@ -112,26 +110,35 @@ export default function EditorLoaderClient({ anuncioId }: EditorLoaderClientProp
           campaniaId: anuncio.campaniaId,
           provincia: anuncio.provincia,
           localidad: anuncio.localidad,
-          creatorId: anuncio.creatorId, // <--- CAMBIO: creatorId añadido al objeto
-        });
+          creatorId: anuncio.creatorId,
+        };
+        
+        // Solo actualizar el estado si el componente sigue montado.
+        if (isMounted) {
+          setDatosPreparados(datosParaEditor);
+          setIsLoading(false);
+        }
 
       } catch (err) {
-        console.error(`[CLIENT] EditorLoaderClient: Error CRÍTICO al cargar datos para el anuncio ${anuncioId}:`, err);
-        let detail = "Error desconocido.";
-        if (err instanceof Error) {
-            detail = err.message;
-        } else if (typeof err === 'string') {
-            detail = err;
+        // Si cualquier parte del 'try' falla (ej. error de permisos), redirigir.
+        if (isMounted) {
+          console.error(`[CLIENT] Error CRÍTICO al cargar datos para el anuncio ${anuncioId}. Redirigiendo.`, err);
+          router.replace('/bienvenida');
         }
-        setError(`No se pudieron obtener los detalles necesarios para editar el anuncio (ID: ${anuncioId}). Detalle del error: ${detail}. Esto puede deberse a un problema de permisos o a que el anuncio no existe. Por favor, verifica las reglas de seguridad de Firebase o contacta a soporte.`);
-      } finally {
-        setIsLoading(false);
       }
     };
 
     fetchAdData();
-  }, [anuncioId]);
 
+    // Función de limpieza para el useEffect
+    return () => {
+      isMounted = false;
+    };
+  }, [anuncioId, router]); // Dependencias del efecto
+
+  // --- LÓGICA DE RENDERIZADO SIMPLIFICADA ---
+  
+  // Mientras isLoading es true, mostrar un spinner.
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -141,29 +148,15 @@ export default function EditorLoaderClient({ anuncioId }: EditorLoaderClientProp
     );
   }
 
-  if (error) {
+  // Si la carga terminó y tenemos datos, renderizar el editor.
+  if (datosPreparados) {
     return (
-      <div className="container mx-auto px-4 py-8 text-center min-h-screen flex flex-col justify-center items-center">
-        <h1 className="text-2xl font-bold text-red-500 mb-4">Error al Cargar Datos del Anuncio</h1>
-        <p className="text-texto-secundario whitespace-pre-line">{error}</p>
+      <div className="editor-page-layout">
+        <EditorConCarga anuncioParaCargar={datosPreparados} />
       </div>
     );
   }
-
-  if (!datosPreparados) {
-    console.error("EditorLoaderClient: No hay datos preparados para renderizar y no hay error explícito, pero tampoco está cargando.");
-    // Este caso podría indicar un flujo inesperado o un error no capturado que dejó datosPreparados como null.
-    // Devolver un mensaje de error genérico o específico si se puede deducir más.
-    return (
-        <div className="flex items-center justify-center h-screen text-orange-500">
-            <p>Advertencia: No se pudieron preparar completamente los datos del anuncio para el editor. Intenta recargar la página.</p>
-        </div>
-    );
-  }
   
-  return (
-    <div className="editor-page-layout">
-      <EditorConCarga anuncioParaCargar={datosPreparados} />
-    </div>
-  );
+  // En cualquier otro caso (como durante la redirección), no renderizar nada.
+  return null;
 }
