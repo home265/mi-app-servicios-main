@@ -72,7 +72,7 @@ const barlow = Barlow({
 
 
 export const metadata = {
-  // Te sugiero actualizar esto para que coincida con tu nueva marca
+  // Actualizado para coincidir con la nueva marca "CODYS | Tu red de confianza"
   title: 'CODYS | Tu red de confianza',
   description: 'Conectamos necesidades con soluciones.',
 };

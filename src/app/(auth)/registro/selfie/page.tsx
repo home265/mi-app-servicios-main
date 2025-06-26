@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 // src/app/(auth)/registro/selfie/page.tsx
 'use client';
 
@@ -17,6 +18,7 @@ import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { ref, getDownloadURL, uploadBytes } from 'firebase/storage';
 import { doc, setDoc } from 'firebase/firestore';
 import bcrypt from 'bcryptjs';
+import { useTheme } from 'next-themes';
 
 interface StoredFormData {
   nombre?: string;
@@ -682,42 +684,85 @@ const handleFinalizarRegistro = async (selfieData: string | null) => {
 
   // Renderizar la Interfaz de Cámara si corresponde
   if (shouldDisplayCameraInterface) {
-    console.log("SelfiePage: Render - Mostrando CameraInterface. Status:", livenessStatus, "Attempts:", attempts, "UI Message:", uiMessage);
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-fondo text-texto p-4">
-        <div className="w-full max-w-md p-6 md:p-8 space-y-4 bg-tarjeta rounded-xl shadow-xl text-center">
-        <Logo />
+  console.log('SelfiePage: Render – CameraInterface…');
 
-          <h1 className="text-xl font-bold text-primario">Verificación de Identidad</h1>
-          <p className="text-texto-secundario text-sm mb-1">
-            {`Intentos restantes: ${attempts}`}
-          </p>
-          <p className="text-texto-secundario text-md mb-2 h-10 flex items-center justify-center">
-            {/* El uiMessage mostrará "Iniciando cámara..." o los mensajes de detección */}
-            {uiMessage}
-          </p>
-          <div className="w-64 h-48 md:w-80 md:h-60 mx-auto rounded-lg overflow-hidden border-2 border-primario bg-gray-700 flex items-center justify-center my-2 relative">
-            {/* El video siempre está en el DOM si shouldDisplayCameraInterface es true.
-                isCameraReady controla si el stream está activo, no si el tag <video> está presente.
-                Podrías mostrar un spinner ENCIMA del video si !isCameraReady y livenessStatus es INITIALIZING_CAMERA */}
-            <video ref={videoRef} playsInline autoPlay muted className="w-full h-full object-cover transform scale-x-[-1]" />
-            {livenessStatus === "INITIALIZING_CAMERA" && !isCameraReady && (
-                <div className="absolute inset-0 flex items-center justify-center bg-gray-700 bg-opacity-50">
-                    <p className="text-white animate-pulse">Configurando cámara...</p>
-                </div>
-            )}
+  /* acceso al tema para la marca de agua */
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const { resolvedTheme } = useTheme();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const logoClaro = '/MARCA_CODYS_13.png';
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const logoOscuro = '/MARCA_CODYS_14.png';
+
+ return (
+  <div className="flex min-h-screen flex-col items-center justify-center bg-fondo text-texto px-2 py-6">
+
+    {/* ─── Isotipo sin transparencia ─── */}
+    <img
+      src={resolvedTheme === 'dark' ? '/MARCA_CODYS_14.png' : '/MARCA_CODYS_13.png'}
+      alt="Isotipo CODYS"
+      className="mx-auto mb-6 w-36 md:w-44 object-contain"
+      width={128}
+      height={128}
+    />
+
+    {/* ─── Tarjeta de verificación ─── */}
+    <div className="
+      w-[90vw] sm:max-w-md md:max-w-xl
+      space-y-4 rounded-xl border border-borde-tarjeta
+      bg-tarjeta p-5 shadow-xl md:p-8
+    ">
+      <h1 className="text-center text-lg font-bold text-primario md:text-xl">
+        Verificación de Identidad
+      </h1>
+
+      <p className="text-center text-xs text-texto-secundario md:text-sm">
+        Intentos restantes: {attempts}
+      </p>
+
+      <p className="h-9 flex items-center justify-center text-center text-xs md:text-sm text-texto-secundario">
+        {uiMessage}
+      </p>
+
+      {/* Video responsivo 4:3 */}
+      <div className="
+        relative mx-auto my-2 flex items-center justify-center
+        w-full pt-[75%]
+        rounded-lg overflow-hidden border-2 border-primario bg-gray-700
+      ">
+        <video
+          ref={videoRef}
+          playsInline
+          autoPlay
+          muted
+          className="absolute inset-0 h-full w-full object-cover transform scale-x-[-1]"
+        />
+        {livenessStatus === 'INITIALIZING_CAMERA' && !isCameraReady && (
+          <div className="absolute inset-0 flex items-center justify-center bg-gray-700/50">
+            <p className="animate-pulse text-white text-sm md:text-base">
+              Configurando cámara…
+            </p>
           </div>
-          <canvas ref={canvasRef} style={{ display: 'none' }}></canvas>
-          
-          {livenessStatus === "SUCCESS" && (
-            <Button onClick={handleCapturarSelfie} disabled={isProcessingAction} fullWidth className="mt-4">
-              {isProcessingAction ? 'Procesando Selfie...' : 'Tomar Selfie y Continuar'}
-            </Button>
-          )}
-        </div>
+        )}
       </div>
-    );
-  }
+
+      <canvas ref={canvasRef} style={{ display: 'none' }} />
+
+      {livenessStatus === 'SUCCESS' && (
+        <Button
+          onClick={handleCapturarSelfie}
+          disabled={isProcessingAction}
+          fullWidth
+          className="mt-2"
+        >
+          {isProcessingAction ? 'Procesando Selfie…' : 'Tomar Selfie y Continuar'}
+        </Button>
+      )}
+    </div>
+  </div>
+);
+
+
 
   // Fallback final si ninguna otra condición de renderizado se cumple
   console.log("SelfiePage: Render - Mostrando Fallback final (inesperado si la lógica es correcta). UI Message:", uiMessage);
@@ -726,4 +771,4 @@ const handleFinalizarRegistro = async (selfieData: string | null) => {
       <p className="text-lg">{uiMessage || "Por favor, espera..."}</p>
     </div>
   );
-}
+}}

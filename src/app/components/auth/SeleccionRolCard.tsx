@@ -1,36 +1,49 @@
-// src/app/components/auth/SeleccionRolCard.tsx
 'use client';
 
 import Link from 'next/link';
+import { User, Briefcase, Store } from 'lucide-react';
+import clsx from 'clsx';
 
-interface SeleccionRolCardProps {
-  titulo: string;
-  descripcion?: string;
-  href: string;
+export type Rol = 'usuario' | 'prestador' | 'comercio';
+
+
+export interface SeleccionRolCardProps {
+  rol: Rol;
 }
 
-export default function SeleccionRolCard({ titulo, descripcion, href }: SeleccionRolCardProps) {
+const iconMap = {
+  usuario: User,
+  prestador: Briefcase,
+  comercio: Store,
+} as const;
+
+const labelMap = {
+  usuario: 'Usuario',
+  prestador: 'Prestador',
+  comercio: 'Comercio',
+} as const;
+
+const pathMap = {
+  usuario: '/registro/usuario',
+  prestador: '/registro/prestador',
+  comercio: '/registro/comercio',
+} as const;
+
+export default function SeleccionRolCard({ rol }: SeleccionRolCardProps) {
+  const Icon = iconMap[rol];
+
   return (
     <Link
-      href={href}
-      className="
-        block w-full max-w-sm p-6 
-        bg-tarjeta 
-        rounded-xl 
-        shadow-lg 
-        border-2 border-borde-tarjeta  // Borde violeta aplicado
-        transition-all duration-300 ease-in-out 
-        transform 
-        hover:shadow-xl hover:-translate-y-1 hover:border-opacity-75 // Sutil cambio de opacidad del borde al hacer hover
-        focus:outline-none focus:ring-2 focus:ring-primario focus:ring-opacity-50 
-      "
-    >
-      <div className="text-center">
-        <h2 className="text-xl font-bold text-primario mb-2">{titulo}</h2>
-        {descripcion && (
-          <p className="text-sm text-texto-secundario">{descripcion}</p>
-        )}
-      </div>
-    </Link>
+  href={pathMap[rol]}
+  className={clsx(
+    'card !bg-primario !text-white dark:bg-tarjeta dark:text-texto', // ← ¡ojo al !  (important)
+    'flex items-center gap-4 transition-all duration-150',
+    'hover:shadow-lg hover:scale-[1.02]',
+    'focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-primario/30'
+  )}
+>
+  <Icon size={24} className="!text-white dark:text-primario" />
+  <span className="text-lg font-medium">{labelMap[rol]}</span>
+</Link>
   );
 }

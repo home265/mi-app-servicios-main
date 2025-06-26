@@ -1,4 +1,4 @@
-// src/app/page.tsx (Splash Screen)
+
 'use client';
 
 import Image from 'next/image';
@@ -25,19 +25,15 @@ export default function SplashScreenPage() {
           ${isMounted ? 'scale-100 opacity-100' : 'scale-0 opacity-0'}
         `}
       >
-        <Image
-          src="/logo1.png"
-          alt="Logo Mi App Servicios"
-          width={263} // ANCHO REAL ORIGINAL de tu archivo logo1.png
-          height={176} // ALTO REAL ORIGINAL de tu archivo logo1.png
-          priority
-          className="w-36 h-auto md:w-44 md:h-auto" // Tailwind: Ancho responsivo, alto automático
-                                                   // w-36 (144px), md:w-44 (176px)
-                                                   // Ajusta estos valores de 'w-' a tu gusto
-                                                   // Dado que tu logo es más ancho que alto,
-                                                   // puedes usar un ancho mayor si quieres que se vea más grande.
-                                                   // Ejemplo: className="w-44 h-auto md:w-56 md:h-auto"
-        />
+        <div className="relative w-52 h-36 md:w-64 md:h-44">
+  <Image
+    src="/logo1.png"
+    alt="Logo Mi App Servicios"
+    fill
+    priority
+    className="object-contain"
+  />
+</div>
       </div>
       <h1
         className={`

@@ -1,6 +1,16 @@
+// src/app/busqueda/page.tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/*───────────────────────────────────────────────
+  BÚSQUEDA — “Búsqueda de servicios”
+───────────────────────────────────────────────*/
 'use client';
+
 import React, { useState, useEffect, useCallback } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useTheme } from 'next-themes';
+import { Bars3BottomRightIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
+
 import { useUserStore, UserProfile } from '@/store/userStore';
 import SelectorCategoria, { CategoriaSeleccionada } from '@/app/components/forms/SelectorCategoria';
 import Button from '@/app/components/ui/Button';
@@ -12,18 +22,37 @@ import {
   sendAgreementConfirmed,
   NotificationDoc as Notification,
   Sender as NotificationSender,
-  Recipient as NotificationRecipient,
   Payload as NotificationPayload,
 } from '@/lib/services/notificationsService';
 import NotificacionCard from '@/app/components/notificaciones/NotificacionCard';
 import ContactoPopup from '@/app/components/notificaciones/ContactoPopup';
 import ResenaForm from '@/app/components/resenas/ResenaForm';
 import PerfilModal from '@/app/components/notificaciones/PerfilModal';
-import Logo from '@/app/components/ui/Logo';
 import { doc, getDoc, deleteDoc, DocumentData } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 
-/* ───── Tipos internos ───── */
+// paleta
+const palette = {
+  dark: {
+    fondo: '#0F2623',
+    tarjeta: '#184840',
+    borde: '#2F5854',
+    texto: '#F9F3D9',
+    subTxt: '#E4DEC4',
+    resalte: '#EFC71D',
+    marca: '/MARCA_CODYS_14.png',
+  },
+  light: {
+    fondo: '#F9F3D9',
+    tarjeta: '#184840',
+    borde: '#2F5854',
+    texto: '#0F2623',
+    subTxt: '#2C463F',
+    resalte: '#EFC71D',
+    marca: '/MARCA_CODYS_13.png',
+  },
+};
+
 interface PrestadorData {
   uid: string;
   collection: string;
@@ -40,42 +69,36 @@ type ResenaTarget = { uid: string; collection: string };
 type PerfilTarget = { uid: string; collection: string };
 
 export default function BusquedaPage() {
-  /* ─── store & router ─── */
-  const currentUser = useUserStore((s) => s.currentUser) as UserProfileWithLocalidad | null;
-  const originalRole = useUserStore((s) => s.originalRole);
-  const setUnread = useUserStore((s) => s.setUnread);
+  const currentUser = useUserStore(s => s.currentUser) as UserProfileWithLocalidad | null;
+  const originalRole = useUserStore(s => s.originalRole);
+  const setUnread = useUserStore(s => s.setUnread);
   const router = useRouter();
 
-  /* ─── state ─── */
+  const { resolvedTheme } = useTheme();
+  const P = resolvedTheme === 'dark' ? palette.dark : palette.light;
+
   const [categorySel, setCategorySel] = useState<CategoriaSeleccionada | null>(null);
   const [description, setDescription] = useState('');
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showContacto, setShowContacto] = useState(false);
   const [selectedPrestador, setSelectedPrestador] = useState<PrestadorData | null>(null);
-
-  // reseñas
   const [showResena, setShowResena] = useState(false);
   const [resenaTarget, setResenaTarget] = useState<ResenaTarget | null>(null);
   const [resenaNotifId, setResenaNotifId] = useState<string | null>(null);
-
-  // perfil
   const [showPerfil, setShowPerfil] = useState(false);
   const [perfilTarget, setPerfilTarget] = useState<PerfilTarget | null>(null);
 
-  /* ─── helpers ─── */
   const userCollection =
-    originalRole === 'prestador'
-      ? 'prestadores'
-      : originalRole === 'comercio'
-      ? 'comercios'
-      : 'usuarios_generales';
+    originalRole === 'prestador' ? 'prestadores' :
+    originalRole === 'comercio'   ? 'comercios' :
+    'usuarios_generales';
 
   const handleCategoriaChange = useCallback((sel: CategoriaSeleccionada | null) => {
-    setCategorySel(sel ? { categoria: sel.categoria, subcategoria: sel.subcategoria || null } : null);
+    setCategorySel(sel);
   }, []);
 
   function getSender(n: Notification): NotificationSender | null {
-    if (n.from?.uid && n.from?.collection) return { uid: n.from.uid, collection: n.from.collection };
+    if (n.from?.uid && n.from?.collection) return n.from;
     const fromId = (n as DocumentData).fromId || (n.payload as DocumentData)?.fromId;
     const fromCollection = (n as DocumentData).fromCollection || (n.payload as DocumentData)?.fromCollection;
     return typeof fromId === 'string' && typeof fromCollection === 'string'
@@ -83,25 +106,23 @@ export default function BusquedaPage() {
       : null;
   }
 
-  /* ─── suscripción ─── */
   useEffect(() => {
     if (currentUser && originalRole) {
       const unsub = subscribeToNotifications(
         { uid: currentUser.uid, collection: userCollection },
-        (list) => {
-          const filtered = list.filter((n) =>
-            ['job_accept', 'contact_followup', 'rating_request'].includes(n.type),
+        list => {
+          const filt = list.filter(n =>
+            ['job_accept', 'contact_followup', 'rating_request'].includes(n.type)
           );
-          setNotifications(filtered);
-          setUnread('jobResponses', filtered.filter((n) => !n.read).length);
-        },
+          setNotifications(filt);
+          setUnread('jobResponses', filt.filter(x => !x.read).length);
+        }
       );
       return unsub;
     }
-    return () => {};
+    return () => { };
   }, [currentUser, originalRole, userCollection, setUnread]);
 
-  /* ─── guards ─── */
   if (!currentUser || !currentUser.localidad) {
     if (typeof window !== 'undefined') router.replace('/login');
     return null;
@@ -114,33 +135,25 @@ export default function BusquedaPage() {
     localidad: { provinciaNombre: province, nombre: locality },
   } = currentUser;
 
-  /* ─── búsqueda ─── */
   async function handleSearch() {
     if (!categorySel) {
-      alert('Selecciona una categoría antes de buscar.');
+      alert('Debes elegir una categoría.');
+      return;
+    }
+    if (!description.trim()) {
+      alert('La descripción no puede estar vacía.');
       return;
     }
     const { categoria, subcategoria } = categorySel;
-
     try {
-      const providers = await getProvidersByFilter(
-        categoria,
-        subcategoria || undefined,
-        province,
-        locality,
-      );
+      const providers = await getProvidersByFilter(categoria, subcategoria || undefined, province, locality);
       if (!providers.length) {
-        alert('No se encontraron prestadores en tu zona.');
+        alert('No se encontraron prestadores.');
         return;
       }
-
-      const toRecipients: NotificationRecipient[] = providers.map((p) => ({
-        uid: p.uid,
-        collection: p.collection,
-      }));
-      const fromSender: NotificationSender = { uid: userUid, collection: userCollection };
-
-      const jobPayload: NotificationPayload = {
+      const toRecipients = providers.map(p => ({ uid: p.uid, collection: p.collection }));
+      const fromSender = { uid: userUid, collection: userCollection };
+      const payload: NotificationPayload = {
         category: categoria,
         subcategoria: subcategoria ?? '',
         description,
@@ -148,76 +161,52 @@ export default function BusquedaPage() {
         avatarUrl: userAvatar || '/logo1.png',
         timestamp: Date.now(),
       };
-
-      await sendJobRequest({ to: toRecipients, from: fromSender, payload: jobPayload });
-      alert('¡Solicitud enviada con éxito!');
+      await sendJobRequest({ to: toRecipients, from: fromSender, payload });
+      alert('Solicitud enviada.');
       setDescription('');
-    } catch (err) {
-      console.error('[Busqueda] Error al enviar solicitud:', err);
-      alert('Ocurrió un error al enviar la solicitud.');
+    } catch (e) {
+      console.error(e);
+      alert('Error al enviar solicitud.');
     }
   }
 
-  /* ─── acciones tarjeta ─── */
   async function handlePrimary(n: Notification) {
-  const sender = getSender(n);
-  if (!sender) return;
-
-  if (n.type === 'job_accept') {
-    const snap = await getDoc(doc(db, sender.collection, sender.uid));
-    const data = snap.data();
-    if (!data) {
-      alert('No se pudieron cargar los datos del prestador.');
-      return;
+    const s = getSender(n); if (!s) return;
+    if (n.type === 'job_accept') {
+      const snap = await getDoc(doc(db, s.collection, s.uid));
+      const data = snap.data();
+      if (!data) { alert('No pude cargar datos.'); return; }
+      setSelectedPrestador({
+        uid: s.uid,
+        collection: s.collection,
+        nombre: data.nombre || 'Prestador',
+        selfieUrl: (data as any).selfieURL || (data as any).selfieUrl || '/avatar-placeholder.png',
+        telefono: (data as any).telefono || '',
+      });
+      setShowContacto(true);
+    } else if (n.type === 'contact_followup') {
+      await sendAgreementConfirmed({
+        to: [s], from: { uid: userUid, collection: userCollection },
+        payload: {
+          description: `${userName} confirmó el acuerdo.`,
+          senderName: userName,
+          avatarUrl: userAvatar || '/avatar-placeholder.png',
+        }
+      });
+      await deleteDoc(doc(db, 'usuarios_generales', userUid, 'contactPendings', s.uid));
+      await removeNotification({ uid: userUid, collection: userCollection }, n.id);
+      alert('Notificado al prestador.');
+    } else {
+      setResenaTarget(s); setResenaNotifId(n.id); setShowResena(true);
     }
-    setSelectedPrestador({
-      uid: sender.uid,
-      collection: sender.collection,
-      nombre: data.nombre ?? 'Prestador',
-      selfieUrl: data.selfieURL ?? data.selfieUrl ?? '/avatar-placeholder.png',
-      telefono: data.telefono ?? '',
-    });
-    setShowContacto(true);
-
-  } else if (n.type === 'contact_followup') {
-    await sendAgreementConfirmed({
-      to: [sender],
-      from: { uid: userUid, collection: userCollection },
-      payload: {
-        description: `${userName} confirmó que llegaron a un acuerdo.`,
-        senderName: userName,
-        avatarUrl: userAvatar ?? '/avatar-placeholder.png',
-      },
-    });
-
-    // 🗑️ Eliminar contactPendings para que la Cloud Function no reprograme
-    await deleteDoc(
-      doc(db, 'usuarios_generales', userUid, 'contactPendings', sender.uid),
-    );
-
-    await removeNotification({ uid: userUid, collection: userCollection }, n.id);
-    alert('Respuesta enviada. Se ha notificado al prestador.');
-
-  } else if (n.type.startsWith('rating_request')) {
-    setResenaTarget(sender);
-    setResenaNotifId(n.id);
-    setShowResena(true);
   }
-}
 
   async function handleSecondary(n: Notification) {
     await removeNotification({ uid: userUid, collection: userCollection }, n.id);
   }
-
   function handleAvatarClick(n: Notification) {
-    const sender = getSender(n);
-    if (sender) {
-      setPerfilTarget(sender);
-      setShowPerfil(true);
-    }
+    const s = getSender(n); if (s) { setPerfilTarget(s); setShowPerfil(true); }
   }
-
-  /* ─── reseña enviada ─── */
   async function handleResenaSubmitted() {
     if (resenaNotifId) {
       await removeNotification({ uid: userUid, collection: userCollection }, resenaNotifId);
@@ -225,70 +214,111 @@ export default function BusquedaPage() {
     setShowResena(false);
     setResenaTarget(null);
     setResenaNotifId(null);
-    alert('¡Reseña enviada!');
+    alert('Reseña enviada.');
   }
 
-  /* ─── render ─── */
   return (
-    <div className="flex flex-col items-center p-4 min-h-screen bg-fondo text-texto-principal">
-      <div className="mb-6 mt-2">
-        <Logo />
-      </div>
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ backgroundColor: P.fondo, color: P.texto }}
+    >
+      <header className="relative flex items-center justify-between px-5 py-4">
+        <button onClick={() => router.push('/bienvenida')} className="h-11 w-11 focus:outline-none">
+          <Image src={P.marca} alt="Inicio" height={30} width={30} />
+        </button>
+        <h1 className="absolute inset-0 flex items-center justify-center text-lg font-medium pointer-events-none">
+          Búsqueda de servicios
+        </h1>
+        <button
+          onClick={() => router.push('/ajustes')}
+          style={{ backgroundColor: P.tarjeta }}
+          className="h-11 w-11 rounded-full flex items-center justify-center focus:outline-none"
+        >
+          <Bars3BottomRightIcon className="h-7 w-7" style={{ color: P.resalte }} />
+        </button>
+      </header>
 
-      {/* --- formulario búsqueda --- */}
-      <div className="w-full max-w-lg space-y-6 bg-tarjeta p-6 rounded-xl shadow-lg border border-borde-tarjeta mb-8">
-        <SelectorCategoria
-          idCategoria="busqueda-categoria"
-          idSubcategoria="busqueda-subcategoria"
-          onCategoriaChange={handleCategoriaChange}
-        />
-        <div>
-          <label
-            htmlFor="descripcion"
-            className="block text-sm font-medium text-texto-secundario mb-1"
+      <hr className="mx-5" style={{ borderColor: P.borde }} />
+
+      <main className="flex flex-col items-center flex-grow pt-6 pb-8 px-4">
+        <div
+          className="w-full max-w-lg space-y-6 p-6 rounded-2xl shadow-lg"
+          style={{
+            backgroundColor: P.tarjeta,
+            border: `1px solid ${P.borde}`,
+            color: palette.dark.texto   /* fuerza texto claro en ambos modos */
+          }}
+        >
+          <SelectorCategoria
+            idCategoria="busq-cat"
+            idSubcategoria="busq-sub"
+            onCategoriaChange={handleCategoriaChange}
+            labelColor={palette.dark.texto}  /* etiquetas siempre claras */
+          />
+
+          <div>
+            <label
+              htmlFor="descripcion"
+              className="block text-sm font-medium mb-1"
+              style={{ color: palette.dark.texto }}
+            >
+              Descripción (breve)
+            </label>
+            <textarea
+              id="descripcion"
+              rows={3}
+              value={description}
+              onChange={e => setDescription(e.target.value)}
+              placeholder="Descripción breve…"
+              className="w-full px-4 py-2 rounded-lg focus:outline-none"
+              style={{
+                backgroundColor: 'rgba(255,255,255,0.08)',
+                color: palette.dark.texto,
+                border: `1px solid ${P.borde}`,
+                resize: 'none'
+              }}
+            />
+          </div>
+
+          <Button
+            onClick={handleSearch}
+            disabled={!categorySel || !description.trim()}
+            fullWidth
+            style={{
+              backgroundColor: P.resalte,
+              color: P.fondo,
+              border: `1px solid ${P.borde}`,
+            }}
           >
-            Descripción del trabajo (opcional)
-          </label>
-          <textarea
-            id="descripcion"
-            rows={4}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Ej: Necesito un plomero para arreglar una pérdida en el baño."
-            className="block w-full px-3 py-2 bg-input text-texto-principal border border-borde-input rounded-md shadow-sm placeholder-texto-placeholder focus:outline-none focus:ring-primario focus:border-primario sm:text-sm"
-            spellCheck="true"
-          />
+            Buscar prestadores
+          </Button>
         </div>
-        <Button onClick={handleSearch} disabled={!categorySel} fullWidth>
-          Buscar Prestadores
-        </Button>
-      </div>
 
-      {/* --- notificaciones --- */}
-      {notifications.length > 0 && (
-        <h2 className="text-xl font-semibold text-texto-principal mb-4">
-          Notificaciones Recibidas
-        </h2>
-      )}
-      <div className="w-full max-w-lg space-y-4">
-        {notifications.length === 0 && (
-          <p className="text-center text-texto-secundario py-4">
-            No tienes notificaciones nuevas.
-          </p>
+        {notifications.length > 0 && (
+          <h3 className="text-xl font-semibold mt-10 mb-4" style={{ color: P.texto }}>
+            Notificaciones recibidas
+          </h3>
         )}
-        {notifications.map((n) => (
-          <NotificacionCard
-            key={n.id}
-            data={n}
-            viewerMode="user"
-            onPrimary={() => handlePrimary(n)}
-            onSecondary={() => handleSecondary(n)}
-            onAvatarClick={() => handleAvatarClick(n)}
-          />
-        ))}
-      </div>
+        <div className="w-full max-w-lg space-y-4">
+          {notifications.length === 0 && (
+            <p className="text-center text-sm opacity-70 py-4" style={{ color: P.subTxt }}>
+              No tienes notificaciones nuevas.
+            </p>
+          )}
+          {notifications.map(n => (
+            <NotificacionCard
+              key={n.id}
+              data={n}
+              viewerMode="user"
+              onPrimary={() => handlePrimary(n)}
+              onSecondary={() => handleSecondary(n)}
+              onAvatarClick={() => handleAvatarClick(n)}
+            />
+          ))}
+        </div>
+      </main>
 
-      {/* --- pop-ups --- */}
+      {/* pop-ups */}
       {showContacto && selectedPrestador && (
         <ContactoPopup
           userUid={userUid}
@@ -296,27 +326,30 @@ export default function BusquedaPage() {
           providerUid={selectedPrestador.uid}
           providerCollection={selectedPrestador.collection}
           providerName={selectedPrestador.nombre}
-          notifId={
-            notifications.find(
-              (notif) =>
-                notif.type === 'job_accept' && getSender(notif)?.uid === selectedPrestador.uid,
-            )?.id ?? ''
-          }
+          notifId={notifications.find(x => x.type === 'job_accept' && getSender(x)?.uid === selectedPrestador.uid)?.id || ''}
           onClose={() => setShowContacto(false)}
         />
       )}
-
-      {showResena && resenaTarget && (
-        <ResenaForm target={resenaTarget} onSubmitted={handleResenaSubmitted} />
-      )}
-
+      {showResena && resenaTarget && <ResenaForm target={resenaTarget} onSubmitted={handleResenaSubmitted} />}
       {showPerfil && perfilTarget && (
-        <PerfilModal
-          target={perfilTarget}
-          viewerMode="user"
-          onClose={() => setShowPerfil(false)}
-        />
+        <PerfilModal target={perfilTarget} viewerMode="user" onClose={() => setShowPerfil(false)} />
       )}
+
+      <button
+        onClick={() => router.push('/bienvenida')}
+        className="fixed bottom-6 right-4 h-12 w-12 rounded-full shadow-lg flex items-center justify-center focus:outline-none"
+        style={{ backgroundColor: P.tarjeta }}
+      >
+        <ChevronLeftIcon className="h-6 w-6" style={{ color: P.resalte }} />
+      </button>
+
+      {/* placeholder description siempre en subTxt oscuro */}
+      <style jsx global>{`
+        #descripcion::placeholder {
+          color: ${palette.dark.subTxt} !important;
+          opacity: 1 !important;
+        }
+      `}</style>
     </div>
   );
 }

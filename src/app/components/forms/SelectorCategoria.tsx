@@ -1,13 +1,9 @@
 // src/app/components/forms/SelectorCategoria.tsx
+/* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import categoriasData from '@/data/categorias.json';
-
-interface Categoria {
-  nombre: string;
-  subcategorias: string[];
-}
 
 export interface CategoriaSeleccionada {
   categoria: string;
@@ -19,132 +15,194 @@ interface SelectorCategoriaProps {
   idSubcategoria: string;
   labelCategoria?: string;
   labelSubcategoria?: string;
-  error?: string; // <<--- CAMBIO AQUÍ: De errorCategoria/errorSubcategoria a solo 'error'
   onCategoriaChange: (seleccion: CategoriaSeleccionada | null) => void;
   initialValue?: CategoriaSeleccionada | null;
+  labelColor?: string;
+}
+
+interface Categoria {
+  nombre: string;
+  subcategorias: string[];
 }
 
 const todasLasCategorias: Categoria[] = categoriasData.categorias;
 
-const SelectorCategoria: React.FC<SelectorCategoriaProps> = ({
+export default function SelectorCategoria({
   idCategoria,
   idSubcategoria,
-  labelCategoria = "Categoría de Servicio",
-  labelSubcategoria = "Subcategoría (si aplica)",
-  error, // <<--- USAREMOS ESTA PROP
+  labelCategoria = 'Seleccionar categoría',
+  labelSubcategoria = 'Seleccionar subcategoría',
   onCategoriaChange,
   initialValue,
-}) => {
-  const [categoriaSeleccionada, setCategoriaSeleccionada] = useState<string>(initialValue?.categoria || '');
-  const [subcategoriaSeleccionada, setSubcategoriaSeleccionada] = useState<string>(initialValue?.subcategoria || '');
-  const [subcategoriasDisponibles, setSubcategoriasDisponibles] = useState<string[]>([]);
+  labelColor = '#F9F3D9',
+}: SelectorCategoriaProps) {
+  const [openCatPanel, setOpenCatPanel] = useState(false);
+  const [openSubPanel, setOpenSubPanel] = useState(false);
+  const [search, setSearch] = useState('');
+  const [categoria, setCategoria] = useState(initialValue?.categoria || '');
+  const [subcategoria, setSubcategoria] = useState(initialValue?.subcategoria || '');
+  const [subcats, setSubcats] = useState<string[]>([]);
 
+  const highlight = '#EFC71D';
+  const borderColor = '#2F5854';
+  const cardBg = 'rgba(0,0,0,0)';
+  const hoverBg = 'rgba(255,255,255,0.1)';
+
+  // Botones de selección
+  const selectorBtn =
+    'inline-flex items-center justify-start px-3 py-1 text-sm rounded-md border transition whitespace-normal';
+  // Botones del listado con altura fija y texto centrado
+  const listBtn =
+    'h-16 flex items-center justify-center px-3 py-2 text-sm rounded-md border transition w-full whitespace-normal break-words';
+
+  // Filtrar categorías
+  const catsFiltradas = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return q
+      ? todasLasCategorias.filter(c => c.nombre.toLowerCase().includes(q))
+      : todasLasCategorias;
+  }, [search]);
+
+  // Al cambiar categoría: resetear subcategoría y cargar nuevas subcats
   useEffect(() => {
-    if (categoriaSeleccionada) {
-      const categoriaActual = todasLasCategorias.find(cat => cat.nombre === categoriaSeleccionada);
-      if (categoriaActual && categoriaActual.subcategorias.length > 0) {
-        setSubcategoriasDisponibles(categoriaActual.subcategorias);
-        // Si la subcategoría inicial ya no es válida para la nueva categoría, la reseteamos
-        if (initialValue?.categoria !== categoriaSeleccionada || !categoriaActual.subcategorias.includes(subcategoriaSeleccionada)) {
-            // No la reseteamos aquí para permitir que la validación de react-hook-form actúe
-            // si la subcategoría se vuelve obligatoria y no está seleccionada.
-            // El usuario deberá seleccionar una subcategoría válida.
-        }
-      } else {
-        setSubcategoriasDisponibles([]);
-        setSubcategoriaSeleccionada(''); // Resetear si no hay subcategorías
-      }
+    // Siempre limpiar subcategoría previa
+    setSubcategoria('');
+    if (!categoria) {
+      setSubcats([]);
     } else {
-      setSubcategoriasDisponibles([]);
-      setSubcategoriaSeleccionada('');
+      const found = todasLasCategorias.find(c => c.nombre === categoria);
+      setSubcats(found?.subcategorias || []);
     }
-  }, [categoriaSeleccionada, initialValue?.categoria, subcategoriaSeleccionada]); // Añadido initialValue?.categoria para re-evaluar si cambia
+    // Cerrar panel de subcategorías
+    setOpenSubPanel(false);
+  }, [categoria]);
 
+  // Notificar cambios al padre
   useEffect(() => {
-    // Sincronizar con valor inicial si cambia desde fuera (menos común para este uso)
-    if (initialValue) {
-        if (initialValue.categoria !== categoriaSeleccionada) {
-            setCategoriaSeleccionada(initialValue.categoria || '');
-        }
-        if (initialValue.subcategoria !== subcategoriaSeleccionada) {
-            setSubcategoriaSeleccionada(initialValue.subcategoria || '');
-        }
-    }
-  }, [categoriaSeleccionada, initialValue, subcategoriaSeleccionada]);
-
-
-  useEffect(() => {
-    if (categoriaSeleccionada) {
-      onCategoriaChange({
-        categoria: categoriaSeleccionada,
-        subcategoria: subcategoriaSeleccionada || null,
-      });
+    if (categoria) {
+      onCategoriaChange({ categoria, subcategoria: subcategoria || null });
     } else {
       onCategoriaChange(null);
     }
-  }, [categoriaSeleccionada, subcategoriaSeleccionada, onCategoriaChange]);
-
-  const handleCategoriaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setCategoriaSeleccionada(e.target.value);
-    setSubcategoriaSeleccionada(''); // Siempre resetear subcategoría al cambiar la principal
-  };
-
-  const handleSubcategoriaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSubcategoriaSeleccionada(e.target.value);
-  };
-
-  const selectBaseClasses = "block w-full px-3 py-2 bg-fondo border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primario focus:border-primario sm:text-sm text-texto dark:text-texto-dark";
+  }, [categoria, subcategoria]);
 
   return (
-    <>
-      <div className="mb-4">
-        <label htmlFor={idCategoria} className="block text-sm font-medium text-texto-secundario mb-1">
+    <div className="space-y-4">
+      {/* Selector de categoría */}
+      <div>
+        <label
+          htmlFor={idCategoria}
+          className="block text-sm font-medium mb-1"
+          style={{ color: labelColor }}
+        >
           {labelCategoria}
         </label>
-        <select
-          id={idCategoria}
-          value={categoriaSeleccionada}
-          onChange={handleCategoriaChange}
-          className={`${selectBaseClasses} ${error ? 'border-error focus:border-error focus:ring-error' : 'border-gray-300 dark:border-gray-600 focus:border-primario focus:ring-primario'}`}
+        <button
+          type="button"
+          onClick={() => { setOpenCatPanel(o => !o); setOpenSubPanel(false); }}
+          className={selectorBtn}
+          style={{
+            backgroundColor: openCatPanel ? hoverBg : cardBg,
+            color: categoria ? highlight : labelColor,
+            borderColor: highlight,
+          }}
         >
-          <option value="">Selecciona una categoría...</option>
-          {todasLasCategorias.map((cat) => (
-            <option key={cat.nombre} value={cat.nombre}>
-              {cat.nombre}
-            </option>
-          ))}
-        </select>
-        {/* El error principal se mostrará debajo de ambos o por el Controller */}
+          {categoria || '— ninguna —'}
+        </button>
+
+        {openCatPanel && (
+          <div className="relative mt-2">
+            <input
+              type="text"
+              autoFocus
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Buscar categoría…"
+              className="w-full px-4 py-2 mb-2 rounded-md focus:outline-none transition"
+              style={{
+                backgroundColor: cardBg,
+                color: labelColor,
+                border: `1px solid ${borderColor}`,
+              }}
+            />
+            <div className="grid grid-cols-3 gap-2 max-h-60 overflow-auto">
+              {catsFiltradas.length ? (
+                catsFiltradas.map(c => (
+                  <button
+                    key={c.nombre}
+                    type="button"
+                    onClick={() => {
+                      setCategoria(c.nombre);
+                      setOpenCatPanel(false);
+                      setSearch('');
+                    }}
+                    className={listBtn + ' hover:bg-white/10'}
+                    style={{
+                      backgroundColor: c.nombre === categoria ? highlight : cardBg,
+                      color: c.nombre === categoria ? '#0F2623' : labelColor,
+                      borderColor: highlight,
+                    }}
+                  >
+                    {c.nombre}
+                  </button>
+                ))
+              ) : (
+                <p className="col-span-3 text-center text-sm py-4" style={{ color: labelColor, opacity: 0.6 }}>
+                  Sin resultados
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
-      {subcategoriasDisponibles.length > 0 && (
-        <div className="mb-4">
-          <label htmlFor={idSubcategoria} className="block text-sm font-medium text-texto-secundario mb-1">
+      {/* Selector de subcategoría */}
+      {categoria && (
+        <div>
+          <label
+            htmlFor={idSubcategoria}
+            className="block text-sm font-medium mb-1"
+            style={{ color: labelColor }}
+          >
             {labelSubcategoria}
           </label>
-          <select
-            id={idSubcategoria}
-            value={subcategoriaSeleccionada}
-            onChange={handleSubcategoriaChange}
-            className={`${selectBaseClasses} ${error && !subcategoriaSeleccionada ? 'border-error focus:border-error focus:ring-error' : 'border-gray-300 dark:border-gray-600 focus:border-primario focus:ring-primario'}`}
+          <button
+            type="button"
+            onClick={() => setOpenSubPanel(o => !o)}
+            className={selectorBtn}
+            style={{
+              backgroundColor: openSubPanel ? hoverBg : cardBg,
+              color: subcategoria ? highlight : labelColor,
+              borderColor: highlight,
+            }}
           >
-            <option value="">Selecciona una subcategoría...</option>
-            {subcategoriasDisponibles.map((subcat) => (
-              <option key={subcat} value={subcat}>
-                {subcat}
-              </option>
-            ))}
-          </select>
+            {subcategoria || '— ninguna —'}
+          </button>
+
+          {openSubPanel && (
+            <div className="grid grid-cols-3 gap-2 mt-2 max-h-60 overflow-auto">
+              {subcats.map(s => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => {
+                    setSubcategoria(s);
+                    setOpenSubPanel(false);
+                  }}
+                  className={listBtn + ' hover:bg-white/10'}
+                  style={{
+                    backgroundColor: cardBg,
+                    color: labelColor,
+                    borderColor: highlight,
+                  }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
-      {/* El error general del Controller se mostrará fuera de este componente,
-          o podrías mostrar `error` aquí si es un mensaje general para el conjunto.
-          Ya que el Controller en RegistroForm.tsx mostrará errors.seleccionCategoria.message,
-          no es estrictamente necesario repetirlo aquí a menos que quieras un estilo diferente.
-      */}
-      {/* {error && <p className="text-sm text-error mt-1">{error}</p>} */}
-    </>
+    </div>
   );
-};
-
-export default SelectorCategoria;
+}

@@ -1,31 +1,32 @@
-/* src/app/globals.css */
 @import "tailwindcss";
 
-/* --- MODO CLARO (Tu nueva paleta de colores) --- */
+/* ---------- PALETA ---------- */
+
+/* --- MODO CLARO --- */
 :root {
-  --color-fondo: #F9F3D9;             /* Crema */
-  --color-primario: #307268;          /* Verde Oscuro */
-  --color-secundario: #EFC71D;        /* Amarillo */
-  --color-texto-principal: #2c4b46;   /* Un verde más oscuro y legible para textos */
-  --color-texto-secundario: #6e8380;  /* Un verde/gris para textos de menor importancia */
-  --color-tarjeta: #FFFFFF;           /* Blanco puro para las tarjetas, para que resalten */
-  --color-error: #D32F2F;             /* Rojo de error estándar */
-  --color-borde-tarjeta: #E2D2BF;      /* Beige para los bordes */
+  --color-fondo:            #F9F3D9;
+  --color-primario:         #307268;  /* verde para botones en modo claro */
+  --color-secundario:       #EFC71D;
+  --color-texto-principal:  #2c4b46;
+  --color-texto-secundario: #6e8380;
+  --color-tarjeta:          #307268;
+  --color-error:            #D32F2F;
+  --color-borde-tarjeta:    #E2D2BF;
 }
 
-/* --- MODO OSCURO (Adaptación de tu nueva paleta) --- */
+/* --- MODO OSCURO --- */
 .dark {
-  --color-fondo: #1a3b36;             /* Fondo de verde muy oscuro */
-  --color-primario: #EFC71D;          /* El amarillo resalta como primario en modo oscuro */
-  --color-secundario: #E2D2BF;        /* Beige como secundario */
-  --color-texto-principal: #F9F3D9;   /* El texto principal es el color crema, muy legible */
-  --color-texto-secundario: #BBC8CA;  /* Gris azulado para texto secundario */
-  --color-tarjeta: #254e48;           /* Un verde oscuro ligeramente más claro para las tarjetas */
-  --color-error: #EF5350;             /* Rojo de error claro para que se vea en fondos oscuros */
-  --color-borde-tarjeta: #307268;      /* Verde oscuro para bordes */
+  --color-fondo:            #1a3b36;
+  --color-primario:         #EFC71D;  /* amarillo para botones en modo oscuro */
+  --color-secundario:       #E2D2BF;
+  --color-texto-principal:  #F9F3D9;
+  --color-texto-secundario: #BBC8CA;
+  --color-tarjeta:          #254e48;
+  --color-error:            #EF5350;
+  --color-borde-tarjeta:    #307268;
 }
 
-/* El resto de tu archivo globals.css se mantiene igual */
+/* ---------- BASE ---------- */
 body {
   background-color: var(--color-fondo);
   color: var(--color-texto-principal);
@@ -34,91 +35,65 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  color: var(--color-primario);
-  text-decoration: none;
-}
-
-a:hover {
-  text-decoration: underline;
-}
+a { color: var(--color-primario); text-decoration: none; }
+a:hover { text-decoration: underline; }
 
 @layer base {
-  html,
-  :host {
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-  }
+  html, :host { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  [data-nextjs-dialog-backdrop] { backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
 }
 
-@layer base {
-  [data-nextjs-dialog-backdrop] {
-    -webkit-backdrop-filter: blur(10px);
-    backdrop-filter: blur(10px);
-  }
+/* ---------- COMPONENTES ---------- */
+
+/* Tarjeta genérica */
+.card {
+  background-color: var(--color-tarjeta);
+  color:            var(--color-texto-principal);
+  border: 1px solid var(--color-borde-tarjeta);
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,.06);
+  padding: 1.5rem;
 }
 
-/* --- ANIMACIONES PARA EFECTOS DEL REEL DE PREVISUALIZACIÓN --- */
-/* Añade esto al final de tu archivo globals.css */
+/* Botón primario: usa var(--color-primario) (verde en claro, amarillo en oscuro) */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  font-weight: 500;
+  background-color: var(--color-primario);
+  color: #fff;
+  transition: background-color .15s, box-shadow .15s, transform .15s;
+}
+.btn-primary:hover  { background-color: color-mix(in srgb, var(--color-primario) 90%, black); }
+.btn-primary:focus  { outline: none; box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primario) 30%, transparent); }
+.btn-primary:active { transform: scale(.97); }
 
-/* Efecto FadeIn */
-@keyframes fadeInAnimation {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-.anim-fadeIn {
-  animation-name: fadeInAnimation;
-  animation-duration: 0.7s; /* Duración de la animación del efecto */
-  animation-timing-function: ease-out;
-  animation-fill-mode: forwards; /* Mantiene el estado final después de la animación */
-}
-
-/* Efecto ZoomIn */
-@keyframes zoomInAnimation {
-  from {
-    opacity: 0;
-    transform: scale(0.85); /* Inicia un poco más pequeño */
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-.anim-zoomIn {
-  animation-name: zoomInAnimation;
-  animation-duration: 0.7s;
-  animation-timing-function: ease-out;
-  animation-fill-mode: forwards;
+/* Aseguramos que el botón de LoginForm herede el color correcto en modo claro */
+.login-card button[type="submit"] {
+  background-color: var(--color-primario);
 }
 
-/* Efecto SlideInFromLeft */
-@keyframes slideInFromLeftAnimation {
-  from {
-    opacity: 0;
-    transform: translateX(-30%); /* Inicia deslizando desde la izquierda */
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-.anim-slideInFromLeft {
-  animation-name: slideInFromLeftAnimation;
-  animation-duration: 0.7s;
-  animation-timing-function: ease-out;
-  animation-fill-mode: forwards;
-}
+/* ---------- ANIMACIONES ---------- */
 
-/* Efecto Pulse */
-@keyframes pulseAnimation {
-  0% { transform: scale(1); }
-  50% { transform: scale(1.03); } /* Un pulso sutil */
-  100% { transform: scale(1); }
+@keyframes fadeInAnimation          { from {opacity:0;}                      to {opacity:1;} }
+@keyframes zoomInAnimation          { from {opacity:0; transform:scale(.85);} to {opacity:1; transform:scale(1);} }
+@keyframes slideInFromLeftAnimation { from {opacity:0; transform:translateX(-30%);} to {opacity:1; transform:translateX(0);} }
+@keyframes pulseAnimation           { 0%{transform:scale(1);} 50%{transform:scale(1.03);} 100%{transform:scale(1);} }
+
+.anim-fadeIn          { animation: fadeInAnimation         0.7s ease-out forwards; }
+.anim-zoomIn          { animation: zoomInAnimation         0.7s ease-out forwards; }
+.anim-slideInFromLeft { animation: slideInFromLeftAnimation 0.7s ease-out forwards; }
+.anim-pulse           { animation: pulseAnimation          0.8s ease-in-out; }
+
+/* === fuerza botón verde en la card de registro === */
+.registro-card button[type="submit"] {
+  background-color: var(--color-primario) !important;
+  color: #ffffff !important;
 }
-.anim-pulse {
-  animation-name: pulseAnimation;
-  animation-duration: 0.8s; /* Duración del pulso */
-  animation-timing-function: ease-in-out;
-  /* No 'forwards' aquí para que vuelva a la normalidad.
-     La animación se aplica una vez. */
+.registro-card button[type="submit"]:hover {
+  background-color: color-mix(in srgb, var(--color-primario) 90%, black) !important;
 }

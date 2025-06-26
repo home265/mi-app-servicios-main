@@ -1,273 +1,306 @@
-'use client';
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { useUserStore, UserProfile, Role as UserRole, ActingAs } from '@/store/userStore';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+'use client'
+
+import React, { useEffect, useState } from 'react'
+import Image from 'next/image'
+import { useRouter } from 'next/navigation'
+import { useTheme } from 'next-themes'
+import {
+  Bars3BottomRightIcon,
+  ChevronLeftIcon,
+} from '@heroicons/react/24/outline'
+
+import {
+  useUserStore,
+  UserProfile,
+  Role as UserRole,
+  ActingAs,
+} from '@/store/userStore'
 import {
   subscribeToNotifications,
   removeNotification,
   sendJobAccept,
-  sendRatingRequest,
   NotificationDoc as Notification,
   Sender as NotificationSender,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Recipient as NotificationRecipient,
   Payload as NotificationPayload,
-} from '@/lib/services/notificationsService';
-import NotificacionCard from '@/app/components/notificaciones/NotificacionCard';
-import ResenaForm from '@/app/components/resenas/ResenaForm';
-import Logo from '@/app/components/ui/Logo'; //
-import { DocumentData } from 'firebase/firestore';
-import PerfilModal from '@/app/components/notificaciones/PerfilModal';
+} from '@/lib/services/notificationsService'
 
-// Interfaz para el usuario actual, asegurando los campos necesarios
+import NotificacionCard from '@/app/components/notificaciones/NotificacionCard'
+import ResenaForm from '@/app/components/resenas/ResenaForm'
+import PerfilModal from '@/app/components/notificaciones/PerfilModal'
+
+/*────────── paleta & assets ──────────*/
+const palette = {
+  dark: {
+    fondo: '#0F2623',
+    tarjeta: '#184840',
+    borde: '#2F5854',
+    texto: '#F9F3D9',
+    resalte: '#EFC71D',
+    marca: '/MARCA_CODYS_14.png',
+  },
+  light: {
+    fondo: '#F9F3D9',
+    tarjeta: '#184840',
+    borde: '#2F5854',
+    texto: '#0F2623',
+    resalte: '#EFC71D',
+    marca: '/MARCA_CODYS_13.png',
+  },
+}
+
 interface ProviderUserProfile extends UserProfile {
-  nombre: string;
-  selfieURL?: string;
+  nombre: string
+  selfieURL?: string
 }
-
-// Interfaz para el target de la reseña (el cliente/usuario)
 interface ResenaTarget {
-  uid: string;
-  collection: string;
+  uid: string
+  collection: string
 }
-
-// Interfaz para el target del PerfilModal
 interface PerfilTarget {
-    uid: string;
-    collection: string;
+  uid: string
+  collection: string
 }
 
 export default function TrabajosPage() {
-  const currentUser = useUserStore((s) => s.currentUser) as ProviderUserProfile | null;
-  const originalRole = useUserStore((s) => s.originalRole) as UserRole | null;
-  const actingAs = useUserStore((s) => s.actingAs) as ActingAs;
-  const setUnread = useUserStore((s) => s.setUnread);
-  const router = useRouter();
+  /*────────── stores & router ──────────*/
+  const currentUser = useUserStore(
+    (s) => s.currentUser
+  ) as ProviderUserProfile | null
+  const originalRole = useUserStore((s) => s.originalRole) as UserRole | null
+  const actingAs = useUserStore((s) => s.actingAs) as ActingAs
+  const setUnread = useUserStore((s) => s.setUnread)
+  const router = useRouter()
 
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [showResena, setShowResena] = useState<boolean>(false);
-  const [resenaTarget, setResenaTarget] = useState<ResenaTarget | null>(null);
-  const [resenaNotifId, setResenaNotifId] = useState<string | null>(null);
+  const { resolvedTheme } = useTheme()
+  const P = resolvedTheme === 'dark' ? palette.dark : palette.light
 
-  const [showPerfilModal, setShowPerfilModal] = useState<boolean>(false);
-  const [perfilModalTarget, setPerfilModalTarget] = useState<PerfilTarget | null>(null);
+  /*────────── estado local ──────────*/
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [showResena, setShowResena] = useState(false)
+  const [resenaTarget, setResenaTarget] = useState<ResenaTarget | null>(null)
+  const [resenaNotifId, setResenaNotifId] = useState<string | null>(null)
+  const [showPerfilModal, setShowPerfilModal] = useState(false)
+  const [perfilModalTarget, setPerfilModalTarget] =
+    useState<PerfilTarget | null>(null)
 
-
-  useEffect(() => {
-    if (currentUser && currentUser.uid && originalRole && actingAs === 'provider') {
-      const userUid = currentUser.uid;
-      const userColl =
-        originalRole === 'prestador'
-          ? 'prestadores'
-          : originalRole === 'comercio'
-          ? 'comercios'
-          : 'usuarios_generales';
-
-      const unsub = subscribeToNotifications(
-        { uid: userUid, collection: userColl },
-        (list) => {
-          const filtered = list.filter((n) =>
-            ['job_request', 'agreement_confirmed'].includes(n.type),
-          );
-          setNotifications(filtered);
-          setUnread('jobRequests', filtered.filter(notif => !notif.read).length);
-        },
-      );
-      return unsub;
-    }
-    return () => {};
-  }, [currentUser, originalRole, actingAs, setUnread, setNotifications]);
-
-  if (!currentUser || actingAs !== 'provider') {
-    if (typeof window !== 'undefined') {
-      router.replace('/bienvenida');
-    }
-    return null;
+  /*────────── loader inicial ──────────*/
+  if (!currentUser) {
+    return (
+      <div
+        className="flex items-center justify-center h-screen"
+        style={{ backgroundColor: P.fondo, color: P.resalte }}
+      >
+        <span className="animate-pulse">Cargando…</span>
+      </div>
+    )
   }
 
+  /*────────── redirección segura ──────────*/
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    if (currentUser && actingAs !== 'provider') {
+      router.replace('/bienvenida')
+    }
+  }, [currentUser, actingAs, router])
+
+  if (actingAs !== 'provider') return null
+
+  /*────────── datos prestador ──────────*/
   const {
     uid: providerUid,
-    nombre: providerName, // Este es el nombre del prestador
-    selfieURL: providerAvatar, // Este es el avatar del prestador
-  } = currentUser;
-
+    nombre: providerName,
+    selfieURL: providerAvatar,
+  } = currentUser
   const providerCollection =
     originalRole === 'prestador'
       ? 'prestadores'
       : originalRole === 'comercio'
       ? 'comercios'
-      : 'usuarios_generales';
+      : 'usuarios_generales'
 
+  /*────────── helpers ──────────*/
   function getSender(n: Notification): NotificationSender | null {
-    if (n.from?.uid && n.from?.collection) {
-      return { uid: n.from.uid, collection: n.from.collection };
-    }
-    const fromId = (n as DocumentData).fromId || (n.payload as DocumentData)?.fromId;
-    const fromCollection = (n as DocumentData).fromCollection || (n.payload as DocumentData)?.fromCollection;
-
-    if (typeof fromId === 'string' && typeof fromCollection === 'string') {
-      return { uid: fromId, collection: fromCollection };
-    }
-    console.warn('Could not determine sender from notification:', n);
-    return null;
+    if (n.from?.uid) return n.from
+    const id = (n as any).fromId
+    const col = (n as any).fromCollection
+    return typeof id === 'string' && typeof col === 'string'
+      ? { uid: id, collection: col }
+      : null
   }
 
-  async function handleAccept(notif: Notification) {
-    const client = getSender(notif);
-    if (!client) {
-      alert('No se pudo determinar el remitente de la solicitud.');
-      return;
-    }
+  /*────────── suscripción a notificaciones ──────────*/
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    const coll =
+      originalRole === 'prestador'
+        ? 'prestadores'
+        : originalRole === 'comercio'
+        ? 'comercios'
+        : 'usuarios_generales'
 
-    // --- CONSOLE LOGS PARA DEPURACIÓN ---
-    console.log('[TRABAJOS_PAGE] handleAccept - Datos del Prestador (currentUser):', { providerName, providerAvatar });
-    if (!providerName || providerName.trim() === ''){
-      console.warn('[TRABAJOS_PAGE] handleAccept - ADVERTENCIA: providerName está vacío o no definido.');
-    }
-    if (!providerAvatar || providerAvatar.trim() === ''){
-      console.warn('[TRABAJOS_PAGE] handleAccept - ADVERTENCIA: providerAvatar está vacío o no definido.');
-    }
-    // --- FIN CONSOLE LOGS ---
+    return subscribeToNotifications(
+      { uid: providerUid, collection: coll },
+      (list) => {
+        const flt = list.filter((n) =>
+          ['job_request', 'agreement_confirmed'].includes(n.type)
+        )
+        setNotifications(flt)
+        setUnread(
+          'jobRequests',
+          flt.filter((x) => !x.read).length
+        )
+      }
+    )
+  }, [providerUid, originalRole, setUnread])
 
-    const acceptPayload: NotificationPayload = {
-      description: `${providerName || 'Un proveedor'} ha aceptado tu solicitud de trabajo.`,
-      senderName: providerName || 'Proveedor de Servicios', // Nombre del prestador que envía
-      providerAvatar: providerAvatar || '/avatar-placeholder.png', // Avatar del prestador que envía
-      category: notif.payload?.category as string || '',
-      subcategoria: notif.payload?.subcategoria as string || '',
-      originalDescription: notif.payload?.description as string || '',
-    };
-
-    // --- CONSOLE LOG PARA DEPURACIÓN DEL PAYLOAD ---
-    console.log('[TRABAJOS_PAGE] handleAccept - acceptPayload a enviar:', acceptPayload);
-    // --- FIN CONSOLE LOG ---
-
-    try {
-      await sendJobAccept({
-        to: [{ uid: client.uid, collection: client.collection }],
-        from: { uid: providerUid, collection: providerCollection },
-        payload: acceptPayload,
-      });
-      await removeNotification({ uid: providerUid, collection: providerCollection }, notif.id);
-      alert('Solicitud aceptada. Se ha notificado al usuario.');
-    } catch (error) {
-      console.error('Error al aceptar el trabajo:', error);
-      alert('Hubo un error al aceptar la solicitud.');
+  /*────────── handlers ──────────*/
+  async function handleAccept(n: Notification) {
+    const cli = getSender(n)
+    if (!cli) return
+    const payload: NotificationPayload = {
+      description: `${
+        providerName || 'Un proveedor'
+      } ha aceptado tu solicitud de trabajo.`,
+      senderName: providerName || 'Proveedor',
+      providerAvatar: providerAvatar || '/avatar-placeholder.png',
+      category: n.payload?.category || '',
+      subcategoria: n.payload?.subcategoria || '',
+      originalDescription: n.payload?.description || '',
     }
+    await sendJobAccept({
+      to: [cli],
+      from: { uid: providerUid, collection: providerCollection },
+      payload,
+    })
+    await removeNotification(
+      { uid: providerUid, collection: providerCollection },
+      n.id
+    )
   }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async function handleRatingRequest(notif: Notification) {
-    const client = getSender(notif);
-    if (!client) {
-      alert('No se pudo determinar a quién solicitar la calificación.');
-      return;
-    }
-    const ratingPayload: NotificationPayload = {
-      description: `${providerName || 'Tu proveedor'} te solicita que califiques el servicio.`,
-      senderName: providerName || 'Proveedor de Servicios', // El proveedor es el remitente de esta solicitud
-      providerAvatar: providerAvatar || '/avatar-placeholder.png', // Avatar del proveedor
-    };
-
-    try {
-      await sendRatingRequest({
-        to: [{ uid: client.uid, collection: client.collection }],
-        from: { uid: providerUid, collection: providerCollection },
-        payload: ratingPayload,
-      });
-      await removeNotification({ uid: providerUid, collection: providerCollection }, notif.id);
-      alert('Solicitud de calificación enviada al usuario.');
-    } catch (error) {
-      console.error('Error al solicitar calificación:', error);
-      alert('Hubo un error al solicitar la calificación.');
-    }
+  async function handleDelete(n: Notification) {
+    await removeNotification(
+      { uid: providerUid, collection: providerCollection },
+      n.id
+    )
   }
-
-  function openResenaFormForClient(notif: Notification) {
-    const client = getSender(notif);
-    if (!client) {
-      alert('No se pudo determinar el cliente a calificar.');
-      return;
-    }
-    setResenaTarget(client);
-    setResenaNotifId(notif.id);
-    setShowResena(true);
+  function openResenaFormForClient(n: Notification) {
+    const cli = getSender(n)
+    if (!cli) return
+    setResenaTarget(cli)
+    setResenaNotifId(n.id)
+    setShowResena(true)
   }
-
   async function handleResenaSubmitted() {
-    if (resenaNotifId && currentUser) {
-      await removeNotification({ uid: providerUid, collection: providerCollection }, resenaNotifId);
+    if (resenaNotifId) {
+      await removeNotification(
+        { uid: providerUid, collection: providerCollection },
+        resenaNotifId
+      )
     }
-    setShowResena(false);
-    setResenaTarget(null);
-    setResenaNotifId(null);
-    alert('Reseña enviada y notificación actualizada.');
+    setShowResena(false)
+    setResenaTarget(null)
+    setResenaNotifId(null)
   }
-
-  async function handleDelete(notif: Notification) {
-    if (!currentUser) return;
-    try {
-      await removeNotification({ uid: providerUid, collection: providerCollection }, notif.id);
-    } catch (error) {
-      console.error('Error al eliminar notificación:', error);
-      alert('No se pudo eliminar la notificación.');
-    }
-  }
-
-  function handleAvatarClick(notif: Notification) {
-    const client = getSender(notif);
-    if (client) {
-        setPerfilModalTarget(client);
-        setShowPerfilModal(true);
+  function handleAvatarClick(n: Notification) {
+    const cli = getSender(n)
+    if (cli) {
+      setPerfilModalTarget(cli)
+      setShowPerfilModal(true)
     }
   }
 
+  /*────────── UI ──────────*/
   return (
-    // Aplicando bg-fondo y text-texto-principal para consistencia con el tema
-    <div className="flex flex-col items-center p-4 min-h-screen bg-fondo text-texto-principal">
-      <div className="mb-6 mt-2">
-        <Logo />
-      </div>
-      {/* Usando text-texto-principal para el título */}
-      <h1 className="mb-6 text-2xl font-bold text-texto-principal">Solicitudes y Acuerdos</h1>
-
-      <div className="w-full max-w-lg space-y-4">
-        {notifications.length === 0 && (
-          // Usando text-texto-secundario para el mensaje
-          <p className="text-center text-texto-secundario py-8">No tienes notificaciones.</p>
-        )}
-        {notifications.map((n) => (
-          <NotificacionCard
-            key={n.id}
-            data={n}
-            viewerMode="provider"
-            onPrimary={() => {
-              if (n.type === 'job_request') {
-                handleAccept(n);
-              } else if (n.type === 'agreement_confirmed') {
-                openResenaFormForClient(n);
-              }
-            }}
-            onSecondary={() => handleDelete(n)}
-            onAvatarClick={() => handleAvatarClick(n)}
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ backgroundColor: P.fondo, color: P.texto }}
+    >
+      {/*────────── header ──────────*/}
+      <header className="relative flex items-center justify-between px-5 py-4">
+        <button
+          onClick={() => router.push('/bienvenida')}
+          aria-label="Ir a inicio"
+          className="flex items-center justify-center h-11 w-11 focus:outline-none focus:ring"
+        >
+          <Image
+            src={P.marca}
+            alt="Inicio CODYS"
+            priority
+            height={30}
+            width={30}
+            className="h-9 w-9 select-none"
           />
-        ))}
-      </div>
+        </button>
 
-      {showResena && resenaTarget && currentUser && (
-        <ResenaForm
-          target={resenaTarget}
-          onSubmitted={handleResenaSubmitted}
-        />
-      )}
+        <h1 className="absolute inset-0 flex items-center justify-center text-lg md:text-xl font-medium tracking-wide pointer-events-none">
+          Solicitudes y acuerdos
+        </h1>
 
-      {showPerfilModal && perfilModalTarget && (
-        <PerfilModal
+        <button
+          onClick={() => router.push('/ajustes')}
+          style={{ backgroundColor: P.tarjeta }}
+          className="flex items-center justify-center h-11 w-11 rounded-full focus:outline-none focus:ring"
+          aria-label="Ajustes"
+        >
+          <Bars3BottomRightIcon
+            className="h-7 w-7"
+            style={{ color: P.resalte }}
+          />
+        </button>
+      </header>
+
+      <hr className="mx-5" style={{ borderColor: P.borde }} />
+
+      {/*────────── contenido ──────────*/}
+      <main className="flex flex-col items-center flex-grow pt-6 pb-8 px-4">
+        <div className="w-full max-w-lg space-y-4">
+          {notifications.length === 0 && (
+            <p className="text-center text-sm opacity-70 py-8">
+              No tienes notificaciones.
+            </p>
+          )}
+
+          {notifications.map((n) => (
+            <NotificacionCard
+              key={n.id}
+              data={n}
+              viewerMode="provider"
+              onPrimary={() =>
+                n.type === 'job_request'
+                  ? handleAccept(n)
+                  : openResenaFormForClient(n)
+              }
+              onSecondary={() => handleDelete(n)}
+              onAvatarClick={() => handleAvatarClick(n)}
+            />
+          ))}
+        </div>
+
+        {showResena && resenaTarget && (
+          <ResenaForm
+            target={resenaTarget}
+            onSubmitted={handleResenaSubmitted}
+          />
+        )}
+        {showPerfilModal && perfilModalTarget && (
+          <PerfilModal
             target={perfilModalTarget}
             viewerMode="provider"
             onClose={() => setShowPerfilModal(false)}
-        />
-      )}
+          />
+        )}
+      </main>
+
+      {/*────────── FAB volver ──────────*/}
+      <button
+        onClick={() => router.push('/bienvenida')}
+        aria-label="Volver a inicio"
+        className="fixed bottom-6 right-4 md:bottom-8 md:left-6 z-40 h-12 w-12 rounded-full shadow-lg flex items-center justify-center transition active:scale-95 focus:outline-none focus:ring"
+        style={{ backgroundColor: P.tarjeta }}
+      >
+        <ChevronLeftIcon className="h-6 w-6" style={{ color: P.resalte }} />
+      </button>
     </div>
-  );
+  )
 }
