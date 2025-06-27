@@ -2,12 +2,22 @@
 'use client';
 
 import { useState } from 'react';
-import { signInWithEmailAndPassword, AuthError } from 'firebase/auth'; // <-- Importar función y tipo de error
-import { auth } from '@/lib/firebase/config'; // <-- Importar tu instancia de auth
+import { signInWithEmailAndPassword, AuthError } from 'firebase/auth';
+import { auth } from '@/lib/firebase/config';
 import Input from '@/app/components/ui/Input';
 import Button from '@/app/components/ui/Button';
 
-export default function LoginForm() {
+// --- INICIO: MODIFICACIÓN ---
+// 1. Definimos las props que el componente recibirá.
+// `onLoginSuccess` es una función opcional.
+interface LoginFormProps {
+  onLoginSuccess?: () => void;
+}
+
+// 2. Usamos las props en la definición del componente.
+export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
+// --- FIN: MODIFICACIÓN ---
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -17,29 +27,32 @@ export default function LoginForm() {
     event.preventDefault();
     setIsLoading(true);
     setError(null);
-    console.log('Login attempt:', { email }); // No loguear contraseña
+    console.log('Login attempt:', { email });
 
     try {
-      // --- INICIO: Lógica Real de Firebase Auth ---
       const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      // Si llegamos aquí, el login fue exitoso en Firebase
       console.log('Login exitoso en Firebase para:', userCredential.user.email);
-      
-      // NO necesitamos hacer nada más aquí (ni setError, ni setIsLoading(false)).
-      // onAuthStateChanged en Providers.tsx se activará automáticamente
-      // y manejará la carga del perfil y la redirección a /pin-entry.
-      // Dejar que Providers.tsx maneje la transición después del éxito.
-      // --- FIN: Lógica Real de Firebase Auth ---
+
+      // --- INICIO: MODIFICACIÓN ---
+      // 3. Verificamos si la función onLoginSuccess fue proporcionada.
+      if (onLoginSuccess) {
+        // Si es así, la llamamos. Esto se usa en el flujo de desbloqueo/recuperación de PIN.
+        // La función se encargará de la lógica posterior (como redirigir a "set-new-pin").
+        onLoginSuccess();
+      }
+      // Si onLoginSuccess NO se proporciona, se ejecuta el flujo de login normal.
+      // El onAuthStateChanged global se encargará de la redirección, por lo que no
+      // es necesario hacer nada más aquí, la lógica existente es correcta.
+      // --- FIN: MODIFICACIÓN ---
 
     } catch (err) {
       console.error("Error en inicio de sesión:", err);
-      const authError = err as AuthError; // Hacer type assertion a AuthError
+      const authError = err as AuthError;
       let errorMessage = "Ocurrió un error al iniciar sesión.";
-      // Códigos de error comunes de signInWithEmailAndPassword
       switch (authError.code) {
           case 'auth/user-not-found':
           case 'auth/wrong-password':
-          case 'auth/invalid-credential': // Código más nuevo/general para email/pwd incorrectos
+          case 'auth/invalid-credential':
               errorMessage = "El correo electrónico o la contraseña son incorrectos.";
               break;
           case 'auth/invalid-email':
@@ -51,18 +64,13 @@ export default function LoginForm() {
           case 'auth/too-many-requests':
                errorMessage = "Demasiados intentos fallidos. Por favor, intenta más tarde.";
                break;
-          // Puedes añadir más casos si los necesitas
           default:
-              // Usar el mensaje de error de Firebase si no es uno de los códigos comunes
               errorMessage = authError.message || errorMessage; 
               break;
       }
       setError(errorMessage);
-      setIsLoading(false); // Detener la carga solo si hay un error aquí
+      setIsLoading(false);
     } 
-    // No poner setIsLoading(false) aquí fuera del catch, 
-    // porque en caso de éxito, la transición y posible redirección
-    // harán que el estado de carga de este componente ya no importe.
   };
 
   return (
@@ -76,7 +84,7 @@ export default function LoginForm() {
         onChange={(e) => setEmail(e.target.value)}
         required
         autoComplete="email"
-        disabled={isLoading} // Deshabilitar inputs mientras carga
+        disabled={isLoading}
       />
       <Input
         id="password"
@@ -87,11 +95,11 @@ export default function LoginForm() {
         onChange={(e) => setPassword(e.target.value)}
         required
         autoComplete="current-password"
-        disabled={isLoading} // Deshabilitar inputs mientras carga
+        disabled={isLoading}
       />
 
       {error && (
-        <p className="text-sm text-error text-center">{error}</p> // Usar tu color 'error'
+        <p className="text-sm text-error text-center">{error}</p>
       )}
 
       <Button type="submit" isLoading={isLoading} fullWidth>

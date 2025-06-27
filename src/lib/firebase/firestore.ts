@@ -1,5 +1,5 @@
 // src/lib/firebase/firestore.ts
-import { doc, deleteDoc, getDoc, DocumentSnapshot } from 'firebase/firestore';
+import { doc, deleteDoc, getDoc, DocumentSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from './config'; // Tu instancia exportada de firestore (db)
 
 // Lista de posibles colecciones de usuarios (mantener consistente con Providers.tsx)
@@ -63,3 +63,37 @@ export const deleteUserProfile = async (uid: string, rol?: string): Promise<void
     throw new Error("Error al borrar el perfil de la base de datos."); // Error genérico
   }
 };
+
+
+// --- INICIO: NUEVA FUNCIÓN AÑADIDA ---
+
+/**
+ * Actualiza el PIN hasheado de un usuario en su documento de Firestore.
+ * @param uid El UID del usuario cuyo PIN se actualizará.
+ * @param rol El rol del usuario, necesario para encontrar la colección correcta.
+ * @param newHashedPin El nuevo PIN ya procesado con hash que se guardará.
+ * @returns Promise<void>
+ * @throws Si no se encuentra la colección del usuario o si falla la actualización.
+ */
+export const updateUserPin = async (uid: string, rol: string, newHashedPin: string): Promise<void> => {
+  // Reutilizamos la función existente para encontrar la colección del usuario.
+  const collectionName = await findUserCollection(uid, rol);
+  
+  if (!collectionName) {
+      throw new Error(`No se pudo encontrar la colección para el usuario con UID: ${uid} para actualizar el PIN.`);
+  }
+
+  const userDocRef = doc(db, collectionName, uid);
+
+  try {
+    // Usamos updateDoc para modificar el campo específico del PIN.
+    await updateDoc(userDocRef, {
+      hashedPin: newHashedPin // Asegúrate que este nombre de campo ('hashedPin') coincida con el de tu base de datos.
+    });
+    console.log(`PIN actualizado exitosamente en Firestore para el usuario ${uid} en la colección ${collectionName}.`);
+  } catch (error) {
+    console.error(`Error al actualizar el PIN en Firestore (${collectionName}/${uid}):`, error);
+    throw new Error("No se pudo actualizar el PIN en la base de datos.");
+  }
+};
+// --- FIN: NUEVA FUNCIÓN AÑADIDA ---
