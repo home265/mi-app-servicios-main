@@ -107,9 +107,9 @@ export default function NotificacionCard({
       {/* avatar */}
       <div className="relative h-12 w-12 shrink-0 rounded-full overflow-hidden">
         {onAvatarClick
-          ? <button onClick={onAvatarClick} className="w-full h-full focus:outline-none">
-              <Image src={avatar} alt="" fill sizes="48px" className="object-cover"/>
-            </button>
+          ? <button onClick={onAvatarClick} className="relative w-full h-full focus:outline-none">
+    <Image src={avatar} alt="" fill sizes="48px" className="object-cover"/>
+</button>
           : <Image src={avatar} alt="" fill sizes="48px" className="object-cover"/>}
       </div>
 

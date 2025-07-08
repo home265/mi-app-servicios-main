@@ -61,7 +61,8 @@ const Avatar: React.FC<AvatarProps> = ({
           alt={`Avatar de ${nombre || 'usuario'}`} // Texto alternativo para accesibilidad.
           width={size}   // Ancho de la imagen (optimización).
           height={size}  // Alto de la imagen (optimización).
-          className="object-cover rounded-full" // Asegura que la imagen cubra el área y mantenga la forma circular.
+          // SE CORRIGIÓ ESTA LÍNEA:
+          className="w-full h-full object-cover" // Añadido w-full y h-full para que la imagen rellene el contenedor.
           priority // Prioriza la carga de esta imagen.
         />
       ) : (

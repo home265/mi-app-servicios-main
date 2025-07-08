@@ -17,11 +17,15 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 
+// ✅ PASO 1: Importar el ícono para el botón de volver
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
+
 import SelectorCategoriasEmpleo from '@/app/components/forms/SelectorCategoriasEmpleo';
 import CvCard, { CvCardData } from '@/app/components/cv/CvCard';
 import Button from '@/app/components/ui/Button';
 import Card from '@/app/components/ui/Card';
-import Logo from '@/app/components/ui/Logo';
+// ✅ PASO 2: Ya no necesitamos importar el Logo
+// import Logo from '@/app/components/ui/Logo';
 
 /* ---------- tipo mínimo del documento CV ---------- */
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -120,8 +124,10 @@ export default function EmpleadosPage() {
 
   /* ====================================================== */
   return (
-    <div className="flex flex-col items-center p-4 space-y-6">
-      <Logo />
+    // Se añade 'min-h-screen' para que el botón flotante tenga referencia de la altura
+    <div className="flex flex-col items-center p-4 space-y-6 min-h-screen">
+      {/* ✅ PASO 3: Se elimina la llamada al componente Logo */}
+      {/* <Logo /> */}
 
       <Card className="max-w-md w-full space-y-4">
         <h2 className="text-lg font-semibold">Buscar Empleados</h2>
@@ -140,7 +146,7 @@ export default function EmpleadosPage() {
       </Card>
 
       {/* Resultados */}
-      <div className="w-full max-w-md space-y-4">
+      <div className="w-full max-w-md space-y-4 pb-20"> {/* Padding bottom para que el botón no tape contenido */}
         {resultados.map((u) => (
           <CvCard
             key={u.uid}
@@ -158,6 +164,15 @@ export default function EmpleadosPage() {
           </p>
         )}
       </div>
+
+      {/* ✅ PASO 4: Se añade el botón flotante para volver */}
+      <button
+        onClick={() => router.push('/bienvenida')}
+        aria-label="Volver a inicio"
+        className="fixed bottom-6 right-4 md:bottom-8 md:left-6 z-40 h-14 w-14 rounded-full shadow-lg flex items-center justify-center transition active:scale-95 focus:outline-none focus:ring bg-tarjeta text-resalte"
+      >
+        <ChevronLeftIcon className="h-7 w-7" />
+      </button>
     </div>
   );
 }

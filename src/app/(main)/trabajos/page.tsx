@@ -218,20 +218,16 @@ export default function TrabajosPage() {
     >
       {/*────────── header ──────────*/}
       <header className="relative flex items-center justify-between px-5 py-4">
-        <button
-          onClick={() => router.push('/bienvenida')}
-          aria-label="Ir a inicio"
-          className="flex items-center justify-center h-11 w-11 focus:outline-none focus:ring"
-        >
-          <Image
-            src={P.marca}
-            alt="Inicio CODYS"
-            priority
-            height={30}
-            width={30}
-            className="h-9 w-9 select-none"
-          />
-        </button>
+        <div className="flex items-center justify-center h-11 w-11">
+  <Image
+    src={P.marca}
+    alt="Logo CODYS" // Es una buena práctica cambiar el 'alt' para que describa la imagen
+    priority
+    height={30}
+    width={30}
+    className="h-9 w-9 select-none"
+  />
+</div>
 
         <h1 className="absolute inset-0 flex items-center justify-center text-lg md:text-xl font-medium tracking-wide pointer-events-none">
           Solicitudes y acuerdos

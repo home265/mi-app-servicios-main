@@ -10,6 +10,7 @@ export interface CategoriaSeleccionada {
   subcategoria: string | null;
 }
 
+// 1. Se añade la propiedad 'error' a la interfaz.
 interface SelectorCategoriaProps {
   idCategoria: string;
   idSubcategoria: string;
@@ -18,6 +19,7 @@ interface SelectorCategoriaProps {
   onCategoriaChange: (seleccion: CategoriaSeleccionada | null) => void;
   initialValue?: CategoriaSeleccionada | null;
   labelColor?: string;
+  error?: string; // Propiedad para el mensaje de error
 }
 
 interface Categoria {
@@ -35,6 +37,7 @@ export default function SelectorCategoria({
   onCategoriaChange,
   initialValue,
   labelColor = '#F9F3D9',
+  error, // 2. Se recibe la nueva prop 'error'.
 }: SelectorCategoriaProps) {
   const [openCatPanel, setOpenCatPanel] = useState(false);
   const [openSubPanel, setOpenSubPanel] = useState(false);
@@ -202,6 +205,13 @@ export default function SelectorCategoria({
             </div>
           )}
         </div>
+      )}
+
+      {/* 3. Se muestra el mensaje de error si existe. */}
+      {error && (
+        <p className="text-sm text-error mt-1">
+          {error}
+        </p>
       )}
     </div>
   );

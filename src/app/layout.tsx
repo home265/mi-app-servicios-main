@@ -2,12 +2,11 @@
 import './globals.css';
 import { Providers } from './providers';
 import {
-  // --- 1. AQUÍ AGREGAMOS BARLOW A TU LISTA DE FUENTES ---
   Barlow,
   Roboto,
   Lato,
   Oswald,
-  Open_Sans, // Nota el guion bajo para nombres con espacios
+  Open_Sans,
   Montserrat,
   Raleway,
   Poppins,
@@ -31,9 +30,14 @@ import {
   Chewy,
   Rock_Salt,
   Covered_By_Your_Grace,
+  Gloria_Hallelujah,
+  Boogaloo,
+  Julius_Sans_One,
+  Wallpoet,
 } from 'next/font/google';
 
-// --- Mantenemos la configuración de todas tus fuentes para el editor ---
+// --- Se asigna cada fuente a una constante, como lo requiere Next.js ---
+const barlow = Barlow({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-barlow' });
 const roboto = Roboto({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-roboto' });
 const lato = Lato({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-lato' });
 const oswald = Oswald({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-oswald' });
@@ -61,18 +65,12 @@ const fasterOne = Faster_One({ subsets: ['latin'], weight: '400', display: 'swap
 const chewy = Chewy({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-chewy' });
 const rockSalt = Rock_Salt({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-rock-salt' });
 const coveredByYourGrace = Covered_By_Your_Grace({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-covered-by-your-grace' });
-
-// --- 2. AQUÍ AÑADIMOS LA CONFIGURACIÓN PARA BARLOW ---
-const barlow = Barlow({
-  subsets: ['latin'],
-  weight: ['400', '700'], // Cargamos el grosor normal y el "bold" o negrita
-  display: 'swap',
-  variable: '--font-barlow', // Esta es la variable que conectamos en tailwind.config.ts
-});
-
+const gloriaHallelujah = Gloria_Hallelujah({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-gloria-hallelujah' });
+const boogaloo = Boogaloo({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-boogaloo' });
+const juliusSansOne = Julius_Sans_One({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-julius-sans-one' });
+const wallpoet = Wallpoet({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-wallpoet' });
 
 export const metadata = {
-  // Actualizado para coincidir con la nueva marca "CODYS | Tu red de confianza"
   title: 'CODYS | Tu red de confianza',
   description: 'Conectamos necesidades con soluciones.',
 };
@@ -86,44 +84,22 @@ export default function RootLayout({
     <html
       lang="es"
       suppressHydrationWarning
-      // --- 3. AÑADIMOS LA VARIABLE DE BARLOW A LA LISTA, SIN QUITAR NINGUNA OTRA ---
+      // Se usan todas las variables para que Next.js las precargue correctamente.
+      // Esto genera los warnings en páginas que no usan las fuentes, pero asegura que el editor funcione.
       className={`
-        ${barlow.variable}
-        ${roboto.variable}
-        ${lato.variable}
-        ${oswald.variable}
-        ${openSans.variable}
-        ${montserrat.variable}
-        ${raleway.variable}
-        ${poppins.variable}
-        ${nunito.variable}
-        ${merriweather.variable}
-        ${anton.variable}
-        ${cinzel.variable}
-        ${medievalSharp.variable}
-        ${unifrakturCook.variable}
-        ${pacifico.variable}
-        ${dancingScript.variable}
-        ${playfairDisplay.variable}
-        ${indieFlower.variable}
-        ${bebasNeue.variable}
-        ${fredoka.variable}
-        ${abrilFatface.variable}
-        ${luckiestGuy.variable}
-        ${creepster.variable}
-        ${spicyRice.variable}
-        ${fasterOne.variable}
-        ${chewy.variable}
-        ${rockSalt.variable}
-        ${coveredByYourGrace.variable}
+        ${barlow.variable} ${roboto.variable} ${lato.variable} ${oswald.variable}
+        ${openSans.variable} ${montserrat.variable} ${raleway.variable} ${poppins.variable}
+        ${nunito.variable} ${merriweather.variable} ${anton.variable} ${cinzel.variable}
+        ${medievalSharp.variable} ${unifrakturCook.variable} ${pacifico.variable}
+        ${dancingScript.variable} ${playfairDisplay.variable} ${indieFlower.variable}
+        ${bebasNeue.variable} ${fredoka.variable} ${abrilFatface.variable}
+        ${luckiestGuy.variable} ${creepster.variable} ${spicyRice.variable}
+        ${fasterOne.variable} ${chewy.variable} ${rockSalt.variable}
+        ${coveredByYourGrace.variable} ${gloriaHallelujah.variable} ${boogaloo.variable}
+        ${juliusSansOne.variable} ${wallpoet.variable}
       `}
     >
-      <head>
-        {/* next/font se encarga de inyectar los estilos de fuente necesarios aquí.
-            No se necesitan las etiquetas <link> manuales a Google Fonts. */}
-      </head>
-      {/* Aplicamos Barlow como clase principal al BODY para que sea la fuente por defecto.
-          Las otras fuentes siguen estando disponibles para tu editor, como querías. */}
+      <head />
       <body className={barlow.className}>
         <Providers>
           <main>

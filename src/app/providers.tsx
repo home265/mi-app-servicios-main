@@ -187,7 +187,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (isLoadingAuth || !mounted) return;
 
-    const publicPaths = ['/login', '/seleccionar-registro', '/registro'];
+    // --- INICIO DE LA MODIFICACIÓN ---
+    const publicPaths = [
+      '/login',
+      '/seleccionar-registro',
+      '/registro',
+      '/terminos-y-condiciones',
+      '/politica-de-privacidad',
+    ];
+    // --- FIN DE LA MODIFICACIÓN ---
+
     const isPublicPath = publicPaths.some((p) => pathname.startsWith(p));
     const isPinEntryPath = pathname === '/pin-entry';
 
@@ -227,7 +236,16 @@ export function Providers({ children }: { children: React.ReactNode }) {
     return <LoadingScreen />;
   }
 
-  const publicPaths = ['/login', '/seleccionar-registro', '/registro'];
+  // --- INICIO DE LA MODIFICACIÓN ---
+  const publicPaths = [
+    '/login',
+    '/seleccionar-registro',
+    '/registro',
+    '/terminos-y-condiciones',
+    '/politica-de-privacidad',
+  ];
+  // --- FIN DE LA MODIFICACIÓN ---
+
   const isPublicPath = publicPaths.some((p) => pathname.startsWith(p));
   const isPinEntryPath = pathname === '/pin-entry';
 

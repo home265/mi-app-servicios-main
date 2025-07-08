@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
@@ -95,8 +96,14 @@ const base: Record<'prestador' | 'comercio', Action[]> = {
     { id: 'modo', label: 'Modo Usuario', Icon: UserCircleIcon, path: '#' },
   ],
   comercio: [
-    // similar for comercio...
-  ],
+  { id: 'buscar_empleados_c', label: 'Buscar Empleados', Icon: UserGroupIcon, path: '/empleados' }, // Cambiado IconComponent a Icon
+  // El ítem para 'Crear/Editar Anuncio' se añadirá dinámicamente
+  { id: 'editar_anuncios_c', label: 'Mis Anuncios', Icon: PencilIcon, path: '/mis-anuncios' }, // Cambiado IconComponent a Icon
+  { id: 'crear_publicacion_c', label: 'Crear Publicación', Icon: PlusCircleIcon, path: '/paginas-amarillas/crear', requiresAd: true }, // Cambiado IconComponent a Icon y requiresActiveAd a requiresAd
+  { id: 'editar_publicacion_c', label: 'Editar Publicación', Icon: PencilSquareIcon, path: '/paginas-amarillas/editar', requiresAd: true }, // Cambiado IconComponent a Icon y requiresActiveAd a requiresAd
+  { id: 'modo_usuario_c', label: 'Modo Usuario', Icon: UserCircleIcon, path: '#' }, // Cambiado IconComponent a Icon
+  { id: 'paginas_amarillas_c', label: 'Páginas Amarillas', Icon: BookOpenIcon, path: '/paginas-amarillas/buscar' }, // Cambiado IconComponent a Icon
+],
 };
 
 export default function BienvenidaPage() {
@@ -178,7 +185,7 @@ export default function BienvenidaPage() {
   return (
     <div className="min-h-screen flex flex-col" style={{ backgroundColor: P.fondo, color: P.texto }}>
       {/* ─── Cabecera ───────────────────────────────────────── */}
-      <header className="flex items-center justify-between px-5 py-4">
+      <header className="flex items-center justify-between px-5 py-4 mt-6">
         <div className="flex items-center gap-4">
           <Avatar selfieUrl={user.selfieURL ?? undefined} nombre={fullName} size={64} />
           <div>
@@ -195,20 +202,10 @@ export default function BienvenidaPage() {
         </button>
       </header>
 
-      {/* ─── Logo Centrado y Agrandado ───────────────────────── */}
-      <div className="flex justify-center mt-8">
-        <Image
-          src={P.logo}
-          alt="CODYS"
-          priority
-          className="h-16 w-auto"
-          width={180}
-          height={60}
-        />
-      </div>
+      {/* ─── El logo central fue eliminado ──────────────────── */}
 
       {/* ─── Grid de Acciones ───────────────────────────────── */}
-      <main className="flex-grow flex justify-center pt-6 pb-6">
+      <main className="flex-grow flex justify-center pt-16 pb-6">
         <div className="w-full px-4">
           <div
             className="
