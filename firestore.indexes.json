@@ -11,6 +11,32 @@
       ]
     },
     {
+      "collectionGroup": "paginas_amarillas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "creatorRole",      "order": "ASCENDING" },
+        { "fieldPath": "activa",           "order": "ASCENDING" },
+        { "fieldPath": "provincia",        "order": "ASCENDING" },
+        { "fieldPath": "localidad",        "order": "ASCENDING" },
+        { "fieldPath": "rubro",            "order": "ASCENDING" },
+        { "fieldPath": "subRubro",         "order": "ASCENDING" },
+        { "fieldPath": "fechaExpiracion",  "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "paginas_amarillas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "creatorRole",      "order": "ASCENDING" },
+        { "fieldPath": "activa",           "order": "ASCENDING" },
+        { "fieldPath": "provincia",        "order": "ASCENDING" },
+        { "fieldPath": "localidad",        "order": "ASCENDING" },
+        { "fieldPath": "categoria",        "order": "ASCENDING" },
+        { "fieldPath": "subCategoria",     "order": "ASCENDING" },
+        { "fieldPath": "fechaExpiracion",  "order": "ASCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "anuncios",
       "queryScope": "COLLECTION",
       "fields": [
