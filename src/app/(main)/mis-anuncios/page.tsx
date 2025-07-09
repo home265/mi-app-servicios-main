@@ -3,14 +3,16 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation'; // <-- 1. Se usa el import correcto.
 import { useUserStore } from '@/store/userStore';
 import { listAnunciosByFilter, listCapturas } from '@/lib/services/anunciosService';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import type { Anuncio, Captura, Timestamp } from '@/types/anuncio'; // Asegúrate que Timestamp esté importado de tus tipos si es un tipo específico de Firestore
+import type { Anuncio, Captura, Timestamp } from '@/types/anuncio'; 
 import { planes, campanias } from '@/lib/constants/anuncios';
 import AnuncioCard from './components/AnuncioCard';
 import Navbar from '@/app/components/common/Navbar';
-import { Loader2 } from 'lucide-react'; // Para un ícono de carga más estilizado
+import { Loader2 } from 'lucide-react';
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 
 interface AnuncioConPreview extends Anuncio {
   previewImageUrl?: string;
@@ -19,27 +21,25 @@ interface AnuncioConPreview extends Anuncio {
   nombreCampania?: string;
 }
 
-// Función auxiliar para convertir Timestamp de Firestore a Date
 function convertTimestampToDate(timestamp: Timestamp | Date | string | undefined): Date | undefined {
   if (!timestamp) return undefined;
   if (timestamp instanceof Date) return timestamp;
-  // Comprobamos si es un objeto Timestamp de Firestore (suele tener el método toDate)
   if (typeof timestamp === 'object' && 'toDate' in timestamp && typeof timestamp.toDate === 'function') {
     return (timestamp as Timestamp).toDate();
   }
-  // Si es un string, intentamos crear una fecha
   if (typeof timestamp === 'string') {
     const date = new Date(timestamp);
-    if (!isNaN(date.getTime())) { // Verifica si la fecha es válida
+    if (!isNaN(date.getTime())) {
         return date;
     }
   }
   console.warn("No se pudo convertir el valor de fecha:", timestamp);
-  return undefined; // Retorna undefined si no se puede convertir
+  return undefined;
 }
 
 
 export default function MisAnunciosPage() {
+  const router = useRouter(); // <-- 2. Se inicializa el router DENTRO del componente.
   const currentUserUid = useUserStore(state => state.currentUser?.uid);
   const isLoadingAuth = useUserStore(state => state.isLoadingAuth);
 
@@ -47,11 +47,11 @@ export default function MisAnunciosPage() {
   const [isLoadingAnuncios, setIsLoadingAnuncios] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const calcularTiempoRestante = useCallback((endDate?: Date): string => { // endDate ahora es Date
+  const calcularTiempoRestante = useCallback((endDate?: Date): string => {
     if (!endDate) return 'No disponible';
 
     const ahora = new Date();
-    if (endDate <= ahora) return "Finalizada"; // O "Expirada" si prefieres
+    if (endDate <= ahora) return "Finalizada"; 
 
     const diferencia = endDate.getTime() - ahora.getTime();
     const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
@@ -71,13 +71,7 @@ export default function MisAnunciosPage() {
     setError(null);
 
     try {
-      // Tu filtro actual es { creatorId: userId }, si listAnunciosByFilter lo espera así, está bien.
-      // Si debe ser ('creatorId', '==', userId) o similar, ajusta la llamada.
-      // Por ahora, asumo que tu servicio `listAnunciosByFilter` maneja bien el objeto.
-      // Si `listAnunciosByFilter` espera un campo y un valor, sería:
-      // const misAnuncios = await listAnunciosByFilter('creatorId', userId);
       const misAnuncios = await listAnunciosByFilter({ creatorId: userId });
-
 
       if (misAnuncios.length === 0) {
         setAnunciosConPreview([]);
@@ -90,13 +84,10 @@ export default function MisAnunciosPage() {
         if (anuncio.id) {
           try {
             const capturasAnuncio = await listCapturas(anuncio.id);
-            // Intenta obtener la captura de la pantalla 0 como preview, sino la última o la primera.
             const capturaScreen0 = capturasAnuncio.find(c => c.screenIndex === 0);
             if (capturaScreen0) {
                 previewImageUrl = capturaScreen0.imageUrl;
             } else if (capturasAnuncio.length > 0) {
-                // Fallback a la primera captura disponible si la pantalla 0 no existe
-                // o la última si así lo preferías: capturasAnuncio[capturasAnuncio.length - 1]?.imageUrl;
                 previewImageUrl = capturasAnuncio[0]?.imageUrl; 
             }
           } catch (e) {
@@ -128,14 +119,14 @@ export default function MisAnunciosPage() {
         }
         
         const nombreDelPlan = planes.find(p => p.id === anuncio.plan)?.name || String(anuncio.plan);
-        const nombreDeCampania = campanias.find(c => c.id === anuncio.campaniaId)?.name; // Si no hay, será undefined, lo que está bien.
+        const nombreDeCampania = campanias.find(c => c.id === anuncio.campaniaId)?.name;
 
         return {
           ...anuncio,
           previewImageUrl,
           tiempoRestante: tiempoRestanteStr,
           nombrePlan: nombreDelPlan,
-          nombreCampania: nombreDeCampania, // Puede ser undefined si no existe
+          nombreCampania: nombreDeCampania,
         };
       });
       
@@ -149,11 +140,11 @@ export default function MisAnunciosPage() {
     } finally {
       setIsLoadingAnuncios(false);
     }
-  }, [calcularTiempoRestante]); // Dependencia de useCallback
+  }, [calcularTiempoRestante]);
 
   useEffect(() => {
     if (isLoadingAuth) {
-      return; // Espera a que la autenticación termine
+      return; 
     }
 
     if (!currentUserUid) {
@@ -163,17 +154,15 @@ export default function MisAnunciosPage() {
       return;
     }
     
-    // Solo llama si currentUserUid está definido
     fetchAnunciosYPreviews(currentUserUid);
 
   }, [currentUserUid, isLoadingAuth, fetchAnunciosYPreviews]);
 
 
-  // Estados de Carga y Error Mejorados
   if (isLoadingAuth) {
     return (
       <>
-        <Navbar />
+        <Navbar hideSettings={true} />
         <div className="flex flex-col items-center justify-center min-h-[calc(100vh-var(--navbar-height,80px))] p-4">
           <Loader2 className="h-12 w-12 animate-spin text-primario" />
           <p className="mt-4 text-lg text-[var(--color-texto-secundario)]">Verificando sesión...</p>
@@ -182,12 +171,10 @@ export default function MisAnunciosPage() {
     );
   }
 
-  // Nota: El error de "Debes iniciar sesión" ya se maneja arriba y previene la carga.
-  // Este 'error' sería para errores de fetchAnunciosYPreviews.
   if (error && error !== 'Debes iniciar sesión para ver tus anuncios.') { 
     return (
       <>
-        <Navbar />
+        <Navbar hideSettings={true} />
         <div className="container mx-auto px-4 py-8 text-center">
           <div className="p-6 bg-[var(--color-fondo-error)] text-[var(--color-texto-error)] rounded-lg shadow-md max-w-md mx-auto">
             <h2 className="text-xl font-semibold mb-3">¡Error!</h2>
@@ -197,7 +184,7 @@ export default function MisAnunciosPage() {
                     if(currentUserUid) fetchAnunciosYPreviews(currentUserUid);
                 }}
                 className="bg-primario text-white px-5 py-2 rounded-md hover:bg-primario-dark transition-colors font-medium"
-                disabled={!currentUserUid} // Deshabilitar si no hay usuario para reintentar
+                disabled={!currentUserUid}
             >
                 Reintentar
             </button>
@@ -210,7 +197,7 @@ export default function MisAnunciosPage() {
   if (isLoadingAnuncios) {
     return (
       <>
-        <Navbar />
+        <Navbar hideSettings={true} />
         <div className="flex flex-col items-center justify-center min-h-[calc(100vh-var(--navbar-height,80px))] p-4">
           <Loader2 className="h-12 w-12 animate-spin text-primario" />
           <p className="mt-4 text-lg text-[var(--color-texto-secundario)]">Cargando tus anuncios...</p>
@@ -221,7 +208,7 @@ export default function MisAnunciosPage() {
 
   return (
     <>
-      <Navbar />
+      <Navbar hideSettings={true} />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
           <h1 className="text-2xl sm:text-3xl font-bold text-[var(--color-texto-principal)]">Mis Anuncios</h1>
@@ -230,7 +217,6 @@ export default function MisAnunciosPage() {
           </Link>
         </div>
 
-        {/* Mensaje si no hay usuario y no está cargando auth (ya manejado por useEffect) */}
         {!currentUserUid && !isLoadingAuth && (
              <div className="text-center py-10 px-6 bg-[var(--color-tarjeta)] rounded-lg shadow-md max-w-lg mx-auto">
                 <svg className="w-16 h-16 text-primario mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
@@ -244,34 +230,39 @@ export default function MisAnunciosPage() {
             </div>
         )}
 
-        {/* Solo muestra el estado vacío o la lista si hay usuario */}
         {currentUserUid && anunciosConPreview.length === 0 && !isLoadingAnuncios && !error && (
-  <div className="text-center py-10 px-6 bg-[var(--color-tarjeta)] rounded-lg shadow-md max-w-lg mx-auto">
-    <h2 className="text-xl font-semibold text-[var(--color-texto-principal)] mb-2">
-      No has creado anuncios
-    </h2>
-    <p className="text-md text-[var(--color-texto-secundario)] mb-6">
-      ¡Anímate a crear el primero para empezar a promocionarte!
-    </p>
-    <Link href="/planes" className="mt-4 inline-block bg-primario text-white px-8 py-3 rounded-lg hover:bg-primario-dark transition-colors font-medium text-sm">
-      Crear Nuevo Anuncio
-    </Link>
-  </div>
-)}
+            <div className="text-center py-10 px-6 bg-[var(--color-tarjeta)] rounded-lg shadow-md max-w-lg mx-auto">
+                <h2 className="text-xl font-semibold text-[var(--color-texto-principal)] mb-2">
+                No has creado anuncios
+                </h2>
+                <p className="text-md text-[var(--color-texto-secundario)] mb-6">
+                ¡Anímate a crear el primero para empezar a promocionarte!
+                </p>
+                <Link href="/planes" className="mt-4 inline-block bg-primario text-white px-8 py-3 rounded-lg hover:bg-primario-dark transition-colors font-medium text-sm">
+                Crear Nuevo Anuncio
+                </Link>
+            </div>
+        )}
 
         {currentUserUid && anunciosConPreview.length > 0 && !isLoadingAnuncios && !error && (
-          // LISTADO DE ANUNCIOS VERTICAL Y CENTRADO
           <div className="flex flex-col items-center space-y-6 md:space-y-8">
             {anunciosConPreview.map((anuncio) => (
-              // Aplicamos un ancho máximo a cada card para el diseño de una sola columna
-              // Usamos un fallback para la key si anuncio.id fuera undefined (aunque AnuncioCard lo maneja)
-              <div key={anuncio.id || `anuncio-fallback-${Math.random().toString(36).substring(7)}`} className="w-full max-w-md"> {/* Ajusta max-w-md (medium) como prefieras: sm, lg, xl */}
+              <div key={anuncio.id || `anuncio-fallback-${Math.random().toString(36).substring(7)}`} className="w-full max-w-md">
                 <AnuncioCard anuncio={anuncio} />
               </div>
             ))}
           </div>
         )}
       </div>
+      {/* 3. Se usa el router en el evento onClick. */}
+      <button
+        onClick={() => router.push('/bienvenida')}
+        aria-label="Volver a inicio"
+        className="fixed bottom-6 right-4 z-40 h-12 w-12 rounded-full shadow-lg flex items-center justify-center transition active:scale-95 focus:outline-none focus:ring"
+        style={{ backgroundColor: '#184840' }}
+      >
+        <ChevronLeftIcon className="h-6 w-6" style={{ color: '#EFC71D' }} />
+      </button>
     </>
   );
 }

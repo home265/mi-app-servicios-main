@@ -4,6 +4,15 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation'; // Importa el hook usePathname para obtener la ruta actual.
 
+// --- 1. SE AÑADE LA INTERFAZ PARA LAS PROPS (ÚNICO CAMBIO LÓGICO) ---
+interface NavbarProps {
+  /**
+   * Si se establece en true, oculta el ícono de Ajustes.
+   * Por defecto es false.
+   */
+  hideSettings?: boolean;
+}
+
 // Icono de Ajustes (SVG): Utiliza un SVG para mayor control y escalabilidad,
 // y 'currentColor' para que se adapte automáticamente al color de texto definido por Tailwind.
 const SettingsIcon = () => (
@@ -12,7 +21,7 @@ const SettingsIcon = () => (
   </svg>
 );
 
-const Navbar: React.FC = () => {
+const Navbar: React.FC<NavbarProps> = ({ hideSettings = false }) => {
   const pathname = usePathname(); // Obtiene la ruta actual para controlar la visibilidad del Navbar.
 
   // Define las rutas en las que el Navbar (o solo el ícono de Ajustes) no debe aparecer.
@@ -48,28 +57,31 @@ const Navbar: React.FC = () => {
         Si se expande en el futuro, se podrían añadir más elementos aquí,
         como un Logo a la izquierda o un ThemeSwitcher.
       */}
-      <Link
-        href="/ajustes"
-        // Estilos para el botón del icono de Ajustes:
-        // - `p-2`: Padding alrededor del icono para un área de clic cómoda.
-        // - `rounded-full`: Icono circular para un aspecto suave y moderno.
-        // - `text-texto-principal`: Color del icono que se adapta al tema.
-        // - `hover:bg-tarjeta hover:shadow-sm`: Efecto de hover que cambia el fondo
-        //   a `color-tarjeta` y añade una sombra sutil para feedback visual.
-        // - `focus:outline-none focus:ring-2 focus:ring-primario focus:ring-offset-2 focus:ring-offset-fondo`:
-        //   Estilos de enfoque accesibles y visualmente agradables.
-        // - `transition-all duration-150 ease-in-out`: Transiciones suaves para los efectos.
-        // - `aria-label`: Etiqueta para mejorar la accesibilidad para usuarios de lectores de pantalla.
-        className="
-          p-2 rounded-full text-texto-principal 
-          hover:bg-tarjeta hover:shadow-sm
-          focus:outline-none focus:ring-2 focus:ring-primario focus:ring-offset-2 focus:ring-offset-fondo 
-          transition-all duration-150 ease-in-out
-        "
-        aria-label="Ir a la página de Ajustes"
-      >
-        <SettingsIcon /> {/* Renderiza el icono de ajustes. */}
-      </Link>
+      {/* --- RENDERIZADO CONDICIONAL DEL ICONO --- */}
+      {!hideSettings && (
+        <Link
+          href="/ajustes"
+          // Estilos para el botón del icono de Ajustes:
+          // - `p-2`: Padding alrededor del icono para un área de clic cómoda.
+          // - `rounded-full`: Icono circular para un aspecto suave y moderno.
+          // - `text-texto-principal`: Color del icono que se adapta al tema.
+          // - `hover:bg-tarjeta hover:shadow-sm`: Efecto de hover que cambia el fondo
+          //   a `color-tarjeta` y añade una sombra sutil para feedback visual.
+          // - `focus:outline-none focus:ring-2 focus:ring-primario focus:ring-offset-2 focus:ring-offset-fondo`:
+          //   Estilos de enfoque accesibles y visualmente agradables.
+          // - `transition-all duration-150 ease-in-out`: Transiciones suaves para los efectos.
+          // - `aria-label`: Etiqueta para mejorar la accesibilidad para usuarios de lectores de pantalla.
+          className="
+            p-2 rounded-full text-texto-principal 
+            hover:bg-tarjeta hover:shadow-sm
+            focus:outline-none focus:ring-2 focus:ring-primario focus:ring-offset-2 focus:ring-offset-fondo 
+            transition-all duration-150 ease-in-out
+          "
+          aria-label="Ir a la página de Ajustes"
+        >
+          <SettingsIcon /> {/* Renderiza el icono de ajustes. */}
+        </Link>
+      )}
     </nav>
   );
 };

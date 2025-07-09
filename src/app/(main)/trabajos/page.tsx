@@ -2,11 +2,9 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useTheme } from 'next-themes'
 import {
-  Bars3BottomRightIcon,
   ChevronLeftIcon,
 } from '@heroicons/react/24/outline'
 
@@ -217,33 +215,10 @@ export default function TrabajosPage() {
       style={{ backgroundColor: P.fondo, color: P.texto }}
     >
       {/*────────── header ──────────*/}
-      <header className="relative flex items-center justify-between px-5 py-4">
-        <div className="flex items-center justify-center h-11 w-11">
-  <Image
-    src={P.marca}
-    alt="Logo CODYS" // Es una buena práctica cambiar el 'alt' para que describa la imagen
-    priority
-    height={30}
-    width={30}
-    className="h-9 w-9 select-none"
-  />
-</div>
-
-        <h1 className="absolute inset-0 flex items-center justify-center text-lg md:text-xl font-medium tracking-wide pointer-events-none">
+      <header className="relative flex items-center justify-center px-5 py-8">
+        <h1 className="text-lg md:text-xl font-medium tracking-wide">
           Solicitudes y acuerdos
         </h1>
-
-        <button
-          onClick={() => router.push('/ajustes')}
-          style={{ backgroundColor: P.tarjeta }}
-          className="flex items-center justify-center h-11 w-11 rounded-full focus:outline-none focus:ring"
-          aria-label="Ajustes"
-        >
-          <Bars3BottomRightIcon
-            className="h-7 w-7"
-            style={{ color: P.resalte }}
-          />
-        </button>
       </header>
 
       <hr className="mx-5" style={{ borderColor: P.borde }} />

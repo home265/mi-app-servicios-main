@@ -6,10 +6,9 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
-import { Bars3BottomRightIcon, ChevronLeftIcon } from '@heroicons/react/24/outline';
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 
 import { useUserStore, UserProfile } from '@/store/userStore';
 import SelectorCategoria, { CategoriaSeleccionada } from '@/app/components/forms/SelectorCategoria';
@@ -222,21 +221,11 @@ export default function BusquedaPage() {
       className="min-h-screen flex flex-col"
       style={{ backgroundColor: P.fondo, color: P.texto }}
     >
-      <header className="relative flex items-center justify-between px-5 py-4">
-        <button onClick={() => router.push('/bienvenida')} className="h-11 w-11 focus:outline-none">
-          <Image src={P.marca} alt="Inicio" height={30} width={30} />
-        </button>
-        <h1 className="absolute inset-0 flex items-center justify-center text-lg font-medium pointer-events-none">
-          Búsqueda de servicios
-        </h1>
-        <button
-          onClick={() => router.push('/ajustes')}
-          style={{ backgroundColor: P.tarjeta }}
-          className="h-11 w-11 rounded-full flex items-center justify-center focus:outline-none"
-        >
-          <Bars3BottomRightIcon className="h-7 w-7" style={{ color: P.resalte }} />
-        </button>
-      </header>
+      <header className="relative flex items-center justify-center px-5 py-8">
+    <h1 className="text-lg font-medium">
+        Búsqueda de servicios
+    </h1>
+</header>
 
       <hr className="mx-5" style={{ borderColor: P.borde }} />
 

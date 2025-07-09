@@ -78,15 +78,14 @@ const Button: React.FC<ButtonProps> = ({
       `;
       break;
     case 'primary':
-    default:
-      // Botón primario (por defecto): fondo verde oscuro, texto blanco.
-      // Sutil oscurecimiento en hover y estado activo.
-      variantClasses = `
-        bg-primario text-white 
-        hover:bg-primario/90 active:bg-primario 
-        focus:ring-primario
-      `;
-      break;
+default:
+  variantClasses = `
+    bg-primario text-white 
+    border-2 border-borde-tarjeta 
+    hover:bg-primario/90 active:bg-primario 
+    focus:ring-primario
+  `;
+  break;
   }
 
   // Combina todas las clases: base, variante, ancho completo y clases personalizadas.

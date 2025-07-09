@@ -1,4 +1,5 @@
 // src/app/(main)/paginas-amarillas/buscar/page.tsx
+
 'use client';
 
 import React, { useState, Suspense } from 'react';
@@ -7,6 +8,8 @@ import {
   useRouter,
   usePathname,
 } from 'next/navigation';
+// --- 1. IMPORTAR EL ÍCONO (COMO EN TRABAJOS/PAGE.TSX) ---
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 
 import {
   PaginaAmarillaData,
@@ -16,20 +19,21 @@ import {
 import PaginasAmarillasFiltros from './components/PaginasAmarillasFiltros';
 import PaginasAmarillasResultados from './components/PaginasAmarillasResultados';
 
+
 type EstadoCarga = 'idle' | 'loading' | 'success' | 'error';
 
 /* -------------------------------------------------------------------- */
-/*  Helpers                                                             */
+/* Helpers                                                              */
 /* -------------------------------------------------------------------- */
 const construirQueryString = (f: PaginaAmarillaFiltros): string => {
   const p = new URLSearchParams();
-  if (f.provincia)     p.append('provincia',     f.provincia);
-  if (f.localidad)     p.append('localidad',     f.localidad);
-  if (f.rol)           p.append('rol',           f.rol);
-  if (f.categoria)     p.append('categoria',     f.categoria);
-  if (f.subCategoria)  p.append('subCategoria',  f.subCategoria);
-  if (f.rubro)         p.append('rubro',         f.rubro);
-  if (f.subRubro)      p.append('subRubro',      f.subRubro);
+  if (f.provincia) p.append('provincia', f.provincia);
+  if (f.localidad) p.append('localidad', f.localidad);
+  if (f.rol) p.append('rol', f.rol);
+  if (f.categoria) p.append('categoria', f.categoria);
+  if (f.subCategoria) p.append('subCategoria', f.subCategoria);
+  if (f.rubro) p.append('rubro', f.rubro);
+  if (f.subRubro) p.append('subRubro', f.subRubro);
   if (typeof f.realizaEnvios === 'boolean') {
     p.append('realizaEnvios', String(f.realizaEnvios));
   }
@@ -71,10 +75,9 @@ const parseQueryParamsToFiltros = (
 };
 
 /* -------------------------------------------------------------------- */
-/*  Client-side logic                                                   */
+/* Client-side logic                                                    */
 /* -------------------------------------------------------------------- */
 const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router       = useRouter();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const pathname     = usePathname();
@@ -98,38 +101,24 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
     if (peticionEnCurso.current) return;
     peticionEnCurso.current = true;
 
-    console.log('[handleBuscar] filtros recibidos', nuevosFiltros);
     setEstadoCarga('loading');
     setMensajeError(null);
     setHasSearched(true);
     setFiltrosActivos(nuevosFiltros);
 
     const qs = construirQueryString(nuevosFiltros);
-    console.log('[handleBuscar] queryString generado', qs);
-
-    /* ----------------------------------------------------------------
-       IMPORTANTE:
-       - Quitamos router.push para evitar que Next.js remonte el
-         componente (lo que borraba el estado y provocaba el parpadeo).
-       - Si en el futuro quieres reflejar los filtros en la URL,
-         usa un store global o React Query para persistir resultados.
-    ---------------------------------------------------------------- */
 
     try {
       const res = await fetch(`/api/paginas-amarillas?${qs}`);
-      console.log('[handleBuscar] response status', res.status);
-
       if (!res.ok) {
         const { error } = await res.json();
         throw new Error(error || `Error del servidor: ${res.status}`);
       }
 
       const data: PaginaAmarillaData[] = await res.json();
-      console.log('[handleBuscar] publicaciones recibidas', data.length);
       setPublicaciones(data);
       setEstadoCarga('success');
     } catch (err: unknown) {
-      console.error('[handleBuscar] fallo', err);
       setMensajeError(
         err instanceof Error ? err.message : 'Error desconocido',
       );
@@ -142,24 +131,39 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
 
   /* ----------------------- UI ----------------------- */
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-6 sm:py-8 space-y-8">
-      <PaginasAmarillasFiltros
-        onBuscar={handleBuscar}
-        isLoading={estadoCarga === 'loading'}
-        initialFiltros={filtrosActivos}
-      />
-      <PaginasAmarillasResultados
-        publicaciones={publicaciones}
-        isLoading={estadoCarga === 'loading'}
-        error={mensajeError}
-        hasSearched={hasSearched}
-      />
-    </div>
-  );
+  <div className="container mx-auto px-2 sm:px-4 py-8 sm:py-12 space-y-6 relative">
+    {/* Título movido fuera y centrado */}
+    <h2 className="text-2xl font-semibold text-texto-principal text-center">
+      Buscar en Páginas Amarillas
+    </h2>
+
+    <PaginasAmarillasFiltros
+      onBuscar={handleBuscar}
+      isLoading={estadoCarga === 'loading'}
+      initialFiltros={filtrosActivos}
+    />
+    <PaginasAmarillasResultados
+      publicaciones={publicaciones}
+      isLoading={estadoCarga === 'loading'}
+      error={mensajeError}
+      hasSearched={hasSearched}
+    />
+
+    {/* --- BOTÓN FLOTANTE (IDÉNTICO AL DE TRABAJOS/PAGE.TSX) --- */}
+    <button
+      onClick={() => router.push('/bienvenida')}
+      aria-label="Volver a inicio"
+      className="fixed bottom-6 right-4 z-40 h-12 w-12 rounded-full shadow-lg flex items-center justify-center transition active:scale-95 focus:outline-none focus:ring"
+      style={{ backgroundColor: '#184840' }} // Verde oscuro específico
+    >
+      <ChevronLeftIcon className="h-6 w-6" style={{ color: '#EFC71D' }} /> {/* Amarillo específico */}
+    </button>
+  </div>
+);
 };
 
 /* -------------------------------------------------------------------- */
-/*  Page wrapper                                                         */
+/* Page wrapper                                                         */
 /* -------------------------------------------------------------------- */
 const BuscarPaginaAmarillaPage: React.FC = () => (
   <Suspense fallback={<div className="p-8 text-center">Cargando filtros…</div>}>

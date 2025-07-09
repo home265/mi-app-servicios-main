@@ -8,7 +8,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useTheme } from 'next-themes';
 import SeleccionRolCard from '@/app/components/auth/SeleccionRolCard';
-import ThemeToggle from '@/app/components/ui/ThemeToggle';
 
 export default function SeleccionarRegistroPage() {
   /* Logo distinto por tema (igual que en login) */
@@ -21,11 +20,6 @@ export default function SeleccionarRegistroPage() {
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-fondo text-texto px-4">
-
-      {/* Toggle discreto en la esquina */}
-      <div className="absolute bottom-4 right-4">
-        <ThemeToggle />
-      </div>
 
       {/* Logo centrado y grande */}
       <Image

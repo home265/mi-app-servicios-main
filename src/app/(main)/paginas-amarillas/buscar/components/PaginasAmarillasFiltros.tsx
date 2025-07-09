@@ -60,6 +60,8 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
   const [realizaEnvios, setRealizaEnvios] = useState<boolean | undefined>(
     initialFiltros.realizaEnvios,
   );
+  const [localidadKey, setLocalidadKey] = useState(Date.now());
+
 
   /* ---------------- handlers ---------------- */
   const handleRolChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -83,16 +85,12 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
     };
     console.log('[Filtros] submit →', filtros);
     onBuscar(filtros);
-  };
 
-  const limpiarFiltros = () => {
-    console.log('[Filtros] limpiar');
+    // --- LÓGICA DE LIMPIEZA CORREGIDA ---
+    // Limpia la localidad y el tipo de publicación.
     setLocalidadSel(null);
-    setRolSel('');
-    setCatSel(null);
-    setRubSel(null);
-    setRealizaEnvios(undefined);
-    onBuscar({});
+    setRolSel(''); // <--- CAMBIO AÑADIDO
+    setLocalidadKey(Date.now());
   };
 
   /* ---------------- UI ---------------- */
@@ -101,12 +99,11 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
       onSubmit={handleSubmit}
       className="p-4 md:p-6 bg-card border border-borde-tarjeta rounded-lg shadow-md space-y-6"
     >
-      <h2 className="text-xl font-semibold text-texto-principal mb-4">
-        Buscar en Páginas Amarillas
-      </h2>
+      
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <SelectorLocalidad
+          key={localidadKey}
           id="busqLoc"
           label="Selecciona una Localidad*"
           onLocalidadSeleccionada={setLocalidadSel}
@@ -167,18 +164,9 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
           variant="primary"
           isLoading={isLoading}
           disabled={isLoading}
-          className="flex-grow"
+          className="flex-grow w-full border-2 border-white"
         >
           {isLoading ? 'Buscando…' : 'Buscar'}
-        </Button>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={limpiarFiltros}
-          disabled={isLoading}
-          className="flex-grow"
-        >
-          Limpiar Filtros
         </Button>
       </div>
     </form>

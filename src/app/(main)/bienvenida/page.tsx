@@ -96,13 +96,22 @@ const base: Record<'prestador' | 'comercio', Action[]> = {
     { id: 'modo', label: 'Modo Usuario', Icon: UserCircleIcon, path: '#' },
   ],
   comercio: [
-  { id: 'buscar_empleados_c', label: 'Buscar Empleados', Icon: UserGroupIcon, path: '/empleados' }, // Cambiado IconComponent a Icon
-  // El ítem para 'Crear/Editar Anuncio' se añadirá dinámicamente
-  { id: 'editar_anuncios_c', label: 'Mis Anuncios', Icon: PencilIcon, path: '/mis-anuncios' }, // Cambiado IconComponent a Icon
-  { id: 'crear_publicacion_c', label: 'Crear Publicación', Icon: PlusCircleIcon, path: '/paginas-amarillas/crear', requiresAd: true }, // Cambiado IconComponent a Icon y requiresActiveAd a requiresAd
-  { id: 'editar_publicacion_c', label: 'Editar Publicación', Icon: PencilSquareIcon, path: '/paginas-amarillas/editar', requiresAd: true }, // Cambiado IconComponent a Icon y requiresActiveAd a requiresAd
-  { id: 'modo_usuario_c', label: 'Modo Usuario', Icon: UserCircleIcon, path: '#' }, // Cambiado IconComponent a Icon
-  { id: 'paginas_amarillas_c', label: 'Páginas Amarillas', Icon: BookOpenIcon, path: '/paginas-amarillas/buscar' }, // Cambiado IconComponent a Icon
+  { id: 'empleados', label: 'Empleados', Icon: UserGroupIcon, path: '/empleados' },
+    { id: 'misAn', label: 'Mis Anuncios', Icon: PencilIcon, path: '/mis-anuncios' },
+    {
+      id: 'crearPub',
+      label: 'Crear / Editar Anuncio',
+      Icon: PlusCircleIcon,
+      component: <BotonCrearEditarAnuncio />,
+      requiresAd: false,
+    },
+    {
+      id: 'paginas',
+      label: 'Páginas Amarillas',
+      Icon: BookOpenIcon,
+      path: '/paginas-amarillas/buscar',
+    },
+    { id: 'modo', label: 'Modo Usuario', Icon: UserCircleIcon, path: '#' },
 ],
 };
 

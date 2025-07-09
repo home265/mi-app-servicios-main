@@ -169,9 +169,10 @@ export default function EmpleadosPage() {
       <button
         onClick={() => router.push('/bienvenida')}
         aria-label="Volver a inicio"
-        className="fixed bottom-6 right-4 md:bottom-8 md:left-6 z-40 h-14 w-14 rounded-full shadow-lg flex items-center justify-center transition active:scale-95 focus:outline-none focus:ring bg-tarjeta text-resalte"
+        className="fixed bottom-6 right-4 z-40 h-12 w-12 rounded-full shadow-lg flex items-center justify-center transition active:scale-95 focus:outline-none focus:ring"
+        style={{ backgroundColor: '#184840' }} // Verde oscuro específico
       >
-        <ChevronLeftIcon className="h-7 w-7" />
+        <ChevronLeftIcon className="h-6 w-6" style={{ color: '#EFC71D' }} /> {/* Amarillo específico */}
       </button>
     </div>
   );
