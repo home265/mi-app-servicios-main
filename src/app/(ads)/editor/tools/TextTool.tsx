@@ -1,12 +1,12 @@
+// src/app/editor/tools/TextTool.tsx
 'use client';
 
 import React, { useState } from 'react';
 import Button from '@/app/components/ui/Button';
 import type { TextElement } from '../hooks/useEditorStore';
 import DeleteElementButton from '../components/ui/DeleteElementButton';
-
-// PASO 1: Importar los datos de las fuentes
 import fontsData from '@/data/fonts.json';
+import FontSelector from '../components/ui/FontSelector'; // 1. IMPORTAMOS EL NUEVO COMPONENTE
 
 // (Opcional pero recomendado) Definir un tipo para los objetos de fuente
 interface FontOption {
@@ -25,7 +25,6 @@ interface TextToolProps {
 export default function TextTool({ initial, onConfirm, onClose }: TextToolProps) {
   const [text, setText] = useState(initial?.text || '');
   const [color, setColor] = useState(initial?.color || '#ffffff');
-  // PASO 2: Actualizar el valor inicial de fontFamily para usar una fuente de tu JSON
   const [fontFamily, setFontFamily] = useState(
     initial?.fontFamily || (typedFontsData.length > 0 ? typedFontsData[0].name : 'Arial')
   );
@@ -36,10 +35,8 @@ export default function TextTool({ initial, onConfirm, onClose }: TextToolProps)
       tipo: 'texto',
       xPct: initial?.xPct ?? 10,
       yPct: initial?.yPct ?? 10,
-      // --- LÍNEAS MODIFICADAS ---
-      widthPct: initial?.widthPct ?? 80,    // Valor anterior era 30
-      heightPct: initial?.heightPct ?? 15,    // Valor anterior era 10
-      // --------------------------
+      widthPct: initial?.widthPct ?? 80,
+      heightPct: initial?.heightPct ?? 15,
       text,
       color,
       fontFamily,
@@ -55,7 +52,7 @@ export default function TextTool({ initial, onConfirm, onClose }: TextToolProps)
     >
       <div
         className="bg-[var(--color-tarjeta)] p-5 rounded-lg shadow-xl w-full max-w-sm text-[var(--color-texto-principal)]"
-        onClick={e => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-xl font-semibold">
@@ -81,7 +78,7 @@ export default function TextTool({ initial, onConfirm, onClose }: TextToolProps)
               id="text-tool-content"
               type="text"
               value={text}
-              onChange={e => setText(e.target.value)}
+              onChange={(e) => setText(e.target.value)}
               className="w-full p-2 rounded-md bg-[var(--color-input)] border border-[var(--color-borde-input)] focus:ring-primario focus:border-primario placeholder-[var(--color-texto-secundario)] opacity-80"
               placeholder="Escribe algo..."
               spellCheck={true}
@@ -98,34 +95,19 @@ export default function TextTool({ initial, onConfirm, onClose }: TextToolProps)
               id="text-tool-color"
               type="color"
               value={color}
-              onChange={e => setColor(e.target.value)}
+              onChange={(e) => setColor(e.target.value)}
               className="w-full h-10 p-0.5 rounded-md border border-[var(--color-borde-input)] bg-[var(--color-input)] cursor-pointer"
             />
           </div>
-          <div>
-            <label
-              htmlFor="text-tool-font"
-              className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1"
-            >
-              Fuente:
-            </label>
-            <select
-              id="text-tool-font"
-              value={fontFamily}
-              onChange={e => setFontFamily(e.target.value)}
-              className="w-full p-2 rounded-md bg-[var(--color-input)] border border-[var(--color-borde-input)] focus:ring-primario focus:border-primario"
-            >
-              {typedFontsData.map(font => (
-                <option
-                  key={font.name}
-                  value={font.name}
-                  style={{ fontFamily: font.name, fontSize: '1rem' }}
-                >
-                  {font.name}
-                </option>
-              ))}
-            </select>
-          </div>
+
+          {/* 2. REEMPLAZAMOS EL <select> POR <FontSelector> */}
+          <FontSelector
+            id="text-tool-font"
+            options={typedFontsData}
+            value={fontFamily}
+            onChange={setFontFamily}
+          />
+
           <div>
             <label
               htmlFor="text-tool-size"
@@ -141,7 +123,7 @@ export default function TextTool({ initial, onConfirm, onClose }: TextToolProps)
               max="25"
               step="0.5"
               value={fontSizePct}
-              onChange={e => setFontSizePct(Number(e.target.value))}
+              onChange={(e) => setFontSizePct(Number(e.target.value))}
               className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primario"
             />
           </div>

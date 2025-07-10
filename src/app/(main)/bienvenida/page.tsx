@@ -75,45 +75,76 @@ interface AdFS {
   endDate?: Timestamp;
 }
 
+// --- INICIO DE LA SECCIÓN CORREGIDA ---
+// Se restaura la lógica para mostrar los botones de Crear/Editar Publicación condicionalmente.
 const base: Record<'prestador' | 'comercio', Action[]> = {
   prestador: [
     { id: 'trabajos', label: 'Trabajos', Icon: BriefcaseIcon, path: '/trabajos' },
     { id: 'empleados', label: 'Empleados', Icon: UserGroupIcon, path: '/empleados' },
     { id: 'misAn', label: 'Mis Anuncios', Icon: PencilIcon, path: '/mis-anuncios' },
     {
-      id: 'crearPub',
+      id: 'crearAnuncioBtn', // ID cambiado para evitar conflictos
       label: 'Crear / Editar Anuncio',
       Icon: PlusCircleIcon,
       component: <BotonCrearEditarAnuncio />,
-      requiresAd: false,
+      requiresAd: false, // Este siempre se muestra
+    },
+    {
+      id: 'crearPub',
+      label: 'Crear Publicación',
+      Icon: DocumentPlusIcon, // Icono más apropiado
+      path: '/paginas-amarillas/crear',
+      requiresAd: true, // Condicional
+    },
+    {
+      id: 'editarPub',
+      label: 'Editar Publicación',
+      Icon: PencilSquareIcon,
+      path: '/paginas-amarillas/editar', // La ruta se completará dinámicamente
+      requiresAd: true, // Condicional
     },
     {
       id: 'paginas',
-      label: 'Páginas Amarillas',
+      label: 'Ver Páginas Amarillas',
       Icon: BookOpenIcon,
       path: '/paginas-amarillas/buscar',
     },
     { id: 'modo', label: 'Modo Usuario', Icon: UserCircleIcon, path: '#' },
   ],
   comercio: [
-  { id: 'empleados', label: 'Empleados', Icon: UserGroupIcon, path: '/empleados' },
+    { id: 'empleados', label: 'Empleados', Icon: UserGroupIcon, path: '/empleados' },
     { id: 'misAn', label: 'Mis Anuncios', Icon: PencilIcon, path: '/mis-anuncios' },
     {
-      id: 'crearPub',
+      id: 'crearAnuncioBtn', // ID cambiado para evitar conflictos
       label: 'Crear / Editar Anuncio',
       Icon: PlusCircleIcon,
       component: <BotonCrearEditarAnuncio />,
-      requiresAd: false,
+      requiresAd: false, // Este siempre se muestra
+    },
+    {
+      id: 'crearPub',
+      label: 'Crear Publicación',
+      Icon: DocumentPlusIcon,
+      path: '/paginas-amarillas/crear',
+      requiresAd: true, // Condicional
+    },
+    {
+      id: 'editarPub',
+      label: 'Editar Publicación',
+      Icon: PencilSquareIcon,
+      path: '/paginas-amarillas/editar', // La ruta se completará dinámicamente
+      requiresAd: true, // Condicional
     },
     {
       id: 'paginas',
-      label: 'Páginas Amarillas',
+      label: 'Ver Páginas Amarillas',
       Icon: BookOpenIcon,
       path: '/paginas-amarillas/buscar',
     },
     { id: 'modo', label: 'Modo Usuario', Icon: UserCircleIcon, path: '#' },
-],
+  ],
 };
+// --- FIN DE LA SECCIÓN CORREGIDA ---
 
 export default function BienvenidaPage() {
   const router = useRouter();
@@ -131,7 +162,10 @@ export default function BienvenidaPage() {
   useEffect(() => {
     if (user?.rol !== 'usuario') return;
     (async () => {
-      const ok = (await getDoc(doc(db, 'usuarios_generales', user.uid, 'cv', 'main'))).exists();
+      if (!user?.uid) return;
+      const ok = (
+        await getDoc(doc(db, 'usuarios_generales', user.uid, 'cv', 'main'))
+      ).exists();
       setCv(ok);
     })();
   }, [user]);
@@ -139,6 +173,7 @@ export default function BienvenidaPage() {
   useEffect(() => {
     if (!user || !['prestador', 'comercio'].includes(user.rol)) return;
     (async () => {
+      if (!user?.uid) return;
       const q = query(
         collection(db, 'anuncios'),
         where('creatorId', '==', user.uid),
@@ -176,30 +211,45 @@ export default function BienvenidaPage() {
     );
   }
 
+  // La lógica de `actions` no necesita cambios, ya que el `filter` funciona
+  // correctamente con la nueva configuración de `base`.
   let actions: Action[] = [];
-  if (user.rol === 'usuario') {
+  if (user && user.rol === 'usuario') {
     actions = [
       { id: 'buscar', label: 'Buscar', Icon: MagnifyingGlassIcon, path: '/busqueda' },
       hasCv
         ? { id: 'editCv', label: 'Editar CV', Icon: PencilSquareIcon, path: '/cv' }
         : { id: 'newCv', label: 'Crear CV', Icon: DocumentPlusIcon, path: '/cv' },
-      { id: 'pagUsr', label: 'Páginas Amarillas', Icon: BookOpenIcon, path: '/paginas-amarillas/buscar' },
+      {
+        id: 'pagUsr',
+        label: 'Páginas Amarillas',
+        Icon: BookOpenIcon,
+        path: '/paginas-amarillas/buscar',
+      },
     ];
-  } else {
-    actions = base[user.rol as 'prestador' | 'comercio'].filter((a) => (a.requiresAd ? hasAd : true));
+  } else if (user) {
+    actions = base[user.rol as 'prestador' | 'comercio'].filter((a) =>
+      a.requiresAd ? hasAd === true : true
+    );
   }
 
-  const fullName = user.nombre ? toTitleCase(user.nombre) : '';
+  const fullName = user?.nombre ? toTitleCase(user.nombre) : '';
 
   return (
-    <div className="min-h-screen flex flex-col" style={{ backgroundColor: P.fondo, color: P.texto }}>
-      {/* ─── Cabecera ───────────────────────────────────────── */}
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ backgroundColor: P.fondo, color: P.texto }}
+    >
       <header className="flex items-center justify-between px-5 py-4 mt-6">
         <div className="flex items-center gap-4">
-          <Avatar selfieUrl={user.selfieURL ?? undefined} nombre={fullName} size={64} />
+          <Avatar
+            selfieUrl={user?.selfieURL ?? undefined}
+            nombre={fullName}
+            size={64}
+          />
           <div>
             <p className="text-lg font-semibold">{`Hola, ${fullName}`}</p>
-            <span className="text-xs uppercase opacity-70">{user.rol}</span>
+            <span className="text-xs uppercase opacity-70">{user?.rol}</span>
           </div>
         </div>
         <button
@@ -211,9 +261,6 @@ export default function BienvenidaPage() {
         </button>
       </header>
 
-      {/* ─── El logo central fue eliminado ──────────────────── */}
-
-      {/* ─── Grid de Acciones ───────────────────────────────── */}
       <main className="flex-grow flex justify-center pt-16 pb-6">
         <div className="w-full px-4">
           <div
@@ -223,7 +270,9 @@ export default function BienvenidaPage() {
             "
           >
             {actions.map((a) => {
-              if (a.component) return <React.Fragment key={a.id}>{a.component}</React.Fragment>;
+              if (a.component) {
+                return <React.Fragment key={a.id}>{a.component}</React.Fragment>;
+              }
               if (!a.Icon) return null;
               const Icon = a.Icon;
               const click = () => {
@@ -237,8 +286,9 @@ export default function BienvenidaPage() {
                   router.push('/busqueda');
                   return;
                 }
-                if (a.id.startsWith('editarPub')) {
-                  router.push(`/paginas-amarillas/editar/${user.uid}`);
+                // --- Lógica de navegación corregida para 'editarPub' ---
+                if (a.id === 'editarPub') {
+                  router.push(`/paginas-amarillas/editar/${user?.uid}`);
                   return;
                 }
                 if (a.path && a.path !== '#') router.push(a.path);
@@ -259,7 +309,7 @@ export default function BienvenidaPage() {
                   }}
                 >
                   <Icon className="w-10 h-10 mb-2" style={{ color: P.iconTxt }} />
-                  <span className="text-sm">{a.label}</span>
+                  <span className="text-sm text-center px-1">{a.label}</span>
                 </button>
               );
             })}

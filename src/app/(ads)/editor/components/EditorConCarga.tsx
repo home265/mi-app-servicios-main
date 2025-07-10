@@ -786,6 +786,7 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
     activeTool={activeTool}
     onPrev={goToPrevScreenInStore}
     onNext={handleNextOrFinalize}
+    onPreview={handleNextOrFinalize}
     isLastScreen={isLastScreenValue}
     currentScreen={currentScreenIndex + 1}
     totalScreens={screensCount}

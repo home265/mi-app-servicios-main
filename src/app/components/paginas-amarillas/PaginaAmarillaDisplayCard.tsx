@@ -3,8 +3,6 @@
 
 import React, { useState } from 'react';
 import {
-  PhoneIcon,
-  EnvelopeIcon,
   MapPinIcon,
 } from '@heroicons/react/24/outline';
 
@@ -63,8 +61,6 @@ const PaginaAmarillaDisplayCard: React.FC<PaginaAmarillaDisplayCardProps> = ({
     subCategoria,
     creatorRole,
     descripcion,
-    telefonoContacto,
-    emailContacto,
     horarios,
     realizaEnvios,
   } = publicacion;
@@ -113,7 +109,6 @@ const PaginaAmarillaDisplayCard: React.FC<PaginaAmarillaDisplayCardProps> = ({
             </div>
           )}
 
-          {/* Horarios de Atención: lista desplegada */}
           <div className="mb-3">
             <p className="text-sm font-medium text-texto-principal mb-1">Horarios:</p>
             <ul className="text-texto-secundario text-sm list-disc list-inside">
@@ -123,35 +118,18 @@ const PaginaAmarillaDisplayCard: React.FC<PaginaAmarillaDisplayCardProps> = ({
             </ul>
           </div>
 
-          {/* Información de Envíos */}
-          <div className="flex items-start text-sm text-texto-secundario mb-4">
-            <span>Envíos: {realizaEnvios ? 'Sí' : 'No'}</span>
-          </div>
+          {/* --- INICIO DEL CAMBIO --- */}
+          {/* Este bloque ahora solo se muestra si el rol es 'comercio' */}
+          {creatorRole === 'comercio' && (
+            <div className="flex items-start text-sm text-texto-secundario mb-4">
+              <span>Envíos: {realizaEnvios ? 'Sí' : 'No'}</span>
+            </div>
+          )}
+          {/* --- FIN DEL CAMBIO --- */}
 
           <Button variant="primary" fullWidth onClick={handleContactarClick}>
             Contactar
           </Button>
-
-          <div className="mt-4 flex justify-center space-x-3">
-            {telefonoContacto && (
-              <a
-                href={`tel:${telefonoContacto}`}
-                aria-label="Llamar por teléfono"
-                className="text-texto-secundario hover:text-primario"
-              >
-                <PhoneIcon className="h-6 w-6" />
-              </a>
-            )}
-            {emailContacto && (
-              <a
-                href={`mailto:${emailContacto}`}
-                aria-label="Enviar correo electrónico"
-                className="text-texto-secundario hover:text-primario"
-              >
-                <EnvelopeIcon className="h-6 w-6" />
-              </a>
-            )}
-          </div>
         </div>
       </Card>
 

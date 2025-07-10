@@ -1,7 +1,7 @@
 // src/app/components/forms/SelectorRubro.tsx
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import rubrosData from '@/data/rubro.json';
 
 interface Rubro {
@@ -19,9 +19,10 @@ interface SelectorRubroProps {
   idSubrubro: string;
   labelRubro?: string;
   labelSubrubro?: string;
-  error?: string; // <<--- CAMBIO AQUÍ
+  error?: string;
   onRubroChange: (seleccion: RubroSeleccionado | null) => void;
   initialValue?: RubroSeleccionado | null;
+  labelColor?: string; // Prop para consistencia con SelectorCategoria
 }
 
 const todosLosRubros: Rubro[] = rubrosData.rubros;
@@ -29,115 +30,193 @@ const todosLosRubros: Rubro[] = rubrosData.rubros;
 const SelectorRubro: React.FC<SelectorRubroProps> = ({
   idRubro,
   idSubrubro,
-  labelRubro = "Rubro del Comercio/Profesional",
-  labelSubrubro = "Especialidad / Subrubro (si aplica)",
-  error, // <<--- USAREMOS ESTA PROP
+  labelRubro = 'Rubro del Comercio/Profesional',
+  labelSubrubro = 'Especialidad / Subrubro (si aplica)',
+  error,
   onRubroChange,
   initialValue,
+  labelColor = '#F9F3D9', // Valor por defecto para consistencia
 }) => {
-  const [rubroSeleccionado, setRubroSeleccionado] = useState<string>(initialValue?.rubro || '');
-  const [subrubroSeleccionado, setSubrubroSeleccionado] = useState<string>(initialValue?.subrubro || '');
+  // --- Estados para la UI y la lógica del componente ---
+  const [openRubroPanel, setOpenRubroPanel] = useState(false);
+  const [openSubRubroPanel, setOpenSubRubroPanel] = useState(false);
+  const [search, setSearch] = useState('');
+  const [rubro, setRubro] = useState(initialValue?.rubro || '');
+  const [subrubro, setSubrubro] = useState(initialValue?.subrubro || '');
   const [subrubrosDisponibles, setSubrubrosDisponibles] = useState<string[]>([]);
 
+  // --- Constantes de estilo para replicar el look de SelectorCategoria ---
+  const highlight = '#EFC71D';
+  const borderColor = '#2F5854';
+  const cardBg = 'rgba(0,0,0,0)';
+  const hoverBg = 'rgba(255,255,255,0.1)';
+
+  // Clases de botones para consistencia visual
+  const selectorBtn =
+    'inline-flex items-center justify-start px-3 py-1 text-sm rounded-md border transition whitespace-normal';
+  const listBtn =
+    'h-16 flex items-center justify-center px-3 py-2 text-sm rounded-md border transition w-full whitespace-normal break-words';
+
+  // --- Lógica de filtrado de rubros ---
+  const rubrosFiltrados = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return q
+      ? todosLosRubros.filter((r) => r.nombre.toLowerCase().includes(q))
+      : todosLosRubros;
+  }, [search]);
+
+  // --- Efectos para manejar la lógica del componente ---
+
+  // Al cambiar el rubro principal, resetear subrubro y cargar nuevas opciones
   useEffect(() => {
-    if (rubroSeleccionado) {
-      const rubroActual = todosLosRubros.find(rub => rub.nombre === rubroSeleccionado);
-      if (rubroActual && rubroActual.subrubros.length > 0) {
-        setSubrubrosDisponibles(rubroActual.subrubros);
-      } else {
-        setSubrubrosDisponibles([]);
-      }
-      // No reseteamos subrubro aquí automáticamente si la categoría principal cambia,
-      // para permitir que la validación actúe. El usuario deberá seleccionar una nueva.
-      // Si la subcategoría inicial ya no es válida, la validación lo indicará.
-    } else {
+    setSubrubro(''); // Limpiar siempre el subrubro previo
+    if (!rubro) {
       setSubrubrosDisponibles([]);
-      setSubrubroSeleccionado('');
+    } else {
+      const found = todosLosRubros.find((r) => r.nombre === rubro);
+      setSubrubrosDisponibles(found?.subrubros || []);
     }
-  }, [rubroSeleccionado]);
+    setOpenSubRubroPanel(false); // Cerrar el panel de subrubros
+     
+  }, [rubro]);
 
+  // Notificar cambios al componente padre
   useEffect(() => {
-    // Sincronizar con valor inicial
-     if (initialValue) {
-        if (initialValue.rubro !== rubroSeleccionado) {
-            setRubroSeleccionado(initialValue.rubro || '');
-        }
-        if (initialValue.subrubro !== subrubroSeleccionado) {
-            setSubrubroSeleccionado(initialValue.subrubro || '');
-        }
-    }
-  }, [initialValue, rubroSeleccionado, subrubroSeleccionado]);
-
-  useEffect(() => {
-    if (rubroSeleccionado) {
-      onRubroChange({
-        rubro: rubroSeleccionado,
-        subrubro: subrubroSeleccionado || null,
-      });
+    if (rubro) {
+      onRubroChange({ rubro, subrubro: subrubro || null });
     } else {
       onRubroChange(null);
     }
-  }, [rubroSeleccionado, subrubroSeleccionado, onRubroChange]);
-
-
-  const handleRubroChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setRubroSeleccionado(e.target.value);
-    setSubrubroSeleccionado(''); // Siempre resetear subrubro al cambiar el principal
-  };
-
-  const handleSubrubroChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setSubrubroSeleccionado(e.target.value);
-  };
-
-  const selectBaseClasses = "block w-full px-3 py-2 bg-fondo border border-gray-300 dark:border-gray-600 rounded-md shadow-sm focus:outline-none focus:ring-primario focus:border-primario sm:text-sm text-texto dark:text-texto-dark";
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rubro, subrubro]);
 
   return (
-    <>
-      <div className="mb-4">
-        <label htmlFor={idRubro} className="block text-sm font-medium text-texto-secundario mb-1">
+    <div className="space-y-4">
+      {/* Selector de Rubro Principal */}
+      <div>
+        <label
+          htmlFor={idRubro}
+          className="block text-sm font-medium mb-1"
+          style={{ color: labelColor }}
+        >
           {labelRubro}
         </label>
-        <select
-          id={idRubro}
-          value={rubroSeleccionado}
-          onChange={handleRubroChange}
-          className={`${selectBaseClasses} ${error ? 'border-error focus:border-error focus:ring-error' : 'border-gray-300 dark:border-gray-600 focus:border-primario focus:ring-primario'}`}
+        <button
+          type="button"
+          onClick={() => {
+            setOpenRubroPanel((o) => !o);
+            setOpenSubRubroPanel(false);
+          }}
+          className={selectorBtn}
+          style={{
+            backgroundColor: openRubroPanel ? hoverBg : cardBg,
+            color: rubro ? highlight : labelColor,
+            borderColor: highlight,
+          }}
         >
-          <option value="">Selecciona un rubro...</option>
-          {todosLosRubros.map((rub) => (
-            <option key={rub.nombre} value={rub.nombre}>
-              {rub.nombre}
-            </option>
-          ))}
-        </select>
+          {rubro || '— ninguno —'}
+        </button>
+
+        {openRubroPanel && (
+          <div className="relative mt-2">
+            <input
+              type="text"
+              autoFocus
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar rubro…"
+              className="w-full px-4 py-2 mb-2 rounded-md focus:outline-none transition"
+              style={{
+                backgroundColor: cardBg,
+                color: labelColor,
+                border: `1px solid ${borderColor}`,
+              }}
+            />
+            <div className="grid grid-cols-3 gap-2 max-h-60 overflow-auto">
+              {rubrosFiltrados.length ? (
+                rubrosFiltrados.map((r) => (
+                  <button
+                    key={r.nombre}
+                    type="button"
+                    onClick={() => {
+                      setRubro(r.nombre);
+                      setOpenRubroPanel(false);
+                      setSearch('');
+                    }}
+                    className={listBtn + ' hover:bg-white/10'}
+                    style={{
+                      backgroundColor: r.nombre === rubro ? highlight : cardBg,
+                      color: r.nombre === rubro ? '#0F2623' : labelColor,
+                      borderColor: highlight,
+                    }}
+                  >
+                    {r.nombre}
+                  </button>
+                ))
+              ) : (
+                <p
+                  className="col-span-3 text-center text-sm py-4"
+                  style={{ color: labelColor, opacity: 0.6 }}
+                >
+                  Sin resultados
+                </p>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
-      {subrubrosDisponibles.length > 0 && (
-        <div className="mb-4">
-          <label htmlFor={idSubrubro} className="block text-sm font-medium text-texto-secundario mb-1">
+      {/* Selector de Subrubro */}
+      {rubro && subrubrosDisponibles.length > 0 && (
+        <div>
+          <label
+            htmlFor={idSubrubro}
+            className="block text-sm font-medium mb-1"
+            style={{ color: labelColor }}
+          >
             {labelSubrubro}
           </label>
-          <select
-            id={idSubrubro}
-            value={subrubroSeleccionado}
-            onChange={handleSubrubroChange}
-            className={`${selectBaseClasses} ${error && !subrubroSeleccionado ? 'border-error focus:border-error focus:ring-error' : 'border-gray-300 dark:border-gray-600 focus:border-primario focus:ring-primario'}`}
+          <button
+            type="button"
+            onClick={() => setOpenSubRubroPanel((o) => !o)}
+            className={selectorBtn}
+            style={{
+              backgroundColor: openSubRubroPanel ? hoverBg : cardBg,
+              color: subrubro ? highlight : labelColor,
+              borderColor: highlight,
+            }}
           >
-            <option value="">Selecciona una especialidad...</option>
-            {subrubrosDisponibles.map((subrub) => (
-              <option key={subrub} value={subrub}>
-                {subrub}
-              </option>
-            ))}
-          </select>
+            {subrubro || '— ninguna —'}
+          </button>
+
+          {openSubRubroPanel && (
+            <div className="grid grid-cols-3 gap-2 mt-2 max-h-60 overflow-auto">
+              {subrubrosDisponibles.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => {
+                    setSubrubro(s);
+                    setOpenSubRubroPanel(false);
+                  }}
+                  className={listBtn + ' hover:bg-white/10'}
+                  style={{
+                    backgroundColor: cardBg,
+                    color: labelColor,
+                    borderColor: highlight,
+                  }}
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       )}
-      {/* El mensaje de error general del Controller (pasado como prop 'error')
-          será mostrado por el <p> debajo del Controller en RegistroForm.tsx.
-          Si queremos mostrar el 'error' DENTRO de este componente, podríamos hacer:
+
+      {/* Muestra el mensaje de error si existe */}
       {error && <p className="text-sm text-error mt-1">{error}</p>}
-      */}
-    </>
+    </div>
   );
 };
 
