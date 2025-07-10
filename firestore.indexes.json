@@ -46,8 +46,8 @@
       ]
     },
     {
-      "collectionGroup": "cv",
-      "queryScope": "COLLECTION_GROUP",
+      "collectionGroup": "cvs",
+      "queryScope": "COLLECTION",
       "fields": [
         { "fieldPath": "localidad.provinciaNombre", "order": "ASCENDING" },
         { "fieldPath": "localidad.nombre", "order": "ASCENDING" },

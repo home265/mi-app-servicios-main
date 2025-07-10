@@ -1,62 +1,50 @@
 // src/app/components/cv/CvModal.tsx
 'use client';
-import React, { useEffect, useState, useMemo } from 'react'; // 1. Se añade 'useMemo'
+import React, { useEffect, useState, useMemo } from 'react';
 import Avatar from '@/app/components/common/Avatar';
 import Card from '@/app/components/ui/Card';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { type CvDocument, getCvByUid } from '@/lib/services/cvService'; // ✅ 1. IMPORTAMOS EL SERVICIO Y EL TIPO
 
 interface CvModalProps {
-  uid: string;
-  collection: string;
+  uid: string; // ✅ 2. EL 'collection' YA NO ES NECESARIO
   onClose: () => void;
   highlightRubro?: string;
 }
 
-interface CvDoc {
-  descripcion?: string;
-  telefonoAlt?: string;
-  rubros?: string[];
-  estudios?: Record<string, string>;
-}
+export default function CvModal({ uid, onClose, highlightRubro }: CvModalProps) {
+  // ✅ 3. UN SOLO ESTADO PARA TODOS LOS DATOS, USANDO NUESTRO TIPO 'CvDocument'
+  const [cvData, setCvData] = useState<CvDocument | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-interface ProfileDoc {
-  nombre: string;
-  apellido: string;
-  selfieURL: string;
-  localidad?: {
-    nombre: string;
-    provinciaNombre: string;
-  };
-}
-
-export default function CvModal({ uid, collection, onClose, highlightRubro }: CvModalProps) {
-  const [profile, setProfile] = useState<ProfileDoc | null>(null);
-  const [cv, setCv] = useState<CvDoc | null>(null);
-
+  // ✅ 4. 'useEffect' TOTALMENTE SIMPLIFICADO A UNA SOLA LLAMADA AL SERVICIO
   useEffect(() => {
-    (async () => {
-      const profileSnap = await getDoc(doc(db, collection, uid));
-      if (profileSnap.exists()) {
-        setProfile(profileSnap.data() as ProfileDoc);
-      }
-      const cvSnap = await getDoc(doc(db, 'usuarios_generales', uid, 'cv', 'main'));
-      if (cvSnap.exists()) {
-        setCv(cvSnap.data() as CvDoc);
-      }
-    })();
-  }, [uid, collection]);
-
-  // 2. Creamos una nueva lista de rubros ordenada
-  const rubrosOrdenados = useMemo(() => {
-    // Si no hay CV o no hay rubros, devolvemos una lista vacía
-    if (!cv?.rubros) return [];
+    if (!uid) return;
     
-    // Si no se está destacando ningún rubro, devolvemos la lista tal como viene
-    if (!highlightRubro) return cv.rubros;
+    const fetchCv = async () => {
+      setIsLoading(true);
+      try {
+        const data = await getCvByUid(uid);
+        if (data) {
+          setCvData(data);
+        } else {
+          console.error("No se encontró el CV para el UID:", uid);
+        }
+      } catch (error) {
+        console.error("Error al cargar datos del CV:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    // Si hay que destacar uno, lo buscamos y lo ponemos al principio
-    const lista = [...cv.rubros];
+    fetchCv();
+  }, [uid]);
+
+  const rubrosOrdenados = useMemo(() => {
+    // Se actualiza para usar el nuevo estado 'cvData'
+    if (!cvData?.rubros) return [];
+    if (!highlightRubro) return cvData.rubros;
+
+    const lista = [...cvData.rubros];
     const indice = lista.indexOf(highlightRubro);
 
     if (indice > -1) {
@@ -65,11 +53,28 @@ export default function CvModal({ uid, collection, onClose, highlightRubro }: Cv
     }
     
     return lista;
-  }, [cv?.rubros, highlightRubro]);
+  }, [cvData?.rubros, highlightRubro]);
 
+  if (isLoading) {
+     return (
+        <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
+            <p className="text-white">Cargando CV...</p>
+        </div>
+     );
+  }
 
-  if (!profile || !cv) return null;
+  if (!cvData) {
+    // Opcional: Mostrar un mensaje si el CV no se pudo cargar por alguna razón
+    return (
+      <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4" onClick={onClose}>
+        <Card>
+            <p>No se pudo cargar la información del CV.</p>
+        </Card>
+      </div>
+    );
+  }
 
+  // ✅ 5. EL JSX AHORA TOMA TODOS LOS DATOS DEL ESTADO UNIFICADO 'cvData'
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
       <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto space-y-4">
@@ -79,27 +84,23 @@ export default function CvModal({ uid, collection, onClose, highlightRubro }: Cv
             </button>
         </div>
 
-        {/* Cabecera */}
         <div className="flex items-center space-x-3">
-          <Avatar selfieUrl={profile.selfieURL} nombre={profile.nombre} size={80} />
+          <Avatar selfieUrl={cvData.selfieURL} nombre={cvData.nombreCompleto} size={80} />
           <div>
             <h2 className="text-xl font-semibold">
-              {profile.nombre} {profile.apellido}
+              {cvData.nombreCompleto}
             </h2>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              {profile.localidad?.nombre}, {profile.localidad?.provinciaNombre}
+              {cvData.localidad?.nombre}, {cvData.localidad?.provinciaNombre}
             </p>
           </div>
         </div>
 
-        {/* Descripción */}
-        {cv.descripcion && <p className="whitespace-pre-wrap text-sm">{cv.descripcion}</p>}
+        {cvData.descripcion && <p className="whitespace-pre-wrap text-sm">{cvData.descripcion}</p>}
 
-        {/* Rubros */}
         <div>
           <h3 className="font-medium mb-1">Rubros</h3>
           <ul className="list-disc list-inside text-sm space-y-1">
-            {/* 3. Usamos la nueva lista ordenada para mostrar los rubros */}
             {rubrosOrdenados.map((r) => (
               <li
                 key={r}
@@ -111,11 +112,10 @@ export default function CvModal({ uid, collection, onClose, highlightRubro }: Cv
           </ul>
         </div>
 
-        {/* Estudios */}
-        {cv.estudios && Object.values(cv.estudios).some(v => v) && (
+        {cvData.estudios && Object.values(cvData.estudios).some(v => v) && (
           <div>
             <h3 className="font-medium">Estudios</h3>
-            {Object.entries(cv.estudios).filter(([, v]) => v).map(([k, v]) => (
+            {Object.entries(cvData.estudios).filter(([, v]) => v).map(([k, v]) => (
               <p key={k} className="text-sm">
                 <span className="capitalize font-semibold">{k}:</span> {v}
               </p>
@@ -123,11 +123,10 @@ export default function CvModal({ uid, collection, onClose, highlightRubro }: Cv
           </div>
         )}
 
-        {/* Contacto alternativo */}
-        {cv.telefonoAlt && (
+        {cvData.telefonoAlt && (
           <div>
             <h3 className="font-medium">Teléfono alternativo</h3>
-            <p className="text-sm">{cv.telefonoAlt}</p>
+            <p className="text-sm">{cvData.telefonoAlt}</p>
           </div>
         )}
       </Card>

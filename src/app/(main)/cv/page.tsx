@@ -2,36 +2,25 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/store/userStore';
-import { doc, getDoc, setDoc, Timestamp } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import { Timestamp } from 'firebase/firestore'; // Timestamp se sigue usando para la fecha
+import { createOrUpdateCv, getCvByUid } from '@/lib/services/cvService'; // ✅ 1. IMPORTAR EL SERVICIO
 import Card from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';
 import SelectorCategoriasEmpleo from '@/app/components/forms/SelectorCategoriasEmpleo';
 import Avatar from '@/app/components/common/Avatar';
-/* ---------- tipo mínimo del documento CV en Firestore ---------- */
-interface CvDoc {
-  descripcion? : string;
-  telefonoAlt? : string;
-  rubros?      : string[];
-  estudios?    : {
-    primario?      : string;
-    secundario?    : string;
-    universitario? : string;
-    posgrado?      : string;
-  };
-}
 
 export default function CvPage() {
   const { currentUser } = useUserStore();
   const router = useRouter();
 
-  /* --- formularios --- */
+  // El estado local para los formularios no cambia
   const [descripcion, setDescripcion] = useState('');
   const [telefonoAlt, setTelefonoAlt] = useState('');
-  const [rubros, setRubros]           = useState<string[]>([]);
-  const [estudios, setEstudios]       = useState({
+  const [rubros, setRubros] = useState<string[]>([]);
+  const [estudios, setEstudios] = useState({
     primario: '', secundario: '', universitario: '', posgrado: '',
   });
+  const [isLoading, setIsLoading] = useState(true); // Añadimos estado de carga
 
   /* --- redirige si no hay user --- */
   useEffect(() => {
@@ -41,51 +30,71 @@ export default function CvPage() {
   /* --- precarga si existe CV --- */
   useEffect(() => {
     if (!currentUser) return;
+    
+    // ✅ 2. USAR EL SERVICIO PARA CARGAR EL CV
     (async () => {
-      const ref  = doc(db, 'usuarios_generales', currentUser.uid, 'cv', 'main');
-      const snap = await getDoc(ref);
-      if (snap.exists()) {
-        const d = snap.data() as CvDoc;            // ✅ tipado explícito
-        setDescripcion(d.descripcion  ?? '');
-        setTelefonoAlt(d.telefonoAlt  ?? '');
-        setRubros      (d.rubros       ?? []);
-        setEstudios({
-            primario      : d.estudios?.primario      ?? '',
-            secundario    : d.estudios?.secundario    ?? '',
-            universitario : d.estudios?.universitario ?? '',
-            posgrado      : d.estudios?.posgrado      ?? '',
+      setIsLoading(true);
+      try {
+        const cvData = await getCvByUid(currentUser.uid);
+        if (cvData) {
+          setDescripcion(cvData.descripcion ?? '');
+          setTelefonoAlt(cvData.telefonoAlt ?? '');
+          setRubros(cvData.rubros ?? []);
+          setEstudios({
+            primario: cvData.estudios?.primario ?? '',
+            secundario: cvData.estudios?.secundario ?? '',
+            universitario: cvData.estudios?.universitario ?? '',
+            posgrado: cvData.estudios?.posgrado ?? '',
           });
+        }
+      } catch (error) {
+        console.error("Error al cargar el CV:", error);
+        alert("No se pudo cargar la información de tu CV. Inténtalo de nuevo.");
+      } finally {
+        setIsLoading(false);
       }
     })();
   }, [currentUser]);
 
   const handleSave = async () => {
     if (!currentUser) return;
-    const ref = doc(db, 'usuarios_generales', currentUser.uid, 'cv', 'main');
-    await setDoc(ref, {
-      uid         : currentUser.uid,
-      descripcion ,
-      telefonoAlt ,
-      rubros      ,
-      estudios    ,
-      localidad   : currentUser.localidad,
-      timestamp   : Timestamp.now().toMillis(),
-    });
-    alert('CV guardado ✔');
-    router.replace('/bienvenida');
+
+    // ✅ 3. USAR EL SERVICIO PARA GUARDAR EL CV
+    try {
+      await createOrUpdateCv(currentUser.uid, {
+        nombreCompleto: `${currentUser.nombre} ${currentUser.apellido}`,
+        selfieURL: currentUser.selfieURL ?? null,
+        descripcion,
+        telefonoAlt,
+        rubros,
+        estudios,
+        localidad: currentUser.localidad,
+        timestamp: Timestamp.now().toMillis(),
+      });
+      alert('CV guardado ✔');
+      router.replace('/bienvenida');
+    } catch (error) {
+      console.error("Error al guardar el CV:", error);
+      alert("Ocurrió un error al guardar tu CV. Por favor, inténtalo de nuevo.");
+    }
   };
 
-  if (!currentUser) return null;
+  if (isLoading || !currentUser) {
+    return (
+        <div className="flex justify-center items-center h-screen">
+            <p>Cargando tu información...</p>
+        </div>
+    );
+  }
 
   return (
     <Card className="max-w-md mx-auto space-y-4">
-      {/* encabezado con título y avatar */}
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Mi Curriculum</h2>
+        <h2 className="text-xl font-semibold">Mi Curriculum</h2>
         <Avatar
           selfieUrl={currentUser.selfieURL}
           nombre={currentUser.nombre}
-          size={64}          /* ajusta a tu gusto: 48‑80 */
+          size={64}
         />
       </div>
   
@@ -124,7 +133,7 @@ export default function CvPage() {
       </div>
   
       <div>
-        <label className="block font-medium">Rubros (máx. 4)</label>
+        <label className="block font-medium">Rubros (máx. 4)</label>
         <SelectorCategoriasEmpleo value={rubros} onChange={setRubros} />
       </div>
   
@@ -144,8 +153,7 @@ export default function CvPage() {
         )
       )}
   
-      <Button onClick={handleSave}>Guardar CV</Button>
+      <Button onClick={handleSave}>Guardar CV</Button>
     </Card>
   );
-  
 }

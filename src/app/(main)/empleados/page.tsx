@@ -1,38 +1,18 @@
 // src/app/empleados/page.tsx
-
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/store/userStore';
-import {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  collection,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-  collectionGroup // ¡Asegúrate de importar collectionGroup!
-} from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
 
-// ✅ PASO 1: Importar el ícono para el botón de volver
+// ✅ 1. IMPORTAMOS EL SERVICIO Y LOS NUEVOS TIPOS
+import { searchCvs, type CvDocument } from '@/lib/services/cvService';
+
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
-
 import SelectorCategoriasEmpleo from '@/app/components/forms/SelectorCategoriasEmpleo';
-import CvCard, { CvCardData } from '@/app/components/cv/CvCard';
+import CvCard from '@/app/components/cv/CvCard'; // CvCard ya fue actualizado
 import Button from '@/app/components/ui/Button';
 import Card from '@/app/components/ui/Card';
-// ✅ PASO 2: Ya no necesitamos importar el Logo
-// import Logo from '@/app/components/ui/Logo';
 
-/* ---------- tipo mínimo del documento CV ---------- */
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-interface CvDoc {
-  rubros?: string[];
-  descripcion?: string;
-}
 
 export default function EmpleadosPage() {
   const router = useRouter();
@@ -40,7 +20,8 @@ export default function EmpleadosPage() {
 
   const [rubroSel, setRubroSel] = useState<string[]>([]);
   const [cargando, setCargando] = useState(false);
-  const [resultados, setResultados] = useState<CvCardData[]>([]);
+  // ✅ 2. EL ESTADO DE RESULTADOS AHORA USA EL TIPO 'CvDocument'
+  const [resultados, setResultados] = useState<CvDocument[]>([]);
 
   useEffect(() => {
     if (!currentUser || (currentUser.rol !== 'prestador' && currentUser.rol !== 'comercio')) {
@@ -52,63 +33,19 @@ export default function EmpleadosPage() {
     return null;
   }
 
-  const provincia = currentUser.localidad.provinciaNombre;
-  const localidad = currentUser.localidad.nombre;
-
   const handleBuscar = async () => {
+    // La lógica de búsqueda ahora es mucho más simple
     console.log('handleBuscar: Iniciando búsqueda...');
     setCargando(true);
     setResultados([]);
 
     try {
-      /* 1. Usamos una Collection Group Query para buscar en todos los 'cv' */
-      let q = query(
-        collectionGroup(db, 'cv'), // La magia sucede aquí
-        where('localidad.provinciaNombre', '==', provincia),
-        where('localidad.nombre', '==', localidad)
-      );
-      
-      console.log(`handleBuscar: Query base para ${localidad}, ${provincia}`);
-
-      /* 2. Si se seleccionó un rubro, lo añadimos al filtro */
-      if (rubroSel.length === 1) {
-        const selectedRubro = rubroSel[0];
-        q = query(q, where('rubros', 'array-contains', selectedRubro));
-        console.log(`handleBuscar: Filtrando por rubro: ${selectedRubro}`);
-      }
-
-      const cvsSnap = await getDocs(q);
-      console.log(`handleBuscar: Se encontraron ${cvsSnap.docs.length} CVs.`);
-
-      if (cvsSnap.empty) {
-        setResultados([]);
-        setCargando(false);
-        return;
-      }
-      
-      /* 3. Para cada CV, obtenemos el perfil de su usuario "padre" */
-      const promises = cvsSnap.docs.map(async (cvDoc) => {
-        const parentUserRef = cvDoc.ref.parent.parent;
-        if (!parentUserRef) return null;
-
-        const profileSnap = await getDoc(parentUserRef);
-        if (!profileSnap.exists()) return null;
-
-        const cv = cvDoc.data();
-        const profile = profileSnap.data();
-
-        return {
-          uid: profileSnap.id,
-          collection: 'usuarios_generales',
-          nombre: `${profile.nombre} ${profile.apellido}`,
-          selfieURL: profile.selfieURL,
-          rubros: cv.rubros ?? [],
-          descripcion: cv.descripcion ?? '',
-          telefono: ''
-        };
+      // ✅ 3. TODA LA LÓGICA COMPLEJA SE REEMPLAZA POR UNA SOLA LLAMADA AL SERVICIO
+      const results = await searchCvs({
+        provincia: currentUser.localidad.provinciaNombre,
+        localidad: currentUser.localidad.nombre,
+        rubro: rubroSel.length === 1 ? rubroSel[0] : undefined,
       });
-
-      const results = (await Promise.all(promises)).filter(Boolean) as CvCardData[];
 
       console.log('handleBuscar: Resultados finales:', results);
       setResultados(results);
@@ -122,13 +59,8 @@ export default function EmpleadosPage() {
     }
   };
 
-  /* ====================================================== */
   return (
-    // Se añade 'min-h-screen' para que el botón flotante tenga referencia de la altura
     <div className="flex flex-col items-center p-4 space-y-6 min-h-screen">
-      {/* ✅ PASO 3: Se elimina la llamada al componente Logo */}
-      {/* <Logo /> */}
-
       <Card className="max-w-md w-full space-y-4">
         <h2 className="text-lg font-semibold">Buscar Empleados</h2>
 
@@ -145,34 +77,30 @@ export default function EmpleadosPage() {
         </Button>
       </Card>
 
-      {/* Resultados */}
-      <div className="w-full max-w-md space-y-4 pb-20"> {/* Padding bottom para que el botón no tape contenido */}
-        {resultados.map((u) => (
+      <div className="w-full max-w-md space-y-4 pb-20">
+        {resultados.map((cv) => (
+          // ✅ 4. PASAMOS LA PROP 'cv' EN LUGAR DE 'user' AL COMPONENTE CvCard
           <CvCard
-            key={u.uid}
-            user={u}
-            // Aquí pasamos el rubro buscado para que se pueda destacar
+            key={cv.uid}
+            cv={cv} 
             highlightRubro={rubroSel.length === 1 ? rubroSel[0] : undefined}
           />
         ))}
 
         {!cargando && resultados.length === 0 && (
           <p className="text-sm text-center text-gray-500">
-            {rubroSel.length
-              ? 'No se encontraron candidatos para ese rubro en tu localidad.'
-              : 'No hay CVs disponibles en tu localidad.'}
+            No se encontraron candidatos que coincidan con tu búsqueda.
           </p>
         )}
       </div>
 
-      {/* ✅ PASO 4: Se añade el botón flotante para volver */}
       <button
         onClick={() => router.push('/bienvenida')}
         aria-label="Volver a inicio"
         className="fixed bottom-6 right-4 z-40 h-12 w-12 rounded-full shadow-lg flex items-center justify-center transition active:scale-95 focus:outline-none focus:ring"
-        style={{ backgroundColor: '#184840' }} // Verde oscuro específico
+        style={{ backgroundColor: '#184840' }}
       >
-        <ChevronLeftIcon className="h-6 w-6" style={{ color: '#EFC71D' }} /> {/* Amarillo específico */}
+        <ChevronLeftIcon className="h-6 w-6" style={{ color: '#EFC71D' }} />
       </button>
     </div>
   );

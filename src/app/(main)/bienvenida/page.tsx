@@ -2,8 +2,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import {
@@ -18,19 +16,12 @@ import {
   PencilIcon,
   Bars3BottomRightIcon,
 } from '@heroicons/react/24/outline';
-import {
-  collection,
-  query,
-  where,
-  getDocs,
-  doc,
-  getDoc,
-  Timestamp,
-} from 'firebase/firestore';
+import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore'; // ✅ Se eliminan 'doc' y 'getDoc' que ya no se usan aquí
 import { useUserStore } from '@/store/userStore';
 import Avatar from '@/app/components/common/Avatar';
 import BotonCrearEditarAnuncio from './components/BotonCrearEditarAnuncio';
 import { db } from '@/lib/firebase/config';
+import { getCvByUid } from '@/lib/services/cvService'; // ✅ PASO 1: IMPORTAR EL SERVICIO DE CV
 
 const palette = {
   dark: {
@@ -75,33 +66,31 @@ interface AdFS {
   endDate?: Timestamp;
 }
 
-// --- INICIO DE LA SECCIÓN CORREGIDA ---
-// Se restaura la lógica para mostrar los botones de Crear/Editar Publicación condicionalmente.
 const base: Record<'prestador' | 'comercio', Action[]> = {
   prestador: [
     { id: 'trabajos', label: 'Trabajos', Icon: BriefcaseIcon, path: '/trabajos' },
     { id: 'empleados', label: 'Empleados', Icon: UserGroupIcon, path: '/empleados' },
     { id: 'misAn', label: 'Mis Anuncios', Icon: PencilIcon, path: '/mis-anuncios' },
     {
-      id: 'crearAnuncioBtn', // ID cambiado para evitar conflictos
+      id: 'crearAnuncioBtn',
       label: 'Crear / Editar Anuncio',
       Icon: PlusCircleIcon,
       component: <BotonCrearEditarAnuncio />,
-      requiresAd: false, // Este siempre se muestra
+      requiresAd: false,
     },
     {
       id: 'crearPub',
       label: 'Crear Publicación',
-      Icon: DocumentPlusIcon, // Icono más apropiado
+      Icon: DocumentPlusIcon,
       path: '/paginas-amarillas/crear',
-      requiresAd: true, // Condicional
+      requiresAd: true,
     },
     {
       id: 'editarPub',
       label: 'Editar Publicación',
       Icon: PencilSquareIcon,
-      path: '/paginas-amarillas/editar', // La ruta se completará dinámicamente
-      requiresAd: true, // Condicional
+      path: '/paginas-amarillas/editar',
+      requiresAd: true,
     },
     {
       id: 'paginas',
@@ -115,25 +104,25 @@ const base: Record<'prestador' | 'comercio', Action[]> = {
     { id: 'empleados', label: 'Empleados', Icon: UserGroupIcon, path: '/empleados' },
     { id: 'misAn', label: 'Mis Anuncios', Icon: PencilIcon, path: '/mis-anuncios' },
     {
-      id: 'crearAnuncioBtn', // ID cambiado para evitar conflictos
+      id: 'crearAnuncioBtn',
       label: 'Crear / Editar Anuncio',
       Icon: PlusCircleIcon,
       component: <BotonCrearEditarAnuncio />,
-      requiresAd: false, // Este siempre se muestra
+      requiresAd: false,
     },
     {
       id: 'crearPub',
       label: 'Crear Publicación',
       Icon: DocumentPlusIcon,
       path: '/paginas-amarillas/crear',
-      requiresAd: true, // Condicional
+      requiresAd: true,
     },
     {
       id: 'editarPub',
       label: 'Editar Publicación',
       Icon: PencilSquareIcon,
-      path: '/paginas-amarillas/editar', // La ruta se completará dinámicamente
-      requiresAd: true, // Condicional
+      path: '/paginas-amarillas/editar',
+      requiresAd: true,
     },
     {
       id: 'paginas',
@@ -144,7 +133,6 @@ const base: Record<'prestador' | 'comercio', Action[]> = {
     { id: 'modo', label: 'Modo Usuario', Icon: UserCircleIcon, path: '#' },
   ],
 };
-// --- FIN DE LA SECCIÓN CORREGIDA ---
 
 export default function BienvenidaPage() {
   const router = useRouter();
@@ -159,17 +147,28 @@ export default function BienvenidaPage() {
   const [hasCv, setCv] = useState<boolean | null>(null);
   const [hasAd, setAd] = useState<boolean | null>(null);
 
+  // ✅ PASO 2: ACTUALIZAR EL useEffect PARA USAR EL SERVICIO
   useEffect(() => {
+    // Esta lógica solo se aplica si el usuario tiene el rol 'usuario'
     if (user?.rol !== 'usuario') return;
+
+    // Esta función asíncrona ahora usa el servicio para verificar si el CV existe
     (async () => {
       if (!user?.uid) return;
-      const ok = (
-        await getDoc(doc(db, 'usuarios_generales', user.uid, 'cv', 'main'))
-      ).exists();
-      setCv(ok);
+      try {
+        // Usamos la función del servicio que busca en la nueva colección /cvs
+        const cvData = await getCvByUid(user.uid);
+        // Si cvData no es nulo, significa que el CV existe
+        setCv(cvData !== null);
+      } catch (error) {
+        console.error("Error al verificar la existencia del CV:", error);
+        // En caso de error, asumimos que no tiene CV para evitar un bloqueo
+        setCv(false); 
+      }
     })();
   }, [user]);
 
+  // El useEffect para verificar anuncios no necesita cambios
   useEffect(() => {
     if (!user || !['prestador', 'comercio'].includes(user.rol)) return;
     (async () => {
@@ -211,8 +210,6 @@ export default function BienvenidaPage() {
     );
   }
 
-  // La lógica de `actions` no necesita cambios, ya que el `filter` funciona
-  // correctamente con la nueva configuración de `base`.
   let actions: Action[] = [];
   if (user && user.rol === 'usuario') {
     actions = [
@@ -286,7 +283,6 @@ export default function BienvenidaPage() {
                   router.push('/busqueda');
                   return;
                 }
-                // --- Lógica de navegación corregida para 'editarPub' ---
                 if (a.id === 'editarPub') {
                   router.push(`/paginas-amarillas/editar/${user?.uid}`);
                   return;

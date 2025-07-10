@@ -7,24 +7,14 @@ import ContactoPopup from '@/app/components/notificaciones/ContactoPopup';
 import CvModal from './CvModal';
 import { useUserStore } from '@/store/userStore';
 import Card from '@/app/components/ui/Card';
-
-/* Datos mínimos para la tarjeta */
-export interface CvCardData {
-  uid: string;
-  collection: string;
-  nombre: string;
-  selfieURL: string;
-  rubros: string[];
-  descripcion: string;
-  telefono: string;
-}
+import { type CvDocument } from '@/lib/services/cvService'; // ✅ 1. IMPORTAMOS EL TIPO DESDE EL SERVICIO
 
 interface CvCardProps {
-  user: CvCardData;
-  highlightRubro?: string; // <-- 1. AÑADIMOS ESTO para que pueda recibir el rubro
+  cv: CvDocument; // ✅ 2. AHORA RECIBE EL DOCUMENTO COMPLETO DEL CV
+  highlightRubro?: string;
 }
 
-const CvCard: React.FC<CvCardProps> = ({ user, highlightRubro }) => { // <-- 2. LO RECIBIMOS AQUÍ
+const CvCard: React.FC<CvCardProps> = ({ cv, highlightRubro }) => {
   const [showCv, setShowCv] = useState(false);
   const [showContact, setShowContact] = useState(false);
   const { currentUser } = useUserStore();
@@ -39,12 +29,13 @@ const CvCard: React.FC<CvCardProps> = ({ user, highlightRubro }) => { // <-- 2. 
   return (
     <>
       <Card className="flex items-center space-x-4">
-        <Avatar selfieUrl={user.selfieURL} nombre={user.nombre} size={64} />
+        {/* ✅ 3. USAMOS LOS CAMPOS DEL NUEVO OBJETO 'cv' */}
+        <Avatar selfieUrl={cv.selfieURL} nombre={cv.nombreCompleto} size={64} />
         <div className="flex-1">
-          <h3 className="font-semibold">{user.nombre}</h3>
+          <h3 className="font-semibold">{cv.nombreCompleto}</h3>
           <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
-            {user.rubros.slice(0, 2).join(', ')}
-            {user.rubros.length > 2 && ` +${user.rubros.length - 2}`}
+            {cv.rubros.slice(0, 2).join(', ')}
+            {cv.rubros.length > 2 && ` +${cv.rubros.length - 2}`}
           </p>
 
           <div className="flex space-x-2 mt-3">
@@ -66,10 +57,10 @@ const CvCard: React.FC<CvCardProps> = ({ user, highlightRubro }) => { // <-- 2. 
       {/* modal CV */}
       {showCv && (
         <CvModal
-          uid={user.uid}
-          collection={user.collection}
+          uid={cv.uid} // ✅ 4. PASAMOS EL UID DEL USUARIO
           onClose={() => setShowCv(false)}
-          highlightRubro={highlightRubro} // <-- 3. LO PASAMOS HACIA EL MODAL
+          highlightRubro={highlightRubro}
+          // El campo 'collection' ya no es necesario
         />
       )}
 
@@ -78,9 +69,10 @@ const CvCard: React.FC<CvCardProps> = ({ user, highlightRubro }) => { // <-- 2. 
         <ContactoPopup
           userUid={currentUser.uid}
           userCollection={viewerCollection}
-          providerUid={user.uid}
-          providerCollection={user.collection}
-          providerName={user.nombre}
+          providerUid={cv.uid}
+          // ✅ 5. LA COLECCIÓN DEL DUEÑO DEL CV AHORA SIEMPRE ES 'usuarios_generales'
+          providerCollection="usuarios_generales"
+          providerName={cv.nombreCompleto}
           notifId=""
           onClose={() => setShowContact(false)}
         />

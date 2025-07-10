@@ -29,25 +29,13 @@ service cloud.firestore {
 
     function isProviderOrCommerce() {
       return isAuthenticated() && (
-        (exists(/databases/$(database)/documents/prestadores/$(request.auth.uid)) &&
-          get(/databases/$(database)/documents/prestadores/$(request.auth.uid)).data.rol == 'prestador')
-        ||
-        (exists(/databases/$(database)/documents/comercios/$(request.auth.uid)) &&
-          get(/databases/$(database)/documents/comercios/$(request.auth.uid)).data.rol == 'comercio')
+        exists(/databases/$(database)/documents/prestadores/$(request.auth.uid)) ||
+        exists(/databases/$(database)/documents/comercios/$(request.auth.uid))
       );
     }
 
     // =====================================================================
-    // REGLA MAESTRA PARA LOS CVs (Se mantiene la del archivo actual)
-    // =====================================================================
-    match /{path=**}/cv/{cvId} {
-      allow read: if isProviderOrCommerce() || (isAuthenticated() && request.auth.uid == resource.data.uid);
-      allow write: if isAuthenticated() && request.auth.uid == resource.data.uid;
-    }
-
-
-    // =====================================================================
-    // Colecciones de Usuarios
+    // Colecciones de Usuarios (Sin cambios)
     // =====================================================================
     match /usuarios_generales/{userId} {
       allow read: if isAuthenticated();
@@ -55,7 +43,6 @@ service cloud.firestore {
       allow update: if isAuthenticated() && isOwner(userId) && request.resource.data.rol == resource.data.rol && request.resource.data.uid == resource.data.uid;
       allow delete: if isAuthenticated() && isOwner(userId);
 
-      // INICIO DE SECCIÓN MODIFICADA: Restaurada a la versión funcional
       match /notifications/{notificationId} {
         allow read:   if isAuthenticated() && isOwner(userId);
         allow create: if isAuthenticated();
@@ -80,7 +67,6 @@ service cloud.firestore {
         allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid;
         allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
       }
-      // FIN DE SECCIÓN MODIFICADA
     }
 
     match /prestadores/{userId} {
@@ -89,7 +75,6 @@ service cloud.firestore {
       allow update: if isAuthenticated() && isOwner(userId) && request.resource.data.rol == resource.data.rol && request.resource.data.uid == resource.data.uid;
       allow delete: if isAuthenticated() && isOwner(userId);
       
-      // INICIO DE SECCIÓN MODIFICADA: Restaurada a la versión funcional
       match /notifications/{notificationId} {
         allow read:   if isAuthenticated() && isOwner(userId);
         allow create: if isAuthenticated();
@@ -114,7 +99,6 @@ service cloud.firestore {
         allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid;
         allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
       }
-      // FIN DE SECCIÓN MODIFICADA
     }
 
     match /comercios/{userId} {
@@ -123,7 +107,6 @@ service cloud.firestore {
       allow update: if isAuthenticated() && isOwner(userId) && request.resource.data.rol == resource.data.rol && request.resource.data.uid == resource.data.uid;
       allow delete: if isAuthenticated() && isOwner(userId);
 
-      // INICIO DE SECCIÓN MODIFICADA: Restaurada a la versión funcional
       match /notifications/{notificationId} {
         allow read:   if isAuthenticated() && isOwner(userId);
         allow create: if isAuthenticated();
@@ -148,25 +131,39 @@ service cloud.firestore {
         allow update: if isAuthenticated() && resource.data.authorId == request.auth.uid;
         allow delete: if isAuthenticated() && resource.data.authorId == request.auth.uid;
       }
-      // FIN DE SECCIÓN MODIFICADA
     }
+    
+    // REGLA PARA LA NUEVA COLECCIÓN /cvs
+    match /cvs/{cvId} {
+      // ✅ INICIO: REGLA DE LECTURA CORREGIDA
+      // Se reemplaza 'resource.data.userId' por 'cvId' para que funcione
+      // incluso si el documento no existe.
+      allow read: if isAuthenticated() && 
+                     (request.auth.uid == cvId || isProviderOrCommerce());
+      // ✅ FIN: REGLA DE LECTURA CORREGIDA
 
+      // PERMISO DE ESCRITURA (sin cambios)
+      allow create: if isAuthenticated() && request.auth.uid == cvId && 
+                       request.resource.data.uid == request.auth.uid;
+      allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+    
     // =====================================================================
-    // OTRAS COLECCIONES (Sin cambios, se mantiene la del archivo actual)
+    // OTRAS COLECCIONES (Sin cambios)
     // =====================================================================
     match /anuncios/{anuncioId} {
       allow read: if (resource.data.status == 'active') ||
-                       (isAuthenticated() && resource.data.creatorId == request.auth.uid) ||
-                       userHasRole('administrador');
+                      (isAuthenticated() && resource.data.creatorId == request.auth.uid) ||
+                      userHasRole('administrador');
       allow create: if isAuthenticated() &&
-                         request.resource.data.creatorId == request.auth.uid &&
-                         isProviderOrCommerce();
+                       request.resource.data.creatorId == request.auth.uid &&
+                       isProviderOrCommerce();
       allow update: if isAuthenticated() && resource.data.creatorId == request.auth.uid;
       allow delete: if isAuthenticated() && resource.data.creatorId == request.auth.uid;
 
       match /capturas/{capturaId} {
         allow read: if (get(/databases/$(database)/documents/anuncios/$(anuncioId)).data.status == 'active') ||
-                         (isAuthenticated() && get(/databases/$(database)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid);
+                       (isAuthenticated() && get(/databases/$(database)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid);
         
         allow create: if isAuthenticated() &&
                            get(/databases/$(database)/documents/anuncios/$(anuncioId)).data.creatorId == request.auth.uid;
