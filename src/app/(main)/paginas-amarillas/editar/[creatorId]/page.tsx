@@ -7,24 +7,22 @@ import PaginaAmarillaEditarForm from './components/PaginaAmarillaEditarForm';
 import { PaginaAmarillaData, SerializablePaginaAmarillaData } from '@/types/paginaAmarilla';
 import type { Metadata, ResolvingMetadata } from 'next';
 
-type PagePropsAsync = {
-  params: Promise<{ creatorId: string }>;
+type PageProps = {
+  params: { creatorId: string };
 };
 
 export async function generateMetadata(
-  { params }: PagePropsAsync,
+  { params }: PageProps,
   _parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const { creatorId } = await params;
+  const { creatorId } = params;
   return {
     title: `Editar Publicación ${creatorId} | Páginas Amarillas`,
   };
 }
 
-export default async function EditarPaginaAmarillaPage(
-  { params }: PagePropsAsync
-) {
-  const { creatorId } = await params;
+export default async function EditarPaginaAmarillaPage({ params }: PageProps) {
+  const { creatorId } = params;
 
   if (!creatorId) {
     notFound();
@@ -35,34 +33,13 @@ export default async function EditarPaginaAmarillaPage(
     notFound();
   }
 
+  // Serializa los Timestamps de Firebase a strings ISO para que el componente sea compatible con Server Components.
   const serializablePublicacion: SerializablePaginaAmarillaData = {
-    creatorId: publicacionDb.creatorId,
-    creatorRole: publicacionDb.creatorRole,
-    nombrePublico: publicacionDb.nombrePublico,
-    provincia: publicacionDb.provincia,
-    localidad: publicacionDb.localidad,
-    contadorEdicionesAnual: publicacionDb.contadorEdicionesAnual,
-    activa: publicacionDb.activa,
-    tituloCard: publicacionDb.tituloCard,
-    subtituloCard: publicacionDb.subtituloCard,
-    descripcion: publicacionDb.descripcion,
-    imagenPortadaUrl: publicacionDb.imagenPortadaUrl,
-    telefonoContacto: publicacionDb.telefonoContacto,
-    emailContacto: publicacionDb.emailContacto,
-    enlaceWeb: publicacionDb.enlaceWeb,
-    enlaceInstagram: publicacionDb.enlaceInstagram,
-    enlaceFacebook: publicacionDb.enlaceFacebook,
-    direccionVisible: publicacionDb.direccionVisible,
-    rubro: publicacionDb.rubro,
-    subRubro: publicacionDb.subRubro,
-    categoria: publicacionDb.categoria,
-    subCategoria: publicacionDb.subCategoria,
-    horarios: publicacionDb.horarios,
-    realizaEnvios: publicacionDb.realizaEnvios,
+    ...publicacionDb,
     fechaCreacion: (publicacionDb.fechaCreacion as Timestamp).toDate().toISOString(),
     fechaExpiracion: (publicacionDb.fechaExpiracion as Timestamp).toDate().toISOString(),
-    ultimaModificacion: (publicacionDb.ultimaModificacion as Timestamp).toDate().toISOString(),
-    inicioCicloEdiciones: (publicacionDb.inicioCicloEdiciones as Timestamp).toDate().toISOString(),
+    ultimaModificacion: publicacionDb.ultimaModificacion ? (publicacionDb.ultimaModificacion as Timestamp).toDate().toISOString() : new Date().toISOString(),
+    inicioCicloEdiciones: publicacionDb.inicioCicloEdiciones ? (publicacionDb.inicioCicloEdiciones as Timestamp).toDate().toISOString() : new Date().toISOString(),
   };
 
   return (
