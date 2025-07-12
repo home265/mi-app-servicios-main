@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-
+import { useTheme } from 'next-themes';
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { SerializablePaginaAmarillaData, RolPaginaAmarilla } from '@/types/paginaAmarilla';
 import {
   HorariosDeAtencion,
@@ -27,6 +28,8 @@ import SelectorHorariosAtencion from '@/app/components/paginas-amarillas/Selecto
 import PaginaAmarillaFormPreview, {
   PaginaAmarillaFormValues,
 } from '@/app/components/paginas-amarillas/PaginaAmarillaFormPreview';
+import BotonAyuda from '@/app/components/common/BotonAyuda';
+import AyudaEditarPublicacionPA from '@/app/components/ayuda-contenido/AyudaEditarPublicacionPA';
 
 // --- INICIO: NUEVO COMPONENTE INPUT CON PREFIJO ---
 interface InputConPrefijoProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -35,7 +38,16 @@ interface InputConPrefijoProps extends InputHTMLAttributes<HTMLInputElement> {
   prefijo: string;
   error?: string;
 }
-
+const palette = {
+  dark: {
+    tarjeta: '#184840',
+    resalte: '#EFC71D',
+  },
+  light: {
+    tarjeta: '#184840',
+    resalte: '#EFC71D',
+  },
+};
 const InputConPrefijo = forwardRef<HTMLInputElement, InputConPrefijoProps>(
   ({ id, label, prefijo, error, ...props }, ref) => {
     return (
@@ -167,7 +179,8 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
   const router = useRouter();
   const currentUser = useUserStore(s => s.currentUser) as UserProfile | null;
   const { creatorRole, creatorId } = publicacionInicial;
-
+  const { resolvedTheme } = useTheme(); // <-- AÑADIR ESTO
+  const P = resolvedTheme === 'dark' ? palette.dark : palette.light; 
   const [isLoading, setIsLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null | undefined>(
     publicacionInicial.imagenPortadaUrl
@@ -321,7 +334,46 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
   return (
     <div className="flex flex-col lg:flex-row gap-8 p-4 md:p-6">
       <div className="lg:w-2/3 xl:w-3/5 space-y-6">
-        <h1 className="text-2xl font-bold text-texto-principal">Editar Publicación en Páginas Amarillas</h1>
+
+  
+
+  {/* --- INICIO DE LA MODIFICACIÓN --- */}
+
+  {/* 1. Contenedor Flexbox para alinear los 3 elementos */}
+
+  <div className="flex items-center justify-between">
+
+    
+
+    {/* 2. Elemento Izquierdo: El Botón de Ayuda */}
+
+    <div>
+
+      <BotonAyuda>
+
+        <AyudaEditarPublicacionPA />
+
+      </BotonAyuda>
+
+    </div>
+
+    
+
+    {/* 3. Elemento Central: El Título */}
+
+   <h1 className="text-2xl font-bold text-texto-principal">Editar Publicación en Páginas Amarillas</h1>
+
+    
+
+    {/* 4. Elemento Derecho: Un espacio invisible que ocupa lo mismo que el botón */}
+
+    <div className="w-12 h-12"></div> {/* Ancho y alto igual al de BotonAyuda */}
+
+    
+
+  </div>
+
+  {/* --- FIN DE LA MODIFICACIÓN --- */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           
           <section>
@@ -478,8 +530,16 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
       <div className="lg:w-1/3 xl:w-2/5 mt-8 lg:mt-0">
         <PaginaAmarillaFormPreview formData={previewVals} />
       </div>
+      <button
+      onClick={() => router.push('/bienvenida')}
+      className="fixed bottom-6 right-4 h-12 w-12 rounded-full shadow-lg flex items-center justify-center focus:outline-none"
+      style={{ backgroundColor: P.tarjeta }}
+    >
+      <ChevronLeftIcon className="h-6 w-6" style={{ color: P.resalte }} />
+    </button>
     </div>
   );
+  
 };
 
 export default PaginaAmarillaEditarForm;

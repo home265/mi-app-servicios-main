@@ -8,7 +8,6 @@ import {
   useRouter,
   usePathname,
 } from 'next/navigation';
-// --- 1. IMPORTAR EL ÍCONO (COMO EN TRABAJOS/PAGE.TSX) ---
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 
 import {
@@ -18,6 +17,8 @@ import {
 } from '@/types/paginaAmarilla';
 import PaginasAmarillasFiltros from './components/PaginasAmarillasFiltros';
 import PaginasAmarillasResultados from './components/PaginasAmarillasResultados';
+import BotonAyuda from '@/app/components/common/BotonAyuda'; // <-- 1. AÑADIDO
+import AyudaPaginasAmarillas from '@/app/components/ayuda-contenido/AyudaPaginasAmarillas'; // <-- 2. AÑADIDO
 
 
 type EstadoCarga = 'idle' | 'loading' | 'success' | 'error';
@@ -83,7 +84,6 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
   const pathname     = usePathname();
   const searchParams = useSearchParams();
 
-  /* filtros que llegan por URL al cargar la página */
   const [filtrosActivos, setFiltrosActivos] = useState<PaginaAmarillaFiltros>(
     () => parseQueryParamsToFiltros(searchParams),
   );
@@ -93,10 +93,8 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
   const [mensajeError,  setMensajeError]  = useState<string | null>(null);
   const [hasSearched,   setHasSearched]   = useState(false);
 
-  /* ref que impide duplicar petición simultánea */
   const peticionEnCurso = React.useRef<boolean>(false);
 
-  /* ----------------------- BUSCAR ----------------------- */
   const handleBuscar = async (nuevosFiltros: PaginaAmarillaFiltros) => {
     if (peticionEnCurso.current) return;
     peticionEnCurso.current = true;
@@ -129,37 +127,49 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
     }
   };
 
-  /* ----------------------- UI ----------------------- */
   return (
-  <div className="container mx-auto px-2 sm:px-4 py-8 sm:py-12 space-y-6 relative">
-    {/* Título movido fuera y centrado */}
-    <h2 className="text-2xl font-semibold text-texto-principal text-center">
-      Buscar en Páginas Amarillas
-    </h2>
+    // El 'relative' en este div es clave para posicionar el botón de ayuda
+    <div className="container mx-auto px-2 sm:px-4 py-8 sm:py-12 space-y-6 relative">
+      
+      {/* --- CONTENEDOR PARA EL TÍTULO Y EL BOTÓN DE AYUDA --- */}
+      <div className="relative mx-auto w-fit">
+        {/* El título ya no necesita padding extra */}
+        <h2 className="text-2xl font-semibold text-texto-principal text-center">
+          Buscar en Páginas Amarillas
+        </h2>
+        
+        {/* El botón de ayuda posicionado relativo al título */}
+        <div className="absolute top-full right-0 mt-3">
+          <BotonAyuda>
+            <AyudaPaginasAmarillas />
+          </BotonAyuda>
+        </div>
+      </div>
 
-    <PaginasAmarillasFiltros
-      onBuscar={handleBuscar}
-      isLoading={estadoCarga === 'loading'}
-      initialFiltros={filtrosActivos}
-    />
-    <PaginasAmarillasResultados
-      publicaciones={publicaciones}
-      isLoading={estadoCarga === 'loading'}
-      error={mensajeError}
-      hasSearched={hasSearched}
-    />
+      <div className="mt-15">
+        <PaginasAmarillasFiltros
+          onBuscar={handleBuscar}
+          isLoading={estadoCarga === 'loading'}
+          initialFiltros={filtrosActivos}
+        />
+      </div>
+      <PaginasAmarillasResultados
+        publicaciones={publicaciones}
+        isLoading={estadoCarga === 'loading'}
+        error={mensajeError}
+        hasSearched={hasSearched}
+      />
 
-    {/* --- BOTÓN FLOTANTE (IDÉNTICO AL DE TRABAJOS/PAGE.TSX) --- */}
-    <button
-      onClick={() => router.push('/bienvenida')}
-      aria-label="Volver a inicio"
-      className="fixed bottom-6 right-4 z-40 h-12 w-12 rounded-full shadow-lg flex items-center justify-center transition active:scale-95 focus:outline-none focus:ring"
-      style={{ backgroundColor: '#184840' }} // Verde oscuro específico
-    >
-      <ChevronLeftIcon className="h-6 w-6" style={{ color: '#EFC71D' }} /> {/* Amarillo específico */}
-    </button>
-  </div>
-);
+      <button
+        onClick={() => router.push('/bienvenida')}
+        aria-label="Volver a inicio"
+        className="fixed bottom-6 right-4 z-40 h-12 w-12 rounded-full shadow-lg flex items-center justify-center transition active:scale-95 focus:outline-none focus:ring"
+        style={{ backgroundColor: '#184840' }}
+      >
+        <ChevronLeftIcon className="h-6 w-6" style={{ color: '#EFC71D' }} />
+      </button>
+    </div>
+  );
 };
 
 /* -------------------------------------------------------------------- */

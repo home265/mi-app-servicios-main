@@ -8,6 +8,9 @@ import Card from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';
 import SelectorCategoriasEmpleo from '@/app/components/forms/SelectorCategoriasEmpleo';
 import Avatar from '@/app/components/common/Avatar';
+import BotonAyuda from '@/app/components/common/BotonAyuda';
+import AyudaCrearEditarCV from '@/app/components/ayuda-contenido/AyudaCrearEditarCV';
+import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 
 export default function CvPage() {
   const { currentUser } = useUserStore();
@@ -98,11 +101,19 @@ export default function CvPage() {
         />
       </div>
   
-      <div>
-        <p className="font-medium">Nombre</p>
-        <p>
-          {currentUser.nombre} {currentUser.apellido}
-        </p>
+      <div className="flex items-start justify-between">
+        {/* Esto mantiene el texto a la izquierda */}
+        <div>
+          <p className="font-medium">Nombre</p>
+          <p>
+            {currentUser.nombre} {currentUser.apellido}
+          </p>
+        </div>
+
+        {/* Y aquí añadimos el botón de ayuda, que se irá a la derecha */}
+        <BotonAyuda>
+          <AyudaCrearEditarCV />
+        </BotonAyuda>
       </div>
   
       <div>
@@ -155,5 +166,15 @@ export default function CvPage() {
   
       <Button onClick={handleSave}>Guardar CV</Button>
     </Card>
+    
   );
+  <button
+        onClick={() => router.push('/bienvenida')}
+        className="fixed bottom-6 right-4 h-12 w-12 rounded-full shadow-lg flex items-center justify-center focus:outline-none"
+        // La variable 'P' no existe en este archivo, así que usamos un color directamente o la defines
+        // Para simplificar, usaré un color que se adapte a tu tema.
+        style={{ backgroundColor: '#184840' }} // Color de la tarjeta
+      >
+        <ChevronLeftIcon className="h-6 w-6" style={{ color: '#EFC71D' }} /> {/* Color de resalte */}
+      </button>
 }

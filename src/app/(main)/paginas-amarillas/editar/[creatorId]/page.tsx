@@ -7,22 +7,25 @@ import PaginaAmarillaEditarForm from './components/PaginaAmarillaEditarForm';
 import { PaginaAmarillaData, SerializablePaginaAmarillaData } from '@/types/paginaAmarilla';
 import type { Metadata, ResolvingMetadata } from 'next';
 
+// Se ajusta el tipo para reflejar que `params` es una Promesa.
 type PageProps = {
-  params: { creatorId: string };
+  params: Promise<{ creatorId: string }>;
 };
 
 export async function generateMetadata(
   { params }: PageProps,
   _parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const { creatorId } = params;
+  // Se usa 'await' para resolver la promesa y obtener el creatorId.
+  const { creatorId } = await params;
   return {
     title: `Editar Publicación ${creatorId} | Páginas Amarillas`,
   };
 }
 
 export default async function EditarPaginaAmarillaPage({ params }: PageProps) {
-  const { creatorId } = params;
+  // Se usa 'await' aquí también para obtener el creatorId.
+  const { creatorId } = await params;
 
   if (!creatorId) {
     notFound();

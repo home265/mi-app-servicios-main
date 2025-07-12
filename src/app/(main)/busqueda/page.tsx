@@ -4,7 +4,8 @@
   BÚSQUEDA — “Búsqueda de servicios”
 ───────────────────────────────────────────────*/
 'use client';
-
+import BotonAyuda from '@/app/components/common/BotonAyuda';
+import AyudaBusqueda from '@/app/components/ayuda-contenido/AyudaBusqueda';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
@@ -222,9 +223,14 @@ export default function BusquedaPage() {
       style={{ backgroundColor: P.fondo, color: P.texto }}
     >
       <header className="relative flex items-center justify-center px-5 py-8">
-    <h1 className="text-lg font-medium">
-        Búsqueda de servicios
-    </h1>
+  <div className="absolute left-5">
+    <BotonAyuda>
+      <AyudaBusqueda />
+    </BotonAyuda>
+  </div>
+  <h1 className="text-lg font-medium">
+    Búsqueda de servicios
+  </h1>
 </header>
 
       <hr className="mx-5" style={{ borderColor: P.borde }} />

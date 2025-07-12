@@ -9,6 +9,9 @@ import { planes, campanias, Plan, Campania, PlanId, CampaniaId } from '@/lib/con
 import { useAnuncioStore } from '@/store/anuncioStore';
 import { updateAnuncio } from '@/lib/services/anunciosService';
 import type { Anuncio } from '@/types/anuncio';
+import BotonAyuda from '@/app/components/common/BotonAyuda';
+import AyudaCrearEditarAnuncio from '@/app/components/ayuda-contenido/AyudaCrearEditarAnuncio';
+
 
 export default function ResumenPage() {
   const router = useRouter();
@@ -119,9 +122,17 @@ export default function ResumenPage() {
 
   return (
     <div className="min-h-screen bg-fondo text-texto p-4 flex flex-col items-center">
-      <h1 className="text-3xl font-bold text-primario mb-8 text-center">
-        Resumen de tu Anuncio
-      </h1>
+       <div className="absolute left-0 top-1">
+          <BotonAyuda>
+            <AyudaCrearEditarAnuncio fase="fase1c" />
+          </BotonAyuda>
+        </div>
+      
+      <div className="relative w-full mb-10 mt-8">
+        <h1 className="text-3xl font-bold text-primario text-center">
+          Resumen de tu Anuncio
+        </h1>
+      </div>
 
       <Card className="w-full max-w-2xl p-6 shadow-lg">
         <div className="space-y-6">

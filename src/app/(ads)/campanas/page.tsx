@@ -7,6 +7,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Card from '@/app/components/ui/Card'; // Asegúrate que la ruta a tu componente Card es correcta
 import { campanias, planes, CampaniaId, PlanId } from '@/lib/constants/anuncios';
 import { useAnuncioStore } from '@/store/anuncioStore';
+import BotonAyuda from '@/app/components/common/BotonAyuda';
+import AyudaCrearEditarAnuncio from '@/app/components/ayuda-contenido/AyudaCrearEditarAnuncio';
 
 export default function CampaniasPage() {
   const router       = useRouter();
@@ -104,9 +106,20 @@ export default function CampaniasPage() {
 
   return (
     <div className="min-h-screen bg-fondo text-texto p-4">
-      <h1 className="text-3xl font-bold text-primario mb-2 text-center">
+      <div className="absolute left-0 top-1">
+                <BotonAyuda>
+                  <AyudaCrearEditarAnuncio fase="fase1b" />
+                </BotonAyuda>
+              </div>
+      <div className="relative w-full mb-10 mt-8">
+
+        <h1 className="text-3xl font-bold text-primario mb-2 text-center">
+
         Elige tu Campaña para el Plan: {planSeleccionado.name}
+
       </h1>
+
+      </div>
       <p className="text-center text-texto-secundario mb-8">
         Has seleccionado el plan <span className="font-semibold">{planSeleccionado.name}</span>.
         Ahora elige la duración de tu campaña.

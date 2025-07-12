@@ -9,6 +9,8 @@ import { useAnuncioStore } from '@/store/anuncioStore';
 import { planes, Plan, PlanId, CampaniaId } from '@/lib/constants/anuncios'; // CampaniaId y PlanId importados para claridad
 import { updateAnuncio } from '@/lib/services/anunciosService';
 import type { Anuncio } from '@/types/anuncio';
+import BotonAyuda from '@/app/components/common/BotonAyuda';
+import AyudaCrearEditarAnuncio from '@/app/components/ayuda-contenido/AyudaCrearEditarAnuncio';
 
 export default function CountSelectionPage() {
   const router = useRouter();
@@ -164,9 +166,29 @@ export default function CountSelectionPage() {
 
   return (
     <div className="min-h-screen bg-fondo text-texto p-4 flex flex-col items-center">
-      <h1 className="text-3xl font-bold text-primario mb-2 text-center">
+      <div className="absolute left-0 top-1">
+
+                <BotonAyuda>
+
+                  <AyudaCrearEditarAnuncio fase="fase1d" />
+
+                </BotonAyuda>
+
+              </div>
+
+      <div className="relative w-full mb-10 mt-8">
+
+
+
+        <h1 className="text-3xl font-bold text-primario mb-2 text-center">
+
         ¿Cuántas Imágenes por Pantalla?
+
       </h1>
+
+
+
+      </div>
       <p className="text-center text-texto-secundario mb-8 max-w-xl">
         Para tu plan <span className="font-semibold">{plan.name}</span>, puedes elegir hasta{' '}
         <span className="font-semibold">{plan.maxImages}</span> imágenes que rotarán.

@@ -26,7 +26,8 @@ import {
 import NotificacionCard from '@/app/components/notificaciones/NotificacionCard'
 import ResenaForm from '@/app/components/resenas/ResenaForm'
 import PerfilModal from '@/app/components/notificaciones/PerfilModal'
-
+import BotonAyuda from '@/app/components/common/BotonAyuda';
+import AyudaTrabajos from '@/app/components/ayuda-contenido/AyudaTrabajos';
 /*────────── paleta & assets ──────────*/
 const palette = {
   dark: {
@@ -216,10 +217,18 @@ export default function TrabajosPage() {
     >
       {/*────────── header ──────────*/}
       <header className="relative flex items-center justify-center px-5 py-8">
-        <h1 className="text-lg md:text-xl font-medium tracking-wide">
-          Solicitudes y acuerdos
-        </h1>
-      </header>
+  {/* Contenedor para posicionar el botón de ayuda a la izquierda */}
+  <div className="absolute left-5 top-1/2 -translate-y-1/2">
+    <BotonAyuda>
+      <AyudaTrabajos />
+    </BotonAyuda>
+  </div>
+
+  {/* Título centrado */}
+  <h1 className="text-lg md:text-xl font-medium tracking-wide">
+    Solicitudes y acuerdos
+  </h1>
+</header>
 
       <hr className="mx-5" style={{ borderColor: P.borde }} />
 

@@ -16,12 +16,16 @@ import {
   PencilIcon,
   Bars3BottomRightIcon,
 } from '@heroicons/react/24/outline';
-import { collection, query, where, getDocs, Timestamp } from 'firebase/firestore'; // ✅ Se eliminan 'doc' y 'getDoc' que ya no se usan aquí
+import { collection, query, where, getDocs, Timestamp, doc, getDoc } from 'firebase/firestore';
 import { useUserStore } from '@/store/userStore';
 import Avatar from '@/app/components/common/Avatar';
 import BotonCrearEditarAnuncio from './components/BotonCrearEditarAnuncio';
 import { db } from '@/lib/firebase/config';
-import { getCvByUid } from '@/lib/services/cvService'; // ✅ PASO 1: IMPORTAR EL SERVICIO DE CV
+import { getCvByUid } from '@/lib/services/cvService';
+import BotonAyuda from '@/app/components/common/BotonAyuda';
+import AyudaAjustes from '@/app/components/ayuda-contenido/AyudaAjustes';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { getPaginaAmarilla } from '@/lib/services/paginasAmarillasService';
 
 const palette = {
   dark: {
@@ -146,29 +150,23 @@ export default function BienvenidaPage() {
 
   const [hasCv, setCv] = useState<boolean | null>(null);
   const [hasAd, setAd] = useState<boolean | null>(null);
+  const [hasPublication, setHasPublication] = useState<boolean | null>(null);
 
-  // ✅ PASO 2: ACTUALIZAR EL useEffect PARA USAR EL SERVICIO
   useEffect(() => {
-    // Esta lógica solo se aplica si el usuario tiene el rol 'usuario'
     if (user?.rol !== 'usuario') return;
 
-    // Esta función asíncrona ahora usa el servicio para verificar si el CV existe
     (async () => {
       if (!user?.uid) return;
       try {
-        // Usamos la función del servicio que busca en la nueva colección /cvs
         const cvData = await getCvByUid(user.uid);
-        // Si cvData no es nulo, significa que el CV existe
         setCv(cvData !== null);
       } catch (error) {
         console.error("Error al verificar la existencia del CV:", error);
-        // En caso de error, asumimos que no tiene CV para evitar un bloqueo
         setCv(false); 
       }
     })();
   }, [user]);
 
-  // El useEffect para verificar anuncios no necesita cambios
   useEffect(() => {
     if (!user || !['prestador', 'comercio'].includes(user.rol)) return;
     (async () => {
@@ -189,6 +187,21 @@ export default function BienvenidaPage() {
   }, [user]);
 
   useEffect(() => {
+    if (!user || !['prestador', 'comercio'].includes(user.rol)) return;
+  
+    (async () => {
+      if (!user?.uid) return;
+      try {
+        const pubDoc = await getDoc(doc(db, 'paginas_amarillas', user.uid));
+        setHasPublication(pubDoc.exists());
+      } catch (error) {
+        console.error("Error al verificar la existencia de la publicación:", error);
+        setHasPublication(false);
+      }
+    })();
+  }, [user]);
+
+  useEffect(() => {
     if (!user) router.replace('/login');
     else if (!pinOk) router.replace('/pin-entry');
   }, [user, pinOk, router]);
@@ -197,7 +210,7 @@ export default function BienvenidaPage() {
     !user ||
     !pinOk ||
     (user.rol === 'usuario' && hasCv === null) ||
-    (['prestador', 'comercio'].includes(user.rol) && hasAd === null);
+    (['prestador', 'comercio'].includes(user.rol) && (hasAd === null || hasPublication === null));
 
   if (loading) {
     return (
@@ -225,9 +238,19 @@ export default function BienvenidaPage() {
       },
     ];
   } else if (user) {
-    actions = base[user.rol as 'prestador' | 'comercio'].filter((a) =>
+    let availableActions = base[user.rol as 'prestador' | 'comercio'].filter((a) =>
       a.requiresAd ? hasAd === true : true
     );
+  
+    if (hasPublication !== null) {
+      if (hasPublication) {
+        availableActions = availableActions.filter((a) => a.id !== 'crearPub');
+      } else {
+        availableActions = availableActions.filter((a) => a.id !== 'editarPub');
+      }
+    }
+  
+    actions = availableActions;
   }
 
   const fullName = user?.nombre ? toTitleCase(user.nombre) : '';
@@ -237,6 +260,7 @@ export default function BienvenidaPage() {
       className="min-h-screen flex flex-col"
       style={{ backgroundColor: P.fondo, color: P.texto }}
     >
+
       <header className="flex items-center justify-between px-5 py-4 mt-6">
         <div className="flex items-center gap-4">
           <Avatar
@@ -249,13 +273,20 @@ export default function BienvenidaPage() {
             <span className="text-xs uppercase opacity-70">{user?.rol}</span>
           </div>
         </div>
-        <button
-          onClick={() => router.push('/ajustes')}
-          style={{ backgroundColor: P.tarjeta }}
-          className="rounded-full p-2.5"
-        >
-          <Bars3BottomRightIcon className="w-7 h-7" style={{ color: P.resalte }} />
-        </button>
+
+        <div className="flex items-center gap-4">
+          <BotonAyuda>
+            <AyudaAjustes />
+          </BotonAyuda>
+
+          <button
+            onClick={() => router.push('/ajustes')}
+            style={{ backgroundColor: P.tarjeta }}
+            className="rounded-full p-2.5"
+          >
+            <Bars3BottomRightIcon className="w-7 h-7" style={{ color: P.resalte }} />
+          </button>
+        </div>
       </header>
 
       <main className="flex-grow flex justify-center pt-16 pb-6">

@@ -135,7 +135,7 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
   return (
     <form
       onSubmit={handleSubmit}
-      className="p-4 md:p-6 bg-card border border-borde-tarjeta rounded-lg shadow-md space-y-6"
+      className="p-4 md:p-6"
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <SelectorLocalidad

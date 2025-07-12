@@ -12,7 +12,8 @@ import SelectorCategoriasEmpleo from '@/app/components/forms/SelectorCategoriasE
 import CvCard from '@/app/components/cv/CvCard'; // CvCard ya fue actualizado
 import Button from '@/app/components/ui/Button';
 import Card from '@/app/components/ui/Card';
-
+import BotonAyuda from '@/app/components/common/BotonAyuda';
+import AyudaEmpleados from '@/app/components/ayuda-contenido/AyudaEmpleados';
 
 export default function EmpleadosPage() {
   const router = useRouter();
@@ -62,20 +63,26 @@ export default function EmpleadosPage() {
   return (
     <div className="flex flex-col items-center p-4 space-y-6 min-h-screen">
       <Card className="max-w-md w-full space-y-4">
-        <h2 className="text-lg font-semibold">Buscar Empleados</h2>
+  {/* Contenedor para alinear título y botón */}
+  <div className="flex items-center justify-between">
+    <h2 className="text-lg font-semibold">Buscar Empleados</h2>
+    <BotonAyuda>
+      <AyudaEmpleados />
+    </BotonAyuda>
+  </div>
 
-        <div>
-          <label className="block font-medium mb-1">Rubro (opcional)</label>
-          <SelectorCategoriasEmpleo
-            value={rubroSel}
-            onChange={(arr) => setRubroSel(arr.slice(0, 1))}
-          />
-        </div>
+  <div>
+    <label className="block font-medium mb-1">Rubro (opcional)</label>
+    <SelectorCategoriasEmpleo
+      value={rubroSel}
+      onChange={(arr) => setRubroSel(arr.slice(0, 1))}
+    />
+  </div>
 
-        <Button onClick={handleBuscar} disabled={cargando}>
-          {cargando ? 'Buscando…' : 'Buscar'}
-        </Button>
-      </Card>
+  <Button onClick={handleBuscar} disabled={cargando}>
+    {cargando ? 'Buscando…' : 'Buscar'}
+  </Button>
+</Card>
 
       <div className="w-full max-w-md space-y-4 pb-20">
         {resultados.map((cv) => (

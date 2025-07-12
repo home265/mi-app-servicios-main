@@ -13,7 +13,8 @@ import AnuncioCard from './components/AnuncioCard';
 import Navbar from '@/app/components/common/Navbar';
 import { Loader2 } from 'lucide-react';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
-
+import BotonAyuda from '@/app/components/common/BotonAyuda';
+import AyudaMisAnuncios from '@/app/components/ayuda-contenido/AyudaMisAnuncios';
 interface AnuncioConPreview extends Anuncio {
   previewImageUrl?: string;
   tiempoRestante?: string;
@@ -210,12 +211,28 @@ export default function MisAnunciosPage() {
     <>
       <Navbar hideSettings={true} />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
-          <h1 className="text-2xl sm:text-3xl font-bold text-[var(--color-texto-principal)]">Mis Anuncios</h1>
-          <Link href="/planes" className="w-full sm:w-auto bg-primario text-white px-6 py-3 rounded-lg shadow hover:bg-primario-dark transition-colors font-semibold text-center">
-              Crear Nuevo Anuncio
-          </Link>
-        </div>
+  {/* 1. Contenedor principal del encabezado con posicionamiento relativo */}
+  <div className="relative mb-6 text-center">
+    
+    {/* 2. Div del ícono, posicionado a la izquierda */}
+    <div className="absolute left-0 top-1/2 -translate-y-1/2">
+      <BotonAyuda>
+        <AyudaMisAnuncios />
+      </BotonAyuda>
+    </div>
+
+    {/* 3. Título centrado que ocupa todo el ancho */}
+    <h1 className="text-2xl sm:text-3xl font-bold text-[var(--color-texto-principal)] inline-block">
+      Mis Anuncios
+    </h1>
+  </div>
+
+  {/* Botón para crear anuncio */}
+  <div className="text-center">
+    <Link href="/planes" className="inline-block bg-primario text-white px-6 py-3 rounded-lg shadow hover:bg-primario-dark transition-colors font-semibold">
+        Crear Nuevo Anuncio
+    </Link>
+  </div>
 
         {!currentUserUid && !isLoadingAuth && (
              <div className="text-center py-10 px-6 bg-[var(--color-tarjeta)] rounded-lg shadow-md max-w-lg mx-auto">

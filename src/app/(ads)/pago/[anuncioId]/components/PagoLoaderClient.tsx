@@ -12,6 +12,8 @@ import type { Anuncio } from '@/types/anuncio';
 import PagoSimuladorClient from '../../components/PagoSimuladorClient'; // Ajusta la ruta si es necesario
 import Card from '@/app/components/ui/Card'; // Para el mensaje de error
 import { Loader2, AlertTriangle } from 'lucide-react'; // Para estados de carga y error
+import BotonAyuda from '@/app/components/common/BotonAyuda';
+import AyudaCrearEditarAnuncio from '@/app/components/ayuda-contenido/AyudaCrearEditarAnuncio';
 
 interface PagoLoaderClientProps {
   anuncioId: string;
@@ -160,10 +162,22 @@ export default function PagoLoaderClient({ anuncioId }: PagoLoaderClientProps) {
 
   return (
     <div className="container mx-auto px-2 sm:px-4 py-6 flex flex-col items-center min-h-screen bg-[var(--color-fondo)]">
-      <Card className="w-full max-w-lg p-6 sm:p-8 shadow-xl">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[var(--color-primario)] mb-6 sm:mb-8 text-center">
+      
+      {/* Contenedor del encabezado con el título y el botón de ayuda */}
+      <div className="relative w-full max-w-lg mb-6 text-center">
+        <div className="absolute left-0 top-1/2 -translate-y-1/2">
+          <BotonAyuda>
+            {/* La ayuda de la Fase 3 corresponde a esta pantalla */}
+            <AyudaCrearEditarAnuncio fase="fase3" />
+          </BotonAyuda>
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[var(--color-primario)]">
           Confirmar y Pagar Anuncio
         </h1>
+      </div>
+
+      {/* La Card ahora solo contiene el simulador de pago */}
+      <Card className="w-full max-w-lg p-6 sm:p-8 shadow-xl">
         <PagoSimuladorClient
           anuncioId={anuncioId}
           nombrePlan={anuncioDataForSimulador.nombrePlan}

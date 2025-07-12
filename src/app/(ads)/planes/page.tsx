@@ -9,6 +9,8 @@ import { useAnuncioStore } from '@/store/anuncioStore';
 import { useUserStore } from '@/store/userStore';
 import { getExistingDraft, getAnuncioById } from '@/lib/services/anunciosService';
 import type { Anuncio } from '@/types/anuncio';
+import BotonAyuda from '@/app/components/common/BotonAyuda';
+import AyudaCrearEditarAnuncio from '@/app/components/ayuda-contenido/AyudaCrearEditarAnuncio';
 
 export default function PlanesPage() {
   const router       = useRouter();
@@ -146,9 +148,21 @@ export default function PlanesPage() {
   /* ---------- render ---------- */
   return (
     <div className="min-h-screen bg-fondo text-texto p-4">
-      <h1 className="text-3xl font-bold text-primario mb-2 text-center">
-        {existingDraft || borradorIdQueryParam ? 'Modifica tu Plan' : 'Elige tu Plan'}
-      </h1>
+  
+  {/* --- Encabezado con posicionamiento relativo --- */}
+  <div className="relative">
+    {/* 1. Contenedor para posicionar el botón en la esquina */}
+    <div className="absolute top-0 left-0">
+      <BotonAyuda>
+        <AyudaCrearEditarAnuncio fase="fase1a" />
+      </BotonAyuda>
+    </div>
+
+    {/* 2. Título centrado y con más espacio inferior (mb-8) */}
+    <h1 className="text-3xl font-bold text-primario mb-8 text-center">
+      {existingDraft || borradorIdQueryParam ? 'Modifica tu Plan' : 'Elige tu Plan'}
+    </h1>
+  </div>
 
       {(existingDraft || borradorIdQueryParam) && (
         <p className="text-center text-texto-secundario mb-8">

@@ -11,11 +11,11 @@ export default function AyudaTrabajos() {
   return (
     <div className="text-sm">
       <div className="flex justify-center mb-4">
-        {/* CORRECCIÓN APLICADA: Se envuelve el Logo en un div para controlar su tamaño. */}
-        <div className="w-20 h-auto">
-          <Logo />
-        </div>
-      </div>
+  {/* El div ahora tiene un tamaño fijo (w-20 h-20) */}
+  <div className="w-20 h-20">
+    <Logo />
+  </div>
+</div>
       <h2 className="text-2xl font-bold text-center mb-6">¿Cómo gestionar tus trabajos?</h2>
       
       {/* --- PASO 1 --- */}
