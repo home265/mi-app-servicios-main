@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 
 import React, { useEffect, useState } from 'react'
@@ -11,7 +10,9 @@ import {
 import {
   useUserStore,
   UserProfile,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Role as UserRole,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ActingAs,
 } from '@/store/userStore'
 import {
@@ -28,6 +29,7 @@ import ResenaForm from '@/app/components/resenas/ResenaForm'
 import PerfilModal from '@/app/components/notificaciones/PerfilModal'
 import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaTrabajos from '@/app/components/ayuda-contenido/AyudaTrabajos';
+
 /*────────── paleta & assets ──────────*/
 const palette = {
   dark: {
@@ -48,6 +50,7 @@ const palette = {
   },
 }
 
+/*────────── Tipos mejorados ──────────*/
 interface ProviderUserProfile extends UserProfile {
   nombre: string
   selfieURL?: string
@@ -60,14 +63,20 @@ interface PerfilTarget {
   uid: string
   collection: string
 }
+// Tipo para una notificación con campos de 'from' potencialmente en el nivel raíz
+type NotificationWithLegacyFrom = Notification & {
+  fromId?: string;
+  fromCollection?: string;
+};
+
 
 export default function TrabajosPage() {
   /*────────── stores & router ──────────*/
   const currentUser = useUserStore(
-    (s) => s.currentUser
-  ) as ProviderUserProfile | null
-  const originalRole = useUserStore((s) => s.originalRole) as UserRole | null
-  const actingAs = useUserStore((s) => s.actingAs) as ActingAs
+    (s) => s.currentUser as ProviderUserProfile | null
+  )
+  const originalRole = useUserStore((s) => s.originalRole)
+  const actingAs = useUserStore((s) => s.actingAs)
   const router = useRouter()
 
   const { resolvedTheme } = useTheme()
@@ -81,6 +90,9 @@ export default function TrabajosPage() {
   const [showPerfilModal, setShowPerfilModal] = useState(false)
   const [perfilModalTarget, setPerfilModalTarget] =
     useState<PerfilTarget | null>(null)
+  
+  // NUEVO: Estado para gestionar la notificación en procesamiento
+  const [processingNotifId, setProcessingNotifId] = useState<string | null>(null);
 
   /*────────── loader inicial ──────────*/
   if (!currentUser) {
@@ -119,17 +131,29 @@ export default function TrabajosPage() {
 
   /*────────── helpers ──────────*/
   function getSender(n: Notification): NotificationSender | null {
-    if (n.from?.uid) return n.from
-    const id = (n as any).fromId
-    const col = (n as any).fromCollection
-    return typeof id === 'string' && typeof col === 'string'
-      ? { uid: id, collection: col }
-      : null
+    if (n.from?.uid && n.from?.collection) {
+      return n.from;
+    }
+    
+    // Acceso seguro a propiedades que podrían no existir
+    const legacyNotif = n as NotificationWithLegacyFrom;
+    const fromId = legacyNotif.fromId ?? (legacyNotif.payload as { fromId?: string }).fromId;
+    const fromCollection = legacyNotif.fromCollection ?? (legacyNotif.payload as { fromCollection?: string }).fromCollection;
+
+    if (typeof fromId === 'string' && typeof fromCollection === 'string') {
+      return { uid: fromId, collection: fromCollection };
+    }
+    
+    console.warn('Could not determine sender from notification:', n);
+    return null
   }
 
    /*────────── suscripción a notificaciones ──────────*/
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
+    // El rol original no debería cambiar, pero lo incluimos por consistencia
+    if (!providerUid || !originalRole) return;
+
     const coll =
       originalRole === 'prestador'
         ? 'prestadores'
@@ -137,7 +161,7 @@ export default function TrabajosPage() {
         ? 'comercios'
         : 'usuarios_generales'
 
-    return subscribeToNotifications(
+    const unsub = subscribeToNotifications(
       { uid: providerUid, collection: coll },
       (list) => {
         const flt = list.filter((n) =>
@@ -146,45 +170,78 @@ export default function TrabajosPage() {
         setNotifications(flt)
       }
     )
+    return unsub;
   }, [providerUid, originalRole])
 
-  /*────────── handlers ──────────*/
+  /*────────── handlers (modificados para gestionar estado) ──────────*/
   async function handleAccept(n: Notification) {
-    const cli = getSender(n)
-    if (!cli) return
-    const payload: NotificationPayload = {
-      description: `${
-        providerName || 'Un proveedor'
-      } ha aceptado tu solicitud de trabajo.`,
-      senderName: providerName || 'Proveedor',
-      providerAvatar: providerAvatar || '/avatar-placeholder.png',
-      category: n.payload?.category || '',
-      subcategoria: n.payload?.subcategoria || '',
-      originalDescription: n.payload?.description || '',
+    if (processingNotifId) return;
+    setProcessingNotifId(n.id);
+
+    try {
+      const cli = getSender(n);
+      if (!cli) {
+        throw new Error("No se pudo determinar el cliente para aceptar la solicitud.");
+      }
+
+      // El payload se construye con seguridad de tipos
+      const payload: NotificationPayload = {
+        description: `${providerName || 'Un proveedor'} ha aceptado tu solicitud de trabajo.`,
+        senderName: providerName || 'Proveedor',
+        providerAvatar: providerAvatar || '/avatar-placeholder.png',
+        category: n.payload?.category || '',
+        subcategoria: n.payload?.subcategoria || '',
+        originalDescription: n.payload?.description || '',
+      };
+      
+      await sendJobAccept({
+        to: [cli],
+        from: { uid: providerUid, collection: providerCollection },
+        payload,
+      });
+
+      // Idealmente, esta eliminación debería ser parte de una transacción en el backend.
+      // Se mantiene aquí para no alterar la lógica existente.
+      await removeNotification(
+        { uid: providerUid, collection: providerCollection },
+        n.id
+      );
+    } catch (error) {
+        console.error("Error al aceptar la solicitud:", error);
+        alert("Hubo un error al aceptar la solicitud.");
+    } finally {
+        setProcessingNotifId(null);
     }
-    await sendJobAccept({
-      to: [cli],
-      from: { uid: providerUid, collection: providerCollection },
-      payload,
-    })
-    await removeNotification(
-      { uid: providerUid, collection: providerCollection },
-      n.id
-    )
   }
+
   async function handleDelete(n: Notification) {
-    await removeNotification(
-      { uid: providerUid, collection: providerCollection },
-      n.id
-    )
+    if (processingNotifId) return;
+    setProcessingNotifId(n.id);
+    
+    try {
+      await removeNotification(
+        { uid: providerUid, collection: providerCollection },
+        n.id
+      );
+    } catch (error) {
+      console.error("Error al eliminar la notificación:", error);
+      alert("Hubo un error al eliminar la notificación.");
+    } finally {
+      setProcessingNotifId(null);
+    }
   }
+
   function openResenaFormForClient(n: Notification) {
+    if (processingNotifId) return;
+    
     const cli = getSender(n)
     if (!cli) return
+    
     setResenaTarget(cli)
     setResenaNotifId(n.id)
     setShowResena(true)
   }
+
   async function handleResenaSubmitted() {
     if (resenaNotifId) {
       await removeNotification(
@@ -196,7 +253,10 @@ export default function TrabajosPage() {
     setResenaTarget(null)
     setResenaNotifId(null)
   }
+
   function handleAvatarClick(n: Notification) {
+    if (processingNotifId) return;
+
     const cli = getSender(n)
     if (cli) {
       setPerfilModalTarget(cli)
@@ -204,7 +264,7 @@ export default function TrabajosPage() {
     }
   }
 
-  /*────────── UI ──────────*/
+  /*────────── UI (modificada para pasar estado) ──────────*/
   return (
     <div
       className="min-h-screen flex flex-col"
@@ -212,18 +272,15 @@ export default function TrabajosPage() {
     >
       {/*────────── header ──────────*/}
       <header className="relative flex items-center justify-center px-5 py-8">
-  {/* Contenedor para posicionar el botón de ayuda a la izquierda */}
-  <div className="absolute left-5 top-1/2 -translate-y-1/2">
-    <BotonAyuda>
-      <AyudaTrabajos />
-    </BotonAyuda>
-  </div>
-
-  {/* Título centrado */}
-  <h1 className="text-lg md:text-xl font-medium tracking-wide">
-    Solicitudes y acuerdos
-  </h1>
-</header>
+        <div className="absolute left-5 top-1/2 -translate-y-1/2">
+          <BotonAyuda>
+            <AyudaTrabajos />
+          </BotonAyuda>
+        </div>
+        <h1 className="text-lg md:text-xl font-medium tracking-wide">
+          Solicitudes y acuerdos
+        </h1>
+      </header>
 
       <hr className="mx-5" style={{ borderColor: P.borde }} />
 
@@ -241,6 +298,7 @@ export default function TrabajosPage() {
               key={n.id}
               data={n}
               viewerMode="provider"
+              isProcessing={processingNotifId === n.id} // Se pasa el estado
               onPrimary={() =>
                 n.type === 'job_request'
                   ? handleAccept(n)

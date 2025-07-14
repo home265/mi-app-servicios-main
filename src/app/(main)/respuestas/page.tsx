@@ -4,7 +4,9 @@ import { useRouter } from 'next/navigation';
 import {
   useUserStore,
   UserProfile,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Role as UserRole,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   ActingAs,
 } from '@/store/userStore';
 import {
@@ -19,7 +21,8 @@ import {
   doc,
   getDoc,
   deleteDoc,
-  DocumentData,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  DocumentData, // Se mantiene para compatibilidad con tipos de Firestore si es necesario, pero se evita su uso directo.
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import NotificacionCard from '@/app/components/notificaciones/NotificacionCard';
@@ -28,9 +31,11 @@ import ResenaForm from '@/app/components/resenas/ResenaForm';
 import Logo from '@/app/components/ui/Logo';
 import PerfilModal from '@/app/components/notificaciones/PerfilModal';
 
-/* ------------------------ tipos internos ------------------- */
+/* ------------------------ tipos internos mejorados ------------------- */
 interface ClientUserProfile extends UserProfile {
   nombre: string;
+  selfieURL?: string; // Aseguramos que existan para un acceso seguro
+  selfieUrl?: string;
 }
 interface PrestadorData {
   uid: string;
@@ -48,26 +53,42 @@ interface PerfilModalTarget {
   collection: string;
 }
 
+// Tipo para los datos que se esperan del documento de un proveedor/prestador en Firestore
+type ProviderDocData = {
+  nombre?: unknown;
+  selfieURL?: unknown;
+  selfieUrl?: unknown;
+  telefono?: unknown;
+};
+
+// Tipo para una notificación con campos de 'from' potencialmente en el nivel raíz
+type NotificationWithLegacyFrom = Notification & {
+  fromId?: string;
+  fromCollection?: string;
+};
+
+
 export default function RespuestasPage() {
   /* --------- store & router ---------- */
   const currentUser = useUserStore(
-    (s) => s.currentUser,
-  ) as ClientUserProfile | null;
-  const originalRole = useUserStore((s) => s.originalRole) as UserRole | null;
-  const actingAs = useUserStore((s) => s.actingAs) as ActingAs;
+    (s) => s.currentUser as ClientUserProfile | null,
+  );
+  const originalRole = useUserStore((s) => s.originalRole);
+  const actingAs = useUserStore((s) => s.actingAs);
   const router = useRouter();
 
   /* ------------ state --------------- */
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showContacto, setShowContacto] = useState(false);
-  const [selectedPrestador, setSelectedPrestador] =
-    useState<PrestadorData | null>(null);
+  const [selectedPrestador, setSelectedPrestador] = useState<PrestadorData | null>(null);
   const [showResena, setShowResena] = useState(false);
   const [resenaTarget, setResenaTarget] = useState<ResenaTarget | null>(null);
   const [resenaNotifId, setResenaNotifId] = useState<string | null>(null);
   const [showPerfilModal, setShowPerfilModal] = useState(false);
-  const [perfilModalTarget, setPerfilModalTarget] =
-    useState<PerfilModalTarget | null>(null);
+  const [perfilModalTarget, setPerfilModalTarget] = useState<PerfilModalTarget | null>(null);
+
+  // NUEVO: Estado para gestionar la notificación en procesamiento
+  const [processingNotifId, setProcessingNotifId] = useState<string | null>(null);
 
  /* ----------- suscripción ----------- */
   useEffect(() => {
@@ -94,7 +115,7 @@ export default function RespuestasPage() {
       return unsub;
     }
     return () => {};
-  }, [currentUser, originalRole, actingAs]); // <-- Se eliminó setUnread de aquí
+  }, [currentUser, originalRole, actingAs]);
 
   /* ----------- guardas --------------- */
   if (!currentUser || actingAs !== 'user') {
@@ -112,95 +133,106 @@ export default function RespuestasPage() {
       ? 'comercios'
       : 'usuarios_generales';
 
-  /** Determina remitente de una notificación */
+  /** Determina remitente de una notificación (con seguridad de tipos) */
   function getSender(n: Notification): NotificationSender | null {
     if (n.from?.uid && n.from?.collection) {
-      return { uid: n.from.uid, collection: n.from.collection };
+      return n.from;
     }
-    const fromId =
-      (n as DocumentData).fromId ||
-      (n.payload as DocumentData)?.fromId;
-    const fromCollection =
-      (n as DocumentData).fromCollection ||
-      (n.payload as DocumentData)?.fromCollection;
+    
+    // Acceso seguro a propiedades que podrían no existir
+    const legacyNotif = n as NotificationWithLegacyFrom;
+    const fromId = legacyNotif.fromId ?? (legacyNotif.payload as { fromId?: string }).fromId;
+    const fromCollection = legacyNotif.fromCollection ?? (legacyNotif.payload as { fromCollection?: string }).fromCollection;
 
     if (typeof fromId === 'string' && typeof fromCollection === 'string') {
       return { uid: fromId, collection: fromCollection };
     }
+
     console.warn('Could not determine sender from notification:', n);
     return null;
   }
 
-  /* ------------- acciones ------------- */
+  /* ------------- acciones (modificadas para gestionar estado de procesamiento) ------------- */
   async function handleContactar(notif: Notification) {
-    const provider = getSender(notif);
-    if (!provider) return;
+    if (processingNotifId) return;
+    setProcessingNotifId(notif.id);
 
-    const snap = await getDoc(doc(db, provider.collection, provider.uid));
-    const data = snap.data();
-    if (!data) return;
+    try {
+      const provider = getSender(notif);
+      if (!provider) {
+        throw new Error("No se pudo determinar el remitente.");
+      }
 
-    setSelectedPrestador({
-      uid: provider.uid,
-      collection: provider.collection,
-      nombre: typeof data.nombre === 'string' ? data.nombre : 'Prestador',
-      selfieUrl:
-        typeof data.selfieURL === 'string'
-          ? data.selfieURL
-          : typeof data.selfieUrl === 'string'
-          ? data.selfieUrl
+      const snap = await getDoc(doc(db, provider.collection, provider.uid));
+      const data = snap.data() as ProviderDocData | undefined; // Tipado seguro
+      if (!data) {
+        throw new Error("No se encontraron datos del proveedor.");
+      }
+
+      setSelectedPrestador({
+        uid: provider.uid,
+        collection: provider.collection,
+        nombre: typeof data.nombre === 'string' ? data.nombre : 'Prestador',
+        selfieUrl:
+          typeof data.selfieURL === 'string' ? data.selfieURL
+          : typeof data.selfieUrl === 'string' ? data.selfieUrl
           : '/avatar-placeholder.png',
-      telefono: typeof data.telefono === 'string' ? data.telefono : '',
-    });
-    setShowContacto(true);
+        telefono: typeof data.telefono === 'string' ? data.telefono : '',
+      });
+      setShowContacto(true);
+    } catch (error) {
+        console.error("Error al contactar:", error);
+        alert("Hubo un error al obtener los datos de contacto.");
+    } finally {
+        setProcessingNotifId(null);
+    }
   }
 
   async function handleConfirmarAcuerdo(notif: Notification) {
-    const provider = getSender(notif);
-    if (!provider) return;
-
-    const selfieCandidate = currentUser?.selfieURL || currentUser?.selfieUrl;
-    const userAvatar =
-      typeof selfieCandidate === 'string' && selfieCandidate
-        ? selfieCandidate
-        : '/avatar-placeholder.png';
-
-    const agreementPayload: NotificationPayload = {
-      description: `${userName || 'Un usuario'} ha confirmado que llegaron a un acuerdo.`,
-      senderName: userName || 'Usuario',
-      avatarUrl: userAvatar,
-    };
+    if (processingNotifId) return;
+    setProcessingNotifId(notif.id);
 
     try {
+      const provider = getSender(notif);
+      if (!provider) {
+        throw new Error("No se pudo determinar el remitente para confirmar el acuerdo.");
+      }
+
+      const selfieCandidate = currentUser?.selfieURL || currentUser?.selfieUrl;
+      const userAvatar =
+        typeof selfieCandidate === 'string' && selfieCandidate
+          ? selfieCandidate
+          : '/avatar-placeholder.png';
+
+      const agreementPayload: NotificationPayload = {
+        description: `${userName || 'Un usuario'} ha confirmado que llegaron a un acuerdo.`,
+        senderName: userName || 'Usuario',
+        avatarUrl: userAvatar,
+      };
+      
       await sendAgreementConfirmed({
         to: [{ uid: provider.uid, collection: provider.collection }],
         from: { uid: userUid, collection: userCollection },
         payload: agreementPayload,
       });
 
-      await deleteDoc(
-        doc(
-          db,
-          'usuarios_generales',
-          userUid,
-          'contactPendings',
-          provider.uid,
-        ),
-      );
-
-      await removeNotification(
-        { uid: userUid, collection: userCollection },
-        notif.id,
-      );
+      // Estas operaciones deberían idealmente estar en el backend para atomicidad,
+      // pero se mantiene la lógica original por ahora.
+      await deleteDoc(doc(db, 'usuarios_generales', userUid, 'contactPendings', provider.uid));
+      await removeNotification({ uid: userUid, collection: userCollection }, notif.id);
 
       alert('Acuerdo confirmado. Se ha notificado al proveedor.');
     } catch (error) {
       console.error('Error al confirmar acuerdo:', error);
       alert('Hubo un error al confirmar el acuerdo.');
+    } finally {
+      setProcessingNotifId(null);
     }
   }
 
   function handleAbrirResena(notif: Notification) {
+    if (processingNotifId) return;
+    // Abrir un modal no es una acción de larga duración, no necesita estado de procesamiento.
     const provider = getSender(notif);
     if (!provider) return;
 
@@ -211,6 +243,8 @@ export default function RespuestasPage() {
 
   async function handleResenaSubmitted() {
     if (resenaNotifId) {
+      // Esta acción ocurre DENTRO del modal de reseña, por lo que no necesita
+      // el estado de procesamiento de la tarjeta principal.
       await removeNotification(
         { uid: userUid, collection: userCollection },
         resenaNotifId,
@@ -223,6 +257,9 @@ export default function RespuestasPage() {
   }
 
   async function handleDelete(notif: Notification) {
+    if (processingNotifId) return;
+    setProcessingNotifId(notif.id);
+
     try {
       await removeNotification(
         { uid: userUid, collection: userCollection },
@@ -230,10 +267,14 @@ export default function RespuestasPage() {
       );
     } catch (error) {
       console.error('Error al eliminar notificación:', error);
+      alert('Error al eliminar notificación.');
+    } finally {
+      setProcessingNotifId(null);
     }
   }
 
   function handleAvatarClick(notif: Notification) {
+    if (processingNotifId) return;
     const provider = getSender(notif);
     if (provider) {
       setPerfilModalTarget(provider);
@@ -241,7 +282,7 @@ export default function RespuestasPage() {
     }
   }
 
-  /* --------------- UI ---------------- */
+  /* --------------- UI (Modificada para pasar el estado de procesamiento) ---------------- */
   return (
     <div className="flex flex-col items-center p-4 min-h-screen bg-gray-50">
       <div className="mb-6 mt-2">
@@ -263,16 +304,16 @@ export default function RespuestasPage() {
             key={n.id}
             data={n}
             viewerMode="user"
+            isProcessing={processingNotifId === n.id} // Se pasa el estado
             onPrimary={() => {
-  if (n.type === 'job_accept') {
-    handleContactar(n);
-  } else if (n.type === 'contact_followup') {
-    handleConfirmarAcuerdo(n);
-  } else if (n.type.startsWith('rating_request')) {
-    // admite "rating_request", "rating_request_provider", etc.
-    handleAbrirResena(n);
-  }
-}}
+              if (n.type === 'job_accept') {
+                handleContactar(n);
+              } else if (n.type === 'contact_followup') {
+                handleConfirmarAcuerdo(n);
+              } else if (n.type.startsWith('rating_request')) {
+                handleAbrirResena(n);
+              }
+            }}
             onSecondary={() => handleDelete(n)}
             onAvatarClick={() => handleAvatarClick(n)}
           />
@@ -293,7 +334,7 @@ export default function RespuestasPage() {
                 getSender(n)?.uid === selectedPrestador.uid,
             )?.id ?? ''
           }
-          onClose={() => setShowContacto(false)} 
+          onClose={() => setShowContacto(false)}
         />
       )}
 
