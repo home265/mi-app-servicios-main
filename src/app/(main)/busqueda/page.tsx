@@ -71,7 +71,6 @@ type PerfilTarget = { uid: string; collection: string };
 export default function BusquedaPage() {
   const currentUser = useUserStore(s => s.currentUser) as UserProfileWithLocalidad | null;
   const originalRole = useUserStore(s => s.originalRole);
-  const setUnread = useUserStore(s => s.setUnread);
   const router = useRouter();
 
   const { resolvedTheme } = useTheme();
@@ -115,13 +114,12 @@ export default function BusquedaPage() {
             ['job_accept', 'contact_followup', 'rating_request'].includes(n.type)
           );
           setNotifications(filt);
-          setUnread('jobResponses', filt.filter(x => !x.read).length);
         }
       );
       return unsub;
     }
     return () => { };
-  }, [currentUser, originalRole, userCollection, setUnread]);
+  }, [currentUser, originalRole, userCollection]);
 
   if (!currentUser || !currentUser.localidad) {
     if (typeof window !== 'undefined') router.replace('/login');

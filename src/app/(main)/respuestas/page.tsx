@@ -55,7 +55,6 @@ export default function RespuestasPage() {
   ) as ClientUserProfile | null;
   const originalRole = useUserStore((s) => s.originalRole) as UserRole | null;
   const actingAs = useUserStore((s) => s.actingAs) as ActingAs;
-  const setUnread = useUserStore((s) => s.setUnread);
   const router = useRouter();
 
   /* ------------ state --------------- */
@@ -70,7 +69,7 @@ export default function RespuestasPage() {
   const [perfilModalTarget, setPerfilModalTarget] =
     useState<PerfilModalTarget | null>(null);
 
-  /* ----------- suscripción ----------- */
+ /* ----------- suscripción ----------- */
   useEffect(() => {
     if (currentUser && originalRole && actingAs === 'user') {
       const userUid = currentUser.uid;
@@ -90,16 +89,12 @@ export default function RespuestasPage() {
             ),
           );
           setNotifications(filtered);
-          setUnread(
-            'jobResponses',
-            filtered.filter((n) => !n.read).length,
-          );
         },
       );
       return unsub;
     }
     return () => {};
-  }, [currentUser, originalRole, actingAs, setUnread]);
+  }, [currentUser, originalRole, actingAs]); // <-- Se eliminó setUnread de aquí
 
   /* ----------- guardas --------------- */
   if (!currentUser || actingAs !== 'user') {

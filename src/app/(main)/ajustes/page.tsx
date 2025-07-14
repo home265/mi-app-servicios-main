@@ -8,6 +8,7 @@ import { signOutUser, performAccountDeletion } from '@/lib/firebase/auth';
 
 // Íconos unificados de lucide-react para consistencia y profesionalismo
 import {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Bell,
   BellOff,
   AlertTriangle,
@@ -62,18 +63,23 @@ const ActionRow: React.FC<{
 export default function AjustesPage() {
   const router = useRouter();
 
-  // Lógica de estado y hooks (SIN CAMBIOS)
-  const currentUser = useUserStore((state) => state.currentUser);
-  const fcmToken = useUserStore((state) => state.fcmToken);
-  const requestNotificationPermission = useUserStore((state) => state.requestNotificationPermission);
-  const notificationUserError = useUserStore((state) => state.userError);
-  const clearUserSession = useUserStore((state) => state.clearUserSession);
-  const setUserError = useUserStore((state) => state.setUserError);
+  // --- LÓGICA DE ESTADO Y HOOKS (con el nombre de la propiedad corregido) ---
+  const {
+    currentUser,
+    fcmToken,
+    requestNotificationPermission,
+    // La acción para desactivar notificaciones debe existir en tu userStore.ts
+    // Asegúrate de haber añadido la acción `disableNotifications` que te proporcioné anteriormente.
+    disableNotifications,
+    userError, // <-- CORREGIDO: Se usa 'userError' en lugar de 'notificationUserError'
+    clearUserSession,
+    setUserError,
+  } = useUserStore();
 
   const [isLoadingLogout, setIsLoadingLogout] = useState(false);
   const [isLoadingDelete, setIsLoadingDelete] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [isNotificationPermissionLoading, setIsNotificationPermissionLoading] = useState(false);
+  const [isNotificationLoading, setIsNotificationLoading] = useState(false);
   const [notificationStatus, setNotificationStatus] = useState<NotificationPermission>('default');
 
   useEffect(() => {
@@ -82,14 +88,15 @@ export default function AjustesPage() {
     }
   }, []);
 
+  // --- CORREGIDO: Se usa 'userError' para escuchar cambios ---
   useEffect(() => {
-    if (notificationUserError) {
-      setError(notificationUserError);
+    if (userError) {
+      setError(userError);
       setUserError(null);
     }
-  }, [notificationUserError, setUserError]);
+  }, [userError, setUserError]);
 
-  // Lógica de handlers (SIN CAMBIOS)
+  // --- HANDLERS (sin cambios en los existentes) ---
   const handleLogout = async () => {
     if (!window.confirm("¿Estás seguro de que deseas cerrar sesión?")) {
       return;
@@ -143,15 +150,37 @@ export default function AjustesPage() {
       setIsLoadingDelete(false);
     }
   };
-
+  
+  // --- HANDLERS PARA NOTIFICACIONES ---
   const handleRequestNotificationPermission = async () => {
-    setIsNotificationPermissionLoading(true);
+    setIsNotificationLoading(true);
     setError(null);
-    await requestNotificationPermission();
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      setNotificationStatus(Notification.permission);
+    try {
+      await requestNotificationPermission();
+      if (typeof window !== 'undefined' && 'Notification' in window) {
+        setNotificationStatus(Notification.permission);
+      }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (err: unknown) {
+       // El error ya se setea en el store
+    } finally {
+      setIsNotificationLoading(false);
     }
-    setIsNotificationPermissionLoading(false);
+  };
+
+  const handleDisableNotifications = async () => {
+    if (!window.confirm("¿Estás seguro de que deseas desactivar las notificaciones en este dispositivo?")) {
+      return;
+    }
+    setIsNotificationLoading(true);
+    setError(null);
+    try {
+      await disableNotifications();
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Ocurrió un error al desactivar las notificaciones.");
+    } finally {
+      setIsNotificationLoading(false);
+    }
   };
 
   if (!currentUser) {
@@ -162,13 +191,11 @@ export default function AjustesPage() {
     );
   }
 
-  // --- RENDERIZADO CON EL ENCABEZADO ACTUALIZADO ---
+  // --- RENDERIZADO ---
   return (
     <div className="container mx-auto max-w-2xl py-8 px-4 pb-28">
 
-      {/* ====================================================== */}
-      {/* INICIO ENCABEZADO ESTILO "BIENVENIDA"                  */}
-      {/* ====================================================== */}
+      {/* ENCABEZADO (sin cambios) */}
       <header className="flex items-center justify-between px-1 pt-2 pb-4 mb-6">
         <div className="flex items-center gap-4">
           <Avatar
@@ -184,41 +211,40 @@ export default function AjustesPage() {
           </div>
         </div>
       </header>
-      {/* ====================================================== */}
-      {/* FIN ENCABEZADO                                       */}
-      {/* ====================================================== */}
-
 
       <div className="space-y-6">
         
-        {/* === SECCIÓN NOTIFICACIONES PUSH (sin cambios) === */}
+        {/* === SECCIÓN NOTIFICACIONES PUSH (MODIFICADA) === */}
         <div className="p-4 bg-tarjeta rounded-lg shadow space-y-3">
           <h2 className="text-lg font-semibold text-texto-principal border-b border-borde-tarjeta pb-2 mb-2">
             Notificaciones Push
           </h2>
           {typeof window !== 'undefined' && 'Notification' in window && 'serviceWorker' in navigator ? (
             <>
+              {/* CASO 1: Permiso concedido Y token existe -> Botón para DESACTIVAR */}
               {notificationStatus === 'granted' && fcmToken && (
-                <div className="flex items-center space-x-2 p-3 bg-green-100 dark:bg-green-900/30 rounded-md text-sm text-green-700 dark:text-green-300">
-                  <Bell className="h-5 w-5 text-green-600 dark:text-green-400" />
-                  <p>Las notificaciones push están activadas.</p>
-                </div>
+                <ActionRow
+                  onClick={handleDisableNotifications}
+                  isLoading={isNotificationLoading}
+                  icon={<BellOff size={22} />}
+                  title="Desactivar Notificaciones Push"
+                  description="Dejarás de recibir alertas en este dispositivo."
+                  variant="danger"
+                />
               )}
-               {notificationStatus === 'granted' && !fcmToken && !isNotificationPermissionLoading && (
-                 <div className="flex items-center space-x-2 p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-md text-sm text-yellow-700 dark:text-yellow-300">
-                    <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
-                    <p>Permiso concedido, pero hubo un problema al registrar tu dispositivo.</p>
-                 </div>
-               )}
-              {notificationStatus === 'default' && (
+
+              {/* CASO 2: Permiso por defecto O permiso concedido pero SIN token -> Botón para ACTIVAR */}
+              {(notificationStatus === 'default' || (notificationStatus === 'granted' && !fcmToken)) && (
                 <ActionRow
                   onClick={handleRequestNotificationPermission}
-                  isLoading={isNotificationPermissionLoading}
+                  isLoading={isNotificationLoading}
                   icon={<BellRing size={22} />}
                   title="Activar Notificaciones Push"
                   description="Recibe alertas importantes incluso cuando la app está cerrada."
                 />
               )}
+              
+              {/* CASO 3: Permiso denegado por el navegador -> Mensaje de bloqueo */}
               {notificationStatus === 'denied' && (
                 <div className="flex items-center space-x-2 p-3 bg-orange-100 dark:bg-orange-900/30 rounded-md text-sm text-orange-700 dark:text-orange-300">
                   <BellOff className="h-5 w-5 text-orange-600 dark:text-orange-400" />
@@ -227,6 +253,7 @@ export default function AjustesPage() {
               )}
             </>
           ) : (
+            // CASO 4: Navegador no compatible
             <div className="flex items-center space-x-2 p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-md text-sm text-yellow-700 dark:text-yellow-300">
               <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
               <p>Tu navegador no es compatible con las notificaciones push.</p>
@@ -234,7 +261,7 @@ export default function AjustesPage() {
           )}
         </div>
 
-        {/* === SECCIÓN APARIENCIA (sin cambios) === */}
+        {/* SECCIÓN APARIENCIA (sin cambios) */}
         <div className="p-4 bg-tarjeta rounded-lg shadow space-y-3">
           <h2 className="text-lg font-semibold text-texto-principal border-b border-borde-tarjeta pb-2 mb-2">
             Apariencia
@@ -248,7 +275,7 @@ export default function AjustesPage() {
           </div>
         </div>
 
-        {/* === SECCIÓN ACCIONES DE LA CUENTA (sin cambios) === */}
+        {/* SECCIÓN ACCIONES DE LA CUENTA (sin cambios) */}
         <div className="bg-tarjeta rounded-lg shadow">
           <h2 className="text-lg font-semibold text-texto-principal border-b border-borde-tarjeta pb-2 mb-2 p-4">
             Acciones de la Cuenta
@@ -274,7 +301,7 @@ export default function AjustesPage() {
           </div>
         </div>
         
-        {/* === ZONA DE ERRORES (sin cambios) === */}
+        {/* ZONA DE ERRORES (sin cambios) */}
         {error && (
             <div className="mt-4 flex items-center gap-3 p-3 bg-red-100/80 dark:bg-red-900/30 rounded-md text-sm text-red-700 dark:text-red-200">
                 <AlertTriangle className="h-5 w-5 flex-shrink-0" />
@@ -283,7 +310,7 @@ export default function AjustesPage() {
         )}
       </div>
 
-      {/* --- BOTÓN FLOTANTE (sin cambios) --- */}
+      {/* BOTÓN FLOTANTE (sin cambios) */}
       <button
         onClick={() => router.back()}
         aria-label="Volver a la página anterior"

@@ -1,6 +1,7 @@
 // src/app/layout.tsx
 import './globals.css';
 import { Providers } from './providers';
+import NotificationWatcher from '@/app/components/common/NotificationWatcher'; // <-- AQUÍ SE IMPORTA
 import {
   Barlow,
   Roboto,
@@ -37,38 +38,43 @@ import {
 } from 'next/font/google';
 
 // --- Se asigna cada fuente a una constante, como lo requiere Next.js ---
+
+// 1. La fuente principal de la UI (Barlow) se mantiene con la precarga por defecto.
 const barlow = Barlow({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-barlow' });
-const roboto = Roboto({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-roboto' });
-const lato = Lato({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-lato' });
-const oswald = Oswald({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-oswald' });
-const openSans = Open_Sans({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-open-sans' });
-const montserrat = Montserrat({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-montserrat' });
-const raleway = Raleway({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-raleway' });
-const poppins = Poppins({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-poppins' });
-const nunito = Nunito({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-nunito' });
-const merriweather = Merriweather({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-merriweather' });
-const anton = Anton({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-anton' });
-const cinzel = Cinzel({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-cinzel' });
-const medievalSharp = MedievalSharp({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-medievalsharp' });
-const unifrakturCook = UnifrakturCook({ subsets: ['latin'], weight: '700', display: 'swap', variable: '--font-unifrakturcook' });
-const pacifico = Pacifico({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-pacifico' });
-const dancingScript = Dancing_Script({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-dancing-script' });
-const playfairDisplay = Playfair_Display({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-playfair-display' });
-const indieFlower = Indie_Flower({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-indie-flower' });
-const bebasNeue = Bebas_Neue({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-bebas-neue' });
-const fredoka = Fredoka({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-fredoka' });
-const abrilFatface = Abril_Fatface({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-abril-fatface' });
-const luckiestGuy = Luckiest_Guy({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-luckiest-guy' });
-const creepster = Creepster({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-creepster' });
-const spicyRice = Spicy_Rice({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-spicy-rice' });
-const fasterOne = Faster_One({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-faster-one' });
-const chewy = Chewy({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-chewy' });
-const rockSalt = Rock_Salt({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-rock-salt' });
-const coveredByYourGrace = Covered_By_Your_Grace({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-covered-by-your-grace' });
-const gloriaHallelujah = Gloria_Hallelujah({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-gloria-hallelujah' });
-const boogaloo = Boogaloo({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-boogaloo' });
-const juliusSansOne = Julius_Sans_One({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-julius-sans-one' });
-const wallpoet = Wallpoet({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-wallpoet' });
+
+// 2. A TODAS las demás fuentes (para el editor) se les añade "preload: false" para evitar la carga innecesaria en cada página.
+const roboto = Roboto({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-roboto', preload: false });
+const lato = Lato({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-lato', preload: false });
+const oswald = Oswald({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-oswald', preload: false });
+const openSans = Open_Sans({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-open-sans', preload: false });
+const montserrat = Montserrat({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-montserrat', preload: false });
+const raleway = Raleway({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-raleway', preload: false });
+const poppins = Poppins({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-poppins', preload: false });
+const nunito = Nunito({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-nunito', preload: false });
+const merriweather = Merriweather({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-merriweather', preload: false });
+const anton = Anton({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-anton', preload: false });
+const cinzel = Cinzel({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-cinzel', preload: false });
+const medievalSharp = MedievalSharp({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-medievalsharp', preload: false });
+const unifrakturCook = UnifrakturCook({ subsets: ['latin'], weight: '700', display: 'swap', variable: '--font-unifrakturcook', preload: false });
+const pacifico = Pacifico({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-pacifico', preload: false });
+const dancingScript = Dancing_Script({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-dancing-script', preload: false });
+const playfairDisplay = Playfair_Display({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-playfair-display', preload: false });
+const indieFlower = Indie_Flower({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-indie-flower', preload: false });
+const bebasNeue = Bebas_Neue({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-bebas-neue', preload: false });
+const fredoka = Fredoka({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-fredoka', preload: false });
+const abrilFatface = Abril_Fatface({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-abril-fatface', preload: false });
+const luckiestGuy = Luckiest_Guy({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-luckiest-guy', preload: false });
+const creepster = Creepster({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-creepster', preload: false });
+const spicyRice = Spicy_Rice({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-spicy-rice', preload: false });
+const fasterOne = Faster_One({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-faster-one', preload: false });
+const chewy = Chewy({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-chewy', preload: false });
+const rockSalt = Rock_Salt({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-rock-salt', preload: false });
+const coveredByYourGrace = Covered_By_Your_Grace({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-covered-by-your-grace', preload: false });
+const gloriaHallelujah = Gloria_Hallelujah({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-gloria-hallelujah', preload: false });
+const boogaloo = Boogaloo({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-boogaloo', preload: false });
+const juliusSansOne = Julius_Sans_One({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-julius-sans-one', preload: false });
+const wallpoet = Wallpoet({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-wallpoet', preload: false });
+
 
 export const metadata = {
   title: 'CODYS | Tu red de confianza',
@@ -84,10 +90,10 @@ export default function RootLayout({
     <html
       lang="es"
       suppressHydrationWarning
-      // Se usan todas las variables para que Next.js las precargue correctamente.
-      // Esto genera los warnings en páginas que no usan las fuentes, pero asegura que el editor funcione.
+      // Se combinan tanto la clase principal de la UI como las variables de las fuentes del editor.
+      // Esto asegura que la fuente por defecto se aplique correctamente y que las demás estén disponibles como variables CSS.
       className={`
-        ${barlow.variable} ${roboto.variable} ${lato.variable} ${oswald.variable}
+        ${barlow.className} ${roboto.variable} ${lato.variable} ${oswald.variable}
         ${openSans.variable} ${montserrat.variable} ${raleway.variable} ${poppins.variable}
         ${nunito.variable} ${merriweather.variable} ${anton.variable} ${cinzel.variable}
         ${medievalSharp.variable} ${unifrakturCook.variable} ${pacifico.variable}
@@ -100,7 +106,9 @@ export default function RootLayout({
       `}
     >
       <head />
-      <body className={barlow.className}>
+      {/* El body ya no necesita la clase porque la hereda del html, lo que mantiene el código más limpio. */}
+      <body>
+        <NotificationWatcher /> {/* <-- AQUÍ SE INTEGRA */}
         <Providers>
           <main>
             {children}

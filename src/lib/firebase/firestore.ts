@@ -1,7 +1,7 @@
 // src/lib/firebase/firestore.ts
 import { doc, deleteDoc, getDoc, DocumentSnapshot, updateDoc } from 'firebase/firestore';
 import { db } from './config'; // Tu instancia exportada de firestore (db)
-
+import { deleteField } from 'firebase/firestore'; 
 // Lista de posibles colecciones de usuarios (mantener consistente con Providers.tsx)
 const USER_COLLECTIONS = ['usuarios_generales', 'prestadores', 'comercios'];
 
@@ -97,3 +97,26 @@ export const updateUserPin = async (uid: string, rol: string, newHashedPin: stri
   }
 };
 // --- FIN: NUEVA FUNCIÓN AÑADIDA ---
+/**
+ * Elimina el token de notificación (FCM Token) y su timestamp del perfil de un usuario en Firestore.
+ */
+export const deleteUserFCMToken = async (uid: string, rol: string): Promise<void> => {
+  const collectionName = await findUserCollection(uid, rol);
+
+  if (!collectionName) {
+    throw new Error(`No se pudo encontrar la colección para el usuario con UID: ${uid} para eliminar el token FCM.`);
+  }
+
+  const userDocRef = doc(db, collectionName, uid);
+
+  try {
+    await updateDoc(userDocRef, {
+      fcmToken: deleteField(),
+      fcmTokenTimestamp: deleteField()
+    });
+    console.log(`Token FCM eliminado exitosamente de Firestore para el usuario ${uid}.`);
+  } catch (error) {
+    console.error(`Error al eliminar el token FCM en Firestore (${collectionName}/${uid}):`, error);
+    throw new Error("No se pudo desactivar las notificaciones.");
+  }
+};

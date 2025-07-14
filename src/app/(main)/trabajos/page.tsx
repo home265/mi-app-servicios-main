@@ -68,7 +68,6 @@ export default function TrabajosPage() {
   ) as ProviderUserProfile | null
   const originalRole = useUserStore((s) => s.originalRole) as UserRole | null
   const actingAs = useUserStore((s) => s.actingAs) as ActingAs
-  const setUnread = useUserStore((s) => s.setUnread)
   const router = useRouter()
 
   const { resolvedTheme } = useTheme()
@@ -128,7 +127,7 @@ export default function TrabajosPage() {
       : null
   }
 
-  /*────────── suscripción a notificaciones ──────────*/
+   /*────────── suscripción a notificaciones ──────────*/
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
     const coll =
@@ -145,13 +144,9 @@ export default function TrabajosPage() {
           ['job_request', 'agreement_confirmed'].includes(n.type)
         )
         setNotifications(flt)
-        setUnread(
-          'jobRequests',
-          flt.filter((x) => !x.read).length
-        )
       }
     )
-  }, [providerUid, originalRole, setUnread])
+  }, [providerUid, originalRole])
 
   /*────────── handlers ──────────*/
   async function handleAccept(n: Notification) {

@@ -8,7 +8,7 @@ import type { DocumentData } from 'firebase/firestore';
 import { doc, setDoc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getToken as getFCMToken, type Messaging } from 'firebase/messaging'; // <--- NUEVO
-
+import { deleteUserFCMToken } from '@/lib/firebase/firestore';
 // ──────────────────────────────────────────────────────────────
 // Tipos básicos
 // ──────────────────────────────────────────────────────────────
@@ -58,7 +58,7 @@ interface UserStoreState {
   setPinVerified   : (isVerified: boolean) => void;
   resetStore       : () => void;
   requestNotificationPermission: () => Promise<void>; // <--- NUEVO: Acción para notificaciones
-
+  disableNotifications: () => Promise<void>;
   // helpers para flujo de auth / providers
   clearUserSession : () => void;
   setCurrentUser   : (user: UserProfile | null) => void;
@@ -155,7 +155,15 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
       });
     }
   },
-
+  
+  disableNotifications: async () => {
+  const { currentUser } = get();
+  if (!currentUser?.uid || !currentUser.rol) {
+    throw new Error("No se puede desactivar notificaciones: falta información del usuario.");
+  }
+  await deleteUserFCMToken(currentUser.uid, currentUser.rol);
+  set({ fcmToken: null });
+},
   /** Alterna entre actuar como usuario (app cliente) o como prestador/comercio */
   toggleActingMode: () => {
     const { originalRole, actingAs } = get();

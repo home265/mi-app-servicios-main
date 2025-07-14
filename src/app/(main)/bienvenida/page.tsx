@@ -148,6 +148,9 @@ export default function BienvenidaPage() {
   const toggleMode = useUserStore((s) => s.toggleActingMode);
   const actingAs = useUserStore((s) => s.actingAs);
 
+  // --- NUEVO: Leer los contadores de notificaciones no leídas desde el store ---
+  const { jobRequests, jobResponses } = useUserStore((s) => s.unread);
+
   const [hasCv, setCv] = useState<boolean | null>(null);
   const [hasAd, setAd] = useState<boolean | null>(null);
   const [hasPublication, setHasPublication] = useState<boolean | null>(null);
@@ -161,8 +164,8 @@ export default function BienvenidaPage() {
         const cvData = await getCvByUid(user.uid);
         setCv(cvData !== null);
       } catch (error) {
-        console.error("Error al verificar la existencia del CV:", error);
-        setCv(false); 
+        console.error('Error al verificar la existencia del CV:', error);
+        setCv(false);
       }
     })();
   }, [user]);
@@ -174,7 +177,7 @@ export default function BienvenidaPage() {
       const q = query(
         collection(db, 'anuncios'),
         where('creatorId', '==', user.uid),
-        where('status', '==', 'active')
+        where('status', '==', 'active'),
       );
       const now = Timestamp.now();
       const snap = await getDocs(q);
@@ -188,14 +191,14 @@ export default function BienvenidaPage() {
 
   useEffect(() => {
     if (!user || !['prestador', 'comercio'].includes(user.rol)) return;
-  
+
     (async () => {
       if (!user?.uid) return;
       try {
         const pubDoc = await getDoc(doc(db, 'paginas_amarillas', user.uid));
         setHasPublication(pubDoc.exists());
       } catch (error) {
-        console.error("Error al verificar la existencia de la publicación:", error);
+        console.error('Error al verificar la existencia de la publicación:', error);
         setHasPublication(false);
       }
     })();
@@ -239,9 +242,9 @@ export default function BienvenidaPage() {
     ];
   } else if (user) {
     let availableActions = base[user.rol as 'prestador' | 'comercio'].filter((a) =>
-      a.requiresAd ? hasAd === true : true
+      a.requiresAd ? hasAd === true : true,
     );
-  
+
     if (hasPublication !== null) {
       if (hasPublication) {
         availableActions = availableActions.filter((a) => a.id !== 'crearPub');
@@ -249,7 +252,7 @@ export default function BienvenidaPage() {
         availableActions = availableActions.filter((a) => a.id !== 'editarPub');
       }
     }
-  
+
     actions = availableActions;
   }
 
@@ -260,14 +263,9 @@ export default function BienvenidaPage() {
       className="min-h-screen flex flex-col"
       style={{ backgroundColor: P.fondo, color: P.texto }}
     >
-
       <header className="flex items-center justify-between px-5 py-4 mt-6">
         <div className="flex items-center gap-4">
-          <Avatar
-            selfieUrl={user?.selfieURL ?? undefined}
-            nombre={fullName}
-            size={64}
-          />
+          <Avatar selfieUrl={user?.selfieURL ?? undefined} nombre={fullName} size={64} />
           <div>
             <p className="text-lg font-semibold">{`Hola, ${fullName}`}</p>
             <span className="text-xs uppercase opacity-70">{user?.rol}</span>
@@ -320,12 +318,22 @@ export default function BienvenidaPage() {
                 }
                 if (a.path && a.path !== '#') router.push(a.path);
               };
+
+              // --- NUEVO: Determina si el botón actual debe mostrar un indicador ---
+              const unreadCount =
+                a.id === 'trabajos'
+                  ? jobRequests
+                  : a.id === 'buscar'
+                  ? jobResponses
+                  : 0;
+
               return (
                 <button
                   key={a.id}
                   onClick={click}
+                  // --- MODIFICADO: Añadido `relative` para posicionar el indicador ---
                   className="
-                    flex flex-col items-center justify-center
+                    relative flex flex-col items-center justify-center
                     aspect-square w-full max-w-[180px]
                     rounded-xl transition active:scale-95 shadow-md hover:shadow-lg
                   "
@@ -335,6 +343,22 @@ export default function BienvenidaPage() {
                     color: P.iconTxt,
                   }}
                 >
+                  {/* --- NUEVO: Renderizado condicional del indicador de notificaciones --- */}
+                  {unreadCount > 0 && (
+                    <div
+                      className="
+                        absolute top-2 right-2 h-6 w-6 bg-red-600 rounded-full
+                        flex items-center justify-center text-white text-xs font-bold
+                        ring-2
+                      "
+                      style={{
+                        borderColor: P.tarjeta,
+                      }}
+                    >
+                      {unreadCount}
+                    </div>
+                  )}
+
                   <Icon className="w-10 h-10 mb-2" style={{ color: P.iconTxt }} />
                   <span className="text-sm text-center px-1">{a.label}</span>
                 </button>
