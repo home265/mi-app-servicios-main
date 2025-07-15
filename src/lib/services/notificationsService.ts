@@ -1,4 +1,4 @@
-/* notificationsService.ts  – flujo v2 + compatibilidad con removeNotification/Notification */
+/* notificationsService.ts – flujo v2 + compatibilidad con removeNotification/Notification */
 
 import {
   getFunctions,
@@ -36,6 +36,24 @@ interface NotificationInput {
   payload: Payload;
 }
 
+/* ---------- NUEVOS TIPOS para la función de limpieza ---------- */
+// Datos que el frontend debe enviar a la nueva función
+export interface ConfirmAgreementData {
+  user: Recipient;
+  provider: Recipient;
+  followupNotifId: string;
+  originalNotifId: string;
+  userName: string;
+}
+
+// Respuesta que se espera de la nueva función
+export interface ConfirmAgreementResult {
+  success: boolean;
+  message: string;
+}
+/* -------------------------------------------------------------- */
+
+
 /* ---------- Documento recibido en el listener ---------- */
 export interface NotificationDoc extends NotificationInput {
   id: string;
@@ -71,6 +89,15 @@ export const sendContactRequest      = callable('sendContactRequest');
 export const sendAgreementConfirmed  = callable('sendAgreementConfirmed');
 export const sendRatingRequest       = callable('sendRatingRequest');
 export const sendContactFollowupTask = callable('sendContactFollowupTask'); // opcional
+
+/* ---------- NUEVO HELPER para la función de limpieza ---------- */
+// Se define explícitamente con sus tipos de entrada (Request) y salida (Result)
+export const confirmAgreementAndCleanup = httpsCallable<ConfirmAgreementData, ConfirmAgreementResult>(
+  functions,
+  'confirmAgreementAndCleanup'
+);
+/* -------------------------------------------------------------- */
+
 
 /* ------------------------------------------------------------------ */
 /* 4. Suscripción en tiempo real                                       */

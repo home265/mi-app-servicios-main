@@ -12,17 +12,19 @@ import {
 import {
   subscribeToNotifications,
   removeNotification,
-  sendAgreementConfirmed,
+  // sendAgreementConfirmed, // Ya no se usa directamente aquí, la nueva función lo llama en el backend
+  confirmAgreementAndCleanup, // <-- NUEVO: Se importa la función de limpieza
   NotificationDoc as Notification,
   Sender as NotificationSender,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Payload as NotificationPayload,
 } from '@/lib/services/notificationsService';
 import {
   doc,
   getDoc,
-  deleteDoc,
+  // deleteDoc, // Ya no se usa directamente aquí
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  DocumentData, // Se mantiene para compatibilidad con tipos de Firestore si es necesario, pero se evita su uso directo.
+  DocumentData,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import NotificacionCard from '@/app/components/notificaciones/NotificacionCard';
@@ -34,7 +36,7 @@ import PerfilModal from '@/app/components/notificaciones/PerfilModal';
 /* ------------------------ tipos internos mejorados ------------------- */
 interface ClientUserProfile extends UserProfile {
   nombre: string;
-  selfieURL?: string; // Aseguramos que existan para un acceso seguro
+  selfieURL?: string;
   selfieUrl?: string;
 }
 interface PrestadorData {
@@ -45,7 +47,7 @@ interface PrestadorData {
   telefono: string;
 }
 interface ResenaTarget {
-  uid: string;
+  uid:string;
   collection: string;
 }
 interface PerfilModalTarget {
@@ -53,7 +55,6 @@ interface PerfilModalTarget {
   collection: string;
 }
 
-// Tipo para los datos que se esperan del documento de un proveedor/prestador en Firestore
 type ProviderDocData = {
   nombre?: unknown;
   selfieURL?: unknown;
@@ -61,7 +62,6 @@ type ProviderDocData = {
   telefono?: unknown;
 };
 
-// Tipo para una notificación con campos de 'from' potencialmente en el nivel raíz
 type NotificationWithLegacyFrom = Notification & {
   fromId?: string;
   fromCollection?: string;
@@ -87,7 +87,6 @@ export default function RespuestasPage() {
   const [showPerfilModal, setShowPerfilModal] = useState(false);
   const [perfilModalTarget, setPerfilModalTarget] = useState<PerfilModalTarget | null>(null);
 
-  // NUEVO: Estado para gestionar la notificación en procesamiento
   const [processingNotifId, setProcessingNotifId] = useState<string | null>(null);
 
  /* ----------- suscripción ----------- */
@@ -138,8 +137,7 @@ export default function RespuestasPage() {
     if (n.from?.uid && n.from?.collection) {
       return n.from;
     }
-    
-    // Acceso seguro a propiedades que podrían no existir
+
     const legacyNotif = n as NotificationWithLegacyFrom;
     const fromId = legacyNotif.fromId ?? (legacyNotif.payload as { fromId?: string }).fromId;
     const fromCollection = legacyNotif.fromCollection ?? (legacyNotif.payload as { fromCollection?: string }).fromCollection;
@@ -164,7 +162,7 @@ export default function RespuestasPage() {
       }
 
       const snap = await getDoc(doc(db, provider.collection, provider.uid));
-      const data = snap.data() as ProviderDocData | undefined; // Tipado seguro
+      const data = snap.data() as ProviderDocData | undefined;
       if (!data) {
         throw new Error("No se encontraron datos del proveedor.");
       }
@@ -188,40 +186,43 @@ export default function RespuestasPage() {
     }
   }
 
+  // ============================================================================================
+  // FUNCIÓN MODIFICADA: Ahora usa la nueva lógica centralizada del backend
+  // ============================================================================================
   async function handleConfirmarAcuerdo(notif: Notification) {
     if (processingNotifId) return;
     setProcessingNotifId(notif.id);
 
     try {
+      // 1. Obtener los datos necesarios para la función de limpieza
       const provider = getSender(notif);
       if (!provider) {
         throw new Error("No se pudo determinar el remitente para confirmar el acuerdo.");
       }
 
-      const selfieCandidate = currentUser?.selfieURL || currentUser?.selfieUrl;
-      const userAvatar =
-        typeof selfieCandidate === 'string' && selfieCandidate
-          ? selfieCandidate
-          : '/avatar-placeholder.png';
+      // 2. Obtener la ID de la notificación original (job_accept) desde el payload
+      const originalNotifId = notif.payload?.originalNotifId as string | undefined;
+      if (!originalNotifId) {
+        // Este es un caso de error importante. Significa que la cadena de IDs se rompió.
+        console.error("Error crítico: No se encontró la 'originalNotifId' en el payload de la notificación de seguimiento.");
+        alert("Error: No se pudo procesar la solicitud por falta de un identificador clave.");
+        setProcessingNotifId(null);
+        return;
+      }
 
-      const agreementPayload: NotificationPayload = {
-        description: `${userName || 'Un usuario'} ha confirmado que llegaron a un acuerdo.`,
-        senderName: userName || 'Usuario',
-        avatarUrl: userAvatar,
-      };
-      
-      await sendAgreementConfirmed({
-        to: [{ uid: provider.uid, collection: provider.collection }],
-        from: { uid: userUid, collection: userCollection },
-        payload: agreementPayload,
+      // 3. Llamar a la única función de backend que hace todo el trabajo
+      await confirmAgreementAndCleanup({
+        user: { uid: userUid, collection: userCollection },
+        provider: { uid: provider.uid, collection: provider.collection },
+        followupNotifId: notif.id,
+        originalNotifId: originalNotifId,
+        userName: userName || 'Usuario',
       });
 
-      // Estas operaciones deberían idealmente estar en el backend para atomicidad,
-      // pero se mantiene la lógica original por ahora.
-      await deleteDoc(doc(db, 'usuarios_generales', userUid, 'contactPendings', provider.uid));
-      await removeNotification({ uid: userUid, collection: userCollection }, notif.id);
+      // ¡Ya no necesitamos borrar nada manualmente desde aquí!
+      // El listener de notificaciones se encargará de actualizar la UI cuando los documentos se eliminen.
+      alert('Acuerdo confirmado. ¡Gracias por usar nuestros servicios!');
 
-      alert('Acuerdo confirmado. Se ha notificado al proveedor.');
     } catch (error) {
       console.error('Error al confirmar acuerdo:', error);
       alert('Hubo un error al confirmar el acuerdo.');
@@ -232,7 +233,6 @@ export default function RespuestasPage() {
 
   function handleAbrirResena(notif: Notification) {
     if (processingNotifId) return;
-    // Abrir un modal no es una acción de larga duración, no necesita estado de procesamiento.
     const provider = getSender(notif);
     if (!provider) return;
 
@@ -243,8 +243,6 @@ export default function RespuestasPage() {
 
   async function handleResenaSubmitted() {
     if (resenaNotifId) {
-      // Esta acción ocurre DENTRO del modal de reseña, por lo que no necesita
-      // el estado de procesamiento de la tarjeta principal.
       await removeNotification(
         { uid: userUid, collection: userCollection },
         resenaNotifId,
@@ -304,7 +302,7 @@ export default function RespuestasPage() {
             key={n.id}
             data={n}
             viewerMode="user"
-            isProcessing={processingNotifId === n.id} // Se pasa el estado
+            isProcessing={processingNotifId === n.id}
             onPrimary={() => {
               if (n.type === 'job_accept') {
                 handleContactar(n);

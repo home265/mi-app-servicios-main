@@ -14,7 +14,7 @@ import {
   sendJobRequest,
   subscribeToNotifications,
   removeNotification,
-  sendAgreementConfirmed,
+  confirmAgreementAndCleanup, // <-- MODIFICADO: Se usa la función correcta
   NotificationDoc as Notification,
   Sender as NotificationSender,
   Payload as NotificationPayload,
@@ -23,7 +23,7 @@ import NotificacionCard from '@/app/components/notificaciones/NotificacionCard';
 import ContactoPopup from '@/app/components/notificaciones/ContactoPopup';
 import ResenaForm from '@/app/components/resenas/ResenaForm';
 import PerfilModal from '@/app/components/notificaciones/PerfilModal';
-import { doc, getDoc, deleteDoc } from 'firebase/firestore';
+import { doc, getDoc } from 'firebase/firestore'; // <-- MODIFICADO: deleteDoc ya no es necesario aquí
 import { db } from '@/lib/firebase/config';
 
 // paleta
@@ -225,17 +225,30 @@ export default function BusquedaPage() {
             });
             setShowContacto(true);
         } else if (n.type === 'contact_followup') {
-            await sendAgreementConfirmed({
-                to: [sender], from: { uid: userUid, collection: userCollection },
-                payload: {
-                    description: `${userName} confirmó el acuerdo.`,
-                    senderName: userName,
-                    avatarUrl: userAvatar || '/avatar-placeholder.png',
-                }
+            // ===========================================================================
+            // INICIO: LÓGICA CORREGIDA
+            // ===========================================================================
+            const originalNotifId = n.payload?.originalNotifId as string | undefined;
+            if (!originalNotifId) {
+                console.error("Error crítico: No se encontró la 'originalNotifId' en el payload de la notificación de seguimiento.");
+                alert("Error: No se pudo procesar la solicitud por falta de un identificador clave.");
+                return;
+            }
+
+            // Llamar a la única función de backend que hace todo el trabajo
+            await confirmAgreementAndCleanup({
+                user: { uid: userUid, collection: userCollection },
+                provider: { uid: sender.uid, collection: sender.collection },
+                followupNotifId: n.id,
+                originalNotifId: originalNotifId,
+                userName: userName || 'Usuario',
             });
-            await deleteDoc(doc(db, 'usuarios_generales', userUid, 'contactPendings', sender.uid));
-            await removeNotification({ uid: userUid, collection: userCollection }, n.id);
-            alert('Se ha notificado al prestador sobre el acuerdo.');
+            
+            // El listener de notificaciones se encargará de actualizar la UI.
+            alert('Acuerdo confirmado. ¡Gracias por usar nuestros servicios!');
+            // ===========================================================================
+            // FIN: LÓGICA CORREGIDA
+            // ===========================================================================
         } else { // rating_request
             setResenaTarget(sender);
             setResenaNotifId(n.id);

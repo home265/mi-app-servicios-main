@@ -1,11 +1,8 @@
-/* ContactoPopup.tsx – Con botón de cierre y overlay, SIN eliminar notificación original */
+/* ContactoPopup.tsx – Corregido para no crear notificaciones fantasma */
 import { useState } from 'react';
-import Button from '@/app/components/ui/Button'; //
-import {
-  sendContactRequest,
-  // removeNotification, // Ya no se usa aquí directamente
-} from '@/lib/services/notificationsService'; //
-import { db } from '@/lib/firebase/config'; //
+import Button from '@/app/components/ui/Button';
+// Se elimina la importación de sendContactRequest que ya no se utiliza
+import { db } from '@/lib/firebase/config';
 import { doc, setDoc } from 'firebase/firestore';
 import { XMarkIcon } from '@heroicons/react/24/solid';
 
@@ -15,7 +12,7 @@ interface Props {
   providerUid: string;
   providerCollection: string;
   providerName: string;
-  notifId: string; // Aunque ya no la usemos para eliminar, la mantenemos por si la necesitas para otra cosa o por consistencia
+  notifId: string; // ID de la notificación 'job_accept' que se guardará
   onClose: () => void;
 }
 
@@ -25,8 +22,7 @@ export default function ContactoPopup({
   providerUid,
   providerCollection,
   providerName,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  notifId, // notifId se sigue recibiendo pero no se usa para eliminar la notificación aquí
+  notifId,
   onClose,
 }: Props) {
   const [loading, setLoading] = useState(false);
@@ -34,12 +30,7 @@ export default function ContactoPopup({
   async function handleClick(via: 'whatsapp' | 'call') {
     setLoading(true);
 
-    // 1. callable contact_request (sólo para estadística)
-    await sendContactRequest({
-      to: [{ uid: providerUid, collection: providerCollection }],
-      from: { uid: userUid, collection: userCollection },
-      payload: { description: 'quiere contactar', via },
-    });
+    // Se elimina la llamada a sendContactRequest que generaba la notificación fantasma.
 
     // 2. guarda primer clic en /contactPendings/
     const ref = doc(
@@ -57,16 +48,12 @@ export default function ContactoPopup({
         providerName,
         via,
         firstClickTs: Date.now(),
+        originalNotifId: notifId, // <-- Guarda la ID de la notificación original
       },
       { merge: true },
     );
 
     // 3. YA NO se elimina la notificación original de "job_accept" desde aquí.
-    // La línea original era:
-    // await removeNotification(
-    //   { uid: userUid, collection: userCollection },
-    //   notifId,
-    // );
 
     // 4. abre medio real
     if (via === 'whatsapp') {
@@ -80,9 +67,9 @@ export default function ContactoPopup({
 
   return (
     // Overlay para el popup
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 anim-fadeIn"> {/* */}
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 anim-fadeIn">
       {/* Contenedor del Popup con estilos de tema */}
-      <div className="relative bg-tarjeta p-6 pt-10 rounded-xl shadow-xl max-w-xs w-full text-texto-principal border border-borde-tarjeta anim-zoomIn"> {/* */}
+      <div className="relative bg-tarjeta p-6 pt-10 rounded-xl shadow-xl max-w-xs w-full text-texto-principal border border-borde-tarjeta anim-zoomIn">
         {/* Botón de Cierre */}
         <button
           onClick={onClose}

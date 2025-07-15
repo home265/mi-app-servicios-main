@@ -48,17 +48,26 @@ export default function ResenaForm({ target, onSubmitted }: ResenaFormProps) {
         comment,
       );
 
-      /* 2️⃣  Notifica al destinatario (rating_request) */
-      await sendRatingRequest({
-        to: [{ uid: target.uid, collection: target.collection }],
-        from: { uid: currentUser.uid, collection: authorCollection },
-        payload: {
-          senderName: currentUser.nombre,
-          avatarUrl: currentUser.selfieURL,
-          description: '¡Has recibido una reseña!',
-          timestamp: Date.now(),
-        },
-      });
+      // =================================================================================
+      // INICIO DEL CAMBIO: Se añade la condición para evitar la notificación fantasma
+      // =================================================================================
+      /* 2️⃣  Notifica al destinatario (rating_request) SOLAMENTE si quien califica es un prestador */
+      if (actingAs === 'provider') {
+        await sendRatingRequest({
+          to: [{ uid: target.uid, collection: target.collection }],
+          from: { uid: currentUser.uid, collection: authorCollection },
+          payload: {
+            senderName: currentUser.nombre,
+            avatarUrl: currentUser.selfieURL,
+            description: '¡Has recibido una reseña!', // Este mensaje ahora solo lo recibirán los usuarios
+            timestamp: Date.now(),
+          },
+        });
+      }
+      // =================================================================================
+      // FIN DEL CAMBIO
+      // =================================================================================
+
 
       /* 3️⃣  Limpia estado y avisa al padre */
       setRating(0);

@@ -4,9 +4,8 @@ import { onDocumentCreated } from 'firebase-functions/v2/firestore';
 import * as admin from 'firebase-admin';
 import { CloudTasksClient } from '@google-cloud/tasks';
 
-// <--- NUEVO: URL base de tu aplicación y URL del ícono de notificación
 const APP_BASE_URL = "https://mi-app-servicios-3326e.web.app";
-const DEFAULT_NOTIFICATION_ICON_URL = `${APP_BASE_URL}/logo1.png`; // Asumiendo que tienes public/logo1.png en tu frontend
+const DEFAULT_NOTIFICATION_ICON_URL = `${APP_BASE_URL}/logo1.png`;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Inicialización
@@ -14,17 +13,13 @@ const DEFAULT_NOTIFICATION_ICON_URL = `${APP_BASE_URL}/logo1.png`; // Asumiendo 
 if (!admin.apps.length) {
   admin.initializeApp();
 }
-const db = admin.firestore(); // <--- NUEVO: Definir db aquí para uso global en el archivo
+const db = admin.firestore();
 
 ////////////////////////////////////////////////////////////////////////////////
-// Tipos compartidos (Payload modificado para anidación)
+// Tipos compartidos
 ////////////////////////////////////////////////////////////////////////////////
 type Primitive = string | number | boolean | null;
 
-// <--- MODIFICADO: Payload ahora puede tener un objeto 'data' para FCM, que puede tener sus propios campos.
-// Esto es para permitir que el 'payload' original siga siendo simple, y los datos específicos de FCM
-// como click_action vayan dentro de un sub-objeto 'data' si es necesario, o directamente.
-// Por ahora, mantendremos tu 'Payload' original simple y construiremos el 'data' de FCM por separado.
 export type Payload = Record<string, Primitive>;
 
 export interface Recipient {
@@ -37,12 +32,11 @@ export interface Sender {
   collection: string;
 }
 
-// <--- MODIFICADO: NotificationData ahora puede incluir actionLink para el click_action
 export interface NotificationData {
   to: Recipient[];
   from: Sender;
   payload: Payload;
-  actionLink?: string; // Opcional: ruta relativa como "/respuestas" o "/trabajos/ID"
+  actionLink?: string;
 }
 
 export const NOTIFICATION_TYPE = {
@@ -57,11 +51,11 @@ export const NOTIFICATION_TYPE = {
 type NotificationType = (typeof NOTIFICATION_TYPE)[keyof typeof NOTIFICATION_TYPE];
 
 ////////////////////////////////////////////////////////////////////////////////
-// Validadores (sin cambios)
+// Validadores
 ////////////////////////////////////////////////////////////////////////////////
 function isNotificationData(data: unknown): data is NotificationData {
   if (typeof data !== 'object' || data === null) return false;
-  const d = data as Partial<NotificationData>; // Usar Partial para chequeo gradual
+  const d = data as Partial<NotificationData>;
 
   return (
     Array.isArray(d.to) &&
@@ -73,7 +67,7 @@ function isNotificationData(data: unknown): data is NotificationData {
     typeof d.from.collection === 'string' &&
     typeof d.payload === 'object' &&
     d.payload !== null &&
-    (d.actionLink === undefined || typeof d.actionLink === 'string') // <--- NUEVO: Validar actionLink si existe
+    (d.actionLink === undefined || typeof d.actionLink === 'string')
   );
 }
 
@@ -85,9 +79,8 @@ async function createNotifications(
   from: Sender,
   type: NotificationType,
   payload: Payload,
-  actionLink?: string // <--- MODIFICADO: Añadir actionLink opcional
+  actionLink?: string
 ): Promise<void> {
-  // const db = admin.firestore(); // db ya está definido globalmente
   const batch = db.batch();
   const timestamp = admin.firestore.FieldValue.serverTimestamp();
 
@@ -98,22 +91,15 @@ async function createNotifications(
       .collection('notifications')
       .doc();
 
-    // <--- MODIFICADO: Añadir título y cuerpo al documento de notificación para consistencia
-    // y para que el trigger `onNotificationCreatedSendPush` (si lo tuviéramos) pueda usarlos.
-    // Por ahora, tu `buildPushPayload` los genera, así que esto es más para el futuro o si quieres logs.
-    const notificationDocPayload: Record<string, unknown> = { // Usar Record<string, unknown> para flexibilidad
+    const notificationDocPayload: Record<string, unknown> = {
       fromId: from.uid,
       fromCollection: from.collection,
       type,
-      payload, // payload original
+      payload,
       timestamp,
       read: false,
-      // Opcional: podrías añadir title y body aquí si quieres que se guarden en Firestore también
-      // title: typeof payload.senderName === 'string' && payload.senderName ? payload.senderName : 'Nueva notificación',
-      // body: typeof payload.description === 'string' ? payload.description : `Tienes un nuevo mensaje de tipo ${type}`,
-      // actionLink: actionLink || "/", // Guardar el actionLink también
     };
-    if (actionLink) { // Solo añadir si existe
+    if (actionLink) {
         notificationDocPayload.actionLink = actionLink;
     }
 
@@ -122,10 +108,9 @@ async function createNotifications(
 
   await batch.commit();
 
-  // Enviar notificación push si es necesario
   await Promise.all(
     recipients.map((r) =>
-      sendPushNotification(r.uid, r.collection, buildPushPayload(type, from, payload, actionLink)) // <--- MODIFICADO: Pasar actionLink
+      sendPushNotification(r.uid, r.collection, buildPushPayload(type, from, payload, actionLink))
     )
   );
 }
@@ -134,7 +119,7 @@ function buildPushPayload(
   type: NotificationType,
   from: Sender,
   payload: Payload,
-  actionLink?: string // <--- MODIFICADO: Recibir actionLink
+  actionLink?: string
 ): Omit<admin.messaging.Message, 'token'> {
   const title = typeof payload.senderName === 'string' && payload.senderName ? payload.senderName : 'Nueva notificación';
   const body =
@@ -142,68 +127,44 @@ function buildPushPayload(
       ? payload.description
       : `Tienes un nuevo mensaje de tipo ${type}`;
 
-  // <--- MODIFICADO: Construcción del objeto 'data' para FCM
   const fcmData: Record<string, string> = {
-    type, // El tipo de notificación original
+    type,
     fromId: from.uid,
     fromCollection: from.collection,
-    // click_action es la clave para el Service Worker.
-    // Usamos la APP_BASE_URL para asegurar que sea una URL absoluta si actionLink es relativo,
-    // o si actionLink es una URL completa, se usa esa. Si no hay actionLink, va a la raíz de la app.
     click_action: actionLink ? (actionLink.startsWith('http') ? actionLink : `${APP_BASE_URL}${actionLink.startsWith('/') ? actionLink : `/${actionLink}`}`) : APP_BASE_URL,
   };
 
-  // Incluir el payload original en fcmData para que el cliente lo tenga si es necesario
-  // (El Service Worker podría usarlo, o la app cuando se abre desde la notificación)
   Object.entries(payload).forEach(([k, v]) => {
-    if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') { // Asegurar que solo se añaden primitivos como string
+    if (typeof v === 'string' || typeof v === 'number' || typeof v === 'boolean') {
         fcmData[k] = String(v);
     }
   });
 
   return {
-    notification: { // Propiedades básicas de la notificación visibles en muchas plataformas
+    notification: {
         title,
         body,
-        // 'icon' se mueve a webpush.notification para mejor compatibilidad con FCM Admin SDK y Web Push
     },
-    data: fcmData, // Tus datos personalizados, incluyendo el click_action
-    webpush: { // Configuración específica para notificaciones web push
+    data: fcmData,
+    webpush: {
         notification: {
-            // Aquí es donde comúnmente se especifica el ícono para web push
             icon: DEFAULT_NOTIFICATION_ICON_URL,
-            // Podrías añadir más propiedades específicas de webpush aquí si las necesitas:
-            // badge: "URL_A_UN_BADGE_ICON",
-            // image: "URL_A_UNA_IMAGEN_GRANDE_EN_LA_NOTIFICACION",
-            // actions: [
-            //   { action: "explore", title: "Ver más" },
-            //   { action: "close", title: "Cerrar" }
-            // ],
-            // tag: "IDENTIFICADOR_PARA_AGRUPAR_O_REEMPLAZAR_NOTIFICACIONES",
-            // click_action: fcmData.click_action // Redundante si ya tienes fcmOptions.link y el SW maneja data.click_action, pero a veces se incluye.
-                                                // El Service Worker que creamos se basa en data.click_action.
         },
         fcmOptions: {
-            // El 'link' aquí es una forma fuerte de indicar al Service Worker
-            // (especialmente si el navegador lo soporta directamente) a dónde ir al hacer clic.
             link: fcmData.click_action,
         },
     },
-    // Si quisieras soportar APNS (iOS) o Android de forma nativa, añadirías objetos 'apns' y 'android' aquí.
-    // apns: { /* ...payload específico de APNS... */ },
-    // android: { /* ...payload específico de Android... */ },
   };
 }
 
 async function sendPushNotification(
   uid: string,
   collection: string,
-  pushMessageContent: Omit<admin.messaging.Message, 'token'>, // <--- MODIFICADO: Renombrado para claridad
+  pushMessageContent: Omit<admin.messaging.Message, 'token'>,
 ): Promise<void> {
-  // const db = admin.firestore(); // db ya está definido globalmente
-  const userDocRef = db.collection(collection).doc(uid); // <--- NUEVO: Guardar la referencia al documento
+  const userDocRef = db.collection(collection).doc(uid);
   const docSnap = await userDocRef.get();
-  const fcmToken = docSnap.data()?.fcmToken as string | undefined; // <--- MODIFICADO: Tipar como string | undefined
+  const fcmToken = docSnap.data()?.fcmToken as string | undefined;
 
   if (typeof fcmToken !== 'string' || fcmToken.length === 0) {
     console.warn(`[sendPushNotification] FCM token no encontrado o inválido para ${collection}/${uid}`);
@@ -216,16 +177,13 @@ async function sendPushNotification(
   };
 
   try {
-    await admin.messaging().send(messageToSend); // <--- MODIFICADO: Usar send() que es más genérico y recomendado
+    await admin.messaging().send(messageToSend);
     console.log(`[sendPushNotification] Push enviada a ${collection}/${uid} (Token: ${fcmToken.substring(0,15)}...)`);
-  } catch (error: unknown) { // <--- MODIFICADO: Capturar como unknown
+  } catch (error: unknown) {
     console.error(`[sendPushNotification] Error al enviar push a ${collection}/${uid}:`, error);
 
-    // <--- NUEVO: Manejo básico de errores de token (opcional pero recomendado)
-    // Si el token es inválido, lo borramos de Firestore para no reintentar.
-    // Es importante que el tipo del error sea el correcto de Firebase Admin SDK
     if (error instanceof Error && 'code' in error) {
-        const firebaseAdminError = error as unknown as admin.FirebaseError; // Hacer type assertion
+        const firebaseAdminError = error as unknown as admin.FirebaseError;
         if (
             firebaseAdminError.code === 'messaging/invalid-registration-token' ||
             firebaseAdminError.code === 'messaging/registration-token-not-registered'
@@ -234,7 +192,7 @@ async function sendPushNotification(
             try {
                 await userDocRef.update({
                     fcmToken: admin.firestore.FieldValue.delete(),
-                    fcmTokenTimestamp: admin.firestore.FieldValue.delete() // También eliminar el timestamp
+                    fcmTokenTimestamp: admin.firestore.FieldValue.delete()
                 });
                 console.log(`[sendPushNotification] Token FCM y timestamp eliminados para ${collection}/${uid}.`);
             } catch (dbError) {
@@ -242,25 +200,21 @@ async function sendPushNotification(
             }
         }
     }
-    // --- FIN NUEVO ---
   }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Cloud Tasks – seguimiento (sin cambios en su lógica interna, pero sus llamadas a createNotifications necesitarán `actionLink`)
+// Cloud Tasks – seguimiento
 ////////////////////////////////////////////////////////////////////////////////
 const tasksClient = new CloudTasksClient();
 const FOLLOWUP_QUEUE = process.env.FOLLOWUP_QUEUE ?? '';
 const FUNCTIONS_BASE_URL =
   process.env.FUNCTIONS_BASE_URL ??
-  'https://us-central1-mi-app-servicios-3326e.cloudfunctions.net'; // <--- MODIFICADO: Usar una URL real si es diferente, o la genérica que tenías si aplica a tu región
-
-// ... (scheduleFollowupTask y contactPendingsOnCreate se mantienen igual en su definición) ...
-// PERO la llamada a createNotifications desde sendContactFollowupTask debería incluir el actionLink.
+  'https://us-central1-mi-app-servicios-3326e.cloudfunctions.net';
 
 async function scheduleFollowupTask(
   userUid: string,
-  docId: string, // Este es el providerId
+  docId: string,
   executeEpochSeconds: number,
 ): Promise<void> {
   if (!FOLLOWUP_QUEUE) {
@@ -281,7 +235,7 @@ async function scheduleFollowupTask(
         scheduleTime: { seconds: executeEpochSeconds },
         httpRequest: {
           httpMethod: 'POST',
-          url: `${FUNCTIONS_BASE_URL}/sendContactFollowupTask`, // Asegúrate que esta función exista y sea HTTP
+          url: `${FUNCTIONS_BASE_URL}/sendContactFollowupTask`,
           body: Buffer.from(JSON.stringify(taskPayload)).toString('base64'),
           headers: { 'Content-Type': 'application/json' },
         },
@@ -298,7 +252,7 @@ interface ContactPending {
   providerCollection: string;
   providerName: string;
   via: 'whatsapp' | 'call';
-  firstClickTs: number; // epoch ms
+  firstClickTs: number;
 }
 
 export const contactPendingsOnCreate = onDocumentCreated(
@@ -327,27 +281,23 @@ export const contactPendingsOnCreate = onDocumentCreated(
 
 ////////////////////////////////////////////////////////////////////////////////
 // Callable Functions – flujo principal
-// (Modificadas para pasar actionLink si es aplicable)
 ////////////////////////////////////////////////////////////////////////////////
-
-// Ejemplo de cómo podrías definir un actionLink para un tipo de notificación
 function getActionLinkForNotification(type: NotificationType, payload: Payload): string | undefined {
     switch (type) {
         case NOTIFICATION_TYPE.JOB_REQUEST:
-            // Suponiendo que payload.jobId existe para este tipo
             return typeof payload.jobId === 'string' ? `/trabajos/${payload.jobId}` : '/trabajos';
         case NOTIFICATION_TYPE.JOB_ACCEPT:
             return typeof payload.jobId === 'string' ? `/trabajos/${payload.jobId}` : '/trabajos';
-        case NOTIFICATION_TYPE.CONTACT_REQUEST: // Para respuestas de prestador
+        case NOTIFICATION_TYPE.CONTACT_REQUEST:
             return typeof payload.chatId === 'string' ? `/respuestas?chatId=${payload.chatId}` : '/respuestas';
-        case NOTIFICATION_TYPE.CONTACT_FOLLOWUP: // Para el usuario general
-            return '/respuestas'; // O una página específica de seguimiento si la tienes
+        case NOTIFICATION_TYPE.CONTACT_FOLLOWUP:
+            return '/respuestas';
         case NOTIFICATION_TYPE.AGREEMENT_CONFIRMED:
-            return typeof payload.agreementId === 'string' ? `/acuerdos/${payload.agreementId}` : '/respuestas'; // Asumiendo que tienes una página de acuerdos
+            return typeof payload.agreementId === 'string' ? `/acuerdos/${payload.agreementId}` : '/respuestas';
         case NOTIFICATION_TYPE.RATING_REQUEST:
-            return typeof payload.subjectId === 'string' ? `/calificar/${payload.subjectId}` : '/'; // Asumiendo una página para calificar
+            return typeof payload.subjectId === 'string' ? `/calificar/${payload.subjectId}` : '/';
         default:
-            return '/'; // fallback a la página principal
+            return '/';
     }
 }
 
@@ -355,15 +305,13 @@ export const sendJobRequest = onCall(async (req) => {
   const { data, auth } = req;
   if (!auth?.uid) throw new HttpsError('unauthenticated', 'Authentication required');
   
-  // <--- MODIFICADO: Validar con la interfaz NotificationData que ahora puede tener actionLink
-  // El actionLink vendrá del cliente o se generará aquí. Por ahora, lo generamos aquí.
-  const notificationInput = data as Omit<NotificationData, 'actionLink'> & { payload: Payload }; // Asumimos que el cliente envía payload como lo hacía antes
-  if (!isNotificationData({ ...notificationInput, actionLink: undefined })) // Validar estructura básica
+  const notificationInput = data as Omit<NotificationData, 'actionLink'> & { payload: Payload };
+  if (!isNotificationData({ ...notificationInput, actionLink: undefined }))
     throw new HttpsError('invalid-argument', 'Invalid data payload');
 
   const { to, from, payload } = notificationInput;
-  const actionLink = getActionLinkForNotification(NOTIFICATION_TYPE.JOB_REQUEST, payload); // <--- NUEVO
-  await createNotifications(to, from, NOTIFICATION_TYPE.JOB_REQUEST, payload, actionLink); // <--- MODIFICADO
+  const actionLink = getActionLinkForNotification(NOTIFICATION_TYPE.JOB_REQUEST, payload);
+  await createNotifications(to, from, NOTIFICATION_TYPE.JOB_REQUEST, payload, actionLink);
   return { success: true };
 });
 
@@ -375,22 +323,19 @@ export const sendJobAccept = onCall(async (req) => {
     throw new HttpsError('invalid-argument', 'Invalid data payload');
 
   const { to, from, payload } = notificationInput;
-  const actionLink = getActionLinkForNotification(NOTIFICATION_TYPE.JOB_ACCEPT, payload); // <--- NUEVO
-  await createNotifications(to, from, NOTIFICATION_TYPE.JOB_ACCEPT, payload, actionLink); // <--- MODIFICADO
+  const actionLink = getActionLinkForNotification(NOTIFICATION_TYPE.JOB_ACCEPT, payload);
+  await createNotifications(to, from, NOTIFICATION_TYPE.JOB_ACCEPT, payload, actionLink);
   return { success: true };
 });
 
+// ========================================================================
+// FUNCIÓN DESACTIVADA PARA EVITAR NOTIFICACIONES FANTASMA
+// ========================================================================
 export const sendContactRequest = onCall(async (req) => {
-  const { data, auth } = req;
-  if (!auth?.uid) throw new HttpsError('unauthenticated', 'Authentication required');
-  const notificationInput = data as Omit<NotificationData, 'actionLink'> & { payload: Payload };
-  if (!isNotificationData({ ...notificationInput, actionLink: undefined }))
-    throw new HttpsError('invalid-argument', 'Invalid data payload');
-
-  const { to, from, payload } = notificationInput;
-  const actionLink = getActionLinkForNotification(NOTIFICATION_TYPE.CONTACT_REQUEST, payload); // <--- NUEVO
-  await createNotifications(to, from, NOTIFICATION_TYPE.CONTACT_REQUEST, payload, actionLink); // <--- MODIFICADO
-  return { success: true };
+  // Esta función ha sido desactivada para evitar la creación de notificaciones "fantasma" al prestador.
+  // La llamada a esta función desde el frontend (ContactoPopup.tsx) debería ser eliminada eventualmente.
+  console.log(`[sendContactRequest] Función desactivada, no se creará ninguna notificación para el usuario ${req.auth?.uid}.`);
+  return { success: true, message: 'Función desactivada.' };
 });
 
 export const sendAgreementConfirmed = onCall(async (req) => {
@@ -401,8 +346,8 @@ export const sendAgreementConfirmed = onCall(async (req) => {
     throw new HttpsError('invalid-argument', 'Invalid data payload');
 
   const { to, from, payload } = notificationInput;
-  const actionLink = getActionLinkForNotification(NOTIFICATION_TYPE.AGREEMENT_CONFIRMED, payload); // <--- NUEVO
-  await createNotifications(to, from, NOTIFICATION_TYPE.AGREEMENT_CONFIRMED, payload, actionLink); // <--- MODIFICADO
+  const actionLink = getActionLinkForNotification(NOTIFICATION_TYPE.AGREEMENT_CONFIRMED, payload);
+  await createNotifications(to, from, NOTIFICATION_TYPE.AGREEMENT_CONFIRMED, payload, actionLink);
   return { success: true };
 });
 
@@ -414,14 +359,87 @@ export const sendRatingRequest = onCall(async (req) => {
     throw new HttpsError('invalid-argument', 'Invalid data payload');
 
   const { to, from, payload } = notificationInput;
-  const actionLink = getActionLinkForNotification(NOTIFICATION_TYPE.RATING_REQUEST, payload); // <--- NUEVO
-  await createNotifications(to, from, NOTIFICATION_TYPE.RATING_REQUEST, payload, actionLink); // <--- MODIFICADO
+  const actionLink = getActionLinkForNotification(NOTIFICATION_TYPE.RATING_REQUEST, payload);
+  await createNotifications(to, from, NOTIFICATION_TYPE.RATING_REQUEST, payload, actionLink);
   return { success: true };
 });
 
+// ========================================================================
+// FUNCIÓN CENTRALIZADA PARA LIMPIEZA
+// ========================================================================
+export const confirmAgreementAndCleanup = onCall(async (req) => {
+  const { auth, data } = req;
+  if (!auth?.uid) throw new HttpsError('unauthenticated', 'Authentication required');
+
+  const {
+    user,
+    provider,
+    followupNotifId,
+    originalNotifId,
+    userName,
+  } = data as {
+    user: Recipient;
+    provider: Recipient;
+    followupNotifId: string;
+    originalNotifId: string;
+    userName: string;
+  };
+
+  if (!user?.uid || !provider?.uid || !followupNotifId || !originalNotifId) {
+    throw new HttpsError('invalid-argument', 'Faltan parámetros para la limpieza de la notificación.');
+  }
+
+  try {
+    const batch = db.batch();
+
+    const followupNotifRef = db.collection(user.collection).doc(user.uid).collection('notifications').doc(followupNotifId);
+    batch.delete(followupNotifRef);
+
+    const originalNotifRef = db.collection(user.collection).doc(user.uid).collection('notifications').doc(originalNotifId);
+    batch.delete(originalNotifRef);
+
+    const pendingDocRef = db.collection(user.collection).doc(user.uid).collection('contactPendings').doc(provider.uid);
+    batch.delete(pendingDocRef);
+
+    const agreementNotifRef = db.collection(provider.collection).doc(provider.uid).collection('notifications').doc();
+    const payload: Payload = {
+      description: `${userName || 'Un usuario'} ha confirmado que llegaron a un acuerdo. ¡Felicidades! Ahora puedes calificarle.`,
+      senderName: userName || 'Usuario',
+      fromId: user.uid,
+      fromCollection: user.collection,
+    };
+    const actionLink = getActionLinkForNotification(NOTIFICATION_TYPE.AGREEMENT_CONFIRMED, payload);
+
+    batch.set(agreementNotifRef, {
+      fromId: user.uid,
+      fromCollection: user.collection,
+      type: NOTIFICATION_TYPE.AGREEMENT_CONFIRMED,
+      payload,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+      read: false,
+      actionLink: actionLink || "/",
+    });
+
+    await batch.commit();
+
+    await sendPushNotification(provider.uid, provider.collection, buildPushPayload(NOTIFICATION_TYPE.AGREEMENT_CONFIRMED, user, payload, actionLink));
+
+    console.log(`[confirmAgreementAndCleanup] Limpieza completada para el usuario ${user.uid} y notificación enviada al proveedor ${provider.uid}.`);
+    return { success: true, message: "Acuerdo confirmado y limpieza realizada." };
+
+  } catch (error) {
+    // AÑADIDO: Log de error más detallado para facilitar la depuración
+    console.error({
+        message: "[confirmAgreementAndCleanup] Error detallado al confirmar acuerdo y limpiar.",
+        errorDetails: error,
+        requestData: data // Loguear los datos recibidos para ver si falta algo
+    });
+    throw new HttpsError('internal', 'Ocurrió un error al procesar la solicitud de confirmación. Revisa los logs del backend para más detalles.');
+  }
+});
 
 // ========================================================================
-// HTTP endpoint – ejecutado por Cloud Tasks (MODIFICADO)
+// HTTP endpoint – ejecutado por Cloud Tasks
 // ========================================================================
 export const sendContactFollowupTask = onRequest(async (req, res) => {
   const { userUid, docId } = req.body as { userUid?: string; docId?: string };
@@ -432,7 +450,6 @@ export const sendContactFollowupTask = onRequest(async (req, res) => {
     return;
   }
 
-  // const db = admin.firestore(); // db ya está definido globalmente
   const pendingSnap = await db
     .collection('usuarios_generales')
     .doc(userUid)
@@ -446,32 +463,32 @@ export const sendContactFollowupTask = onRequest(async (req, res) => {
     return;
   }
 
-  const pending = pendingSnap.data() as ContactPending; // Asumimos que ContactPending está bien definido
+  const pending = pendingSnap.data() as ContactPending & { originalNotifId?: string };
   const to: Recipient[] = [{ uid: userUid, collection: 'usuarios_generales' }];
-  
+
   const appSystemSender: Sender = {
     uid: pending.providerId,
-    collection: pending.providerCollection
+    collection: pending.providerCollection,
   };
 
   const followupPayload: Payload = {
     senderName: 'Co-Dy-S',
-    avatarUrl: '/logo1.png', // Esta URL es relativa, para la push se usará DEFAULT_NOTIFICATION_ICON_URL
-    description: `¡Hola! Solo queríamos saber si pudiste contactar a ${pending.providerName} y si llegaron a un acuerdo sobre el trabajo/servicio.`
+    avatarUrl: '/logo1.png',
+    description: `¡Hola! Solo queríamos saber si pudiste contactar a ${pending.providerName} y si llegaron a un acuerdo sobre el trabajo/servicio.`,
+    originalNotifId: pending.originalNotifId ?? '',
   };
-  
+
   console.log(`[sendContactFollowupTask] Enviando CONTACT_FOLLOWUP a user: ${userUid} desde ${appSystemSender.uid} (${followupPayload.senderName}), referente a provider: ${pending.providerName}`);
-  
+
   try {
-    // <--- MODIFICADO: Determinar el actionLink para esta notificación específica
     const actionLink = getActionLinkForNotification(NOTIFICATION_TYPE.CONTACT_FOLLOWUP, followupPayload);
-    
+
     await createNotifications(
       to,
       appSystemSender,
       NOTIFICATION_TYPE.CONTACT_FOLLOWUP,
       followupPayload,
-      actionLink // <--- MODIFICADO: Pasar el actionLink
+      actionLink
     );
 
     res.json({ success: true });

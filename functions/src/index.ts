@@ -11,20 +11,26 @@ if (!admin.apps.length) {
 }
 
 /* -------------------------------------------------------------------------- */
-/*  Funciones de notificaciones (nuevo flujo)                                 */
+/* Funciones de notificaciones (nuevo flujo)                                 */
 /* -------------------------------------------------------------------------- */
 export {
+  // --- Función nueva y corregida ---
+  confirmAgreementAndCleanup, // <-- AÑADIDA: Ahora sí se desplegará
+
+  // --- Funciones existentes que se mantienen ---
   sendJobRequest,
   sendJobAccept,
-  sendContactRequest,
   sendAgreementConfirmed,
   sendRatingRequest,
   sendContactFollowupTask,
   contactPendingsOnCreate,
+
+  // --- Función fantasma desactivada (opcional pero recomendado quitarla de aquí) ---
+  // sendContactRequest, 
 } from './notifications';
 
 /* -------------------------------------------------------------------------- */
-/*  Otras funciones de tu proyecto                                            */
+/* Otras funciones de tu proyecto                                            */
 /* -------------------------------------------------------------------------- */
 export { onPaymentSuccess } from './onPaymentSuccess';
 export { scheduledmanagepaginasamarillas } from './managePaginasAmarillas';
