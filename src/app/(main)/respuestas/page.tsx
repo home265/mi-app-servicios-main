@@ -29,7 +29,7 @@ import {
 import { db } from '@/lib/firebase/config';
 import NotificacionCard from '@/app/components/notificaciones/NotificacionCard';
 import ContactoPopup from '@/app/components/notificaciones/ContactoPopup';
-import ResenaForm from '@/app/components/resenas/ResenaForm';
+
 import Logo from '@/app/components/ui/Logo';
 import PerfilModal from '@/app/components/notificaciones/PerfilModal';
 
@@ -46,10 +46,7 @@ interface PrestadorData {
   selfieUrl: string;
   telefono: string;
 }
-interface ResenaTarget {
-  uid:string;
-  collection: string;
-}
+
 interface PerfilModalTarget {
   uid: string;
   collection: string;
@@ -81,9 +78,7 @@ export default function RespuestasPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showContacto, setShowContacto] = useState(false);
   const [selectedPrestador, setSelectedPrestador] = useState<PrestadorData | null>(null);
-  const [showResena, setShowResena] = useState(false);
-  const [resenaTarget, setResenaTarget] = useState<ResenaTarget | null>(null);
-  const [resenaNotifId, setResenaNotifId] = useState<string | null>(null);
+  
   const [showPerfilModal, setShowPerfilModal] = useState(false);
   const [perfilModalTarget, setPerfilModalTarget] = useState<PerfilModalTarget | null>(null);
 
@@ -232,27 +227,16 @@ export default function RespuestasPage() {
   }
 
   function handleAbrirResena(notif: Notification) {
-    if (processingNotifId) return;
-    const provider = getSender(notif);
-    if (!provider) return;
-
-    setResenaTarget(provider);
-    setResenaNotifId(notif.id);
-    setShowResena(true);
+  if (processingNotifId) return;
+  const provider = getSender(notif);
+  if (provider) {
+    // Redirige a la nueva página de calificación pasándole el UID del prestador
+    router.push(`/calificar/${provider.uid}?notifId=${notif.id}`);
+    // Opcional: podrías eliminar la notificación aquí o en la página de calificación
   }
+}
 
-  async function handleResenaSubmitted() {
-    if (resenaNotifId) {
-      await removeNotification(
-        { uid: userUid, collection: userCollection },
-        resenaNotifId,
-      );
-    }
-    setShowResena(false);
-    setResenaTarget(null);
-    setResenaNotifId(null);
-    alert('Reseña enviada.');
-  }
+  
 
   async function handleDelete(notif: Notification) {
     if (processingNotifId) return;
@@ -336,12 +320,7 @@ export default function RespuestasPage() {
         />
       )}
 
-      {showResena && resenaTarget && (
-        <ResenaForm
-          target={resenaTarget}
-          onSubmitted={handleResenaSubmitted}
-        />
-      )}
+      
 
       {showPerfilModal && perfilModalTarget && (
         <PerfilModal

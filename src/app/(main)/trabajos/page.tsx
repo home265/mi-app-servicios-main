@@ -25,7 +25,6 @@ import {
 } from '@/lib/services/notificationsService'
 
 import NotificacionCard from '@/app/components/notificaciones/NotificacionCard'
-import ResenaForm from '@/app/components/resenas/ResenaForm'
 import PerfilModal from '@/app/components/notificaciones/PerfilModal'
 import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaTrabajos from '@/app/components/ayuda-contenido/AyudaTrabajos';
@@ -55,10 +54,6 @@ interface ProviderUserProfile extends UserProfile {
   nombre: string
   selfieURL?: string
 }
-interface ResenaTarget {
-  uid: string
-  collection: string
-}
 interface PerfilTarget {
   uid: string
   collection: string
@@ -84,9 +79,6 @@ export default function TrabajosPage() {
 
   /*────────── estado local ──────────*/
   const [notifications, setNotifications] = useState<Notification[]>([])
-  const [showResena, setShowResena] = useState(false)
-  const [resenaTarget, setResenaTarget] = useState<ResenaTarget | null>(null)
-  const [resenaNotifId, setResenaNotifId] = useState<string | null>(null)
   const [showPerfilModal, setShowPerfilModal] = useState(false)
   const [perfilModalTarget, setPerfilModalTarget] =
     useState<PerfilTarget | null>(null)
@@ -232,27 +224,14 @@ export default function TrabajosPage() {
   }
 
   function openResenaFormForClient(n: Notification) {
-    if (processingNotifId) return;
-    
-    const cli = getSender(n)
-    if (!cli) return
-    
-    setResenaTarget(cli)
-    setResenaNotifId(n.id)
-    setShowResena(true)
+  if (processingNotifId) return;
+  
+  const cli = getSender(n)
+  if (cli) {
+    // Redirige a la nueva página pasándole el UID del usuario a calificar
+    router.push(`/calificar/${cli.uid}?notifId=${n.id}`);
   }
-
-  async function handleResenaSubmitted() {
-    if (resenaNotifId) {
-      await removeNotification(
-        { uid: providerUid, collection: providerCollection },
-        resenaNotifId
-      )
-    }
-    setShowResena(false)
-    setResenaTarget(null)
-    setResenaNotifId(null)
-  }
+}
 
   function handleAvatarClick(n: Notification) {
     if (processingNotifId) return;
@@ -310,12 +289,6 @@ export default function TrabajosPage() {
           ))}
         </div>
 
-        {showResena && resenaTarget && (
-          <ResenaForm
-            target={resenaTarget}
-            onSubmitted={handleResenaSubmitted}
-          />
-        )}
         {showPerfilModal && perfilModalTarget && (
           <PerfilModal
             target={perfilModalTarget}

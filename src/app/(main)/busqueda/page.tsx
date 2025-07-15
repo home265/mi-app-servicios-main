@@ -21,7 +21,7 @@ import {
 } from '@/lib/services/notificationsService';
 import NotificacionCard from '@/app/components/notificaciones/NotificacionCard';
 import ContactoPopup from '@/app/components/notificaciones/ContactoPopup';
-import ResenaForm from '@/app/components/resenas/ResenaForm';
+
 import PerfilModal from '@/app/components/notificaciones/PerfilModal';
 import { doc, getDoc } from 'firebase/firestore'; // <-- MODIFICADO: deleteDoc ya no es necesario aquí
 import { db } from '@/lib/firebase/config';
@@ -61,7 +61,6 @@ interface UserProfileWithLocalidad extends UserProfile {
   selfieURL?: string;
   nombre: string;
 }
-type ResenaTarget = { uid: string; collection: string };
 type PerfilTarget = { uid: string; collection: string };
 
 type ProviderDocData = {
@@ -91,9 +90,6 @@ export default function BusquedaPage() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [showContacto, setShowContacto] = useState(false);
   const [selectedPrestador, setSelectedPrestador] = useState<PrestadorData | null>(null);
-  const [showResena, setShowResena] = useState(false);
-  const [resenaTarget, setResenaTarget] = useState<ResenaTarget | null>(null);
-  const [resenaNotifId, setResenaNotifId] = useState<string | null>(null);
   const [showPerfil, setShowPerfil] = useState(false);
   const [perfilTarget, setPerfilTarget] = useState<PerfilTarget | null>(null);
 
@@ -249,11 +245,10 @@ export default function BusquedaPage() {
             // ===========================================================================
             // FIN: LÓGICA CORREGIDA
             // ===========================================================================
-        } else { // rating_request
-            setResenaTarget(sender);
-            setResenaNotifId(n.id);
-            setShowResena(true);
-        }
+       } else { // rating_request
+    // Redirige a la nueva página de calificación
+    router.push(`/calificar/${sender.uid}?notifId=${n.id}`);
+}
     } catch (error) {
         console.error("Error en la acción principal:", error);
         alert("Hubo un error al procesar tu solicitud.");
@@ -284,15 +279,6 @@ export default function BusquedaPage() {
     }
   }
 
-  async function handleResenaSubmitted() {
-    if (resenaNotifId) {
-      await removeNotification({ uid: userUid, collection: userCollection }, resenaNotifId);
-    }
-    setShowResena(false);
-    setResenaTarget(null);
-    setResenaNotifId(null);
-    alert('Reseña enviada.');
-  }
 
   return (
     <div
@@ -403,7 +389,6 @@ export default function BusquedaPage() {
           onClose={() => setShowContacto(false)}
         />
       )}
-      {showResena && resenaTarget && <ResenaForm target={resenaTarget} onSubmitted={handleResenaSubmitted} />}
       {showPerfil && perfilTarget && (
         <PerfilModal target={perfilTarget} viewerMode="user" onClose={() => setShowPerfil(false)} />
       )}
