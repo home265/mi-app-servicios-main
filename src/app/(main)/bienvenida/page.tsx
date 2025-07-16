@@ -320,12 +320,15 @@ export default function BienvenidaPage() {
               };
 
               // --- NUEVO: Determina si el botón actual debe mostrar un indicador ---
-              const unreadCount =
-                a.id === 'trabajos'
-                  ? jobRequests
-                  : a.id === 'buscar'
-                  ? jobResponses
-                  : 0;
+              // --- NUEVO: Determina si el botón actual debe mostrar un indicador ---
+const unreadCount =
+  a.id === 'trabajos'
+    ? jobRequests
+    : a.id === 'buscar'
+    ? jobResponses
+    : a.id === 'modo' // <--- AÑADE ESTA LÍNEA
+    ? jobResponses // <--- Y ESTA
+    : 0;
 
               return (
                 <button

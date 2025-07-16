@@ -98,8 +98,8 @@ const FormularioResenaDetallado: React.FC<FormularioResenaDetalladoProps> = ({
       }
 
       // Paso C: Envía una nueva notificación a la otra persona para que califique de vuelta.
-      // (Solo si quien califica es un prestador, como en tu flujo original).
-      if (actingAs === 'provider') {
+      // (Solo si se acaba de calificar a un usuario, para evitar el bucle).
+      if (context === 'as_user') {
         await sendRatingRequest({
           to: [{ uid: target.uid, collection: target.collection }],
           from: author,
