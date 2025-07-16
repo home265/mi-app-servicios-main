@@ -1,3 +1,5 @@
+// Este es el archivo completo y corregido. Cópialo y pégalo en tu proyecto.
+
 import 'dotenv/config';
 import { onCall, onRequest, HttpsError } from 'firebase-functions/v2/https';
 import { onDocumentCreated } from 'firebase-functions/v2/firestore';
@@ -204,18 +206,21 @@ async function sendPushNotification(
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Cloud Tasks – seguimiento
+// Cloud Tasks – seguimiento (SECCIÓN MODIFICADA)
 ////////////////////////////////////////////////////////////////////////////////
 const tasksClient = new CloudTasksClient();
 const FOLLOWUP_QUEUE = process.env.FOLLOWUP_QUEUE ?? '';
 const FUNCTIONS_BASE_URL =
   process.env.FUNCTIONS_BASE_URL ??
   'https://us-central1-mi-app-servicios-3326e.cloudfunctions.net';
+// Nueva variable para la cuenta de servicio (configurar en .env)
+const SERVICE_ACCOUNT_EMAIL = process.env.SERVICE_ACCOUNT_EMAIL ?? '';
 
 async function scheduleFollowupTask(
   userUid: string,
   docId: string,
   executeEpochSeconds: number,
+  userCollection: string, // <-- 1. Se añade 'userCollection' para saber dónde buscar
 ): Promise<void> {
   if (!FOLLOWUP_QUEUE) {
     console.error('[scheduleFollowupTask] FOLLOWUP_QUEUE env var no definida');
@@ -225,8 +230,14 @@ async function scheduleFollowupTask(
      console.error('[scheduleFollowupTask] FUNCTIONS_BASE_URL no parece ser una URL válida:', FUNCTIONS_BASE_URL);
      return;
   }
+  // Añadida validación para la cuenta de servicio
+  if (!SERVICE_ACCOUNT_EMAIL) {
+    console.error('[scheduleFollowupTask] SERVICE_ACCOUNT_EMAIL env var no definida. La tarea no se autenticará.');
+    return;
+  }
 
-  const taskPayload = { userUid, docId };
+  // Se añade 'userCollection' al payload de la tarea
+  const taskPayload = { userUid, docId, userCollection };
 
   try {
     await tasksClient.createTask({
@@ -238,6 +249,10 @@ async function scheduleFollowupTask(
           url: `${FUNCTIONS_BASE_URL}/sendContactFollowupTask`,
           body: Buffer.from(JSON.stringify(taskPayload)).toString('base64'),
           headers: { 'Content-Type': 'application/json' },
+          // <-- 2. Se añade token OIDC para autenticar la tarea en la función HTTP
+          oidcToken: {
+            serviceAccountEmail: SERVICE_ACCOUNT_EMAIL,
+          },
         },
       },
     });
@@ -255,26 +270,39 @@ interface ContactPending {
   firstClickTs: number;
 }
 
+// Lista de colecciones de usuarios permitidas
+const ALLOWED_USER_COLLECTIONS = ['usuarios_generales', 'prestadores', 'comercios'];
+
 export const contactPendingsOnCreate = onDocumentCreated(
-  'usuarios_generales/{uid}/contactPendings/{docId}',
+  // <-- 3. El activador ahora escucha en todas las colecciones de usuario
+  '{collection}/{uid}/contactPendings/{docId}',
   async (event) => {
-    const { uid, docId } = event.params;
+    // Se obtienen todos los parámetros de la ruta, incluyendo la colección
+    const { collection, uid, docId } = event.params;
+    
+    // Medida de seguridad: solo procesar si la colección es una de las esperadas
+    if (!ALLOWED_USER_COLLECTIONS.includes(collection)) {
+        console.log(`[contactPendingsOnCreate] Activador ignorado para colección no permitida: ${collection}`);
+        return;
+    }
+
     const pending = event.data?.data() as ContactPending | undefined;
 
     if (!pending || typeof pending.firstClickTs !== 'number') {
-      console.error(`[contactPendingsOnCreate] Documento 'pending' o 'firstClickTs' no encontrado o no es un número. UID: ${uid}, DocID (providerId): ${docId}. Datos de pending:`, pending);
+      console.error(`[contactPendingsOnCreate] Documento 'pending' o 'firstClickTs' inválido. Path: ${collection}/${uid}/contactPendings/${docId}.`, pending);
       return;
     }
 
-    const delayInSeconds = 5 * 60; 
+    const delayInSeconds = 5 * 60; // 5 minutos (puedes ajustar este valor)
     const executeAt = Math.floor(pending.firstClickTs / 1000) + delayInSeconds;
     
-    console.log(`[contactPendingsOnCreate] Programando tarea (${delayInSeconds / 60} min) para user: ${uid}, provider: ${docId}. executeAt (epoch seconds): ${executeAt}, Fecha ISO: ${new Date(executeAt * 1000).toISOString()}`);
+    console.log(`[contactPendingsOnCreate] Programando tarea (${delayInSeconds / 60} min) para user: ${collection}/${uid}, provider: ${docId}. executeAt (epoch seconds): ${executeAt}, Fecha ISO: ${new Date(executeAt * 1000).toISOString()}`);
 
     try {
-      await scheduleFollowupTask(uid, docId, executeAt);
+      // Se pasa el nombre de la colección a la función que crea la tarea
+      await scheduleFollowupTask(uid, docId, executeAt, collection);
     } catch (error) {
-      console.error(`[contactPendingsOnCreate] Error al llamar a scheduleFollowupTask para user: ${uid}, provider: ${docId}. Error:`, error);
+      console.error(`[contactPendingsOnCreate] Error al llamar a scheduleFollowupTask para user: ${collection}/${uid}, provider: ${docId}. Error:`, error);
     }
   },
 );
@@ -332,8 +360,6 @@ export const sendJobAccept = onCall(async (req) => {
 // FUNCIÓN DESACTIVADA PARA EVITAR NOTIFICACIONES FANTASMA
 // ========================================================================
 export const sendContactRequest = onCall(async (req) => {
-  // Esta función ha sido desactivada para evitar la creación de notificaciones "fantasma" al prestador.
-  // La llamada a esta función desde el frontend (ContactoPopup.tsx) debería ser eliminada eventualmente.
   console.log(`[sendContactRequest] Función desactivada, no se creará ninguna notificación para el usuario ${req.auth?.uid}.`);
   return { success: true, message: 'Función desactivada.' };
 });
@@ -428,43 +454,45 @@ export const confirmAgreementAndCleanup = onCall(async (req) => {
     return { success: true, message: "Acuerdo confirmado y limpieza realizada." };
 
   } catch (error) {
-    // AÑADIDO: Log de error más detallado para facilitar la depuración
     console.error({
         message: "[confirmAgreementAndCleanup] Error detallado al confirmar acuerdo y limpiar.",
         errorDetails: error,
-        requestData: data // Loguear los datos recibidos para ver si falta algo
+        requestData: data
     });
     throw new HttpsError('internal', 'Ocurrió un error al procesar la solicitud de confirmación. Revisa los logs del backend para más detalles.');
   }
 });
 
 // ========================================================================
-// HTTP endpoint – ejecutado por Cloud Tasks
+// HTTP endpoint – ejecutado por Cloud Tasks (SECCIÓN MODIFICADA)
 // ========================================================================
 export const sendContactFollowupTask = onRequest(async (req, res) => {
-  const { userUid, docId } = req.body as { userUid?: string; docId?: string };
+  // <-- 4. Se recibe 'userCollection' del payload de la tarea
+  const { userUid, docId, userCollection } = req.body as { userUid?: string; docId?: string; userCollection?: string };
 
-  if (!userUid || !docId) {
-    console.error('[sendContactFollowupTask] Faltan userUid o docId en el body:', req.body);
+  if (!userUid || !docId || !userCollection) {
+    console.error('[sendContactFollowupTask] Faltan userUid, docId o userCollection en el body:', req.body);
     res.status(400).send('Bad Request: missing parameters');
     return;
   }
 
+  // Se usa la 'userCollection' dinámica para encontrar el documento
   const pendingSnap = await db
-    .collection('usuarios_generales')
+    .collection(userCollection) // <-- 5. Se usa la colección dinámica
     .doc(userUid)
     .collection('contactPendings')
     .doc(docId)
     .get();
 
   if (!pendingSnap.exists) {
-    console.log(`[sendContactFollowupTask] Documento contactPendings no encontrado para user: ${userUid}, providerId (docId): ${docId}. La tarea no enviará notificación.`);
+    console.log(`[sendContactFollowupTask] Documento contactPendings no encontrado para user: ${userCollection}/${userUid}, providerId (docId): ${docId}. La tarea no enviará notificación.`);
     res.status(200).send('contactPendings doc not found, followup not sent.');
     return;
   }
 
   const pending = pendingSnap.data() as ContactPending & { originalNotifId?: string };
-  const to: Recipient[] = [{ uid: userUid, collection: 'usuarios_generales' }];
+  // Se usa la 'userCollection' para crear el destinatario de la notificación
+  const to: Recipient[] = [{ uid: userUid, collection: userCollection }]; // <-- 6. Se usa la colección dinámica
 
   const appSystemSender: Sender = {
     uid: pending.providerId,
