@@ -1,4 +1,4 @@
-// Este es el archivo completo y corregido. Cópialo y pégalo en tu proyecto.
+// functions/src/notifications.ts
 
 import 'dotenv/config';
 import { onCall, onRequest, HttpsError } from 'firebase-functions/v2/https';
@@ -7,7 +7,7 @@ import * as admin from 'firebase-admin';
 import { CloudTasksClient } from '@google-cloud/tasks';
 
 const APP_BASE_URL = "https://mi-app-servicios-3326e.web.app";
-const DEFAULT_NOTIFICATION_ICON_URL = `${APP_BASE_URL}/logo1.png`;
+const DEFAULT_NOTIFICATION_ICON_URL = `${APP_BASE_URL}/icons/notification-icon.png`; 
 
 ////////////////////////////////////////////////////////////////////////////////
 // Inicialización
@@ -38,7 +38,6 @@ export interface NotificationData {
   to: Recipient[];
   from: Sender;
   payload: Payload;
-  actionLink?: string;
 }
 
 export const NOTIFICATION_TYPE = {
@@ -68,23 +67,83 @@ function isNotificationData(data: unknown): data is NotificationData {
     typeof d.from.uid === 'string' &&
     typeof d.from.collection === 'string' &&
     typeof d.payload === 'object' &&
-    d.payload !== null &&
-    (d.actionLink === undefined || typeof d.actionLink === 'string')
+    d.payload !== null
   );
+}
+
+
+// --- AÑADIDO: Función de ayuda para generar contenido dinámico ---
+// Aquí reside toda la inteligencia de las notificaciones.
+function getNotificationDetails(
+  type: NotificationType,
+  payload: Payload
+): { title: string; body: string; actionLink: string } {
+  const senderName = typeof payload.senderName === 'string' && payload.senderName ? payload.senderName : 'Alguien';
+  
+  switch (type) {
+    case NOTIFICATION_TYPE.JOB_REQUEST:
+      const category = typeof payload.category === 'string' ? payload.category : 'un servicio';
+      const description = typeof payload.description === 'string' ? `: "${payload.description.substring(0, 80)}..."` : '';
+      return {
+        title: `Nueva solicitud de ${category}`,
+        body: `${senderName} necesita ayuda${description}`,
+        actionLink: '/trabajos'
+      };
+
+    case NOTIFICATION_TYPE.JOB_ACCEPT:
+      return {
+        title: '¡Tu solicitud fue aceptada!',
+        body: `${senderName} aceptó tu solicitud. ¡Ponte en contacto para coordinar!`,
+        actionLink: '/busqueda'
+      };
+      
+    case NOTIFICATION_TYPE.CONTACT_FOLLOWUP:
+      const providerName = typeof payload.providerName === 'string' ? payload.providerName : 'el prestador';
+      return {
+          title: `¿Acordaste con ${providerName}?`,
+          body: `Hola, solo para saber si pudiste contactar a ${providerName} y si llegaron a un acuerdo.`,
+          actionLink: '/busqueda'
+      };
+      
+    case NOTIFICATION_TYPE.RATING_REQUEST:
+        const subjectId = typeof payload.subjectId === 'string' ? payload.subjectId : '';
+        return {
+            title: '¡Valora tu experiencia!',
+            body: `El trabajo con ${senderName} ha finalizado. Por favor, califica el servicio.`,
+            actionLink: `/calificar/${subjectId}`
+        };
+
+    case NOTIFICATION_TYPE.AGREEMENT_CONFIRMED:
+        return {
+            title: '¡Acuerdo Confirmado!',
+            body: `${senderName} ha confirmado que llegaron a un acuerdo. ¡Ya puedes calificarle!`,
+            actionLink: '/trabajos'
+        };
+
+    default:
+      return {
+        title: 'Nueva Notificación',
+        body: 'Tienes un nuevo mensaje en la aplicación.',
+        actionLink: '/'
+      };
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
 // Helper principal: creación + push
 ////////////////////////////////////////////////////////////////////////////////
+// --- MODIFICADO: `createNotifications` ahora decide si enviar PUSH o no ---
 async function createNotifications(
   recipients: Recipient[],
   from: Sender,
   type: NotificationType,
   payload: Payload,
-  actionLink?: string
+  options: { sendPush: boolean } = { sendPush: true } // Por defecto, siempre envía push
 ): Promise<void> {
   const batch = db.batch();
   const timestamp = admin.firestore.FieldValue.serverTimestamp();
+
+  const { actionLink } = getNotificationDetails(type, payload);
 
   recipients.forEach(({ uid, collection }) => {
     const ref = db
@@ -100,40 +159,41 @@ async function createNotifications(
       payload,
       timestamp,
       read: false,
+      actionLink: actionLink || "/", // Se guarda el enlace dinámico
     };
-    if (actionLink) {
-        notificationDocPayload.actionLink = actionLink;
-    }
 
     batch.set(ref, notificationDocPayload);
   });
 
   await batch.commit();
 
-  await Promise.all(
-    recipients.map((r) =>
-      sendPushNotification(r.uid, r.collection, buildPushPayload(type, from, payload, actionLink))
-    )
-  );
+  // Se envía el PUSH solo si la opción es verdadera
+  if (options.sendPush) {
+      await Promise.all(
+        recipients.map((r) =>
+          sendPushNotification(r.uid, r.collection, buildPushPayload(type, from, payload))
+        )
+      );
+  }
 }
 
+// --- MODIFICADO: `buildPushPayload` ahora usa la nueva lógica ---
 function buildPushPayload(
   type: NotificationType,
   from: Sender,
-  payload: Payload,
-  actionLink?: string
+  payload: Payload
 ): Omit<admin.messaging.Message, 'token'> {
-  const title = typeof payload.senderName === 'string' && payload.senderName ? payload.senderName : 'Nueva notificación';
-  const body =
-    typeof payload.description === 'string'
-      ? payload.description
-      : `Tienes un nuevo mensaje de tipo ${type}`;
+  const { title, body, actionLink } = getNotificationDetails(type, payload);
+  
+  const finalActionLink = actionLink.startsWith('http') 
+    ? actionLink 
+    : `${APP_BASE_URL}${actionLink.startsWith('/') ? actionLink : `/${actionLink}`}`;
 
   const fcmData: Record<string, string> = {
     type,
     fromId: from.uid,
     fromCollection: from.collection,
-    click_action: actionLink ? (actionLink.startsWith('http') ? actionLink : `${APP_BASE_URL}${actionLink.startsWith('/') ? actionLink : `/${actionLink}`}`) : APP_BASE_URL,
+    click_action: finalActionLink,
   };
 
   Object.entries(payload).forEach(([k, v]) => {
@@ -206,37 +266,26 @@ async function sendPushNotification(
 }
 
 ////////////////////////////////////////////////////////////////////////////////
-// Cloud Tasks – seguimiento (SECCIÓN MODIFICADA)
+// Cloud Tasks – seguimiento
 ////////////////////////////////////////////////////////////////////////////////
 const tasksClient = new CloudTasksClient();
 const FOLLOWUP_QUEUE = process.env.FOLLOWUP_QUEUE ?? '';
 const FUNCTIONS_BASE_URL =
   process.env.FUNCTIONS_BASE_URL ??
   'https://us-central1-mi-app-servicios-3326e.cloudfunctions.net';
-// Nueva variable para la cuenta de servicio (configurar en .env)
 const SERVICE_ACCOUNT_EMAIL = process.env.SERVICE_ACCOUNT_EMAIL ?? '';
 
 async function scheduleFollowupTask(
   userUid: string,
   docId: string,
   executeEpochSeconds: number,
-  userCollection: string, // <-- 1. Se añade 'userCollection' para saber dónde buscar
+  userCollection: string,
 ): Promise<void> {
-  if (!FOLLOWUP_QUEUE) {
-    console.error('[scheduleFollowupTask] FOLLOWUP_QUEUE env var no definida');
-    return;
-  }
-  if (!FUNCTIONS_BASE_URL.startsWith('https://')) {
-     console.error('[scheduleFollowupTask] FUNCTIONS_BASE_URL no parece ser una URL válida:', FUNCTIONS_BASE_URL);
-     return;
-  }
-  // Añadida validación para la cuenta de servicio
-  if (!SERVICE_ACCOUNT_EMAIL) {
-    console.error('[scheduleFollowupTask] SERVICE_ACCOUNT_EMAIL env var no definida. La tarea no se autenticará.');
+  if (!FOLLOWUP_QUEUE || !FUNCTIONS_BASE_URL.startsWith('https://') || !SERVICE_ACCOUNT_EMAIL) {
+    console.error('[scheduleFollowupTask] Faltan variables de entorno para Cloud Tasks (QUEUE, BASE_URL, SERVICE_ACCOUNT_EMAIL).');
     return;
   }
 
-  // Se añade 'userCollection' al payload de la tarea
   const taskPayload = { userUid, docId, userCollection };
 
   try {
@@ -249,7 +298,6 @@ async function scheduleFollowupTask(
           url: `${FUNCTIONS_BASE_URL}/sendContactFollowupTask`,
           body: Buffer.from(JSON.stringify(taskPayload)).toString('base64'),
           headers: { 'Content-Type': 'application/json' },
-          // <-- 2. Se añade token OIDC para autenticar la tarea en la función HTTP
           oidcToken: {
             serviceAccountEmail: SERVICE_ACCOUNT_EMAIL,
           },
@@ -270,17 +318,13 @@ interface ContactPending {
   firstClickTs: number;
 }
 
-// Lista de colecciones de usuarios permitidas
 const ALLOWED_USER_COLLECTIONS = ['usuarios_generales', 'prestadores', 'comercios'];
 
 export const contactPendingsOnCreate = onDocumentCreated(
-  // <-- 3. El activador ahora escucha en todas las colecciones de usuario
   '{collection}/{uid}/contactPendings/{docId}',
   async (event) => {
-    // Se obtienen todos los parámetros de la ruta, incluyendo la colección
     const { collection, uid, docId } = event.params;
     
-    // Medida de seguridad: solo procesar si la colección es una de las esperadas
     if (!ALLOWED_USER_COLLECTIONS.includes(collection)) {
         console.log(`[contactPendingsOnCreate] Activador ignorado para colección no permitida: ${collection}`);
         return;
@@ -293,13 +337,12 @@ export const contactPendingsOnCreate = onDocumentCreated(
       return;
     }
 
-    const delayInSeconds = 5 * 60; // 5 minutos (puedes ajustar este valor)
+    const delayInSeconds = 5 * 60; // 5 minutos
     const executeAt = Math.floor(pending.firstClickTs / 1000) + delayInSeconds;
     
-    console.log(`[contactPendingsOnCreate] Programando tarea (${delayInSeconds / 60} min) para user: ${collection}/${uid}, provider: ${docId}. executeAt (epoch seconds): ${executeAt}, Fecha ISO: ${new Date(executeAt * 1000).toISOString()}`);
+    console.log(`[contactPendingsOnCreate] Programando tarea (${delayInSeconds / 60} min) para user: ${collection}/${uid}, provider: ${docId}.`);
 
     try {
-      // Se pasa el nombre de la colección a la función que crea la tarea
       await scheduleFollowupTask(uid, docId, executeAt, collection);
     } catch (error) {
       console.error(`[contactPendingsOnCreate] Error al llamar a scheduleFollowupTask para user: ${collection}/${uid}, provider: ${docId}. Error:`, error);
@@ -310,55 +353,32 @@ export const contactPendingsOnCreate = onDocumentCreated(
 ////////////////////////////////////////////////////////////////////////////////
 // Callable Functions – flujo principal
 ////////////////////////////////////////////////////////////////////////////////
-function getActionLinkForNotification(type: NotificationType, payload: Payload): string | undefined {
-    switch (type) {
-        case NOTIFICATION_TYPE.JOB_REQUEST:
-            return typeof payload.jobId === 'string' ? `/trabajos/${payload.jobId}` : '/trabajos';
-        case NOTIFICATION_TYPE.JOB_ACCEPT:
-            return typeof payload.jobId === 'string' ? `/trabajos/${payload.jobId}` : '/trabajos';
-        case NOTIFICATION_TYPE.CONTACT_REQUEST:
-            return typeof payload.chatId === 'string' ? `/respuestas?chatId=${payload.chatId}` : '/respuestas';
-        case NOTIFICATION_TYPE.CONTACT_FOLLOWUP:
-            return '/respuestas';
-        case NOTIFICATION_TYPE.AGREEMENT_CONFIRMED:
-            return typeof payload.agreementId === 'string' ? `/acuerdos/${payload.agreementId}` : '/respuestas';
-        case NOTIFICATION_TYPE.RATING_REQUEST:
-            return typeof payload.subjectId === 'string' ? `/calificar/${payload.subjectId}` : '/';
-        default:
-            return '/';
-    }
-}
+
+// --- ELIMINADO: La función getActionLinkForNotification ya no es necesaria.
+// La nueva función getNotificationDetails se encarga de esto.
 
 export const sendJobRequest = onCall(async (req) => {
   const { data, auth } = req;
   if (!auth?.uid) throw new HttpsError('unauthenticated', 'Authentication required');
-  
-  const notificationInput = data as Omit<NotificationData, 'actionLink'> & { payload: Payload };
-  if (!isNotificationData({ ...notificationInput, actionLink: undefined }))
-    throw new HttpsError('invalid-argument', 'Invalid data payload');
+  if (!isNotificationData(data as NotificationData)) throw new HttpsError('invalid-argument', 'Invalid data payload');
 
-  const { to, from, payload } = notificationInput;
-  const actionLink = getActionLinkForNotification(NOTIFICATION_TYPE.JOB_REQUEST, payload);
-  await createNotifications(to, from, NOTIFICATION_TYPE.JOB_REQUEST, payload, actionLink);
+  const { to, from, payload } = data;
+  // La notificación push se enviará por defecto
+  await createNotifications(to, from, NOTIFICATION_TYPE.JOB_REQUEST, payload);
   return { success: true };
 });
 
 export const sendJobAccept = onCall(async (req) => {
   const { data, auth } = req;
   if (!auth?.uid) throw new HttpsError('unauthenticated', 'Authentication required');
-  const notificationInput = data as Omit<NotificationData, 'actionLink'> & { payload: Payload };
-  if (!isNotificationData({ ...notificationInput, actionLink: undefined }))
-    throw new HttpsError('invalid-argument', 'Invalid data payload');
+  if (!isNotificationData(data as NotificationData)) throw new HttpsError('invalid-argument', 'Invalid data payload');
 
-  const { to, from, payload } = notificationInput;
-  const actionLink = getActionLinkForNotification(NOTIFICATION_TYPE.JOB_ACCEPT, payload);
-  await createNotifications(to, from, NOTIFICATION_TYPE.JOB_ACCEPT, payload, actionLink);
+  const { to, from, payload } = data;
+  // La notificación push se enviará por defecto
+  await createNotifications(to, from, NOTIFICATION_TYPE.JOB_ACCEPT, payload);
   return { success: true };
 });
 
-// ========================================================================
-// FUNCIÓN DESACTIVADA PARA EVITAR NOTIFICACIONES FANTASMA
-// ========================================================================
 export const sendContactRequest = onCall(async (req) => {
   console.log(`[sendContactRequest] Función desactivada, no se creará ninguna notificación para el usuario ${req.auth?.uid}.`);
   return { success: true, message: 'Función desactivada.' };
@@ -367,32 +387,25 @@ export const sendContactRequest = onCall(async (req) => {
 export const sendAgreementConfirmed = onCall(async (req) => {
   const { data, auth } = req;
   if (!auth?.uid) throw new HttpsError('unauthenticated', 'Authentication required');
-  const notificationInput = data as Omit<NotificationData, 'actionLink'> & { payload: Payload };
-  if (!isNotificationData({ ...notificationInput, actionLink: undefined }))
-    throw new HttpsError('invalid-argument', 'Invalid data payload');
+  if (!isNotificationData(data as NotificationData)) throw new HttpsError('invalid-argument', 'Invalid data payload');
 
-  const { to, from, payload } = notificationInput;
-  const actionLink = getActionLinkForNotification(NOTIFICATION_TYPE.AGREEMENT_CONFIRMED, payload);
-  await createNotifications(to, from, NOTIFICATION_TYPE.AGREEMENT_CONFIRMED, payload, actionLink);
+  const { to, from, payload } = data;
+  // Esta notificación SÍ enviará un push
+  await createNotifications(to, from, NOTIFICATION_TYPE.AGREEMENT_CONFIRMED, payload, { sendPush: false });
   return { success: true };
 });
 
+// --- MODIFICADO: `sendRatingRequest` ya no enviará PUSH ---
 export const sendRatingRequest = onCall(async (req) => {
   const { data, auth } = req;
   if (!auth?.uid) throw new HttpsError('unauthenticated', 'Authentication required');
-  const notificationInput = data as Omit<NotificationData, 'actionLink'> & { payload: Payload };
-  if (!isNotificationData({ ...notificationInput, actionLink: undefined }))
-    throw new HttpsError('invalid-argument', 'Invalid data payload');
+  if (!isNotificationData(data as NotificationData)) throw new HttpsError('invalid-argument', 'Invalid data payload');
 
-  const { to, from, payload } = notificationInput;
-  const actionLink = getActionLinkForNotification(NOTIFICATION_TYPE.RATING_REQUEST, payload);
-  await createNotifications(to, from, NOTIFICATION_TYPE.RATING_REQUEST, payload, actionLink);
+  const { to, from, payload } = data;
+  await createNotifications(to, from, NOTIFICATION_TYPE.RATING_REQUEST, payload, { sendPush: false });
   return { success: true };
 });
 
-// ========================================================================
-// FUNCIÓN CENTRALIZADA PARA LIMPIEZA
-// ========================================================================
 export const confirmAgreementAndCleanup = onCall(async (req) => {
   const { auth, data } = req;
   if (!auth?.uid) throw new HttpsError('unauthenticated', 'Authentication required');
@@ -434,7 +447,9 @@ export const confirmAgreementAndCleanup = onCall(async (req) => {
       fromId: user.uid,
       fromCollection: user.collection,
     };
-    const actionLink = getActionLinkForNotification(NOTIFICATION_TYPE.AGREEMENT_CONFIRMED, payload);
+    
+    // --- MODIFICADO: Se usa la nueva función para obtener el enlace ---
+    const { actionLink } = getNotificationDetails(NOTIFICATION_TYPE.AGREEMENT_CONFIRMED, payload);
 
     batch.set(agreementNotifRef, {
       fromId: user.uid,
@@ -448,7 +463,8 @@ export const confirmAgreementAndCleanup = onCall(async (req) => {
 
     await batch.commit();
 
-    await sendPushNotification(provider.uid, provider.collection, buildPushPayload(NOTIFICATION_TYPE.AGREEMENT_CONFIRMED, user, payload, actionLink));
+    // Se envía el push usando la nueva lógica
+    await sendPushNotification(provider.uid, provider.collection, buildPushPayload(NOTIFICATION_TYPE.AGREEMENT_CONFIRMED, user, payload));
 
     console.log(`[confirmAgreementAndCleanup] Limpieza completada para el usuario ${user.uid} y notificación enviada al proveedor ${provider.uid}.`);
     return { success: true, message: "Acuerdo confirmado y limpieza realizada." };
@@ -459,15 +475,12 @@ export const confirmAgreementAndCleanup = onCall(async (req) => {
         errorDetails: error,
         requestData: data
     });
-    throw new HttpsError('internal', 'Ocurrió un error al procesar la solicitud de confirmación. Revisa los logs del backend para más detalles.');
+    throw new HttpsError('internal', 'Ocurrió un error al procesar la solicitud de confirmación.');
   }
 });
 
-// ========================================================================
-// HTTP endpoint – ejecutado por Cloud Tasks (SECCIÓN MODIFICADA)
-// ========================================================================
+// --- MODIFICADO: `sendContactFollowupTask` ya no enviará PUSH ---
 export const sendContactFollowupTask = onRequest(async (req, res) => {
-  // <-- 4. Se recibe 'userCollection' del payload de la tarea
   const { userUid, docId, userCollection } = req.body as { userUid?: string; docId?: string; userCollection?: string };
 
   if (!userUid || !docId || !userCollection) {
@@ -476,24 +489,21 @@ export const sendContactFollowupTask = onRequest(async (req, res) => {
     return;
   }
 
-  // Se usa la 'userCollection' dinámica para encontrar el documento
   const pendingSnap = await db
-    .collection(userCollection) // <-- 5. Se usa la colección dinámica
+    .collection(userCollection)
     .doc(userUid)
     .collection('contactPendings')
     .doc(docId)
     .get();
 
   if (!pendingSnap.exists) {
-    console.log(`[sendContactFollowupTask] Documento contactPendings no encontrado para user: ${userCollection}/${userUid}, providerId (docId): ${docId}. La tarea no enviará notificación.`);
+    console.log(`[sendContactFollowupTask] Documento contactPendings no encontrado para user: ${userCollection}/${userUid}.`);
     res.status(200).send('contactPendings doc not found, followup not sent.');
     return;
   }
 
   const pending = pendingSnap.data() as ContactPending & { originalNotifId?: string };
-  // Se usa la 'userCollection' para crear el destinatario de la notificación
-  const to: Recipient[] = [{ uid: userUid, collection: userCollection }]; // <-- 6. Se usa la colección dinámica
-
+  const to: Recipient[] = [{ uid: userUid, collection: userCollection }]; 
   const appSystemSender: Sender = {
     uid: pending.providerId,
     collection: pending.providerCollection,
@@ -501,24 +511,22 @@ export const sendContactFollowupTask = onRequest(async (req, res) => {
 
   const followupPayload: Payload = {
     senderName: 'Co-Dy-S',
-    avatarUrl: '/logo1.png',
-    description: `¡Hola! Solo queríamos saber si pudiste contactar a ${pending.providerName} y si llegaron a un acuerdo sobre el trabajo/servicio.`,
+    providerName: pending.providerName, // Se usa para el texto dinámico
+    description: `¡Hola! Solo queríamos saber si pudiste contactar a ${pending.providerName} y si llegaron a un acuerdo.`,
     originalNotifId: pending.originalNotifId ?? '',
   };
 
-  console.log(`[sendContactFollowupTask] Enviando CONTACT_FOLLOWUP a user: ${userUid} desde ${appSystemSender.uid} (${followupPayload.senderName}), referente a provider: ${pending.providerName}`);
+  console.log(`[sendContactFollowupTask] Creando notificación CONTACT_FOLLOWUP (sin push) para user: ${userUid}.`);
 
   try {
-    const actionLink = getActionLinkForNotification(NOTIFICATION_TYPE.CONTACT_FOLLOWUP, followupPayload);
-
+    // Se añade la opción para no enviar PUSH
     await createNotifications(
       to,
       appSystemSender,
       NOTIFICATION_TYPE.CONTACT_FOLLOWUP,
       followupPayload,
-      actionLink
+      { sendPush: false }
     );
-
     res.json({ success: true });
   } catch (error) {
     console.error(`[sendContactFollowupTask] Error al procesar user: ${userUid}, providerId: ${docId}.`, error);

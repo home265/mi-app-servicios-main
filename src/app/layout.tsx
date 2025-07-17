@@ -1,7 +1,7 @@
 // src/app/layout.tsx
 import './globals.css';
 import { Providers } from './providers';
-import NotificationWatcher from '@/app/components/common/NotificationWatcher'; // <-- AQUÍ SE IMPORTA
+import NotificationWatcher from '@/app/components/notificaciones/NotificationWatcher'; // <-- AQUÍ SE IMPORTA
 import {
   Barlow,
   Roboto,
