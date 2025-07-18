@@ -1,5 +1,14 @@
 // next.config.mjs
 
+// ========================================================================
+// 1. LÍNEA AÑADIDA: Importa el paquete del analizador
+// ========================================================================
+import withBundleAnalyzer from '@next/bundle-analyzer';
+
+
+// ========================================================================
+// TU CONFIGURACIÓN ORIGINAL (PERMANECE 100% INTACTA)
+// ========================================================================
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Build standalone (SSR/API dinámicas)
@@ -41,4 +50,16 @@ const nextConfig = {
   },
 };
 
-export default nextConfig;
+
+// ========================================================================
+// 2. LÓGICA AÑADIDA: Prepara la función del analizador
+// ========================================================================
+const bundleAnalyzer = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === 'true',
+});
+
+
+// ========================================================================
+// 3. EXPORTACIÓN MODIFICADA: Exporta tu configuración envuelta en el analizador
+// ========================================================================
+export default bundleAnalyzer(nextConfig);

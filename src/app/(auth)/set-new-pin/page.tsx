@@ -1,18 +1,17 @@
-// src/app/auth/set-new-pin/page.tsx
 'use client';
 
 import { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-import bcrypt from 'bcryptjs';
+// Se eliminan las importaciones de bcrypt y updateUserPin.
+// import bcrypt from 'bcryptjs';
+// import { updateUserPin } from '@/lib/firebase/firestore';
 
 import { useUserStore } from '@/store/userStore';
-import { updateUserPin } from '@/lib/firebase/firestore'; // La función que creamos antes
-
 import Input from '@/app/components/ui/Input';
 import Button from '@/app/components/ui/Button';
 
-// Definimos los valores que tendrá nuestro formulario
+// La definición de los valores del formulario no cambia.
 type FormValues = {
   pin: string;
   repetirPin: string;
@@ -35,10 +34,9 @@ export default function SetNewPinPage() {
     },
   });
 
-  // Observamos el valor del primer PIN para poder compararlo con el segundo
   const pinValue = watch('pin');
 
-  // Función que se ejecuta al enviar el formulario
+  // La función onSubmit ahora llama a la nueva API.
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setServerError(null);
 
@@ -48,26 +46,36 @@ export default function SetNewPinPage() {
     }
 
     try {
-      // 1. Hashear el nuevo PIN antes de guardarlo
-      const salt = await bcrypt.genSalt(10);
-      const newHashedPin = await bcrypt.hash(data.pin, salt);
+      // 1. Llamar a la API segura para actualizar el PIN.
+      const response = await fetch('/api/auth/update-pin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          uid: currentUser.uid,
+          rol: currentUser.rol,
+          newPin: data.pin,
+        }),
+      });
 
-      // 2. Llamar a la función para actualizar el PIN en Firestore
-      await updateUserPin(currentUser.uid, currentUser.rol, newHashedPin);
+      const result = await response.json();
 
-      // 3. Si todo sale bien, marcamos la sesión como verificada con PIN
+      if (!response.ok) {
+        // Si la API devuelve un error, lo mostramos.
+        throw new Error(result.error || 'Ocurrió un error al intentar guardar tu nuevo PIN.');
+      }
+      
+      // 2. Si todo sale bien, marcamos la sesión como verificada.
       setPinVerified(true);
       
-      // 4. Redirigimos al usuario a la página de bienvenida
+      // 3. Redirigimos al usuario a la página de bienvenida.
       router.replace('/bienvenida');
 
     } catch (error) {
       console.error("Error al actualizar el PIN:", error);
-      if (error instanceof Error) {
-        setServerError(error.message);
-      } else {
-        setServerError('Ocurrió un error inesperado al intentar guardar tu nuevo PIN.');
-      }
+      const errorMessage = error instanceof Error ? error.message : 'Ocurrió un error inesperado.';
+      setServerError(errorMessage);
     }
   };
 

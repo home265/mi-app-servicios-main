@@ -1,10 +1,12 @@
-// src/app/components/forms/SelectorLocalidad.tsx
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import localidadesData from '@/data/localidades.json';
 
-interface Localidad {
+// 1. Se elimina la importación del archivo JSON.
+// import localidadesData from '@/data/localidades.json';
+
+// Las interfaces ahora definen la estructura de los datos que se cargarán.
+export interface Localidad {
   id: string;
   nombre: string;
   provincia: {
@@ -27,7 +29,7 @@ interface SelectorLocalidadProps {
   onLocalidadSeleccionada: (localidad: LocalidadSeleccionada | null) => void;
 }
 
-const todasLasLocalidades: Localidad[] = localidadesData.localidades;
+// 2. Ya no se crea la constante 'todasLasLocalidades' desde el import.
 
 const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
   id,
@@ -36,10 +38,35 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
   error,
   onLocalidadSeleccionada,
 }) => {
+  // 3. Se añaden estados para manejar la carga de datos.
+  const [todasLasLocalidades, setTodasLasLocalidades] = useState<Localidad[]>([]);
+  const [estadoCarga, setEstadoCarga] = useState<'idle' | 'loading' | 'error'>('idle');
+
   const [terminoBusqueda, setTerminoBusqueda] = useState('');
   const [sugerencias, setSugerencias] = useState<Localidad[]>([]);
-  const [seleccionActual, setSeleccionActual] = useState<string>(''); // Lo que el usuario ve en el input
+  const [seleccionActual, setSeleccionActual] = useState<string>('');
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
+
+  // 4. useEffect para cargar los datos desde la carpeta 'public'.
+  useEffect(() => {
+    setEstadoCarga('loading');
+    fetch('/localidades.json') // La URL es relativa a la carpeta 'public'.
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error(`Error HTTP: ${res.status}`);
+        }
+        return res.json();
+      })
+      .then((data) => {
+        // Asumimos que el JSON tiene una clave 'localidades' que contiene el array.
+        setTodasLasLocalidades(data.localidades || []);
+        setEstadoCarga('idle');
+      })
+      .catch((err) => {
+        console.error("Error al cargar localidades.json:", err);
+        setEstadoCarga('error');
+      });
+  }, []); // El array vacío [] asegura que esto se ejecute solo una vez.
 
   const filtrarLocalidades = useCallback((busqueda: string) => {
     if (busqueda.length < 2) {
@@ -47,6 +74,7 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
       return;
     }
     const busquedaNormalizada = busqueda.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    // 5. La función ahora usa el estado 'todasLasLocalidades' que se cargó con fetch.
     const filtradas = todasLasLocalidades
       .filter(loc => {
         const nombreNormalizado = loc.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
@@ -55,10 +83,10 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
       })
       .slice(0, 10);
     setSugerencias(filtradas);
-  }, []);
+  }, [todasLasLocalidades]); // Se añade dependencia para que se actualice cuando los datos carguen.
 
   useEffect(() => {
-    if (terminoBusqueda.length >= 2) { // Solo filtrar y mostrar si hay al menos 2 caracteres
+    if (terminoBusqueda.length >= 2) {
       filtrarLocalidades(terminoBusqueda);
       setMostrarSugerencias(true);
     } else {
@@ -74,24 +102,22 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
       provinciaNombre: localidad.provincia.nombre,
     };
     setSeleccionActual(`${localidad.nombre}, ${localidad.provincia.nombre}`);
-    setTerminoBusqueda(''); // Limpia el término para que el useEffect oculte sugerencias
-    setMostrarSugerencias(false); // Ocultar explícitamente
+    setTerminoBusqueda('');
+    setMostrarSugerencias(false);
     onLocalidadSeleccionada(seleccion);
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const nuevoValor = e.target.value;
-    setSeleccionActual(nuevoValor); // El usuario está escribiendo, actualizamos lo que ve
-    setTerminoBusqueda(nuevoValor); // Y el término para filtrar
-    if (nuevoValor === '') { // Si borra todo, limpiamos la selección en el form
+    setSeleccionActual(nuevoValor);
+    setTerminoBusqueda(nuevoValor);
+    if (nuevoValor === '') {
         onLocalidadSeleccionada(null);
     }
   };
 
-  // Cierra las sugerencias si se hace clic fuera del componente
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // Verifica que el clic no sea dentro del wrapper del selector
       if (mostrarSugerencias && !(event.target as HTMLElement).closest(`#${id}-wrapper`)) {
         setMostrarSugerencias(false);
       }
@@ -100,39 +126,45 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [mostrarSugerencias, id]); // Dependencia 'id' para que el selector del listener sea correcto
+  }, [mostrarSugerencias, id]);
+
+  // 6. Se mejora el placeholder y se deshabilita el input mientras carga.
+  const placeholderActual = estadoCarga === 'loading'
+    ? 'Cargando localidades...'
+    : estadoCarga === 'error'
+    ? 'Error al cargar datos'
+    : placeholder;
 
   return (
-    // ESTE DIV DEBE SER 'relative' para que el 'absolute' del 'ul' funcione correctamente dentro de él.
     <div id={`${id}-wrapper`} className="mb-4 relative">
       <label htmlFor={id} className="block text-sm font-medium text-texto-secundario mb-1">
         {label}
       </label>
       <input
         type="text"
-        id={id} // El id del input
-        value={seleccionActual} // Lo que el usuario ve y escribe
+        id={id}
+        value={seleccionActual}
         onChange={handleChange}
         onFocus={() => {
-          // Mostrar sugerencias si ya hay algo escrito y hay sugerencias para mostrar
           if (terminoBusqueda.length >= 2 && sugerencias.length > 0) {
             setMostrarSugerencias(true);
           }
         }}
-        placeholder={placeholder}
-        autoComplete="off" // Evita que el navegador muestre su propio autocompletado
-        className="block w-full px-3 py-2 bg-fondo border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primario focus:border-primario sm:text-sm text-texto dark:text-texto-dark"
+        placeholder={placeholderActual}
+        autoComplete="off"
+        disabled={estadoCarga !== 'idle'}
+        className="block w-full px-3 py-2 bg-fondo border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primario focus:border-primario sm:text-sm text-texto dark:text-texto-dark disabled:bg-gray-200 disabled:dark:bg-gray-700"
       />
 
       {mostrarSugerencias && sugerencias.length > 0 && (
         <ul
           className="
-            absolute w-full       /* Posicionamiento absoluto */
-            bg-white dark:bg-zinc-800            /* Fondo sólido (usa tu variable --color-tarjeta) */
-            border border-borde-tarjeta /* Borde violeta (usa --color-borde-tarjeta) */
-            rounded-md shadow-xl  /* Sombra para destacar */
-            mt-1 max-h-60 overflow-y-auto /* Scroll si hay muchas opciones */
-            z-50                  /* <<-- z-index ALTO para estar por encima -->> */
+            absolute w-full
+            bg-white dark:bg-zinc-800
+            border border-borde-tarjeta
+            rounded-md shadow-xl
+            mt-1 max-h-60 overflow-y-auto
+            z-50
           "
         >
           {sugerencias.map((loc) => (

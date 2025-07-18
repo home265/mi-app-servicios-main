@@ -1,0 +1,5432 @@
+[
+  {
+    "nombre": "JORGE ALBERTO",
+    "apellido": "NARANJO",
+    "matricula": "32632",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS DANIEL",
+    "apellido": "VARGAS",
+    "matricula": "1100000558",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GRACIELA",
+    "apellido": "ESCOBAR",
+    "matricula": "1100000559",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DENIS H.",
+    "apellido": "ABAN",
+    "matricula": "33264",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PABLO ALBERTO",
+    "apellido": "FLORES",
+    "matricula": "31838",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALFREDO TEODORO",
+    "apellido": "PONCE",
+    "matricula": "32833",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DANIEL AMERICO",
+    "apellido": "JARA",
+    "matricula": "1100000783",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS FABIO",
+    "apellido": "PEREZ",
+    "matricula": "32131",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HECTOR RAUL",
+    "apellido": "ABED",
+    "matricula": "32301",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSCAR HORACIO",
+    "apellido": "RODRIGUEZ",
+    "matricula": "1100000877",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LEONARDO JESUS",
+    "apellido": "TORRES",
+    "matricula": "33249",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "VICTORIO J.",
+    "apellido": "BARRERA",
+    "matricula": "11445",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RODOLFO S.",
+    "apellido": "GONZALEZ",
+    "matricula": "11372",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCELO RAFAEL",
+    "apellido": "MARTINEZ",
+    "matricula": "1100000024",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSCAR HECTOR",
+    "apellido": "LUCERO",
+    "matricula": "31074",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RODRIGO JAVIER",
+    "apellido": "JAUVEN",
+    "matricula": "32317",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "WASHINGTON",
+    "apellido": "VARGAS MIRANDA",
+    "matricula": "32797",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS E.",
+    "apellido": "OCAÑA",
+    "matricula": "11843",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS E.",
+    "apellido": "OCAÑA",
+    "matricula": "1000000570",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO RAUL",
+    "apellido": "FUNES",
+    "matricula": "12683",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CRISTIAN JOSE",
+    "apellido": "ALCAYA",
+    "matricula": "33128",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JULIO FERNANDO",
+    "apellido": "GHILARDI",
+    "matricula": "32215",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "YLDA LILIANA",
+    "apellido": "VAZQUEZ",
+    "matricula": "1100000230",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SEBASTIAN",
+    "apellido": "CESPEDES",
+    "matricula": "1100000343",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JONATHAN ALEJANDRO",
+    "apellido": "CARRIZO",
+    "matricula": "1100000832",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUSTAVO",
+    "apellido": "TONEGHIN",
+    "matricula": "1100000652",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE AMARO",
+    "apellido": "CARRIZO",
+    "matricula": "31085",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EDUARDO ALEJANDRO",
+    "apellido": "FUNES",
+    "matricula": "31264",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO DANIEL",
+    "apellido": "FERNANDEZ",
+    "matricula": "32135",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROXANA",
+    "apellido": "CRUZ",
+    "matricula": "1100000582",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HUGO",
+    "apellido": "QUINTERO",
+    "matricula": "11959",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAMON DARDO",
+    "apellido": "VERON",
+    "matricula": "32218",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "",
+    "apellido": "ACUÑA SANTIAGO",
+    "matricula": "1100001046",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MILENA SANDRA MARIA",
+    "apellido": "YANCE",
+    "matricula": "30457",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUIS ALBERTO",
+    "apellido": "FLORES",
+    "matricula": "31164",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCELO",
+    "apellido": "CABANA",
+    "matricula": "33246",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "AMILCAR JONATAN",
+    "apellido": "NARVAEZ",
+    "matricula": "1100000845",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PABLO HORACIO",
+    "apellido": "PALLERO",
+    "matricula": "32455",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAMON VICTOR",
+    "apellido": "DOMINGUEZ",
+    "matricula": "12382",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUJAN ALEJANDRO E.",
+    "apellido": "GOMEZ",
+    "matricula": "31595",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAUL",
+    "apellido": "RUIZ",
+    "matricula": "1100000461",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DARIO",
+    "apellido": "RINALDI",
+    "matricula": "1100000477",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN MANUEL",
+    "apellido": "RODRIGUEZ",
+    "matricula": "1100000575",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LEONARDO GASTON",
+    "apellido": "GONZALEZ",
+    "matricula": "1100000821",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EFRAIN RAUL",
+    "apellido": "OJEDA",
+    "matricula": "1100001013",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ABEL",
+    "apellido": "OCHOA",
+    "matricula": "1100001021",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DARIO ROBERTO",
+    "apellido": "MALLON",
+    "matricula": "1100000035",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ELEUTERIO",
+    "apellido": "CHOQUE",
+    "matricula": "11846",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GABRIEL",
+    "apellido": "VALENCIA",
+    "matricula": "1100001036",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DANIEL ALEJANDRO",
+    "apellido": "MANGIAFICO",
+    "matricula": "1100001094",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALEJANDRO J.",
+    "apellido": "GUERRA",
+    "matricula": "13619",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE ROBERTO",
+    "apellido": "RAMOS",
+    "matricula": "32330",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DIEGO BRUNO",
+    "apellido": "SIFUENTE",
+    "matricula": "31711",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIO HECTOR",
+    "apellido": "NIEVAS",
+    "matricula": "31688",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALBERTO ALEJANDRO",
+    "apellido": "MAUNA",
+    "matricula": "31883",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RIGOBERTO JESUS",
+    "apellido": "MAUREIRA",
+    "matricula": "31177",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "VICTOR EDUARDO",
+    "apellido": "MARTIN",
+    "matricula": "30619",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MAURICIO G.",
+    "apellido": "PADILLA SALAS",
+    "matricula": "12262",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "VICTOR FABIAN",
+    "apellido": "MARTINEZ",
+    "matricula": "31218",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PABLO ANIBAL",
+    "apellido": "MARTINEZ",
+    "matricula": "1100000724",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CLAUDIO",
+    "apellido": "GOMEZ",
+    "matricula": "1100000647",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIO D.",
+    "apellido": "ROUX",
+    "matricula": "11535",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO PASCUAL",
+    "apellido": "FELIZIANI",
+    "matricula": "32907",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "VERONICA NATALIA",
+    "apellido": "VILLAFUERTE",
+    "matricula": "31245",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE OSVALDO",
+    "apellido": "MARIN",
+    "matricula": "33205",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PABLO DANIEL",
+    "apellido": "OJEDA",
+    "matricula": "30987",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE ALBERTO",
+    "apellido": "CARRERA",
+    "matricula": "1100000823",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JESUS JULIO CESAR",
+    "apellido": "RIGLA",
+    "matricula": "31891",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROBERTO H.",
+    "apellido": "GOICOECHEA",
+    "matricula": "13360",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HUGO ANTONIO",
+    "apellido": "ARCE",
+    "matricula": "32403",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SEBASTIAN",
+    "apellido": "LOMBARDO",
+    "matricula": "1100000503",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE GUILLERMO",
+    "apellido": "ESCUDERO",
+    "matricula": "1100000819",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "NELSON",
+    "apellido": "ROUX",
+    "matricula": "11800",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROLANDO N.",
+    "apellido": "TOBARES",
+    "matricula": "10925",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "BLAS MIGUEL ANGEL",
+    "apellido": "MURGA",
+    "matricula": "31693",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FRANCISCO CRUZ",
+    "apellido": "ZULOAGA",
+    "matricula": "1100000097",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCOS",
+    "apellido": "SALA",
+    "matricula": "1100000684",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EUGENIO YACHI",
+    "apellido": "LAZO",
+    "matricula": "31952",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ADRIAN G.",
+    "apellido": "ETURA",
+    "matricula": "13930",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE DANIEL",
+    "apellido": "FARIAS",
+    "matricula": "33124",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALFONSO",
+    "apellido": "HERNANDEZ",
+    "matricula": "1100000986",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE LUIS",
+    "apellido": "ALVAREZ",
+    "matricula": "30771",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROLANDO SANTIAGO",
+    "apellido": "BORDON",
+    "matricula": "31825",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN PABLO",
+    "apellido": "VEDIA",
+    "matricula": "1100000092",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAUL ALBERTO",
+    "apellido": "FIGUEROA",
+    "matricula": "31741",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN PABLO",
+    "apellido": "MENDEZ",
+    "matricula": "1100000743",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DANTE FABIO",
+    "apellido": "OLIVA",
+    "matricula": "31926",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MAURICIO ANDRES",
+    "apellido": "TISATO",
+    "matricula": "32600",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE LUIS",
+    "apellido": "RENNA",
+    "matricula": "32663",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSVALDO",
+    "apellido": "DONAIRE",
+    "matricula": "12515",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE MARCELO",
+    "apellido": "MEDINA",
+    "matricula": "31750",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SILVANO JAVIER",
+    "apellido": "VIDELA",
+    "matricula": "31751",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CRISTIAN ORLANDO",
+    "apellido": "DIONIS",
+    "matricula": "31896",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RICARDO JESÚS",
+    "apellido": "RODRIGUEZ",
+    "matricula": "32144",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROLANDO RAUL",
+    "apellido": "MOLINA",
+    "matricula": "32188",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS JAVIER",
+    "apellido": "VIVAS",
+    "matricula": "1100000498",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "VICTOR CIPRIANO",
+    "apellido": "MELLA",
+    "matricula": "30626",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUIS MARIA",
+    "apellido": "VALENCIA",
+    "matricula": "11639",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HORACIO JESÚS",
+    "apellido": "CALVENTE",
+    "matricula": "31194",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE LEANDRO",
+    "apellido": "MERCADO",
+    "matricula": "33285",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARTIN OSCAR",
+    "apellido": "HIDALGO",
+    "matricula": "31925",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROBERTO CESAR",
+    "apellido": "ALVAREZ",
+    "matricula": "31621",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MAURICIO ALEJANDRO",
+    "apellido": "CERDA",
+    "matricula": "1100000180",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIO",
+    "apellido": "ALEAGA",
+    "matricula": "33001",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JONATHAN EXEQUIEL",
+    "apellido": "ALEAGA",
+    "matricula": "1100001028",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RUBEN ALFREDO",
+    "apellido": "LOPEZ",
+    "matricula": "33346",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MIGUEL OSCAR",
+    "apellido": "LOPEZ",
+    "matricula": "11109",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE LUIS",
+    "apellido": "ACUÑA",
+    "matricula": "1100000385",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALDO ALEJANDRO",
+    "apellido": "PROSPERO",
+    "matricula": "1100000427",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MIRIAN SUSANA",
+    "apellido": "BALLARINI",
+    "matricula": "1100000533",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HUMBERTO ALEJANDRO",
+    "apellido": "LOPEZ",
+    "matricula": "1100000617",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EMILIO",
+    "apellido": "QUIROGA",
+    "matricula": "1100000620",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MATIAS",
+    "apellido": "CASTILLO",
+    "matricula": "1100000918",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE ANTONIO RAMON",
+    "apellido": "LUSI",
+    "matricula": "13645",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JAVIER OSCAR",
+    "apellido": "CHIRIVINO",
+    "matricula": "32932",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EMILCE BELEN",
+    "apellido": "SALINAS",
+    "matricula": "31300",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALEXIS JOSE",
+    "apellido": "GATICA",
+    "matricula": "32127",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EMILCE BELEN",
+    "apellido": "SALINAS",
+    "matricula": "1100000750",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HECTOR",
+    "apellido": "LIRANCHE",
+    "matricula": "30733",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUSTAVO EZEQUIEL",
+    "apellido": "ROJAS",
+    "matricula": "31297",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RUBEN ANIBAL",
+    "apellido": "RECABARREN",
+    "matricula": "31954",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUIS ALEJANDRO",
+    "apellido": "PEREYRA",
+    "matricula": "32405",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN CARLOS",
+    "apellido": "ALONSO",
+    "matricula": "32653",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DIEGO GABRIEL",
+    "apellido": "ORIAS",
+    "matricula": "32671",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROLANDO JO",
+    "apellido": "CASTRO GONZALEZ",
+    "matricula": "32730",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HEBER GONZALO",
+    "apellido": "BARROSO",
+    "matricula": "33348",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE SEBASTIAN",
+    "apellido": "PORCILIO",
+    "matricula": "1100000749",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DARIO A.",
+    "apellido": "REALES",
+    "matricula": "13208",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FEDERICO",
+    "apellido": "LIRANCHE",
+    "matricula": "32611",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JAVIER GUSTAVO",
+    "apellido": "BRAGAGNOLO",
+    "matricula": "30877",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DUILIO JAVIER",
+    "apellido": "SARMIENTO",
+    "matricula": "32352",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CRISTIAN FABIAN",
+    "apellido": "GARRIDO",
+    "matricula": "31133",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSVALDO FELIX",
+    "apellido": "SALINAS",
+    "matricula": "13177",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DANIEL ABEL",
+    "apellido": "UVILLA",
+    "matricula": "1100000039",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JESÚS JOEL",
+    "apellido": "ASAGUATTE",
+    "matricula": "1100000313",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAUL JAVIER",
+    "apellido": "SOTO",
+    "matricula": "1100001005",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DIANA LAURA",
+    "apellido": "BLAJEVITCH",
+    "matricula": "32249",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANDRES FACUNDO",
+    "apellido": "VILLAR",
+    "matricula": "31599",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSÉ DANIEL",
+    "apellido": "VERDUGO",
+    "matricula": "32454",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SIMON CRUZ",
+    "apellido": "MACIEL",
+    "matricula": "32704",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN ANTONIO",
+    "apellido": "LUCERO",
+    "matricula": "1100000305",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "NELSON ALBERTO",
+    "apellido": "ARAYA",
+    "matricula": "1100000524",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCELO DAVID",
+    "apellido": "BARRERA",
+    "matricula": "1100000746",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN CARLOS",
+    "apellido": "VERDUGO",
+    "matricula": "13368",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "NESTOR ADRIAN",
+    "apellido": "CASTILLO",
+    "matricula": "31738",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JESUS GABRIEL",
+    "apellido": "SIMON",
+    "matricula": "32008",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ADRIAN CEFERINO",
+    "apellido": "SERVANT",
+    "matricula": "32338",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FLORENTINO O.",
+    "apellido": "SANTANDER",
+    "matricula": "32389",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE LEONARDO",
+    "apellido": "JAQUE",
+    "matricula": "32391",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "YAMIL GERMAN",
+    "apellido": "VILLAR",
+    "matricula": "33343",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ARIEL FABIAN",
+    "apellido": "IDAÑEZ",
+    "matricula": "1100000261",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CRISTIAN ISMAEL",
+    "apellido": "PADRON",
+    "matricula": "1100000374",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE JAVIER",
+    "apellido": "VEGA",
+    "matricula": "1100000378",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DARIO JAVIER",
+    "apellido": "VIALE",
+    "matricula": "1100000642",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RUBEN TOMAS",
+    "apellido": "MANSILLA",
+    "matricula": "1100000796",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DARIO ALEJANDRO",
+    "apellido": "ARROYO",
+    "matricula": "1100000851",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUCIANO PATRICIO",
+    "apellido": "LESCANO",
+    "matricula": "1100000947",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN DOMINGO",
+    "apellido": "ADZO",
+    "matricula": "1100001061",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE LUIS",
+    "apellido": "HUENUMAN",
+    "matricula": "11833",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALBERTO",
+    "apellido": "FERREYRA",
+    "matricula": "12464",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIANO",
+    "apellido": "PANDOLFO",
+    "matricula": "1100000298",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FABIAN ΑΝΤΟΝΙΟ",
+    "apellido": "SORIA VEGA",
+    "matricula": "32593",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSCAR EDUARDO",
+    "apellido": "FERNANDEZ",
+    "matricula": "11976",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RODRIGO LEANDRO",
+    "apellido": "JAQUE",
+    "matricula": "1100000421",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSCAR JAVIER",
+    "apellido": "QUIROGA",
+    "matricula": "13744",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIA SOFIA",
+    "apellido": "DONEGANI",
+    "matricula": "13339",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LEONARDO MIGUEL",
+    "apellido": "ROSALES",
+    "matricula": "1100001048",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "VICTOR HUGO",
+    "apellido": "VILLEGAS",
+    "matricula": "32977",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "WALTER OSCAR",
+    "apellido": "MESTORINO",
+    "matricula": "31434",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO MARCELO",
+    "apellido": "BAEZ",
+    "matricula": "32235",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE A.",
+    "apellido": "SANTOS",
+    "matricula": "11859",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ELIO ARNALDO",
+    "apellido": "MAMANI",
+    "matricula": "1100000948",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSCAR FERNANDO",
+    "apellido": "ROSALES",
+    "matricula": "31248",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROBERTO MARTIN",
+    "apellido": "BRAGAGNOLO",
+    "matricula": "31542",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CEFERINO ORLANDO",
+    "apellido": "BRIZUELA",
+    "matricula": "31554",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "WALTER A.",
+    "apellido": "CANTUDO",
+    "matricula": "1100000756",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE DANIEL",
+    "apellido": "MORALES",
+    "matricula": "30796",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUIS H.",
+    "apellido": "CANTUDO",
+    "matricula": "12604",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EDGARDO EMILIO",
+    "apellido": "BOSCARIOL",
+    "matricula": "1100000771",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DANIEL EDGARDO",
+    "apellido": "DINDORF",
+    "matricula": "31499",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PABLO EMANUEL",
+    "apellido": "DIAZ",
+    "matricula": "1100001089",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "WALTER CRISTIAN",
+    "apellido": "CONCATTI",
+    "matricula": "1100000624",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FELIX FERNANDO",
+    "apellido": "AGUERO",
+    "matricula": "30956",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LAURA KAREN ELIZA",
+    "apellido": "FERNANDEZ",
+    "matricula": "32775",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "TEODORO LAUREANO",
+    "apellido": "RIVERO",
+    "matricula": "1100000554",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ARMANDO MANUEL",
+    "apellido": "CARRIZO",
+    "matricula": "1100000953",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE LUIS",
+    "apellido": "RUIZ",
+    "matricula": "30978",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCELO SANTIAGO",
+    "apellido": "SOSA",
+    "matricula": "31565",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CLAUDIO GABRIEL",
+    "apellido": "FUNEZ",
+    "matricula": "31596",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CLAUDIA ELIZABETH",
+    "apellido": "CHIRINO",
+    "matricula": "31677",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GERARDO RUBEN",
+    "apellido": "GONZALEZ",
+    "matricula": "32468",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DANTE FABIAN",
+    "apellido": "MARAVILLA",
+    "matricula": "32680",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DIEGO FERNANDO",
+    "apellido": "BORDON",
+    "matricula": "33142",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RICARDO ADRIAN",
+    "apellido": "FIZONA",
+    "matricula": "1100000143",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "NAHUEL FRANCO",
+    "apellido": "GONZALEZ",
+    "matricula": "1100000895",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DARIO OSCAR",
+    "apellido": "AMBROSIO",
+    "matricula": "1100001056",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CIRILO R.",
+    "apellido": "SOSA",
+    "matricula": "10649",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE",
+    "apellido": "STRAPPAZON",
+    "matricula": "12646",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HECTOR HUMBERTO",
+    "apellido": "TESTA",
+    "matricula": "33254",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIO CESAR",
+    "apellido": "LUNA",
+    "matricula": "32223",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAUL R.",
+    "apellido": "MERLETTI",
+    "matricula": "12535",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FERNANDO JESUS",
+    "apellido": "ARTERO",
+    "matricula": "13979",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DAVID FERNANDO",
+    "apellido": "CUMMAUDO",
+    "matricula": "31000",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CLAUDIO BERNARDO",
+    "apellido": "AGUERO",
+    "matricula": "32221",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIA VANESA",
+    "apellido": "MURUA",
+    "matricula": "32787",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FABIAN EDUARDO",
+    "apellido": "SOSA",
+    "matricula": "33084",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LEILA MARIANELA",
+    "apellido": "RUIZ",
+    "matricula": "1100000606",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE DIEGO",
+    "apellido": "GONZALEZ",
+    "matricula": "31284",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EZEQUIEL SEBASTIAN",
+    "apellido": "ROMERO",
+    "matricula": "33257",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALDO FABIO",
+    "apellido": "BERNARDI",
+    "matricula": "1100000549",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ESTRELLA JORGE FABIAN",
+    "apellido": "VEGA",
+    "matricula": "31594",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DANTE NESTOR",
+    "apellido": "CAMARGO",
+    "matricula": "32056",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE NESTOR",
+    "apellido": "CAMPOS",
+    "matricula": "1100001015",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE EMILIO",
+    "apellido": "LEYES",
+    "matricula": "30867",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MAURICIO",
+    "apellido": "TORRES",
+    "matricula": "13986",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HORACIO ARIEL",
+    "apellido": "TORRES",
+    "matricula": "32496",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ISAAC EMILIO",
+    "apellido": "LEYES",
+    "matricula": "1100001085",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PABLO EXEQUIEL",
+    "apellido": "CRIPPA",
+    "matricula": "1100000957",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUISA",
+    "apellido": "NAVARRO",
+    "matricula": "1100000380",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAUL EMILIANO",
+    "apellido": "GARCIA",
+    "matricula": "1100000454",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FABIAN RICARDO",
+    "apellido": "ZALAZAR",
+    "matricula": "1100000474",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUSTAVO ANDRE",
+    "apellido": "LAZZARINI",
+    "matricula": "1100000481",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALEXIS",
+    "apellido": "VILLEGAS",
+    "matricula": "1100000513",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ARTURO",
+    "apellido": "ROJAS",
+    "matricula": "1100000537",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FERNANDO",
+    "apellido": "BERMUDEZ",
+    "matricula": "1100000952",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HUGO ARIEL",
+    "apellido": "NIEVAS",
+    "matricula": "13601",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RICARDO RAFAEL",
+    "apellido": "QUINTANA",
+    "matricula": "32079",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MIGUEL A.",
+    "apellido": "BUSTOS",
+    "matricula": "12184",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSVALDO DE JESÚS",
+    "apellido": "MICHELETTI",
+    "matricula": "1100000134",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LORENZO CESAR",
+    "apellido": "VALLA",
+    "matricula": "32116",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EDUARDO IGNACIO",
+    "apellido": "ROVERES",
+    "matricula": "30922",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PEDRO RUBEN",
+    "apellido": "ROMERO",
+    "matricula": "30631",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JULIAN MATIAS",
+    "apellido": "AGOSTINO",
+    "matricula": "32153",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE ANTONIO",
+    "apellido": "SUAREZ",
+    "matricula": "11532",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE RICARDO",
+    "apellido": "MENDEZ",
+    "matricula": "30670",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANDREA ELIZABETH",
+    "apellido": "PAEZ",
+    "matricula": "31088",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PEDRO JOSE",
+    "apellido": "LEMOLI",
+    "matricula": "31097",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ENRIQUE OMAR",
+    "apellido": "RETAMAR",
+    "matricula": "31675",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCELO RAUL",
+    "apellido": "JUAREZ",
+    "matricula": "32510",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "POLO FABRICIO",
+    "apellido": "TEJADA",
+    "matricula": "32585",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAUL GUILLERMO",
+    "apellido": "MENDOZA",
+    "matricula": "32716",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PABLO JOSÉ",
+    "apellido": "AVILA, SILVA",
+    "matricula": "33100",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JONATAN",
+    "apellido": "CATALA",
+    "matricula": "33169",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUILLERMO SEBASTIAN",
+    "apellido": "NEIIENDAM",
+    "matricula": "33241",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HÉCTOR DAMIAN",
+    "apellido": "GUAJARDO",
+    "matricula": "33265",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GONZALO JAVIER",
+    "apellido": "ESTRELLA",
+    "matricula": "1100000239",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RODOLFO VICTOR",
+    "apellido": "HERRERA",
+    "matricula": "1100000469",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FERNANDO",
+    "apellido": "FOIX",
+    "matricula": "1100000480",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MAURICIO",
+    "apellido": "MAGALLANES",
+    "matricula": "1100000543",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PAMELA",
+    "apellido": "RUBILAR",
+    "matricula": "1100000586",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSCAR ANTONIO",
+    "apellido": "PEÑAS",
+    "matricula": "1100000711",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "IGNACIO",
+    "apellido": "BAZ",
+    "matricula": "1100000778",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN MARCELO",
+    "apellido": "BATTISTELLA",
+    "matricula": "1100000813",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ABEL YAMIL",
+    "apellido": "IRACHETA",
+    "matricula": "1100000868",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FLAVIA PAOLA",
+    "apellido": "ESPEJO",
+    "matricula": "1100000875",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "VIVIANA",
+    "apellido": "RODRIGUEZ",
+    "matricula": "1100000950",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LORENA",
+    "apellido": "CARAM",
+    "matricula": "1100001050",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DENISE",
+    "apellido": "MAROVICH",
+    "matricula": "1100001030",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUCAS EMANUEL",
+    "apellido": "PROTO",
+    "matricula": "31191",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FRANCO BRUNO",
+    "apellido": "GIACOMELLI",
+    "matricula": "33123",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANALIA E",
+    "apellido": "CABRERA",
+    "matricula": "33194",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MAXIMILIANO RODRIGO",
+    "apellido": "BRU",
+    "matricula": "1100000433",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FLAVIA GIBBS",
+    "apellido": "PAVON",
+    "matricula": "1100000890",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIANO",
+    "apellido": "PONCE",
+    "matricula": "31341",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE ARMANDO",
+    "apellido": "PEREZ",
+    "matricula": "13621",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EDUARDO ESTEBAN",
+    "apellido": "TOLEDO",
+    "matricula": "30869",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS GERMAN",
+    "apellido": "SCANIO",
+    "matricula": "31112",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROXANA",
+    "apellido": "ESQUIVEL",
+    "matricula": "31375",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HECTOR SEBASTIAN",
+    "apellido": "DELCLAUX",
+    "matricula": "32337",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SANTIAGO SAMUEL",
+    "apellido": "QUIROGA",
+    "matricula": "31671",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSMAR ARTU",
+    "apellido": "ALVAREZ HERRERA",
+    "matricula": "32462",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FERNANDO ADRIAN",
+    "apellido": "VARGAS",
+    "matricula": "13949",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ADRIANA JOSEFINA",
+    "apellido": "FASANELLI",
+    "matricula": "32253",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RODRIGO",
+    "apellido": "CEBALLOS",
+    "matricula": "1100000660",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE EDGARDO",
+    "apellido": "HERRERA",
+    "matricula": "32538",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROBERTO MIGUEL",
+    "apellido": "SANFILIPPO",
+    "matricula": "31694",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ENRIQUE ARIEL",
+    "apellido": "VALDEVENITEZ",
+    "matricula": "1100000894",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE ALBERTO",
+    "apellido": "CARRIZO",
+    "matricula": "33350",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANDRES",
+    "apellido": "ARAYA",
+    "matricula": "1100000881",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN MARCELO",
+    "apellido": "CHAILE",
+    "matricula": "31903",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCELO WALTER",
+    "apellido": "BALDASSO",
+    "matricula": "31503",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JULIO ALEJANDRO",
+    "apellido": "HERMIDA",
+    "matricula": "30542",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "IAN PAULO",
+    "apellido": "GONZALEZ",
+    "matricula": "1100001084",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO DANIEL",
+    "apellido": "CARELLO",
+    "matricula": "31918",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MAURICIO ORLANDO",
+    "apellido": "ARAYA",
+    "matricula": "1100000439",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO DAVID",
+    "apellido": "CONESA",
+    "matricula": "1100000400",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCOS MAXIMILIANO",
+    "apellido": "GODOY",
+    "matricula": "31165",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FERNANDO NICOLAS",
+    "apellido": "SALINAS",
+    "matricula": "1100000990",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE LUIS",
+    "apellido": "BENITEZ",
+    "matricula": "30841",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JAVIER ALBERTO",
+    "apellido": "CASTILLO",
+    "matricula": "32000",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DANIEL ANGEL",
+    "apellido": "CANER",
+    "matricula": "32582",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HECTOR FABIAN",
+    "apellido": "GOMEZ",
+    "matricula": "1100000159",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROBERTO JORGE",
+    "apellido": "MITOIRE",
+    "matricula": "1100000202",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANGEL ALFREDO",
+    "apellido": "MIRANDA",
+    "matricula": "1100000229",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SANTOS DAVID",
+    "apellido": "BLANES",
+    "matricula": "1100000236",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUCAS NICOLAS",
+    "apellido": "BRUNET",
+    "matricula": "1100000426",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "VICTOR MARCELO",
+    "apellido": "ARCHENTI",
+    "matricula": "1100000528",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE ALEJANDRO",
+    "apellido": "FRACCHIA",
+    "matricula": "1100000618",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ENRIQUE DANIEL",
+    "apellido": "REMY",
+    "matricula": "1100000740",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EMANUEL",
+    "apellido": "ALEMAN",
+    "matricula": "1100000532",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FEDERICO GA",
+    "apellido": "ODORICO HERRERA",
+    "matricula": "32493",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DANTE EMILIO",
+    "apellido": "BONTORNO",
+    "matricula": "33024",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCO A.",
+    "apellido": "VALDES ORTEGA",
+    "matricula": "33150",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RENE",
+    "apellido": "AROS, LAZO",
+    "matricula": "12719",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "VIVIANA",
+    "apellido": "URTUBIA",
+    "matricula": "30764",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MAURICIO ALEJANDR",
+    "apellido": "MENGARELLI",
+    "matricula": "32344",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUSTAVO DANIEL",
+    "apellido": "ALFARO",
+    "matricula": "1100000352",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "BENJAMIN",
+    "apellido": "ARROYO",
+    "matricula": "1100000382",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DIEGO ARIEL",
+    "apellido": "GOMEZ",
+    "matricula": "1100000440",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EMMANUEL",
+    "apellido": "MENGARELLI",
+    "matricula": "1100000465",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ARIEL",
+    "apellido": "FERNANDEZ",
+    "matricula": "1100000495",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO ALEXANDER",
+    "apellido": "RUSALEN",
+    "matricula": "1100000519",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EMILIANO",
+    "apellido": "MENESE",
+    "matricula": "1100000523",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROQUE LUIS",
+    "apellido": "HEREDIA",
+    "matricula": "1100000681",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GASTON NICOLAS",
+    "apellido": "PEREYRA",
+    "matricula": "1100000792",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ENRIQUE",
+    "apellido": "SALINAS",
+    "matricula": "1100000963",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FERNANDO 1.",
+    "apellido": "CASTILLO",
+    "matricula": "13342",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DAVID FERNANDO",
+    "apellido": "BARTOLOME",
+    "matricula": "32606",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUSTINO ISAAC",
+    "apellido": "RAMOS",
+    "matricula": "33034",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "AXEL EZEQUIEL",
+    "apellido": "GOMEZ",
+    "matricula": "1100000632",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JONOTHAN",
+    "apellido": "FUNES",
+    "matricula": "1100000600",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SANDRA ISABEL",
+    "apellido": "NAVARRETE",
+    "matricula": "13958",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "WALTER O.",
+    "apellido": "QUATTROPANI",
+    "matricula": "13337",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LEONARDO G.",
+    "apellido": "SCHERBOVSKY",
+    "matricula": "31597",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN MANUEL",
+    "apellido": "GOBBATO",
+    "matricula": "31379",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OMAR JAVIER",
+    "apellido": "MOLINA",
+    "matricula": "31096",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "VICTOR ANIBAL",
+    "apellido": "GUTIERREZ",
+    "matricula": "30622",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO GASTON",
+    "apellido": "BRUNET",
+    "matricula": "32959",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS JAVIER",
+    "apellido": "MASTRANTONIO",
+    "matricula": "1100000663",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANTONIO",
+    "apellido": "GORDILLO",
+    "matricula": "11918",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "BRIAN ALFREDO",
+    "apellido": "BARROS",
+    "matricula": "1100000841",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RICARDO",
+    "apellido": "CORNETTE",
+    "matricula": "31846",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSCAR",
+    "apellido": "FLORES",
+    "matricula": "1100001035",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUIS FERNANDO",
+    "apellido": "ROSALES",
+    "matricula": "1100000146",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALFREDO GABRIEL",
+    "apellido": "GIORDANO",
+    "matricula": "1100000243",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN DARIO",
+    "apellido": "CRUZ",
+    "matricula": "1100000319",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RODRIGO",
+    "apellido": "BIANCHINELLI",
+    "matricula": "1100000403",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EMILIO FERNANDO",
+    "apellido": "CORREA",
+    "matricula": "1100000430",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EMMANUEL",
+    "apellido": "BUSSACA",
+    "matricula": "1100000444",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RICARDO",
+    "apellido": "PUEBLA",
+    "matricula": "1100000509",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAMON",
+    "apellido": "ALLENDES",
+    "matricula": "1100000563",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SEBASTIAN",
+    "apellido": "LISANTI",
+    "matricula": "1100000564",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE LUIS VALENTIN",
+    "apellido": "BECERRA",
+    "matricula": "1100000625",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EDGARDO",
+    "apellido": "OVIEDO",
+    "matricula": "1100000951",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "WALTER",
+    "apellido": "BRITOS",
+    "matricula": "1100000976",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FACUNDO FERNANDO",
+    "apellido": "ROJAS",
+    "matricula": "31770",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LAUTARO NAHUEL",
+    "apellido": "CORTE, DIAZ",
+    "matricula": "33300",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN RAMON",
+    "apellido": "SOSA",
+    "matricula": "1100000815",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE CEFERINO",
+    "apellido": "SILVA",
+    "matricula": "32658",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE MIGUEL",
+    "apellido": "CABEZAS",
+    "matricula": "33210",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSCAR",
+    "apellido": "ESCALANTE",
+    "matricula": "12451",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANGEL OMAR",
+    "apellido": "GIMENEZ",
+    "matricula": "32105",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO OMAR",
+    "apellido": "LUNA",
+    "matricula": "31543",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROBERTO",
+    "apellido": "POSTA",
+    "matricula": "1100000568",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARMELO SINDONI",
+    "apellido": "CALIGIORE",
+    "matricula": "1100000661",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MATIAS",
+    "apellido": "ORTIZ",
+    "matricula": "1100000970",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN PABLO",
+    "apellido": "MERQUIORI",
+    "matricula": "1100001078",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALBERTO G.",
+    "apellido": "POBLETE",
+    "matricula": "11652",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JESUS R.",
+    "apellido": "LAPENNA",
+    "matricula": "11368",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DIEGO FERNANDO",
+    "apellido": "DÍAZ",
+    "matricula": "1100000182",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FLAVIA",
+    "apellido": "LOZA",
+    "matricula": "1100001077",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO",
+    "apellido": "MARTIN",
+    "matricula": "12583",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN PABLO",
+    "apellido": "DE FILIPPO",
+    "matricula": "31142",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HUGO ERNESTO",
+    "apellido": "SOSA",
+    "matricula": "13899",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JONATAN CESAR",
+    "apellido": "GONZALEZ",
+    "matricula": "32778",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "NELSON A.",
+    "apellido": "REYES NAVARRETE",
+    "matricula": "32224",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RICARDO W.",
+    "apellido": "RUGGERI",
+    "matricula": "11407",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LEANDRO DAMIAN",
+    "apellido": "PONCE",
+    "matricula": "32639",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DANIEL OSVALDO",
+    "apellido": "VARELA",
+    "matricula": "11838",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SABINO TITO",
+    "apellido": "ARAMAYO",
+    "matricula": "1100000550",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DARIO SALVADOR",
+    "apellido": "GUELI",
+    "matricula": "31970",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANGEL JORGE",
+    "apellido": "GOMEZ",
+    "matricula": "32432",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MAURICIO ESTEBAN",
+    "apellido": "VITALE",
+    "matricula": "13961",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JULIO SEBASTIAN",
+    "apellido": "FLORES",
+    "matricula": "1100001088",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUSTO",
+    "apellido": "SILVA",
+    "matricula": "1100001095",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DAVID ALEJANDRO",
+    "apellido": "PERALTA",
+    "matricula": "1100000095",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "KEVIN ADRIEL",
+    "apellido": "SOSA",
+    "matricula": "1100001042",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROBERTO DANIEL",
+    "apellido": "GIAROLI",
+    "matricula": "30943",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OMAR MAURICIO",
+    "apellido": "BITTAR",
+    "matricula": "13625",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JULIO YAMIL",
+    "apellido": "HADDAD",
+    "matricula": "31320",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RUBEN D.",
+    "apellido": "DOMINGUEZ",
+    "matricula": "13062",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ENRIQUE MARIO",
+    "apellido": "DE LA ROSA",
+    "matricula": "31081",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RENE EDUARDO",
+    "apellido": "CARRIZO",
+    "matricula": "31806",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS LUCIANO",
+    "apellido": "BURGOS",
+    "matricula": "32749",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ELIAS ISIDORO",
+    "apellido": "PEREYRA",
+    "matricula": "32889",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OMAR ARIEL",
+    "apellido": "ROCHA",
+    "matricula": "32944",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUCIANO DAMIAN",
+    "apellido": "SOMBRA",
+    "matricula": "1100000125",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN PABLO EMILIANO",
+    "apellido": "VALDEZ",
+    "matricula": "1100000849",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JULIO CESAR",
+    "apellido": "RODRIGUEZ",
+    "matricula": "1100000879",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "WALTER NORBERTO",
+    "apellido": "SALDAÑA",
+    "matricula": "13258",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HECTOR JAVIER",
+    "apellido": "PEREZ",
+    "matricula": "13999",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OMAR SINECIO",
+    "apellido": "FREDES",
+    "matricula": "30851",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HUGO",
+    "apellido": "ASSENZA",
+    "matricula": "31070",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DELFOR ANDRES",
+    "apellido": "MARTINEZ",
+    "matricula": "31288",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PATRICIO ALBERTO",
+    "apellido": "CASTRO",
+    "matricula": "31451",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN CARLOS",
+    "apellido": "VALVERDE",
+    "matricula": "31537",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCOS DIEGO",
+    "apellido": "MARTIN",
+    "matricula": "31987",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE LUIS",
+    "apellido": "GOMEZA",
+    "matricula": "32172",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE ALBERTO",
+    "apellido": "BUSTOS",
+    "matricula": "32173",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE ANDRES",
+    "apellido": "CARRASCO",
+    "matricula": "32365",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE LUIS",
+    "apellido": "ROSSI",
+    "matricula": "32470",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GONZALO JESUS",
+    "apellido": "AUTIERE",
+    "matricula": "32783",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSCAR ALBERTO",
+    "apellido": "GUARDIA",
+    "matricula": "32979",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN ANTONIO",
+    "apellido": "RAMIREZ",
+    "matricula": "33045",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JESUS DAVID",
+    "apellido": "VERA",
+    "matricula": "33248",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS EDUARDO",
+    "apellido": "ROSSI",
+    "matricula": "1100000602",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HORACIO EMMANUEL",
+    "apellido": "SALINAS",
+    "matricula": "1100000717",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MAURICIO JAVIER",
+    "apellido": "SOMBRA",
+    "matricula": "1100000738",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE GONZALO",
+    "apellido": "ROSSI",
+    "matricula": "1100000914",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUILLERMO",
+    "apellido": "LUNA",
+    "matricula": "11663",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE MIGUEL",
+    "apellido": "ESPINOSA",
+    "matricula": "12043",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUILLERMO",
+    "apellido": "BARRIOS",
+    "matricula": "12177",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO ANIBAL",
+    "apellido": "BELIZON",
+    "matricula": "32943",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN C.",
+    "apellido": "BALDOVIN",
+    "matricula": "13646",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SILVIA NOEMI",
+    "apellido": "LOPEZ",
+    "matricula": "32161",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN CARLOS",
+    "apellido": "TORREGROSA",
+    "matricula": "32236",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ADRIAN E.",
+    "apellido": "MANZANO",
+    "matricula": "32847",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HUGO ALFREDO",
+    "apellido": "REVIGLIO",
+    "matricula": "30583",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUIS MARIA",
+    "apellido": "SPERTINO",
+    "matricula": "32845",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MIGUEL ANGEL",
+    "apellido": "FORTUNATO",
+    "matricula": "30911",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE O.",
+    "apellido": "SARMIENTO",
+    "matricula": "10995",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS",
+    "apellido": "CASTRO",
+    "matricula": "13025",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS ALBERT",
+    "apellido": "ARCHAMBAULF",
+    "matricula": "31534",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MATIAS AGUSTIN",
+    "apellido": "RIOS",
+    "matricula": "1100000805",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RODRIGO ALBERTO",
+    "apellido": "ESTRELLA",
+    "matricula": "1100000818",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HUGO GASTON",
+    "apellido": "SCOLLO",
+    "matricula": "1100001086",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "VICTOR ADRIAN",
+    "apellido": "ARENAS",
+    "matricula": "13594",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANTONIO CLAUDIO",
+    "apellido": "VUANELLO",
+    "matricula": "31201",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE MARCELO",
+    "apellido": "LAMACCHIA",
+    "matricula": "31298",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE DARIO",
+    "apellido": "MERCADO",
+    "matricula": "31874",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE ARTURO",
+    "apellido": "SAEZ",
+    "matricula": "32953",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN JOSE",
+    "apellido": "GOMEZ",
+    "matricula": "1100001057",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSCAR",
+    "apellido": "GUERRERO",
+    "matricula": "12399",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "A.",
+    "apellido": "ARIAS ESPINOZA",
+    "matricula": "13700",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PABLO",
+    "apellido": "PAGELLA",
+    "matricula": "1100000257",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN MANUEL",
+    "apellido": "VELASCO",
+    "matricula": "33303",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "WILLY ALEXIS",
+    "apellido": "ABAN",
+    "matricula": "31119",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PEDRO R.",
+    "apellido": "SOMBRA",
+    "matricula": "13818",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE",
+    "apellido": "ESTUDILLO",
+    "matricula": "32657",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUSTAVO ALBERTO",
+    "apellido": "RAMOS",
+    "matricula": "30870",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "WALTER TITO",
+    "apellido": "VALVERDE",
+    "matricula": "1100000987",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUIS",
+    "apellido": "RAMALLO",
+    "matricula": "1100001001",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ADAN",
+    "apellido": "CABAÑEZ",
+    "matricula": "1100000788",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FABIO GERMAN",
+    "apellido": "BOZZO",
+    "matricula": "33082",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ELEODORO",
+    "apellido": "AYARDE ROMERO",
+    "matricula": "31289",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FRANCISCO",
+    "apellido": "ESPINOZA JUCHANI",
+    "matricula": "33228",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN CARLOS",
+    "apellido": "CHOQUE",
+    "matricula": "30875",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE ORLANDO",
+    "apellido": "VELE",
+    "matricula": "31004",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUSTAVO DANIEL",
+    "apellido": "ANTEQUERA",
+    "matricula": "32277",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANDRES FABIAN",
+    "apellido": "SUAREZ PEREZ",
+    "matricula": "33235",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GERARDO OSCAR",
+    "apellido": "GOMEZ",
+    "matricula": "1100000615",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HUGO MARTIN",
+    "apellido": "ROSALES",
+    "matricula": "33014",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE LUIS",
+    "apellido": "ROSALES",
+    "matricula": "1100000224",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALEXIS ANTONIO",
+    "apellido": "FLORES",
+    "matricula": "32751",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "TEOVALDO RUBEN",
+    "apellido": "BRAVO",
+    "matricula": "31255",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN PEDRO",
+    "apellido": "CERVERA",
+    "matricula": "31737",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS RUBEN",
+    "apellido": "MORALES",
+    "matricula": "32590",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MIGUEL ALEJANDRO",
+    "apellido": "TELLO",
+    "matricula": "1100000728",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUCAS EDUARDO",
+    "apellido": "SOSA",
+    "matricula": "32935",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RODOLFO HECTOR",
+    "apellido": "GALDAME",
+    "matricula": "1100000358",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS ALBERTO",
+    "apellido": "DAFFUNCHIO",
+    "matricula": "33293",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCELO",
+    "apellido": "GATICA",
+    "matricula": "33289",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARTIN C.",
+    "apellido": "COIMBRA MARTINEZ",
+    "matricula": "33321",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LEONARDO",
+    "apellido": "MILLAN",
+    "matricula": "1100000347",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DARIO LUCAS",
+    "apellido": "GODOY",
+    "matricula": "1100000936",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RODRIGO ALEJANDRO",
+    "apellido": "LUDUEÑA",
+    "matricula": "1100001090",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "VICTOR A.",
+    "apellido": "DERLICH",
+    "matricula": "11813",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "IVAN ALEJANDRO",
+    "apellido": "DERLICH",
+    "matricula": "31412",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE L.",
+    "apellido": "ASTORGA",
+    "matricula": "13233",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSUE DAVID ROCHA",
+    "apellido": "MOLINA",
+    "matricula": "1100000415",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUCAS RAUL",
+    "apellido": "SANCHEZ",
+    "matricula": "1100000772",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUIS MARTIN VASQUEZ",
+    "apellido": "ZAFRA",
+    "matricula": "1100000820",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE MARTIN",
+    "apellido": "MORALES",
+    "matricula": "1100000857",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MATIAS MOHAMED",
+    "apellido": "CRESCITELLI",
+    "matricula": "33288",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "BENJAMIN",
+    "apellido": "CASUSOL CABALLERO",
+    "matricula": "33305",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FABRIZIO ANDRES IBARRA",
+    "apellido": "VAZQUEZ",
+    "matricula": "1100000351",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUSTAVO FABIAN",
+    "apellido": "ALANIZ",
+    "matricula": "1100000453",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DIEGO DAVID",
+    "apellido": "CASTRO",
+    "matricula": "1100000530",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUSTINO VARGA",
+    "apellido": "RIOS",
+    "matricula": "1100000628",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ARIEL ANTONIO",
+    "apellido": "BOGLIOLI",
+    "matricula": "1100000677",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO",
+    "apellido": "ODORICO",
+    "matricula": "32197",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FRANCISCO RUPERTO",
+    "apellido": "VEDIA",
+    "matricula": "32722",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GERMAN ARIEL",
+    "apellido": "CANO",
+    "matricula": "33092",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MATIAS GABRIEL",
+    "apellido": "NUÑEZ",
+    "matricula": "33177",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RODOLFO H.",
+    "apellido": "JOURDON",
+    "matricula": "33189",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CLAUDIO SAUL",
+    "apellido": "MORALES",
+    "matricula": "1100000341",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PABLO",
+    "apellido": "SALAZAR",
+    "matricula": "1100000859",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANDRES VASQUEZ",
+    "apellido": "MORETTI",
+    "matricula": "1100000903",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCIA",
+    "apellido": "MAZA",
+    "matricula": "1100000923",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PABLO",
+    "apellido": "POLIDORI",
+    "matricula": "1100001034",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIO",
+    "apellido": "DIAZ ROMERO",
+    "matricula": "12326",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DANIEL MAURICIO",
+    "apellido": "CASAROTTO",
+    "matricula": "30819",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LEONARDO MARCOS",
+    "apellido": "DARIO",
+    "matricula": "32109",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ENRIQUE ADOLFO",
+    "apellido": "FASCIOLI",
+    "matricula": "32933",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GERMAN ARIEL",
+    "apellido": "BIANCHINI",
+    "matricula": "31449",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RICARDO",
+    "apellido": "CARRILLO",
+    "matricula": "1100000929",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARTIN FERNANDO",
+    "apellido": "GIUDICE",
+    "matricula": "31648",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PABLO MAURICIO",
+    "apellido": "TISSERA",
+    "matricula": "32050",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FABIAN VICENTE",
+    "apellido": "GUERRERO",
+    "matricula": "31614",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EDUARDO LUIS",
+    "apellido": "CASTRO",
+    "matricula": "31514",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS E.",
+    "apellido": "VILLALOBOS",
+    "matricula": "13236",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS ALBERTO",
+    "apellido": "PAEZ",
+    "matricula": "13933",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSCAR F.",
+    "apellido": "ORTIZ",
+    "matricula": "1100001102",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ARIEL OMAR",
+    "apellido": "ZANOTTI",
+    "matricula": "32917",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS N",
+    "apellido": "SABATINI ASTORGA",
+    "matricula": "32699",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN CARLOS",
+    "apellido": "PERALTA",
+    "matricula": "32367",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MIGUEL ANGEL",
+    "apellido": "BARRIONUEVO",
+    "matricula": "32809",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "WALTER EDUARDO",
+    "apellido": "YANZÓN",
+    "matricula": "1100000263",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LEONARDO ISAAC BAYON",
+    "apellido": "MORALES",
+    "matricula": "30986",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GABRIEL ANIBAL",
+    "apellido": "SUSMANO",
+    "matricula": "33186",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN JOSE",
+    "apellido": "SANDUAY",
+    "matricula": "1100000727",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ELIANA GILDA",
+    "apellido": "TANSILLO",
+    "matricula": "1100000311",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN FERNANDO",
+    "apellido": "MONTIVERO",
+    "matricula": "1100000763",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EDUARDO",
+    "apellido": "PACINI",
+    "matricula": "1100001054",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FRANCO",
+    "apellido": "TASSO",
+    "matricula": "1100000883",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANTONIO JOEL PORTILLO",
+    "apellido": "HERRERA",
+    "matricula": "1100000492",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DANIEL ALEJANDRO",
+    "apellido": "OTAROLA",
+    "matricula": "1100000597",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUSTAVO EMMANUEL CABRAL",
+    "apellido": "RAMIREZ",
+    "matricula": "1100000687",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RICARDO",
+    "apellido": "DANDREA",
+    "matricula": "1100001053",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FANNY GABRIELA",
+    "apellido": "FARÍAS",
+    "matricula": "1100000063",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PATRICIO",
+    "apellido": "VERGAGNI",
+    "matricula": "33077",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "NESTOR FABIAN",
+    "apellido": "GIL",
+    "matricula": "31064",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RUBEN M.",
+    "apellido": "MUÑOZ",
+    "matricula": "12810",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUIS",
+    "apellido": "MARQUEZ",
+    "matricula": "1100001105",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIA IRENE",
+    "apellido": "NOGUES",
+    "matricula": "30616",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PEDRO CEFERINO",
+    "apellido": "ESQUIVEL",
+    "matricula": "32688",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCO ANTONIO",
+    "apellido": "AROS LAZO",
+    "matricula": "32805",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROBERTO FABIAN",
+    "apellido": "SANCHEZ",
+    "matricula": "1100000031",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RICARDO F.",
+    "apellido": "BUSTOS",
+    "matricula": "12806",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GISELA MABEL",
+    "apellido": "MERCADO",
+    "matricula": "32769",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIA ROSA",
+    "apellido": "DE FELIPPO",
+    "matricula": "1100000108",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SEBASTIAN",
+    "apellido": "FUNES",
+    "matricula": "1100001100",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE ALBERTO",
+    "apellido": "MACHUCA",
+    "matricula": "31476",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GERÓNIMO",
+    "apellido": "TOMBA",
+    "matricula": "32941",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "WALTER G.",
+    "apellido": "VILLARRUBIA",
+    "matricula": "13119",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CIRO",
+    "apellido": "TARANTINO",
+    "matricula": "12031",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FACUNDO OSCAR",
+    "apellido": "ARIAS",
+    "matricula": "32871",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CESAR",
+    "apellido": "ORTIZ",
+    "matricula": "1100000908",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RUBEN ANIBAL ADALBE",
+    "apellido": "VARGAS",
+    "matricula": "31069",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANGELO BORI",
+    "apellido": "CAÑETE NAVARRO",
+    "matricula": "32222",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LEONARDO EZEQUIEL",
+    "apellido": "PUEBLA",
+    "matricula": "1100001093",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE F.",
+    "apellido": "MORALES CABALLERO",
+    "matricula": "33313",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO FABIAN",
+    "apellido": "VILA",
+    "matricula": "32588",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN",
+    "apellido": "VILLAFAÑE",
+    "matricula": "1100000710",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HECTOR ALEJANDRO",
+    "apellido": "ARROYO",
+    "matricula": "1100000969",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANDREA",
+    "apellido": "GONZALEZ",
+    "matricula": "32687",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE ANTONIO",
+    "apellido": "LICCIARDO",
+    "matricula": "1100000369",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "NESTOR",
+    "apellido": "GONZALEZ",
+    "matricula": "1100001082",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE LUIS",
+    "apellido": "RINCON",
+    "matricula": "1100000758",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HORACIO HECTOR",
+    "apellido": "CRUZ",
+    "matricula": "32796",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUILLERMO FABIAN",
+    "apellido": "MARTINEZ",
+    "matricula": "33041",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DIEGO",
+    "apellido": "MASSI",
+    "matricula": "1100000472",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HECTOR ALEJANDRO",
+    "apellido": "ESPINOSA",
+    "matricula": "31204",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANGEL EZEQUIEL",
+    "apellido": "GIBBS",
+    "matricula": "1100001079",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DANIEL GUSTAVO",
+    "apellido": "GIL",
+    "matricula": "33168",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAUL N.",
+    "apellido": "LUNA",
+    "matricula": "13843",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EMILIO M.",
+    "apellido": "BORDALLO RODRIGUEZ",
+    "matricula": "32163",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "NATALIA VANESA",
+    "apellido": "MEYER",
+    "matricula": "31901",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO ARNALDO",
+    "apellido": "SOSINO",
+    "matricula": "33126",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE ENRIQUE",
+    "apellido": "ARROYO",
+    "matricula": "30907",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HORACIO R.",
+    "apellido": "POZO",
+    "matricula": "13766",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CAROLA GIULIANA",
+    "apellido": "PRINA",
+    "matricula": "1100000197",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCOS DAMIAN",
+    "apellido": "QUIROGA",
+    "matricula": "32869",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS G.",
+    "apellido": "BAUTISTA",
+    "matricula": "1100000769",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DAVID",
+    "apellido": "ESCOBAR",
+    "matricula": "1100000105",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DOMINGO CILO",
+    "apellido": "RUIZ",
+    "matricula": "30663",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MAURO LOPEZ",
+    "apellido": "GONZALEZ",
+    "matricula": "1100001031",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FABIO E.",
+    "apellido": "GARCIA",
+    "matricula": "11651",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HERACLIO E.",
+    "apellido": "TORANZA",
+    "matricula": "12011",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOB ELIAS",
+    "apellido": "SANCHEZ",
+    "matricula": "30823",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAMON",
+    "apellido": "ARCE",
+    "matricula": "10752",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HECTOR DIEGO",
+    "apellido": "LINARES",
+    "matricula": "1100000416",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANGEL JAVIER",
+    "apellido": "GIMENEZ",
+    "matricula": "1100000292",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PABLO ANDRES",
+    "apellido": "UBEDA",
+    "matricula": "32111",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANTONIO A.",
+    "apellido": "LUQUE",
+    "matricula": "11696",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARTIN AMILCAR",
+    "apellido": "LEIVA",
+    "matricula": "32525",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PABLO HERNAN",
+    "apellido": "FERNANDES",
+    "matricula": "1100001067",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CESAR JAVIER",
+    "apellido": "AMAYA",
+    "matricula": "32613",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE RAUL",
+    "apellido": "BONADA",
+    "matricula": "31073",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS ALBERTO",
+    "apellido": "SALINAS",
+    "matricula": "32016",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAUL J.",
+    "apellido": "DULCE",
+    "matricula": "11726",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RUBEN O.",
+    "apellido": "SUAREZ",
+    "matricula": "11454",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FABIO MARTIN",
+    "apellido": "DONATO",
+    "matricula": "1100000578",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JAVIER NESTOR",
+    "apellido": "MESTRE",
+    "matricula": "1100000619",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EMILIO",
+    "apellido": "TERRAZAS",
+    "matricula": "1100000874",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RICARDO",
+    "apellido": "CANTALEJOS",
+    "matricula": "1100000434",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALEJANDRO",
+    "apellido": "PALMERO",
+    "matricula": "31439",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FRANCO AXEL",
+    "apellido": "SANDOVAL",
+    "matricula": "31735",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCIO",
+    "apellido": "FRIAS",
+    "matricula": "1100001096",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSCAR DANIEL",
+    "apellido": "MATURANO",
+    "matricula": "1100000386",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RICARDO GABRIEL",
+    "apellido": "LETARD",
+    "matricula": "32180",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FRANCISCO MATEO",
+    "apellido": "JOFRE",
+    "matricula": "31388",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUIS ENRIQUE",
+    "apellido": "ALBARRACIN",
+    "matricula": "32219",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROBERTO ADRIAN",
+    "apellido": "GUIÑAZU",
+    "matricula": "31230",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO DIEGO",
+    "apellido": "GARBAGNATI",
+    "matricula": "1100000680",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OLIVER",
+    "apellido": "LLANOS",
+    "matricula": "1100000934",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FERNANDO",
+    "apellido": "SIMONETTO",
+    "matricula": "1100000552",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "AMERICO MANUEL",
+    "apellido": "RODRIGUEZ",
+    "matricula": "32563",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RODOLFO SEBASTIAN",
+    "apellido": "GONZALEZ",
+    "matricula": "1100000993",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MAURO FABIAN",
+    "apellido": "KURI",
+    "matricula": "1100001043",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARTIN BERNARDO",
+    "apellido": "BANDIERA",
+    "matricula": "31224",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SANTOS E.",
+    "apellido": "CUELLO",
+    "matricula": "13203",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS R.",
+    "apellido": "CARABALLO",
+    "matricula": "13135",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JESUS A.",
+    "apellido": "TIRAPELLE",
+    "matricula": "11447",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FRANCISCO CARLOS",
+    "apellido": "CARRASCO",
+    "matricula": "30849",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE ALFREDO DANIEL",
+    "apellido": "BOUERI",
+    "matricula": "1100000271",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CRISTIAN ADRIAN",
+    "apellido": "LUCERO",
+    "matricula": "32499",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GASTON",
+    "apellido": "PERALTA",
+    "matricula": "1100001055",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "AMADO MIRKO S",
+    "apellido": "GRANIC ZAVALA",
+    "matricula": "32070",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CESAR ALFREDO",
+    "apellido": "FERNANDEZ",
+    "matricula": "32201",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DENISE LOURDES",
+    "apellido": "FERRARI",
+    "matricula": "1100000307",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROBERTO JAVIER",
+    "apellido": "SURBAN",
+    "matricula": "1100000907",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "VICTOR HUGO",
+    "apellido": "OLLER",
+    "matricula": "31702",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "BRUNO E.",
+    "apellido": "CALDERON, PEPI",
+    "matricula": "32942",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DOMINGO ANDRES",
+    "apellido": "RUIZ",
+    "matricula": "31908",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EDGARDO RUBEN",
+    "apellido": "MUÑOZ",
+    "matricula": "1100000650",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUIS ALBERTO",
+    "apellido": "PEREZ",
+    "matricula": "31290",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSCAR MARCELO",
+    "apellido": "TORRES",
+    "matricula": "1100000719",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSCAR JAVIER",
+    "apellido": "ABREGO",
+    "matricula": "31498",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CLAUDIO OSCAR",
+    "apellido": "TOLABA",
+    "matricula": "33233",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANIBAL",
+    "apellido": "ALVAREZ",
+    "matricula": "33223",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCOS DOMINGO",
+    "apellido": "MARTINEZ",
+    "matricula": "1100000656",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SEBASTIAN",
+    "apellido": "COMERCI",
+    "matricula": "1100000695",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CRISTIAN ADRIAN",
+    "apellido": "VALLEJO",
+    "matricula": "1100000658",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HUGO ESTEBAN",
+    "apellido": "CONDORI",
+    "matricula": "1100000304",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALEJANDRO",
+    "apellido": "DELGADO",
+    "matricula": "1100000927",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CAROLINA",
+    "apellido": "TORRES",
+    "matricula": "1100001097",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUSTAVO ABEL",
+    "apellido": "AVILA",
+    "matricula": "32355",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PABLO SAUL",
+    "apellido": "AVILA",
+    "matricula": "1100000789",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LEANDRO",
+    "apellido": "VAQUER",
+    "matricula": "1100000806",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCOS",
+    "apellido": "AVILA",
+    "matricula": "1100000954",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CRISTIAN ANDRES",
+    "apellido": "MIRANDA",
+    "matricula": "32284",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE MANUEL",
+    "apellido": "VARGAS",
+    "matricula": "32343",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FACUNDO DANIEL",
+    "apellido": "SANDOVAL",
+    "matricula": "33250",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCELO ALEJANDRO",
+    "apellido": "VILLEGAS",
+    "matricula": "1100000911",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUIS JAVIER",
+    "apellido": "RAGUSA",
+    "matricula": "30872",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CRISTIAN",
+    "apellido": "NOGUERA",
+    "matricula": "1100001011",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALEJANDRO DANIEL",
+    "apellido": "ALENDA",
+    "matricula": "33330",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RUBEN OSVALDO",
+    "apellido": "SOSA",
+    "matricula": "1100000585",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DARIO SEBASTIAN",
+    "apellido": "DEVIA",
+    "matricula": "33319",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "WALTER MIGUEL",
+    "apellido": "COROMINAS",
+    "matricula": "32394",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSCAR A.",
+    "apellido": "NOGUERA",
+    "matricula": "13825",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PAULO CESAR",
+    "apellido": "CASTRO",
+    "matricula": "31674",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO RICARDO",
+    "apellido": "LOVOS",
+    "matricula": "30494",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SONIA V.",
+    "apellido": "PIRRERA,",
+    "matricula": "13384",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ARIEL R.",
+    "apellido": "FLORES",
+    "matricula": "13787",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN PABLO",
+    "apellido": "TRUJILLO",
+    "matricula": "1100000587",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MIGUEL JOSÉ",
+    "apellido": "GELVEZ",
+    "matricula": "1100000281",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JON LEO",
+    "apellido": "GARCIA",
+    "matricula": "33256",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUILLERMO RAUL",
+    "apellido": "RODRIGUEZ5584",
+    "matricula": "1100000278",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALBERTO RICARDO",
+    "apellido": "VITALI",
+    "matricula": "31257",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GONZALO GABRIEL",
+    "apellido": "SANTARELLI",
+    "matricula": "1100000747",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DARIO NICOLAS",
+    "apellido": "SCABONE",
+    "matricula": "1100001033",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EDGAR MIGUEL",
+    "apellido": "LUNA",
+    "matricula": "31035",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GASTON EMILIANO SPEZIALE",
+    "apellido": "KAIRUZ",
+    "matricula": "1100000694",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LORENZO I",
+    "apellido": "TORRES",
+    "matricula": "10969",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANGEL RUBEN",
+    "apellido": "SOSA",
+    "matricula": "33110",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO ANTONIO",
+    "apellido": "BARROSO",
+    "matricula": "1100000854",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "BERNARDO LUIS",
+    "apellido": "NUÑEZ",
+    "matricula": "1100000767",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FRANCO FARFAN",
+    "apellido": "SOTO",
+    "matricula": "1100001004",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "WALTER MARIO",
+    "apellido": "RAGUASI",
+    "matricula": "31820",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS RAUL",
+    "apellido": "RAMONDA",
+    "matricula": "31247",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE LUIS",
+    "apellido": "SANCHEZ",
+    "matricula": "13252",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FACUNDO EZEQUIEL DERRACHE",
+    "apellido": "FERRÓN",
+    "matricula": "1100000137",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIO",
+    "apellido": "PERULAN",
+    "matricula": "13550",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RICHARD",
+    "apellido": "MURILLO QUISPE",
+    "matricula": "32363",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ERNESTO GENARO",
+    "apellido": "RIQUELME",
+    "matricula": "32666",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SEGUNDO ARTURO ECHEVERRIA",
+    "apellido": "CARREÑO",
+    "matricula": "31725",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE OSVALDO",
+    "apellido": "GARCIA",
+    "matricula": "32366",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "NELSON HUGO GARAY",
+    "apellido": "CORTES",
+    "matricula": "1100000199",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ERIC DAVID",
+    "apellido": "IBAÑEZ",
+    "matricula": "1100000366",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JULIO DANIEL",
+    "apellido": "SYCZ",
+    "matricula": "1100000906",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DIEGO",
+    "apellido": "LAZARO",
+    "matricula": "1100001074",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "AGUSTIN",
+    "apellido": "CAYO, QUENAYA",
+    "matricula": "33113",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS",
+    "apellido": "VISCARRA",
+    "matricula": "33129",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE OSVALDO",
+    "apellido": "FLORES",
+    "matricula": "32225",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DIEGO ARMANDO",
+    "apellido": "VELA",
+    "matricula": "1100000609",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HERNAN",
+    "apellido": "ARANCIBIA",
+    "matricula": "1100000662",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MAIRA GUERRA",
+    "apellido": "ALMEIRA",
+    "matricula": "1100000867",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LILIANA E.",
+    "apellido": "ALMEIRA",
+    "matricula": "32417",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE ENRIQUE",
+    "apellido": "LORIA",
+    "matricula": "33243",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIO DEL VALLE",
+    "apellido": "ALVEA",
+    "matricula": "31819",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HUGO DANIEL",
+    "apellido": "ZAVALA",
+    "matricula": "12623",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GERARDO",
+    "apellido": "SAEZ",
+    "matricula": "33292",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SAMUEL SALOMON",
+    "apellido": "OPAZO",
+    "matricula": "1100000096",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANDRES",
+    "apellido": "HOFFMANN",
+    "matricula": "1100000428",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE MANUEL",
+    "apellido": "MALLEA",
+    "matricula": "32176",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS O.",
+    "apellido": "MALLEA",
+    "matricula": "13100",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALBERTO EMILIANO",
+    "apellido": "MELERO DIAZ",
+    "matricula": "32754",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PEDRO ANTONIO",
+    "apellido": "CORDOBA",
+    "matricula": "12642",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GRACIELA INES",
+    "apellido": "BISET",
+    "matricula": "33076",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN",
+    "apellido": "TERRERO",
+    "matricula": "1100000956",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE LUIS",
+    "apellido": "BECERRA REYES",
+    "matricula": "30565",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DANIEL R.",
+    "apellido": "GIANDINOTTO",
+    "matricula": "10842",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "WALTER FABIAN",
+    "apellido": "WOLLFART",
+    "matricula": "31575",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUILLERMO GASTON",
+    "apellido": "SIMUNOVIC",
+    "matricula": "31174",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MIGUEL ALBERTO",
+    "apellido": "GODOY",
+    "matricula": "32212",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALFREDO GUILLERMO",
+    "apellido": "AGUIRRE",
+    "matricula": "13549",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIO OSVALDO",
+    "apellido": "RUEDA",
+    "matricula": "31796",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "WALTER D.",
+    "apellido": "MICONI",
+    "matricula": "13788",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ARMANDO SEBASTIAN",
+    "apellido": "MACIA",
+    "matricula": "32150",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HUGO JOSE LUIS",
+    "apellido": "ROMERO",
+    "matricula": "1100000824",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "AGUSTIN",
+    "apellido": "ORRICO",
+    "matricula": "13555",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SEBASTIAN",
+    "apellido": "SANCHEZ",
+    "matricula": "1100000940",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUSTAVO ANDRES",
+    "apellido": "LIER",
+    "matricula": "32554",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CLAUDIO DARIO",
+    "apellido": "CASTRO",
+    "matricula": "31084",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO OSCAR",
+    "apellido": "SALDIVAR",
+    "matricula": "1100000870",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HECTOR OSVALDO",
+    "apellido": "GUZMAN",
+    "matricula": "31886",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALEJANDRA",
+    "apellido": "HERNANDEZ",
+    "matricula": "13836",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ELIAS A. DE LA",
+    "apellido": "CRUZ LOPEZ",
+    "matricula": "31934",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN FRANCISCO",
+    "apellido": "DIAZ",
+    "matricula": "32195",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FERNANDO GUSTAVO",
+    "apellido": "CONTRERAS",
+    "matricula": "1100000276",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RICARDO DANIEL",
+    "apellido": "MORENO",
+    "matricula": "32246",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE ALBERTO",
+    "apellido": "GARCIA",
+    "matricula": "30500",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DANIEL",
+    "apellido": "SANCHEZ",
+    "matricula": "30530",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARTIN GABRIEL",
+    "apellido": "DI MARCO",
+    "matricula": "32451",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LAUREANO PASCUAL",
+    "apellido": "TORRICO",
+    "matricula": "1100000674",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ARMANDO MARTIN",
+    "apellido": "IBACETA",
+    "matricula": "33302",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EDUARDO Z",
+    "apellido": "JOFRE",
+    "matricula": "13108",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS",
+    "apellido": "CHAVEZ",
+    "matricula": "12436",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HUMBERTO DARIO",
+    "apellido": "HERNANDEZ",
+    "matricula": "1100000571",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ABEL I.",
+    "apellido": "REQUELME",
+    "matricula": "33217",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CRISTIAN SEBASTIAN",
+    "apellido": "GUTIERREZ",
+    "matricula": "32049",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "BLADIMIRO R.",
+    "apellido": "BUSTOS",
+    "matricula": "13358",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ASUNCION",
+    "apellido": "ERAZO CRUZ",
+    "matricula": "1100000419",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "WALTER SILVESTRE",
+    "apellido": "GUTIERREZ",
+    "matricula": "1100000669",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PAOLA PATRICIA",
+    "apellido": "ASCURRA",
+    "matricula": "1100000974",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DAVID",
+    "apellido": "FLORES",
+    "matricula": "1100000835",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCELO LEONARDO",
+    "apellido": "CORÁTOLO",
+    "matricula": "1100000065",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARTIN",
+    "apellido": "ΜΟΥΑΝΟ",
+    "matricula": "1100000838",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MIGUEL H.",
+    "apellido": "OLAVE",
+    "matricula": "10701",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIO A.",
+    "apellido": "DI BUDUO",
+    "matricula": "13614",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE M.",
+    "apellido": "SOSA",
+    "matricula": "13740",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUIS",
+    "apellido": "ALBORNOZ",
+    "matricula": "12759",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIO CESAR",
+    "apellido": "GARCIA",
+    "matricula": "30839",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RICARDO TEOFILO",
+    "apellido": "MENDOZA",
+    "matricula": "31108",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DIEGO",
+    "apellido": "SARMIENTO",
+    "matricula": "1100000417",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALEJANDRO",
+    "apellido": "FIGUEROA",
+    "matricula": "1100000916",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JESUS ANGEL",
+    "apellido": "MANRIQUE",
+    "matricula": "1100001003",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CRISTIAN JESUS",
+    "apellido": "MAMANI",
+    "matricula": "1100001007",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EDUARDO",
+    "apellido": "CALA BURGOS",
+    "matricula": "33042",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CELIA ALEJANDRINA",
+    "apellido": "JOFRE",
+    "matricula": "33188",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAUL DANIEL",
+    "apellido": "PALAZZINI",
+    "matricula": "32527",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANDRES ANTONIO",
+    "apellido": "IMPA",
+    "matricula": "33032",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALICIA INES",
+    "apellido": "ALCAVIL QUIDEQUEO",
+    "matricula": "31653",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DERLY NAIR",
+    "apellido": "SEPULVEDA",
+    "matricula": "1100000312",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSCAR SALVADOR",
+    "apellido": "BRACCHI",
+    "matricula": "30946",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LEONARDO ANDRES",
+    "apellido": "KRISTICH",
+    "matricula": "31205",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUILLERMO RUBEN",
+    "apellido": "FERNANDEZ",
+    "matricula": "32776",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN PABLO",
+    "apellido": "MENDEZ",
+    "matricula": "1100000828",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MATIAS DANIEL",
+    "apellido": "SANCHEZ",
+    "matricula": "1100000411",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALEX HERRERA",
+    "apellido": "PERALES",
+    "matricula": "1100000414",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MATÍAS DANIEL",
+    "apellido": "PAUTASSO",
+    "matricula": "1100000148",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FERNANDO RAÚL",
+    "apellido": "ALAGGIA",
+    "matricula": "1100000062",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "URIEL LUCIANO",
+    "apellido": "ARNAEZ",
+    "matricula": "1100000058",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GABRIEL RAMON",
+    "apellido": "BRAVO",
+    "matricula": "1100001087",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS",
+    "apellido": "LOUET",
+    "matricula": "1100000900",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS A.",
+    "apellido": "KRAHULIK",
+    "matricula": "13537",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUIS MARCELO",
+    "apellido": "LUNATI",
+    "matricula": "1100000759",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUIS ALBERTO",
+    "apellido": "MARTIN",
+    "matricula": "1100000388",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAFAEL AGUSTIN",
+    "apellido": "SORIA",
+    "matricula": "1100000527",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DAVID TORREZ",
+    "apellido": "GUARDIA",
+    "matricula": "1100000670",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE E",
+    "apellido": "ALVARADO CARDENAS",
+    "matricula": "32518",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "BENITO",
+    "apellido": "MALDONADO GUARACHI",
+    "matricula": "32854",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "YAIR LUIS",
+    "apellido": "HIADAD",
+    "matricula": "32617",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DIEGO PABLO",
+    "apellido": "PIZZUOLO",
+    "matricula": "33216",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE",
+    "apellido": "CAMPOS",
+    "matricula": "11161",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JACINTO",
+    "apellido": "RODRIGUEZ",
+    "matricula": "11623",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS DANTE",
+    "apellido": "ARAYA",
+    "matricula": "31098",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PABLO ADRIAN",
+    "apellido": "AÑES",
+    "matricula": "32625",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN MARCOS",
+    "apellido": "PEREYRA",
+    "matricula": "32862",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS ALBERTO",
+    "apellido": "ESTELA",
+    "matricula": "33081",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIO GUSTAVO",
+    "apellido": "GARCIA",
+    "matricula": "33329",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EZEQUIEL CARLOS",
+    "apellido": "PAREDES",
+    "matricula": "1100000830",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ELIO OMAR",
+    "apellido": "MANZINI",
+    "matricula": "1100000852",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FLORENCIA",
+    "apellido": "PALMA",
+    "matricula": "1100000892",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAUL H.",
+    "apellido": "ALVARADO",
+    "matricula": "11081",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ELSA A.",
+    "apellido": "UREÑA",
+    "matricula": "11749",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCELO ARCANGE",
+    "apellido": "PANNOCCHIA",
+    "matricula": "32410",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GASTON MATIAS",
+    "apellido": "CRESCITELLI",
+    "matricula": "32542",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DARIO",
+    "apellido": "LISANTTI",
+    "matricula": "1100001063",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RODRIGO JOSÉ",
+    "apellido": "GATICA",
+    "matricula": "33040",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIA EUGENIA",
+    "apellido": "MICHEL",
+    "matricula": "31696",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DANIEL ESTEBAN",
+    "apellido": "VILLA MARIN",
+    "matricula": "30729",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GERARDO JAVIER",
+    "apellido": "MORALES",
+    "matricula": "31337",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO VICTOR",
+    "apellido": "MAMANI",
+    "matricula": "30990",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "REMY",
+    "apellido": "SEJAS PEREZ",
+    "matricula": "31475",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MIGUEL A.",
+    "apellido": "VERGARA",
+    "matricula": "11788",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FABIAN G.",
+    "apellido": "TORRES",
+    "matricula": "11798",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "VICTOR R.",
+    "apellido": "PEÑARANDA",
+    "matricula": "13811",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GABRIELA BELEN",
+    "apellido": "ZEBALLOS",
+    "matricula": "33003",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE ARMANDO",
+    "apellido": "BEJARANO",
+    "matricula": "31569",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ELBIO RICARDO",
+    "apellido": "LAVAYEN",
+    "matricula": "32434",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FELIX A.",
+    "apellido": "PASCIUCCO",
+    "matricula": "11207",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN PABLO",
+    "apellido": "PONCE",
+    "matricula": "1100000930",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE LUIS",
+    "apellido": "RAMONDA",
+    "matricula": "1100001060",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS",
+    "apellido": "MARTINEZ",
+    "matricula": "1100001075",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN PABLO",
+    "apellido": "RUIZ ZALAZAR",
+    "matricula": "32896",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FLORENCIA",
+    "apellido": "GAMBOA",
+    "matricula": "1100000910",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HECTOR EDGARDO",
+    "apellido": "SANCA",
+    "matricula": "1100000145",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARIA DANIELA",
+    "apellido": "CHAVARRIA",
+    "matricula": "1100000917",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ESTEBAN",
+    "apellido": "STEINLE",
+    "matricula": "1100000945",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CECILIO",
+    "apellido": "AGUERO",
+    "matricula": "1100000643",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROBERTO ARIEL",
+    "apellido": "DONOSO",
+    "matricula": "1100001081",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO MARTIN",
+    "apellido": "SEQUEIRA",
+    "matricula": "32082",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN ANTONIO",
+    "apellido": "IBARRA CORREA",
+    "matricula": "30691",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LEANDRO",
+    "apellido": "ALEGRE",
+    "matricula": "1100001068",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALDO",
+    "apellido": "JORDAN",
+    "matricula": "1100001069",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCELO FABIAN",
+    "apellido": "GUERRERO",
+    "matricula": "30800",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FACUNDO",
+    "apellido": "FERRAREIS",
+    "matricula": "1100001047",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EDWARD J",
+    "apellido": "AREVALO QUIJANDRIA",
+    "matricula": "31009",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ROBERTO E.",
+    "apellido": "MAIORANA",
+    "matricula": "12772",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUILLERMO DANIEL",
+    "apellido": "ORTEGA",
+    "matricula": "1100000682",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE D.",
+    "apellido": "ALVAREZ",
+    "matricula": "11205",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCELO C.",
+    "apellido": "HERRERA",
+    "matricula": "12945",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HECTOR OSVALDO",
+    "apellido": "OLMEDO",
+    "matricula": "32126",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "NATALIA",
+    "apellido": "FLORES ROMERO",
+    "matricula": "32921",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE LUIS",
+    "apellido": "GONZALEZ",
+    "matricula": "31764",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUSTAVO EXEQUIEL",
+    "apellido": "FERREYRA",
+    "matricula": "1100000109",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUSTAVO JAVIER",
+    "apellido": "JAIME",
+    "matricula": "33033",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "WALTER JESUS",
+    "apellido": "CHACON",
+    "matricula": "32502",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EDUARDO TEOFILO",
+    "apellido": "SALAJ",
+    "matricula": "30499",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HECTOR OSVALDO",
+    "apellido": "SERNA",
+    "matricula": "32724",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "BRIAN JESUS JAVIER",
+    "apellido": "CHAVEZ",
+    "matricula": "33234",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSÉ ANTONIO",
+    "apellido": "CASAS",
+    "matricula": "1100000104",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ELIO OSVALDO",
+    "apellido": "MINIUTTI",
+    "matricula": "1100000362",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAUL GASTON",
+    "apellido": "SUAREZ",
+    "matricula": "33148",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE ANTONIO",
+    "apellido": "CARRASCO",
+    "matricula": "30659",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE DAVID",
+    "apellido": "ALFONZO",
+    "matricula": "1100001062",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "NESTOR M.",
+    "apellido": "SALOMON",
+    "matricula": "13867",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GONZALO NICOLAS",
+    "apellido": "PARRA",
+    "matricula": "30755",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JAVIER MIGUEL",
+    "apellido": "VIOLINO",
+    "matricula": "31188",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "TOMAS NAVARRO",
+    "apellido": "PEREZ",
+    "matricula": "1100000456",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DENIS GABRIEL",
+    "apellido": "LUCERO",
+    "matricula": "32636",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE",
+    "apellido": "MUGNECO",
+    "matricula": "12474",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN PABLO",
+    "apellido": "GUERRA",
+    "matricula": "1100000357",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CRISTIAN",
+    "apellido": "BRITO",
+    "matricula": "1100000899",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ΜΑΧΙΜΟ",
+    "apellido": "MARTINEZ",
+    "matricula": "1100001006",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DANIEL",
+    "apellido": "CORDERO",
+    "matricula": "1100000891",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCELO HUGO",
+    "apellido": "JOSE",
+    "matricula": "1100000715",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HUGO JUAN",
+    "apellido": "CORIA",
+    "matricula": "32460",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SAMUEL ALBERTO",
+    "apellido": "CORREA",
+    "matricula": "1100000780",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ERNESTO R.",
+    "apellido": "MORSUCCI",
+    "matricula": "13604",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE LUIS",
+    "apellido": "TELLO",
+    "matricula": "13705",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FERNANDO G.",
+    "apellido": "JARA",
+    "matricula": "12402",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ALFREDO MAURICIO",
+    "apellido": "PONCE",
+    "matricula": "31808",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FACUNDO GASPAR",
+    "apellido": "DIAZ",
+    "matricula": "32729",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAMON RICARDO",
+    "apellido": "RODRIGUEZ",
+    "matricula": "31496",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAUL",
+    "apellido": "FUNES",
+    "matricula": "1100000479",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PABLO GUSTAVO",
+    "apellido": "GORRI",
+    "matricula": "32066",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CRISTIAN JOSE",
+    "apellido": "RIOS",
+    "matricula": "1100000607",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN DONATO",
+    "apellido": "CAMACHO",
+    "matricula": "32186",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CRISTIAN",
+    "apellido": "GUZMAN",
+    "matricula": "1100000869",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DIEGO ORLANDO",
+    "apellido": "GUZMAN",
+    "matricula": "33347",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FRANCO",
+    "apellido": "HORN",
+    "matricula": "1100000667",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE ISIDRO",
+    "apellido": "CANCIANI",
+    "matricula": "1100000070",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FRANCISCO",
+    "apellido": "BARROSO",
+    "matricula": "31149",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PEDRO EPIFANIO",
+    "apellido": "PEREZ",
+    "matricula": "32822",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DARIO ALBERTO",
+    "apellido": "ESCUDERO",
+    "matricula": "1100000810",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DARIO",
+    "apellido": "EMIN",
+    "matricula": "13790",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CESAR",
+    "apellido": "CRUZ",
+    "matricula": "1100000361",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ARIEL MENDOZA",
+    "apellido": "ROLO",
+    "matricula": "1100000424",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCOS",
+    "apellido": "BONAFEDE",
+    "matricula": "1100000488",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DIEGO",
+    "apellido": "BUSTOS",
+    "matricula": "1100001083",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN MANUEL",
+    "apellido": "FARIAS",
+    "matricula": "1100000745",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DAVID ALBERTO",
+    "apellido": "APERT",
+    "matricula": "32254",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DANIEL ADRIAN",
+    "apellido": "VALVERDE",
+    "matricula": "32505",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "SERGIO",
+    "apellido": "CONDORI TELERA",
+    "matricula": "1100001066",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSCAR RUBEN",
+    "apellido": "PANELO",
+    "matricula": "33200",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MATIAS ENMANUEL",
+    "apellido": "MORALES",
+    "matricula": "33229",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCELO PABLO",
+    "apellido": "AREVALO",
+    "matricula": "32924",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ENRIQUE CLODOMIRO",
+    "apellido": "TEJADA",
+    "matricula": "32231",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS HECTOR",
+    "apellido": "DE LIBERATO",
+    "matricula": "30976",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CARLOS ALBERTO",
+    "apellido": "ZANOTTI",
+    "matricula": "31378",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "WALDO D.",
+    "apellido": "NAVARRETE SANCHEZ",
+    "matricula": "31018",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GERMAN",
+    "apellido": "PALAGUERRA",
+    "matricula": "1100000705",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LUIS ROBUSTIANO",
+    "apellido": "COLINA",
+    "matricula": "32408",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EDGARDO MAURO",
+    "apellido": "ORTIZ",
+    "matricula": "32448",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "PEDRO LUIS",
+    "apellido": "BADOSA",
+    "matricula": "1100001040",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JOSE",
+    "apellido": "BANCO AVENI",
+    "matricula": "11597",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCELO FRANCISCO A",
+    "apellido": "ACOSTA",
+    "matricula": "30768",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "ANTONIO GREGORIO",
+    "apellido": "GONZALEZ",
+    "matricula": "31382",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GERMAN VICENTE",
+    "apellido": "RUMEO",
+    "matricula": "31347",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HENRY O.",
+    "apellido": "MARTINI",
+    "matricula": "12027",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAUL GERÓNIMO",
+    "apellido": "SOMBRA",
+    "matricula": "12100",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JULIO C.",
+    "apellido": "GUEVARA",
+    "matricula": "12553",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE O.",
+    "apellido": "SABATINI",
+    "matricula": "11861",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MIGUEL",
+    "apellido": "CALDERON",
+    "matricula": "11862",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARTIN",
+    "apellido": "SALINAS",
+    "matricula": "32550",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "GUSTAVO GABRIEL",
+    "apellido": "VALENZUELA",
+    "matricula": "1100000019",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "DENIS MARIEL",
+    "apellido": "GUILLEN",
+    "matricula": "1100000802",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RAMON MIGUEL",
+    "apellido": "BARRERA",
+    "matricula": "1100000893",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "LAUREANO",
+    "apellido": "PAEZ",
+    "matricula": "1100001014",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "RICARDO",
+    "apellido": "CAMPOS",
+    "matricula": "1100001012",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "CLAUDIO",
+    "apellido": "SOSA",
+    "matricula": "1100000716",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "EDGARDO",
+    "apellido": "CARRABAL",
+    "matricula": "1100001022",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "MARCOS ARIEL",
+    "apellido": "MENDEZ",
+    "matricula": "30896",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN MARCELO",
+    "apellido": "AHUMADA",
+    "matricula": "1100001091",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE",
+    "apellido": "QUIERO",
+    "matricula": "1100001070",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JUAN CARLOS",
+    "apellido": "SARABIA",
+    "matricula": "32440",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FRANCISCO J.",
+    "apellido": "GALLEGOS",
+    "matricula": "11460",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "FRANCISCO LUIS",
+    "apellido": "MASTINO",
+    "matricula": "31002",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "OSMAN",
+    "apellido": "RODRIGUEZ",
+    "matricula": "1100000639",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "JORGE HORACIO",
+    "apellido": "MIRANDA",
+    "matricula": "1100000668",
+    "provincia": "MENDOZA"
+  },
+  {
+    "nombre": "HECTOR RICARDO",
+    "apellido": "CORIA",
+    "matricula": "30933",
+    "provincia": "MENDOZA"
+  }
+]

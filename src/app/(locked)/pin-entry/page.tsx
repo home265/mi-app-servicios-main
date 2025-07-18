@@ -1,11 +1,11 @@
-// src/app/(locked)/pin-entry/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import Image from 'next/image';
-import bcrypt from 'bcryptjs';
+// Se elimina la importación de bcryptjs.
+// import bcrypt from 'bcryptjs';
 
 import { useUserStore } from '@/store/userStore';
 import PinInput from '@/app/components/forms/PinInput';
@@ -30,14 +30,10 @@ export default function PinEntryPage() {
   const [isLocked, setIsLocked] = useState(false);
   const MAX_ATTEMPTS = 5;
 
-  // --- INICIO: CAMBIO DEL LOGO ---
-  // Se usan las mismas rutas y nombres de variables que en LoginPage
   const { resolvedTheme } = useTheme();
   const lightLogo = '/logo2.png';
   const darkLogo  = '/logo1.png';
-  // --- FIN: CAMBIO DEL LOGO ---
 
-  /* ——— lógica existente, intacta ——— */
   useEffect(() => {
     if (isPinVerifiedForSession && currentUser) {
       router.replace('/bienvenida');
@@ -59,7 +55,7 @@ export default function PinEntryPage() {
       return;
     }
     if (!currentUser?.hashedPin) {
-      setPageError('Error de sesión. Recarga la página.');
+      setPageError('Error de sesión. No se encontró el PIN para verificar.');
       return;
     }
 
@@ -67,14 +63,32 @@ export default function PinEntryPage() {
     setPageError(null);
 
     try {
-      const isMatch = await bcrypt.compare(pin, currentUser.hashedPin);
-      if (isMatch) {
+      // Se llama a la nueva API para verificar el PIN de forma segura.
+      const response = await fetch('/api/auth/verify-pin', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          pin: pin,
+          hashedPin: currentUser.hashedPin,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Error en el servidor.');
+      }
+
+      if (result.isMatch) {
         setPinVerified(true);
         setFailedAttempts(0);
+        // router.replace('/bienvenida') se maneja por el useEffect de arriba.
       } else {
         const newAttemptCount = failedAttempts + 1;
         setFailedAttempts(newAttemptCount);
-        setPin('');
+        setPin(''); // Limpia el input del PIN
 
         if (newAttemptCount >= MAX_ATTEMPTS) {
           setPageError(`Has superado los ${MAX_ATTEMPTS} intentos. Debes iniciar sesión de nuevo.`);
@@ -83,9 +97,9 @@ export default function PinEntryPage() {
           setPageError(`PIN incorrecto. Te quedan ${MAX_ATTEMPTS - newAttemptCount} intentos.`);
         }
       }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err) {
-      setPageError('Ocurrió un error al verificar el PIN.');
+      const errorMessage = err instanceof Error ? err.message : 'Ocurrió un error inesperado al verificar el PIN.';
+      setPageError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -102,8 +116,6 @@ export default function PinEntryPage() {
     setPageError(null);
     router.push('/auth/set-new-pin');
   };
-
-  /* ——— RENDERIZADO CONDICIONAL (Lógica sin cambios) ——— */
 
   if (!currentUser) {
     return (
@@ -132,8 +144,6 @@ export default function PinEntryPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-fondo text-texto px-2 py-6">
       
-      {/* --- INICIO: CAMBIO DEL COMPONENTE IMAGE --- */}
-      {/* Se usa exactamente el mismo componente Image que en LoginPage para consistencia visual */}
       <Image
         src={resolvedTheme === 'dark' ? darkLogo : lightLogo}
         alt="Logo CODYS"
@@ -142,7 +152,6 @@ export default function PinEntryPage() {
         priority
         className="mb-8 h-auto w-52 flex-shrink-0 object-contain md:w-64"
       />
-      {/* --- FIN: CAMBIO DEL COMPONENTE IMAGE --- */}
 
       <div className="
         w-[90vw] sm:max-w-md md:max-w-lg
