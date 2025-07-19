@@ -4,14 +4,20 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import rubrosData from '@/data/rubro.json';
 
+interface Subrubro {
+  nombre: string;
+  requiereMatricula: boolean;
+}
+
 interface Rubro {
   nombre: string;
-  subrubros: string[];
+  subrubros: Subrubro[];
+  requiereMatricula?: boolean;
 }
 
 export interface RubroSeleccionado {
   rubro: string;
-  subrubro: string | null;
+  subrubro: Subrubro | null;
 }
 
 interface SelectorRubroProps {
@@ -22,7 +28,7 @@ interface SelectorRubroProps {
   error?: string;
   onRubroChange: (seleccion: RubroSeleccionado | null) => void;
   initialValue?: RubroSeleccionado | null;
-  labelColor?: string; // Prop para consistencia con SelectorCategoria
+  labelColor?: string;
 }
 
 const todosLosRubros: Rubro[] = rubrosData.rubros;
@@ -35,29 +41,24 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
   error,
   onRubroChange,
   initialValue,
-  labelColor = '#F9F3D9', // Valor por defecto para consistencia
+  labelColor = '#F9F3D9',
 }) => {
-  // --- Estados para la UI y la lógica del componente ---
   const [openRubroPanel, setOpenRubroPanel] = useState(false);
   const [openSubRubroPanel, setOpenSubRubroPanel] = useState(false);
   const [search, setSearch] = useState('');
-  const [rubro, setRubro] = useState(initialValue?.rubro || '');
-  const [subrubro, setSubrubro] = useState(initialValue?.subrubro || '');
-  const [subrubrosDisponibles, setSubrubrosDisponibles] = useState<string[]>([]);
+  const [rubro, setRubro] = useState<Rubro | null>(null);
+  const [subrubro, setSubrubro] = useState<Subrubro | null>(initialValue?.subrubro || null);
 
-  // --- Constantes de estilo para replicar el look de SelectorCategoria ---
   const highlight = '#EFC71D';
   const borderColor = '#2F5854';
   const cardBg = 'rgba(0,0,0,0)';
   const hoverBg = 'rgba(255,255,255,0.1)';
 
-  // Clases de botones para consistencia visual
   const selectorBtn =
     'inline-flex items-center justify-start px-3 py-1 text-sm rounded-md border transition whitespace-normal';
   const listBtn =
     'h-16 flex items-center justify-center px-3 py-2 text-sm rounded-md border transition w-full whitespace-normal break-words';
 
-  // --- Lógica de filtrado de rubros ---
   const rubrosFiltrados = useMemo(() => {
     const q = search.trim().toLowerCase();
     return q
@@ -65,25 +66,29 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
       : todosLosRubros;
   }, [search]);
 
-  // --- Efectos para manejar la lógica del componente ---
-
-  // Al cambiar el rubro principal, resetear subrubro y cargar nuevas opciones
   useEffect(() => {
-    setSubrubro(''); // Limpiar siempre el subrubro previo
-    if (!rubro) {
-      setSubrubrosDisponibles([]);
-    } else {
-      const found = todosLosRubros.find((r) => r.nombre === rubro);
-      setSubrubrosDisponibles(found?.subrubros || []);
+    if (initialValue?.rubro) {
+      const found = todosLosRubros.find(r => r.nombre === initialValue.rubro);
+      setRubro(found || null);
     }
-    setOpenSubRubroPanel(false); // Cerrar el panel de subrubros
-     
-  }, [rubro]);
+  }, [initialValue]);
 
-  // Notificar cambios al componente padre
   useEffect(() => {
     if (rubro) {
-      onRubroChange({ rubro, subrubro: subrubro || null });
+      const subrubroValido = rubro.subrubros.find(s => s.nombre === subrubro?.nombre);
+      setSubrubro(subrubroValido || null);
+    } else {
+      setSubrubro(null);
+    }
+    setOpenSubRubroPanel(false);
+  }, [rubro, subrubro?.nombre]);
+
+  useEffect(() => {
+    if (rubro) {
+      onRubroChange({
+        rubro: rubro.nombre,
+        subrubro: subrubro || null,
+      });
     } else {
       onRubroChange(null);
     }
@@ -92,7 +97,6 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* Selector de Rubro Principal */}
       <div>
         <label
           htmlFor={idRubro}
@@ -110,11 +114,11 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
           className={selectorBtn}
           style={{
             backgroundColor: openRubroPanel ? hoverBg : cardBg,
-            color: rubro ? highlight : labelColor,
+            color: rubro?.nombre ? highlight : labelColor,
             borderColor: highlight,
           }}
         >
-          {rubro || '— ninguno —'}
+          {rubro?.nombre || '— ninguno —'}
         </button>
 
         {openRubroPanel && (
@@ -139,14 +143,15 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
                     key={r.nombre}
                     type="button"
                     onClick={() => {
-                      setRubro(r.nombre);
+                      setRubro(r);
+                      setSubrubro(null);
                       setOpenRubroPanel(false);
                       setSearch('');
                     }}
                     className={listBtn + ' hover:bg-white/10'}
                     style={{
-                      backgroundColor: r.nombre === rubro ? highlight : cardBg,
-                      color: r.nombre === rubro ? '#0F2623' : labelColor,
+                      backgroundColor: r.nombre === rubro?.nombre ? highlight : cardBg,
+                      color: r.nombre === rubro?.nombre ? '#0F2623' : labelColor,
                       borderColor: highlight,
                     }}
                   >
@@ -166,8 +171,7 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
         )}
       </div>
 
-      {/* Selector de Subrubro */}
-      {rubro && subrubrosDisponibles.length > 0 && (
+      {rubro && rubro.subrubros.length > 0 && (
         <div>
           <label
             htmlFor={idSubrubro}
@@ -186,14 +190,14 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
               borderColor: highlight,
             }}
           >
-            {subrubro || '— ninguna —'}
+            {subrubro?.nombre || '— ninguna —'}
           </button>
 
           {openSubRubroPanel && (
             <div className="grid grid-cols-3 gap-2 mt-2 max-h-60 overflow-auto">
-              {subrubrosDisponibles.map((s) => (
+              {rubro.subrubros.map((s) => (
                 <button
-                  key={s}
+                  key={s.nombre}
                   type="button"
                   onClick={() => {
                     setSubrubro(s);
@@ -201,12 +205,12 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
                   }}
                   className={listBtn + ' hover:bg-white/10'}
                   style={{
-                    backgroundColor: cardBg,
-                    color: labelColor,
+                    backgroundColor: s.nombre === subrubro?.nombre ? highlight : cardBg,
+                    color: s.nombre === subrubro?.nombre ? '#0F2623' : labelColor,
                     borderColor: highlight,
                   }}
                 >
-                  {s}
+                  {s.nombre}
                 </button>
               ))}
             </div>
@@ -214,7 +218,6 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
         </div>
       )}
 
-      {/* Muestra el mensaje de error si existe */}
       {error && <p className="text-sm text-error mt-1">{error}</p>}
     </div>
   );

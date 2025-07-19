@@ -18,8 +18,8 @@ export default function RegistroRolPage() {
   const { resolvedTheme } = useTheme();
 
   /* Logos decorativos (solo icono) */
-  const logoClaro = '/MARCA_CODYS_13.png'; // verde
-  const logoOscuro = '/MARCA_CODYS_14.png'; // amarillo
+  const logoClaro = '/logo2.png'; // verde
+  const logoOscuro = '/logo3.png'; // amarillo
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-fondo text-texto px-4 py-12 overscroll-y-auto">
@@ -32,7 +32,7 @@ export default function RegistroRolPage() {
           width={300}
           height={300}
           priority
-          className="opacity-5 select-none"
+          className="w-80 opacity-5 select-none"
         />
       </div>
 

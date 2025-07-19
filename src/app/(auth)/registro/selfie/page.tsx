@@ -52,7 +52,7 @@ const ACTIVE_LIVENESS_STATES: LivenessState[] = [
 export default function SelfiePage() {
   console.log("SelfiePage RENDERIZANDO INICIO - Timestamp:", Date.now());
   const router = useRouter();
-
+  const { resolvedTheme } = useTheme();
   const [formData, setFormData] = useState<StoredFormData | null>(null);
   const [rol, setRol] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -531,18 +531,13 @@ export default function SelfiePage() {
   }
 
   if (shouldDisplayCameraInterface) {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const { resolvedTheme } = useTheme();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const logoClaro = '/MARCA_CODYS_13.png';
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const logoOscuro = '/MARCA_CODYS_14.png';
+  
 
  return (
   <div className="flex min-h-screen flex-col items-center justify-center bg-fondo text-texto px-2 py-6">
 
     <img
-      src={resolvedTheme === 'dark' ? '/MARCA_CODYS_14.png' : '/MARCA_CODYS_13.png'}
+      src={resolvedTheme === 'dark' ? '/logo3.png' : '/logo2.png'}
       alt="Isotipo CODYS"
       className="mx-auto mb-6 w-36 md:w-44 object-contain"
       width={128}

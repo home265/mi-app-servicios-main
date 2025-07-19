@@ -1,132 +1,150 @@
 {
-    "rubros": [
-      {
-        "nombre": "Salud",
-        "subrubros": [
-          "Médico Clínico",
-          "Oftalmólogos",
-          "Gastroenterólogos",
-          "Odontólogos",
-          "Cardiólogo",
-          "Otorrinolaringólogo",
-          "Ópticas",
-          "Clínicas",
-          "Análisis Clínicos",
-          "Diagnóstico por Imágenes",
-          "Farmacias",
-          "Emergencias Médicas",
-          "Traumatologo",
-          "Pediatra",
-          "Kinesiologo",
-          "Fisioterapeuta",
-          "Psicologo",
-          "Psiquiatra"
-        ]
-      },
-      {
-        "nombre": "Bienestar",
-        "subrubros": [
-          "Peluquerías",
-          "Manicuras",
-          "Depilación",
-          "Yoga",
-          "Personal Training",
-          "Gimnasios",
-          "Podología",
-          "Barbería",
-          "Deportes"
-        ]
-      },
-      {
-        "nombre": "Servicios Profesionales",
-        "subrubros": [
-          "Abogado",
-          "Arquitecto",
-          "Escribano",
-          "Contador",
-          "Ingeniero Industrial",
-          "Ingeniero Eléctrico",
-          "Ingeniero Electrónico",
-          "Ingeniero Agrónomo",
-          "Diseñador Gráfico"
-        ]
-      },
-      {
-        "nombre": "Construcción",
-        "subrubros": []
-      },
-      {
-        "nombre": "Ferretería",
-        "subrubros": []
-      },
-      {
-        "nombre": "Electricidad",
-        "subrubros": []
-      },
-      {
-        "nombre": "Artículos de Electrónica",
-        "subrubros": []
-      },
-      {
-        "nombre": "Pinturería",
-        "subrubros": []
-      },
-      {
-        "nombre": "Transporte de Cargas",
-        "subrubros": []
-      },
-      {
-        "nombre": "Librerías",
-        "subrubros": []
-      },
-      {
-        "nombre": "Artículos de Limpieza",
-        "subrubros": []
-      },
-      {
-        "nombre": "Repuestos de Automotores",
-        "subrubros": []
-      },
-      {
-        "nombre": "Lubricentros",
-        "subrubros": []
-      },
-      {
-        "nombre": "Lavadero de Autos",
-        "subrubros": []
-      },
-      {
-        "nombre": "Restaurantes y Bares",
-        "subrubros": []
-      },
-      {
-        "nombre": "Comidas para Llevar",
-        "subrubros": []
-      },
-      {
-        "nombre": "Dietéticas",
-        "subrubros": []
-      },
-      {
-        "nombre": "Jugueterías",
-        "subrubros": []
-      },
-      {
-        "nombre": "Cotillón",
-        "subrubros": []
-      },
-      {
-        "nombre": "Musicalización de Eventos",
-        "subrubros": []
-      },
-      {
-        "nombre": "Catering",
-        "subrubros": []
-      },
-      {
-        "nombre": "Insumos Agrícolas",
-        "subrubros": []
-      }
-    ]
-  }
-  
+  "rubros": [
+    {
+      "nombre": "Salud",
+      "subrubros": [
+        { "nombre": "Médico Clínico", "requiereMatricula": true },
+        { "nombre": "Oftalmólogos", "requiereMatricula": true },
+        { "nombre": "Gastroenterólogos", "requiereMatricula": true },
+        { "nombre": "Odontólogos", "requiereMatricula": true },
+        { "nombre": "Cardiólogo", "requiereMatricula": true },
+        { "nombre": "Otorrinolaringólogo", "requiereMatricula": true },
+        { "nombre": "Ópticas", "requiereMatricula": false },
+        { "nombre": "Clínicas", "requiereMatricula": false },
+        { "nombre": "Análisis Clínicos", "requiereMatricula": false },
+        { "nombre": "Diagnóstico por Imágenes", "requiereMatricula": false },
+        { "nombre": "Farmacias", "requiereMatricula": false },
+        { "nombre": "Emergencias Médicas", "requiereMatricula": false },
+        { "nombre": "Traumatologo", "requiereMatricula": true },
+        { "nombre": "Pediatra", "requiereMatricula": true },
+        { "nombre": "Kinesiologo", "requiereMatricula": true },
+        { "nombre": "Fisioterapeuta", "requiereMatricula": true },
+        { "nombre": "Psicologo", "requiereMatricula": true },
+        { "nombre": "Psiquiatra", "requiereMatricula": true }
+      ]
+    },
+    {
+      "nombre": "Bienestar",
+      "subrubros": [
+        { "nombre": "Peluquerías", "requiereMatricula": false },
+        { "nombre": "Manicuras", "requiereMatricula": false },
+        { "nombre": "Depilación", "requiereMatricula": false },
+        { "nombre": "Yoga", "requiereMatricula": false },
+        { "nombre": "Personal Training", "requiereMatricula": false },
+        { "nombre": "Gimnasios", "requiereMatricula": false },
+        { "nombre": "Podología", "requiereMatricula": false },
+        { "nombre": "Barbería", "requiereMatricula": false },
+        { "nombre": "Deportes", "requiereMatricula": false }
+      ]
+    },
+    {
+      "nombre": "Servicios Profesionales",
+      "subrubros": [
+        { "nombre": "Abogado", "requiereMatricula": true },
+        { "nombre": "Arquitecto", "requiereMatricula": true },
+        { "nombre": "Escribano", "requiereMatricula": true },
+        { "nombre": "Contador", "requiereMatricula": true },
+        { "nombre": "Ingeniero Industrial", "requiereMatricula": true },
+        { "nombre": "Ingeniero Eléctrico", "requiereMatricula": true },
+        { "nombre": "Ingeniero Electrónico", "requiereMatricula": true },
+        { "nombre": "Ingeniero Agrónomo", "requiereMatricula": true },
+        { "nombre": "Diseñador Gráfico", "requiereMatricula": false }
+      ]
+    },
+    {
+      "nombre": "Construcción",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Ferretería",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Electricidad",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Artículos de Electrónica",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Pinturería",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Transporte de Cargas",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Librerías",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Artículos de Limpieza",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Repuestos de Automotores",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Lubricentros",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Lavadero de Autos",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Restaurantes y Bares",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Comidas para Llevar",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Dietéticas",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Jugueterías",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Cotillón",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Musicalización de Eventos",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Catering",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Insumos Agrícolas",
+      "subrubros": [],
+      "requiereMatricula": false
+    }
+  ]
+}

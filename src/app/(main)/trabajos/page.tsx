@@ -37,7 +37,7 @@ const palette = {
     borde: '#2F5854',
     texto: '#F9F3D9',
     resalte: '#EFC71D',
-    marca: '/MARCA_CODYS_14.png',
+    marca: '/logo3.png',
   },
   light: {
     fondo: '#F9F3D9',
@@ -45,7 +45,7 @@ const palette = {
     borde: '#2F5854',
     texto: '#0F2623',
     resalte: '#EFC71D',
-    marca: '/MARCA_CODYS_13.png',
+    marca: '/logo2.png',
   },
 }
 
