@@ -6,6 +6,7 @@ import type { SubimageElement } from '../hooks/useEditorStore';
 import Image from 'next/image';
 import DeleteElementButton from '../components/ui/DeleteElementButton';
 import { UploadCloud } from 'lucide-react';
+import { toast } from 'react-hot-toast'; // 1. Importar toast
 
 interface SubimageToolProps {
   initial?: SubimageElement;
@@ -33,7 +34,8 @@ export default function SubimageTool({ initial, onConfirm, onClose }: SubimageTo
 
   const handleConfirm = () => {
     if (!src) {
-      alert("Por favor, selecciona una imagen antes de confirmar.");
+      // 2. Reemplazar alert con toast.error
+      toast.error("Por favor, selecciona una imagen antes de confirmar.");
       return;
     }
     onConfirm({

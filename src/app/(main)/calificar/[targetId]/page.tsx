@@ -2,10 +2,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-// 1. IMPORTACIÓN ACTUALIZADA: Se añade 'useSearchParams' para leer parámetros de la URL.
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { doc, getDoc, type DocumentData } from 'firebase/firestore';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
+import { toast } from 'react-hot-toast'; // 1. Importar toast
 
 import { db } from '@/lib/firebase/config';
 import { useUserStore } from '@/store/userStore';
@@ -43,20 +43,17 @@ async function getAnyUserData(uid: string): Promise<{ data: DocumentData; collec
 export default function CalificarPage() {
   const router = useRouter();
   const params = useParams();
-  // 2. LEER PARÁMETROS DE URL: Se inicializa el hook.
   const searchParams = useSearchParams(); 
-  const { currentUser, actingAs } = useUserStore(); // Se añade 'actingAs' para la redirección
+  const { currentUser, actingAs } = useUserStore();
 
   const [targetUser, setTargetUser] = useState<TargetUserData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   const targetId = typeof params.targetId === 'string' ? params.targetId : '';
-  // 3. OBTENER NOTIF ID: Se lee el valor del parámetro 'notifId' de la URL.
   const notifId = searchParams.get('notifId');
 
   useEffect(() => {
-    // La lógica de este useEffect para cargar datos del usuario no necesita cambios.
     if (!targetId) {
       setError('No se ha especificado un usuario para calificar.');
       setIsLoading(false);
@@ -117,15 +114,14 @@ export default function CalificarPage() {
             </h2>
           </div>
 
-          {/* 4. PROP ACTUALIZADA: Se pasa 'originalNotifId' al formulario. */}
           <FormularioResenaDetallado
             target={targetUser}
-            originalNotifId={notifId} // Se pasa la ID leída de la URL.
+            originalNotifId={notifId}
             onSubmitted={() => {
-              alert('¡Gracias por tu reseña!');
-              // Se mejora la redirección para que sea inteligente según el rol.
+              // 2. Reemplazar alert con toast.success
+              toast.success('¡Gracias por tu reseña!');
               const homePage = actingAs === 'provider' ? '/trabajos' : '/bienvenida';
-    router.push(homePage);
+              router.push(homePage);
             }}
           />
         </>

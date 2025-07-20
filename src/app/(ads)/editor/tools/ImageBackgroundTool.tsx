@@ -1,14 +1,13 @@
 'use client';
 
-import React, { useState, useRef } from 'react'; // useRef añadido
+import React, { useState, useRef } from 'react';
 import Button from '@/app/components/ui/Button';
 import type { ImageBackgroundElement } from '../hooks/useEditorStore';
 import Image from 'next/image';
-import { UploadCloud } from 'lucide-react'; // Icono para el botón de subir
+import { UploadCloud } from 'lucide-react';
+import { toast } from 'react-hot-toast'; // 1. Importar toast
 
 interface ImageBackgroundToolProps {
-  // Si se edita, 'initial' debería tener el src actual.
-  // No se necesita 'id' aquí porque un fondo de imagen es único por pantalla y se reemplaza.
   initial?: Partial<Omit<ImageBackgroundElement, 'id' | 'tipo'>>;
   onConfirm: (elementData: Omit<ImageBackgroundElement, 'id' | 'tipo'> & { tipo: 'fondoImagen' }) => void;
   onClose: () => void;
@@ -16,22 +15,22 @@ interface ImageBackgroundToolProps {
 
 export default function ImageBackgroundTool({ initial, onConfirm, onClose }: ImageBackgroundToolProps) {
   const [src, setSrc] = useState(initial?.src || '');
-
-  // Referencia para el input de archivo oculto
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      if (file.size > 3 * 1024 * 1024) { // Límite de 3MB para imágenes de fondo (puedes ajustar)
-        alert("La imagen es demasiado grande. El tamaño máximo es 3MB.");
+      if (file.size > 3 * 1024 * 1024) {
+        // 2. Reemplazar alert con toast.error
+        toast.error("La imagen es demasiado grande. El tamaño máximo es 3MB.");
         if (fileInputRef.current) {
-          fileInputRef.current.value = ""; // Resetear para permitir nueva selección
+          fileInputRef.current.value = "";
         }
         return;
       }
       if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
-        alert("Tipo de archivo no permitido. Sube imágenes JPG, PNG, o WEBP.");
+        // 3. Reemplazar alert con toast.error
+        toast.error("Tipo de archivo no permitido. Sube imágenes JPG, PNG, o WEBP.");
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
@@ -49,10 +48,10 @@ export default function ImageBackgroundTool({ initial, onConfirm, onClose }: Ima
 
   const handleConfirm = () => {
     if (!src) {
-      alert("Por favor, selecciona una imagen antes de confirmar.");
+      // 4. Reemplazar alert con toast.error
+      toast.error("Por favor, selecciona una imagen antes de confirmar.");
       return;
     }
-    // Los fondos de imagen usualmente cubren toda la pantalla
     onConfirm({
       tipo: 'fondoImagen',
       xPct: 0,
@@ -64,40 +63,33 @@ export default function ImageBackgroundTool({ initial, onConfirm, onClose }: Ima
     onClose();
   };
 
-  // Función para simular clic en el input de archivo
   const handleUploadButtonClick = () => {
     fileInputRef.current?.click();
   };
 
   return (
-    // Mantengo tu estilo de panel fijo en la esquina inferior, adaptando los colores.
     <div className="absolute bottom-4 left-4 z-50 bg-[var(--color-tarjeta)] text-[var(--color-texto-principal)] p-4 rounded-lg shadow-lg w-full max-w-xs max-h-[calc(100vh-8rem)] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-700 scrollbar-track-gray-800">
-      <div className="flex justify-between items-center mb-3"> {/* Ajustado mb-3 */}
-        <h3 className="text-lg font-semibold"> {/* Título modificado */}
+      <div className="flex justify-between items-center mb-3">
+        <h3 className="text-lg font-semibold">
           {initial?.src ? 'Cambiar Imagen de Fondo' : 'Imagen de Fondo'}
         </h3>
-        {/* No se añade botón de eliminar aquí, ya que la acción es reemplazar o usar otra herramienta (Color/Gradiente) */}
       </div>
 
       <div className="space-y-4">
-        {/* MEJORA UI: Botón para subir imagen e input de archivo oculto */}
         <div>
-          {/* El label puede asociarse con el input oculto para accesibilidad */}
           <label htmlFor="background-image-file-input" className="sr-only">
             Seleccionar imagen de fondo:
           </label>
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/png, image/jpeg, image/webp" // Tipos de archivo comunes
+            accept="image/png, image/jpeg, image/webp"
             onChange={handleFileChange}
-            className="hidden" // Ocultar el input por defecto
+            className="hidden"
             id="background-image-file-input"
           />
-          {/* Botón visible para el usuario */}
           <Button
-            variant="outline" // Asumiendo que ya tienes este variant en tu Button.tsx
-                               // Si no, cámbialo a "secondary" o "ghost" y ajusta className
+            variant="outline"
             onClick={handleUploadButtonClick}
             fullWidth
             className="border-dashed hover:border-primario text-[var(--color-texto-secundario)]"
@@ -107,22 +99,20 @@ export default function ImageBackgroundTool({ initial, onConfirm, onClose }: Ima
           </Button>
         </div>
 
-        {/* Previsualización de la imagen seleccionada */}
         {src && (
           <div className="mt-3 mb-3 border border-[var(--color-borde-input)] rounded-md p-2 bg-[var(--color-fondo-sutil)]">
             <p className="text-xs text-[var(--color-texto-secundario)] mb-1 text-center">Vista previa actual:</p>
-            <div className="w-full h-32 sm:h-24 relative rounded overflow-hidden"> {/* Altura de preview ajustada */}
+            <div className="w-full h-32 sm:h-24 relative rounded overflow-hidden">
               <Image
                 src={src}
                 alt="Preview imagen de fondo"
                 fill
-                className="object-cover" // Para fondo, 'cover' suele ser lo deseado para llenar el espacio
+                className="object-cover"
                 unoptimized={typeof src === 'string' && src.startsWith('data:')}
               />
             </div>
           </div>
         )}
-        {/* Para ImageBackground, no hay controles de widthPct/heightPct ya que usualmente es 100% */}
       </div>
 
       <div className="mt-6 flex justify-end space-x-2">

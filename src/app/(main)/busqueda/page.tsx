@@ -5,6 +5,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTheme } from 'next-themes';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
+import { toast } from 'react-hot-toast';
 
 import { useUserStore, UserProfile } from '@/store/userStore';
 import SelectorCategoria, { CategoriaSeleccionada } from '@/app/components/forms/SelectorCategoria';
@@ -14,7 +15,7 @@ import {
   sendJobRequest,
   subscribeToNotifications,
   removeNotification,
-  confirmAgreementAndCleanup, // <-- MODIFICADO: Se usa la función correcta
+  confirmAgreementAndCleanup,
   NotificationDoc as Notification,
   Sender as NotificationSender,
   Payload as NotificationPayload,
@@ -23,7 +24,7 @@ import NotificacionCard from '@/app/components/notificaciones/NotificacionCard';
 import ContactoPopup from '@/app/components/notificaciones/ContactoPopup';
 
 import PerfilModal from '@/app/components/notificaciones/PerfilModal';
-import { doc, getDoc } from 'firebase/firestore'; // <-- MODIFICADO: deleteDoc ya no es necesario aquí
+import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 
 // paleta
@@ -93,7 +94,6 @@ export default function BusquedaPage() {
   const [showPerfil, setShowPerfil] = useState(false);
   const [perfilTarget, setPerfilTarget] = useState<PerfilTarget | null>(null);
 
-  // NUEVO: Estados para gestionar acciones asíncronas
   const [isSearching, setIsSearching] = useState(false);
   const [processingNotifId, setProcessingNotifId] = useState<string | null>(null);
 
@@ -153,11 +153,11 @@ export default function BusquedaPage() {
     localidad: { provinciaNombre: province, nombre: locality },
   } = currentUser;
 
-  /*────────── Acciones (Modificadas con estado de procesamiento) ──────────*/
+  /*────────── Acciones (Modificadas con toast) ──────────*/
   async function handleSearch() {
     if (!categorySel || !description.trim() || isSearching) {
-      if (!categorySel) alert('Debes elegir una categoría.');
-      if (!description.trim()) alert('La descripción no puede estar vacía.');
+      if (!categorySel) toast.error('Debes elegir una categoría.');
+      if (!description.trim()) toast.error('La descripción no puede estar vacía.');
       return;
     }
 
@@ -167,7 +167,7 @@ export default function BusquedaPage() {
     try {
       const providers = await getProvidersByFilter(categoria, subcategoria || undefined, province, locality);
       if (providers.length === 0) {
-        alert('No se encontraron prestadores para esta categoría en tu localidad.');
+        toast('No se encontraron prestadores para esta categoría en tu localidad.', { icon: 'ℹ️' });
         return;
       }
 
@@ -184,11 +184,11 @@ export default function BusquedaPage() {
       };
 
       await sendJobRequest({ to: toRecipients, from: fromSender, payload });
-      alert('Solicitud enviada con éxito.');
+      toast.success('Solicitud enviada con éxito.');
       setDescription('');
     } catch (e) {
       console.error(e);
-      alert('Ocurrió un error al enviar la solicitud.');
+      toast.error('Ocurrió un error al enviar la solicitud.');
     } finally {
       setIsSearching(false);
     }
@@ -199,7 +199,7 @@ export default function BusquedaPage() {
 
     const sender = getSender(n);
     if (!sender) {
-        alert("No se pudo identificar al remitente de la notificación.");
+        toast.error("No se pudo identificar al remitente de la notificación.");
         return;
     }
 
@@ -209,7 +209,7 @@ export default function BusquedaPage() {
             const snap = await getDoc(doc(db, sender.collection, sender.uid));
             const data = snap.data() as ProviderDocData | undefined;
             if (!data) {
-                alert('No se pudieron cargar los datos del prestador.');
+                toast.error('No se pudieron cargar los datos del prestador.');
                 return;
             }
             setSelectedPrestador({
@@ -221,17 +221,13 @@ export default function BusquedaPage() {
             });
             setShowContacto(true);
         } else if (n.type === 'contact_followup') {
-            // ===========================================================================
-            // INICIO: LÓGICA CORREGIDA
-            // ===========================================================================
             const originalNotifId = n.payload?.originalNotifId as string | undefined;
             if (!originalNotifId) {
                 console.error("Error crítico: No se encontró la 'originalNotifId' en el payload de la notificación de seguimiento.");
-                alert("Error: No se pudo procesar la solicitud por falta de un identificador clave.");
+                toast.error("Error: No se pudo procesar la solicitud por falta de un identificador clave.");
                 return;
             }
 
-            // Llamar a la única función de backend que hace todo el trabajo
             await confirmAgreementAndCleanup({
                 user: { uid: userUid, collection: userCollection },
                 provider: { uid: sender.uid, collection: sender.collection },
@@ -240,31 +236,26 @@ export default function BusquedaPage() {
                 userName: userName || 'Usuario',
             });
             
-            // El listener de notificaciones se encargará de actualizar la UI.
-            alert('Acuerdo confirmado. ¡Gracias por usar nuestros servicios!');
-            // ===========================================================================
-            // FIN: LÓGICA CORREGIDA
-            // ===========================================================================
+            toast.success('Acuerdo confirmado. ¡Gracias por usar nuestros servicios!');
        } else { // rating_request
-    // Redirige a la nueva página de calificación
-    router.push(`/calificar/${sender.uid}?notifId=${n.id}`);
-}
+        router.push(`/calificar/${sender.uid}?notifId=${n.id}`);
+       }
     } catch (error) {
         console.error("Error en la acción principal:", error);
-        alert("Hubo un error al procesar tu solicitud.");
+        toast.error("Hubo un error al procesar tu solicitud.");
     } finally {
         setProcessingNotifId(null);
     }
   }
 
-  async function handleSecondaryAction(n: Notification) {
+ async function handleSecondaryAction(n: Notification) {
     if (processingNotifId) return;
     setProcessingNotifId(n.id);
     try {
         await removeNotification({ uid: userUid, collection: userCollection }, n.id);
     } catch (error) {
         console.error("Error al eliminar notificación:", error);
-        alert("No se pudo eliminar la notificación.");
+        toast.error("No se pudo eliminar la notificación.");
     } finally {
         setProcessingNotifId(null);
     }

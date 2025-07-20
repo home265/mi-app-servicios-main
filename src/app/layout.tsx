@@ -1,7 +1,8 @@
 // src/app/layout.tsx
 import './globals.css';
 import { Providers } from './providers';
-import NotificationWatcher from '@/app/components/notificaciones/NotificationWatcher'; // <-- AQUÍ SE IMPORTA
+import NotificationWatcher from '@/app/components/notificaciones/NotificationWatcher';
+import type { Metadata } from 'next'; // Se añade el tipo para Metadata
 import {
   Barlow,
   Roboto,
@@ -37,12 +38,8 @@ import {
   Wallpoet,
 } from 'next/font/google';
 
-// --- Se asigna cada fuente a una constante, como lo requiere Next.js ---
-
-// 1. La fuente principal de la UI (Barlow) se mantiene con la precarga por defecto.
+// --- Toda la configuración de tus fuentes se mantiene intacta ---
 const barlow = Barlow({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-barlow' });
-
-// 2. A TODAS las demás fuentes (para el editor) se les añade "preload: false" para evitar la carga innecesaria en cada página.
 const roboto = Roboto({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-roboto', preload: false });
 const lato = Lato({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-lato', preload: false });
 const oswald = Oswald({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-oswald', preload: false });
@@ -76,9 +73,19 @@ const juliusSansOne = Julius_Sans_One({ subsets: ['latin'], weight: '400', displ
 const wallpoet = Wallpoet({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-wallpoet', preload: false });
 
 
-export const metadata = {
+// --- OBJETO METADATA ACTUALIZADO ---
+export const metadata: Metadata = {
   title: 'CODYS | Tu red de confianza',
   description: 'Conectamos necesidades con soluciones.',
+  // --- Datos para los íconos y la app web ---
+  manifest: '/manifest.json', // Next.js buscará este archivo en /public
+  appleWebApp: {
+    title: 'CODYS',
+    statusBarStyle: 'black-translucent',
+  },
+  // La configuración de los íconos para favicon y apple-touch-icon
+  // es manejada automáticamente por Next.js si colocas los archivos
+  // con los nombres correctos (icon.png, apple-icon.png) en la carpeta /app
 };
 
 export default function RootLayout({
@@ -90,8 +97,6 @@ export default function RootLayout({
     <html
       lang="es"
       suppressHydrationWarning
-      // Se combinan tanto la clase principal de la UI como las variables de las fuentes del editor.
-      // Esto asegura que la fuente por defecto se aplique correctamente y que las demás estén disponibles como variables CSS.
       className={`
         ${barlow.className} ${roboto.variable} ${lato.variable} ${oswald.variable}
         ${openSans.variable} ${montserrat.variable} ${raleway.variable} ${poppins.variable}
@@ -106,9 +111,8 @@ export default function RootLayout({
       `}
     >
       <head />
-      {/* El body ya no necesita la clase porque la hereda del html, lo que mantiene el código más limpio. */}
       <body>
-        <NotificationWatcher /> {/* <-- AQUÍ SE INTEGRA */}
+        <NotificationWatcher />
         <Providers>
           <main>
             {children}

@@ -2,8 +2,9 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/store/userStore';
-import { Timestamp } from 'firebase/firestore'; // Timestamp se sigue usando para la fecha
-import { createOrUpdateCv, getCvByUid } from '@/lib/services/cvService'; // ✅ 1. IMPORTAR EL SERVICIO
+import { Timestamp } from 'firebase/firestore';
+import { createOrUpdateCv, getCvByUid } from '@/lib/services/cvService';
+import { toast } from 'react-hot-toast'; // 1. Importar toast
 import Card from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';
 import SelectorCategoriasEmpleo from '@/app/components/forms/SelectorCategoriasEmpleo';
@@ -16,14 +17,13 @@ export default function CvPage() {
   const { currentUser } = useUserStore();
   const router = useRouter();
 
-  // El estado local para los formularios no cambia
   const [descripcion, setDescripcion] = useState('');
   const [telefonoAlt, setTelefonoAlt] = useState('');
   const [rubros, setRubros] = useState<string[]>([]);
   const [estudios, setEstudios] = useState({
     primario: '', secundario: '', universitario: '', posgrado: '',
   });
-  const [isLoading, setIsLoading] = useState(true); // Añadimos estado de carga
+  const [isLoading, setIsLoading] = useState(true);
 
   /* --- redirige si no hay user --- */
   useEffect(() => {
@@ -34,7 +34,6 @@ export default function CvPage() {
   useEffect(() => {
     if (!currentUser) return;
     
-    // ✅ 2. USAR EL SERVICIO PARA CARGAR EL CV
     (async () => {
       setIsLoading(true);
       try {
@@ -52,7 +51,8 @@ export default function CvPage() {
         }
       } catch (error) {
         console.error("Error al cargar el CV:", error);
-        alert("No se pudo cargar la información de tu CV. Inténtalo de nuevo.");
+        // 2. Reemplazar alert con toast.error
+        toast.error("No se pudo cargar la información de tu CV. Inténtalo de nuevo.");
       } finally {
         setIsLoading(false);
       }
@@ -62,7 +62,6 @@ export default function CvPage() {
   const handleSave = async () => {
     if (!currentUser) return;
 
-    // ✅ 3. USAR EL SERVICIO PARA GUARDAR EL CV
     try {
       await createOrUpdateCv(currentUser.uid, {
         nombreCompleto: `${currentUser.nombre} ${currentUser.apellido}`,
@@ -74,11 +73,13 @@ export default function CvPage() {
         localidad: currentUser.localidad,
         timestamp: Timestamp.now().toMillis(),
       });
-      alert('CV guardado ✔');
+      // 3. Reemplazar alert con toast.success
+      toast.success('CV guardado ✔');
       router.replace('/bienvenida');
     } catch (error) {
       console.error("Error al guardar el CV:", error);
-      alert("Ocurrió un error al guardar tu CV. Por favor, inténtalo de nuevo.");
+      // 4. Reemplazar alert con toast.error
+      toast.error("Ocurrió un error al guardar tu CV. Por favor, inténtalo de nuevo.");
     }
   };
 
@@ -90,91 +91,89 @@ export default function CvPage() {
     );
   }
 
+  // Se envuelve el retorno en un Fragmento <> para incluir el botón flotante
   return (
-    <Card className="max-w-md mx-auto space-y-4">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Mi Curriculum</h2>
-        <Avatar
-          selfieUrl={currentUser.selfieURL}
-          nombre={currentUser.nombre}
-          size={64}
-        />
-      </div>
-  
-      <div className="flex items-start justify-between">
-        {/* Esto mantiene el texto a la izquierda */}
+    <>
+      <Card className="max-w-md mx-auto space-y-4 my-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold">Mi Curriculum</h2>
+          <Avatar
+            selfieUrl={currentUser.selfieURL}
+            nombre={currentUser.nombre}
+            size={64}
+          />
+        </div>
+    
+        <div className="flex items-start justify-between">
+          <div>
+            <p className="font-medium">Nombre</p>
+            <p>
+              {currentUser.nombre} {currentUser.apellido}
+            </p>
+          </div>
+          <BotonAyuda>
+            <AyudaCrearEditarCV />
+          </BotonAyuda>
+        </div>
+    
         <div>
-          <p className="font-medium">Nombre</p>
+          <p className="font-medium">Localidad</p>
           <p>
-            {currentUser.nombre} {currentUser.apellido}
+            {currentUser.localidad.nombre}, {currentUser.localidad.provinciaNombre}
           </p>
         </div>
-
-        {/* Y aquí añadimos el botón de ayuda, que se irá a la derecha */}
-        <BotonAyuda>
-          <AyudaCrearEditarCV />
-        </BotonAyuda>
-      </div>
-  
-      <div>
-        <p className="font-medium">Localidad</p>
-        <p>
-          {currentUser.localidad.nombre}, {currentUser.localidad.provinciaNombre}
-        </p>
-      </div>
-  
-      <div>
-        <label className="block font-medium">Descripción / habilidades</label>
-        <textarea
-          className="w-full border rounded p-2 text-sm"
-          rows={4}
-          value={descripcion}
-          onChange={(e) => setDescripcion(e.target.value)}
-          spellCheck="true"
-        />
-      </div>
-  
-      <div>
-        <label className="block font-medium">Teléfono alternativo</label>
-        <input
-          className="w-full border rounded p-2 text-sm"
-          value={telefonoAlt}
-          onChange={(e) => setTelefonoAlt(e.target.value)}
-        />
-      </div>
-  
-      <div>
-        <label className="block font-medium">Rubros (máx. 4)</label>
-        <SelectorCategoriasEmpleo value={rubros} onChange={setRubros} />
-      </div>
-  
-      {(['primario', 'secundario', 'universitario', 'posgrado'] as const).map(
-        (k) => (
-          <div key={k}>
-            <label className="block font-medium capitalize">{k}</label>
-            <input
-              className="w-full border rounded p-2 text-sm"
-              value={estudios[k]}
-              onChange={(e) =>
-                setEstudios({ ...estudios, [k]: e.target.value })
-              }
-              placeholder="Ej.: Completo / Incompleto / Lic. en…"
-            />
-          </div>
-        )
-      )}
-  
-      <Button onClick={handleSave}>Guardar CV</Button>
-    </Card>
     
-  );
-  <button
+        <div>
+          <label className="block font-medium">Descripción / habilidades</label>
+          <textarea
+            className="w-full border rounded p-2 text-sm"
+            rows={4}
+            value={descripcion}
+            onChange={(e) => setDescripcion(e.target.value)}
+            spellCheck="true"
+          />
+        </div>
+    
+        <div>
+          <label className="block font-medium">Teléfono alternativo</label>
+          <input
+            className="w-full border rounded p-2 text-sm"
+            value={telefonoAlt}
+            onChange={(e) => setTelefonoAlt(e.target.value)}
+          />
+        </div>
+    
+        <div>
+          <label className="block font-medium">Rubros (máx. 4)</label>
+          <SelectorCategoriasEmpleo value={rubros} onChange={setRubros} />
+        </div>
+    
+        {(['primario', 'secundario', 'universitario', 'posgrado'] as const).map(
+          (k) => (
+            <div key={k}>
+              <label className="block font-medium capitalize">{k}</label>
+              <input
+                className="w-full border rounded p-2 text-sm"
+                value={estudios[k]}
+                onChange={(e) =>
+                  setEstudios({ ...estudios, [k]: e.target.value })
+                }
+                placeholder="Ej.: Completo / Incompleto / Lic. en…"
+              />
+            </div>
+          )
+        )}
+    
+        <Button onClick={handleSave}>Guardar CV</Button>
+      </Card>
+      
+      <button
         onClick={() => router.push('/bienvenida')}
         className="fixed bottom-6 right-4 h-12 w-12 rounded-full shadow-lg flex items-center justify-center focus:outline-none"
-        // La variable 'P' no existe en este archivo, así que usamos un color directamente o la defines
-        // Para simplificar, usaré un color que se adapte a tu tema.
-        style={{ backgroundColor: '#184840' }} // Color de la tarjeta
+        style={{ backgroundColor: '#184840' }}
       >
-        <ChevronLeftIcon className="h-6 w-6" style={{ color: '#EFC71D' }} /> {/* Color de resalte */}
+        <ChevronLeftIcon className="h-6 w-6" style={{ color: '#EFC71D' }} />
       </button>
+    </>
+  );
 }

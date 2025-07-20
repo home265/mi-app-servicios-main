@@ -3,13 +3,14 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/store/userStore';
+import { toast } from 'react-hot-toast'; // 1. Importar toast
 
-// ✅ 1. IMPORTAMOS EL SERVICIO Y LOS NUEVOS TIPOS
+// ✅ Se mantienen las importaciones del servicio y tipos
 import { searchCvs, type CvDocument } from '@/lib/services/cvService';
 
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import SelectorCategoriasEmpleo from '@/app/components/forms/SelectorCategoriasEmpleo';
-import CvCard from '@/app/components/cv/CvCard'; // CvCard ya fue actualizado
+import CvCard from '@/app/components/cv/CvCard';
 import Button from '@/app/components/ui/Button';
 import Card from '@/app/components/ui/Card';
 import BotonAyuda from '@/app/components/common/BotonAyuda';
@@ -21,7 +22,6 @@ export default function EmpleadosPage() {
 
   const [rubroSel, setRubroSel] = useState<string[]>([]);
   const [cargando, setCargando] = useState(false);
-  // ✅ 2. EL ESTADO DE RESULTADOS AHORA USA EL TIPO 'CvDocument'
   const [resultados, setResultados] = useState<CvDocument[]>([]);
 
   useEffect(() => {
@@ -35,13 +35,11 @@ export default function EmpleadosPage() {
   }
 
   const handleBuscar = async () => {
-    // La lógica de búsqueda ahora es mucho más simple
     console.log('handleBuscar: Iniciando búsqueda...');
     setCargando(true);
     setResultados([]);
 
     try {
-      // ✅ 3. TODA LA LÓGICA COMPLEJA SE REEMPLAZA POR UNA SOLA LLAMADA AL SERVICIO
       const results = await searchCvs({
         provincia: currentUser.localidad.provinciaNombre,
         localidad: currentUser.localidad.nombre,
@@ -53,7 +51,8 @@ export default function EmpleadosPage() {
 
     } catch (error) {
       console.error("handleBuscar: Error durante la búsqueda:", error);
-      alert("Ocurrió un error al buscar. Revisa la consola para más detalles.");
+      // 2. Reemplazar alert con toast.error
+      toast.error("Ocurrió un error al buscar. Revisa la consola para más detalles.");
     } finally {
       setCargando(false);
       console.log('handleBuscar: Búsqueda finalizada.');
@@ -63,30 +62,28 @@ export default function EmpleadosPage() {
   return (
     <div className="flex flex-col items-center p-4 space-y-6 min-h-screen">
       <Card className="max-w-md w-full space-y-4">
-  {/* Contenedor para alinear título y botón */}
-  <div className="flex items-center justify-between">
-    <h2 className="text-lg font-semibold">Buscar Empleados</h2>
-    <BotonAyuda>
-      <AyudaEmpleados />
-    </BotonAyuda>
-  </div>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Buscar Empleados</h2>
+          <BotonAyuda>
+            <AyudaEmpleados />
+          </BotonAyuda>
+        </div>
 
-  <div>
-    <label className="block font-medium mb-1">Rubro (opcional)</label>
-    <SelectorCategoriasEmpleo
-      value={rubroSel}
-      onChange={(arr) => setRubroSel(arr.slice(0, 1))}
-    />
-  </div>
+        <div>
+          <label className="block font-medium mb-1">Rubro (opcional)</label>
+          <SelectorCategoriasEmpleo
+            value={rubroSel}
+            onChange={(arr) => setRubroSel(arr.slice(0, 1))}
+          />
+        </div>
 
-  <Button onClick={handleBuscar} disabled={cargando}>
-    {cargando ? 'Buscando…' : 'Buscar'}
-  </Button>
-</Card>
+        <Button onClick={handleBuscar} disabled={cargando}>
+          {cargando ? 'Buscando…' : 'Buscar'}
+        </Button>
+      </Card>
 
       <div className="w-full max-w-md space-y-4 pb-20">
         {resultados.map((cv) => (
-          // ✅ 4. PASAMOS LA PROP 'cv' EN LUGAR DE 'user' AL COMPONENTE CvCard
           <CvCard
             key={cv.uid}
             cv={cv} 

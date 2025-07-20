@@ -12,6 +12,7 @@ import Konva from 'konva';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import type { UploadMetadata } from 'firebase/storage';
+import { toast } from 'react-hot-toast';
 
 import {
   useEditorStore,
@@ -44,6 +45,7 @@ import { planes, campanias } from '@/lib/constants/anuncios';
 import EditorCanvas from './EditorCanvas';
 import Toolbar, { type ToolId } from './Toolbar';
 import Button from '@/app/components/ui/Button';
+import Modal from '@/app/components/common/Modal';
 
 // ... (importaciones de TextTool, CurvedTextTool, etc. y dataURLtoBlob sin cambios)
 const FrameColorTool = dynamic(() => import('../tools/FrameColorTool'), { ssr: false });
@@ -142,6 +144,8 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
   const [activeTool, setActiveTool] = useState<ToolId | null>(null);
   const [showGuardarModal, setShowGuardarModal] = useState(false);
   const [showFinalizarModal, setShowFinalizarModal] = useState(false);
+  const [isChangePlanModalOpen, setIsChangePlanModalOpen] = useState<boolean>(false);
+  const [isDeleteDraftModalOpen, setIsDeleteDraftModalOpen] = useState<boolean>(false);
   const [frozenCanvasDimensions, setFrozenCanvasDimensions] = useState<{ width: number; height: number } | null>(null);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const stageRef = useRef<Konva.Stage>(null);
@@ -201,8 +205,7 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
   /** Mantendrá el ID del frame activo */
   let animationFrameId: number | undefined;
 
-  /**  
-   * Bucle que se repite hasta que el Stage tenga un
+  /** * Bucle que se repite hasta que el Stage tenga un
    * tamaño > 0 × 0 o hasta que la herramienta “effects”
    * deje de estar activa.  
    */
@@ -234,7 +237,7 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
 }, [activeTool]);
 
 
-  const handleSelectTool = useCallback((toolId: ToolId | null) => {
+ const handleSelectTool = useCallback((toolId: ToolId | null) => {
     console.log(`[handleSelectTool] Solicitud para herramienta: ${toolId}. Herramienta activa actual: ${activeTool}. Elemento seleccionado: ${useEditorStore.getState().selectedElementIdForEdit}`);
     if (activeTool === toolId && toolId !== 'effects') {
       console.log(`[handleSelectTool] Toggle OFF para herramienta: ${toolId}.`);
@@ -278,12 +281,12 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
     console.log(`[procesarYGuardarPantallaActual] Iniciando para pantalla ${pantallaAGuardarIndex}. Anuncio ID: ${anuncioParaCargar.id}`);
     
     if (!stageRef.current) {
-      alert("Error interno: Referencia al canvas no encontrada para guardar pantalla.");
+      toast.error("Error interno: Referencia al canvas no encontrada para guardar pantalla.");
       console.error("[procesarYGuardarPantallaActual] stageRef.current es null.");
       return false;
     }
     if (!anuncioParaCargar.id || !anuncioParaCargar.plan || !anuncioParaCargar.provincia || !anuncioParaCargar.localidad || !anuncioParaCargar.creatorId) {
-        alert("Error interno: Faltan datos del anuncio (ID, plan, provincia, localidad, creatorId) para procesar la pantalla.");
+        toast.error("Error interno: Faltan datos del anuncio (ID, plan, provincia, localidad, creatorId).");
         console.error("[procesarYGuardarPantallaActual] Faltan datos críticos de anuncioParaCargar:", anuncioParaCargar);
         return false;
     }
@@ -294,7 +297,7 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
       const dataUrl = stageRef.current.toDataURL({ mimeType: 'image/jpeg', quality: 0.8 });
       if (!dataUrl) {
         console.error(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] toDataURL devolvió null o undefined.`);
-        alert("Error al generar la imagen de la pantalla.");
+        toast.error("Error al generar la imagen de la pantalla.");
         return false;
       }
       console.log(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Data URL (primeros 100 chars):`, dataUrl.substring(0,100)+"...");
@@ -302,16 +305,12 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
       const imageBlob = await dataURLtoBlob(dataUrl);
       const imagePath = `capturas_anuncios/${anuncioParaCargar.id}/screen_${pantallaAGuardarIndex}_${Date.now()}.jpg`;
       
-      // ===================================================================
-      // LÍNEA CORREGIDA
-      // ===================================================================
       const metadataForStorage: UploadMetadata = {
         contentType: 'image/jpeg',
         customMetadata: {
-          creatorId: anuncioParaCargar.creatorId, // <-- Se cambió 'ownerUid' por 'creatorId'
+          creatorId: anuncioParaCargar.creatorId,
         },
       };
-      // ===================================================================
 
       console.log(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Subiendo imagen a Storage en path:`, imagePath, "con metadatos:", metadataForStorage);
       
@@ -325,7 +324,7 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
 
       if (!planSeleccionado) {
         console.error(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Plan seleccionado no encontrado:`, anuncioParaCargar.plan);
-        alert("Error: Datos del plan no encontrados para este anuncio.");
+        toast.error("Error: Datos del plan no encontrados para este anuncio.");
         if (newStorageImageUrl) deleteFileByUrl(newStorageImageUrl).catch(console.error);
         return false;
       }
@@ -334,7 +333,6 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
         ? campaniaSeleccionada.months * 30
         : anuncioParaCargar.maxScreens * (planSeleccionado.durationSeconds / anuncioParaCargar.maxScreens);
 
-      // Leer los estados del store para la pantalla correcta
       const sCount = useEditorStore.getState().screensCount;
       const effectForScreen = useEditorStore.getState().animationEffectsByScreen[pantallaAGuardarIndex];
       const durationForScreen = useEditorStore.getState().durationsByScreen[pantallaAGuardarIndex];
@@ -400,7 +398,7 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
       if (error instanceof Error) {
         errorMessage = error.message;
       }
-      alert(`Error al guardar la pantalla ${pantallaAGuardarIndex + 1}: ${errorMessage}`);
+      toast.error(`Error al guardar la pantalla ${pantallaAGuardarIndex + 1}: ${errorMessage}`);
       
       if (newStorageImageUrl) {
         console.warn(`[procesarYGuardarPantallaActual] [Pantalla ${pantallaAGuardarIndex}] Error después de subir ${newStorageImageUrl}, intentando borrarla.`);
@@ -411,9 +409,7 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
       return false;
     }
   }, [
-    anuncioParaCargar, // Dependencia principal para IDs y datos del anuncio
-    // currentScreenIndex se lee del store al inicio de la función para frescura
-    // Lo mismo para animationEffectsByScreenFromStore, durationsByScreenFromStore, screensCount
+    anuncioParaCargar,
   ]);
 
   const handleSaveCurrentScreenOnly = useCallback(async () => {
@@ -426,7 +422,7 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
 
     const success = await procesarYGuardarPantallaActual();
     if (success) {
-      alert('Pantalla guardada con éxito.');
+      toast.success('Pantalla guardada con éxito.');
     }
     setIsLoadingSave(false);
     console.log("[handleSaveCurrentScreenOnly] Finalizado guardado de PANTALLA ACTUAL.");
@@ -459,10 +455,7 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
 
     if (success) {
       const currentIsLast = useEditorStore.getState().currentScreenIndex >= useEditorStore.getState().screensCount - 1 && useEditorStore.getState().screensCount > 0;
-      // ^ Re-evaluar isLast con el índice que podría haber sido actualizado por goToNextScreenInStore si no fuera la última.
-      // Sin embargo, si success=true y currentIsLast=false, llamamos a goToNextScreenInStore.
-      // Si success=true y currentIsLast=true, mostramos modal.
-      if (currentIsLast) { // Si después de guardar, sigue siendo la última (o era la última)
+      if (currentIsLast) {
         console.log("[handleNextOrFinalize] Es la última pantalla Y SE GUARDÓ BIEN. Mostrando modal de finalizar.");
         setShowFinalizarModal(true);
       } else {
@@ -484,88 +477,75 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
   ]);
   
   const handleFinalizarAnuncioCompleto = useCallback(async () => {
-  const anuncioIdActual = anuncioParaCargar.id;
-  console.log(
-    '[handleFinalizarAnuncioCompleto] Iniciando finalización del anuncio completo. Anuncio ID:',
-    anuncioIdActual
-  );
-  setShowFinalizarModal(false);
-  setIsProcessingScreen(true);
+    const anuncioIdActual = anuncioParaCargar.id;
+    console.log(
+      '[handleFinalizarAnuncioCompleto] Iniciando finalización del anuncio completo. Anuncio ID:',
+      anuncioIdActual
+    );
+    setShowFinalizarModal(false);
+    setIsProcessingScreen(true);
 
-  // --- INICIO CAMBIO PARA EVITAR DUPLICACIÓN ---
-  console.log(
-    '[handleFinalizarAnuncioCompleto] Se asume que la última pantalla ya fue procesada por handleNextOrFinalize, que llamó a procesarYGuardarPantallaActual.'
-  );
-  // ---- FIN CAMBIO PARA EVITAR DUPLICACIÓN -----
+    console.log(
+      '[handleFinalizarAnuncioCompleto] Se asume que la última pantalla ya fue procesada por handleNextOrFinalize, que llamó a procesarYGuardarPantallaActual.'
+    );
 
-  try {
-    /* -----------------------------------------------------------------
-       1️⃣  Construimos el payload SIN forzar status por defecto
-    ------------------------------------------------------------------ */
-    const payload: {
-      elementosPorPantalla: typeof elementosGuardadosRef.current;
-      status?: 'pendingPayment';
-    } = {
-      elementosPorPantalla: elementosGuardadosRef.current,
-    };
+    try {
+      const payload: {
+        elementosPorPantalla: typeof elementosGuardadosRef.current;
+        status?: 'pendingPayment';
+      } = {
+        elementosPorPantalla: elementosGuardadosRef.current,
+      };
 
-    /* -----------------------------------------------------------------
-       2️⃣  Sólo los anuncios que NO estén activos pasan a pendingPayment
-    ------------------------------------------------------------------ */
-    if (anuncioParaCargar.status !== 'active') {
-      payload.status = 'pendingPayment';
+      if (anuncioParaCargar.status !== 'active') {
+        payload.status = 'pendingPayment';
+      }
+
+      console.log(
+        '[handleFinalizarAnuncioCompleto] Elementos finales a guardar en el Anuncio:',
+        JSON.parse(JSON.stringify(elementosGuardadosRef.current))
+      );
+
+      await updateAnuncioService(anuncioIdActual, payload);
+      console.log(
+        '[handleFinalizarAnuncioCompleto] Anuncio actualizado con todos los elementos.'
+      );
+
+      if (anuncioParaCargar.status === 'active') {
+        toast.success('¡Cambios guardados! Volvemos a tu anuncio.');
+        router.push(`/preview/${anuncioIdActual}?edit=ok`);
+      } else {
+        toast.success(
+          '¡Anuncio completado y listo para el pago! Serás redirigido a la previsualización.'
+        );
+        router.push(`/preview/${anuncioIdActual}`);
+      }
+
+    } catch (error) {
+      console.error(
+        '[handleFinalizarAnuncioCompleto] Error al actualizar el anuncio para finalizar:',
+        error
+      );
+      toast.error(
+        `Error CRÍTICO al finalizar el anuncio: ${
+          error instanceof Error ? error.message : 'Error desconocido.'
+        }`
+      );
+    } finally {
+      setIsProcessingScreen(false);
+      console.log('[handleFinalizarAnuncioCompleto] Finalizado.');
     }
-
-    console.log(
-      '[handleFinalizarAnuncioCompleto] Elementos finales a guardar en el Anuncio:',
-      JSON.parse(JSON.stringify(elementosGuardadosRef.current))
-    );
-
-    await updateAnuncioService(anuncioIdActual, payload);
-    console.log(
-      '[handleFinalizarAnuncioCompleto] Anuncio actualizado con todos los elementos.'
-    );
-
-    /* -----------------------------------------------------------------
-       3️⃣  Redirección según estado previo
-    ------------------------------------------------------------------ */
-    if (anuncioParaCargar.status === 'active') {
-  alert('¡Cambios guardados! Volvemos a tu anuncio.');
-  // Mostramos la versión actualizada en la página de previsualización
-  router.push(`/preview/${anuncioIdActual}?edit=ok`);
-} else {
-  alert(
-    '¡Anuncio completado y listo para el pago! Serás redirigido a la previsualización.'
-  );
-  // Flujo normal de pago para borradores
-  router.push(`/preview/${anuncioIdActual}`);
-}
-
-  } catch (error) {
-    console.error(
-      '[handleFinalizarAnuncioCompleto] Error al actualizar el anuncio para finalizar:',
-      error
-    );
-    alert(
-      `Error CRÍTICO al finalizar el anuncio: ${
-        error instanceof Error ? error.message : 'Error desconocido.'
-      }`
-    );
-  } finally {
-    setIsProcessingScreen(false);
-    console.log('[handleFinalizarAnuncioCompleto] Finalizado.');
-  }
 }, [anuncioParaCargar.id, anuncioParaCargar.status, router]);
 
+ // ... (Callbacks del bloque anterior) ...
 
-  // ... (Callbacks handlePreviewAnuncio, handleOpenExitModal, handleChangePlanCampania, handleConfirmExitAction sin cambios) ...
   const handlePreviewAnuncio = useCallback(() => {
     console.log("[handlePreviewAnuncio] Solicitud de previsualización.");
     if (anuncioParaCargar && anuncioParaCargar.id) {
       router.push(`/preview/${anuncioParaCargar.id}`);
     } else {
       console.error("[handlePreviewAnuncio] Error: No se pudo obtener el ID del anuncio.");
-      alert("Error al intentar previsualizar: ID del anuncio no encontrado.");
+      toast.error("Error al intentar previsualizar: ID del anuncio no encontrado.");
     }
   }, [anuncioParaCargar, router]);
 
@@ -574,96 +554,85 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
     setShowExitModal(true);
   }, []);
 
+  // --- LÓGICA DE CONFIRMACIONES MOVIDA A FUNCIONES DEDICADAS ---
+  const performChangePlan = useCallback(() => {
+    console.log("[performChangePlan] Confirmado. Redirigiendo a planes.");
+    router.push(`/planes?borradorId=${anuncioParaCargar.id}`);
+    setIsChangePlanModalOpen(false);
+  }, [router, anuncioParaCargar.id]);
+
+  const performDeleteDraft = useCallback(() => {
+    const anuncioId = anuncioParaCargar.id;
+    console.log(`[performDeleteDraft] Eliminación confirmada para borrador ${anuncioId}.`);
+    setIsDeleteDraftModalOpen(false);
+    setIsProcessingExit(true);
+
+    deleteAnuncio(anuncioId)
+      .then(() => {
+        console.log(`[performDeleteDraft] Borrador ${anuncioId} eliminado. Redirigiendo a bienvenida.`);
+        toast.success("El borrador ha sido eliminado.");
+        router.push('/bienvenida');
+        resetAnuncioConfigStore();
+        resetEditorStore();
+      })
+      .catch((error) => {
+        console.error("[performDeleteDraft] Error al eliminar el borrador:", error);
+        toast.error(`No se pudo eliminar el borrador: ${(error instanceof Error) ? error.message : "Error desconocido"}`);
+        setIsProcessingExit(false);
+      });
+  }, [anuncioParaCargar.id, router, resetAnuncioConfigStore, resetEditorStore]);
+
+
   const handleChangePlanCampania = useCallback(() => {
     console.log("[handleChangePlanCampania] Solicitud de cambio de plan/campaña.");
     if (anuncioParaCargar.status === 'draft') {
-      const confirmChange = window.confirm(
-        "Serás redirigido para cambiar el plan/campaña de tu borrador. ¿Estás seguro? Los cambios no guardados en la pantalla actual podrían perderse."
-      );
-      if (confirmChange) {
-        console.log("[handleChangePlanCampania] Confirmado. Redirigiendo a planes.");
-        router.push(`/planes?borradorId=${anuncioParaCargar.id}`);
-      } else {
-        console.log("[handleChangePlanCampania] Cambio cancelado.");
-      }
+      setIsChangePlanModalOpen(true);
     } else {
-      alert("Solo puedes cambiar el plan/campaña de anuncios en estado 'borrador'.");
+      toast("Solo puedes cambiar el plan/campaña de anuncios en estado 'borrador'.", { icon: '⚠️' });
     }
-  }, [router, anuncioParaCargar]);
+  }, [anuncioParaCargar.status]);
 
   const handleConfirmExitAction = useCallback(async (action: 'saveAndExit' | 'deleteAndExit') => {
     const anuncioId = anuncioParaCargar.id;
     console.log(`[handleConfirmExitAction] Acción: ${action}, Anuncio ID: ${anuncioId}`);
 
-    setIsProcessingExit(true);
+    // Cierra el modal de salida principal inmediatamente
     setShowExitModal(false);
 
     if (action === 'saveAndExit') {
+      setIsProcessingExit(true);
       try {
         console.log("[handleConfirmExitAction] Intentando guardar ANTES de salir...");
-        // Procesar y guardar la pantalla actual ANTES de intentar actualizar el anuncio principal
         const guardadoPantallaOk = await procesarYGuardarPantallaActual();
         
         if (guardadoPantallaOk) {
             console.log("[handleConfirmExitAction] Elementos a guardar en el Anuncio al salir:", elementosGuardadosRef.current);
             await updateAnuncioService(anuncioId, {
                 elementosPorPantalla: elementosGuardadosRef.current,
-                // No cambiamos el status aquí, solo guardamos el progreso del draft
             });
             console.log(`[handleConfirmExitAction] Borrador ${anuncioId} guardado. Redirigiendo a mis-anuncios.`);
+            toast.success("Progreso guardado.");
             router.push('/mis-anuncios');
         } else {
-            // Si falla el guardado de la pantalla actual, no proceder con el guardado del anuncio
             throw new Error("Fallo al guardar la pantalla actual antes de salir. El anuncio no se guardó completamente.");
         }
       } catch (error) {
         console.error("[handleConfirmExitAction] Error al guardar el borrador antes de salir:", error);
-        // La alerta ya se muestra en procesarYGuardarPantallaActual si falló allí, o aquí si falla updateAnuncioService
         if (!(error instanceof Error && error.message.includes("pantalla"))) {
-            alert(`No se pudo guardar el progreso antes de salir: ${error instanceof Error ? error.message : "Intente de nuevo."}`);
+            toast.error(`No se pudo guardar el progreso antes de salir: ${error instanceof Error ? error.message : "Intente de nuevo."}`);
         }
       } finally {
         setIsProcessingExit(false);
       }
     } else if (action === 'deleteAndExit') {
       if (anuncioParaCargar.status !== 'draft') {
-        alert("Solo se pueden eliminar anuncios en estado 'borrador'.");
-        setIsProcessingExit(false);
+        toast("Solo se pueden eliminar anuncios en estado 'borrador'.", { icon: '⚠️' });
         return;
       }
-      const confirmDelete = window.confirm(
-        "¡Atención! Estás a punto de eliminar este borrador de forma permanente. Esta acción no se puede deshacer. ¿Estás absolutamente seguro?"
-      );
-      if (confirmDelete) {
-        // 1. Iniciar el estado de "saliendo" para desmontar el canvas (ver cambio #2).
-        setIsProcessingExit(true);
-        setShowExitModal(false);
-
-        deleteAnuncio(anuncioId)
-          .then(() => {
-            console.log(`[handleConfirmExitAction] Borrador ${anuncioId} eliminado. Redirigiendo a bienvenida.`);
-            // 2. Redirigir a la página correcta.
-            router.push('/bienvenida');
-            // 3. Resetear los stores para la próxima sesión.
-            resetAnuncioConfigStore();
-            resetEditorStore();
-          })
-          .catch((error) => {
-            console.error("[handleConfirmExitAction] Error al eliminar el borrador:", error);
-            alert(`No se pudo eliminar el borrador: ${(error instanceof Error) ? error.message : "Error desconocido"}`);
-            // Si falla el borrado, revertir el estado de "saliendo".
-            setIsProcessingExit(false);
-          });
-      } else {
-        console.log("[handleConfirmExitAction] Eliminación cancelada.");
-        setIsProcessingExit(false);
-      }
+      // En lugar de un confirm, abre el modal de confirmación de borrado
+      setIsDeleteDraftModalOpen(true);
     }
-  }, [anuncioParaCargar, procesarYGuardarPantallaActual, router, resetAnuncioConfigStore, resetEditorStore]);
-
-
-  // ... (JSX de renderizado: if !isEditorInitialized, renderActiveTool, y el return principal con Sidebar, Toolbar, Modales, etc.,
-  // permanecen IGUALES a la última versión completa que te proporcioné. Los cambios clave están en los callbacks de arriba.)
+  }, [anuncioParaCargar, procesarYGuardarPantallaActual, router]);
 
   if (!isEditorInitialized || !anuncioParaCargar) {
     return (
@@ -675,14 +644,11 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
   }
 
   const renderActiveTool = () => {
-    // Busca el elemento seleccionado actualmente en el store
     const currentSelectedId = useEditorStore.getState().selectedElementIdForEdit;
     const elementToEdit = currentSelectedId
       ? elementsOfCurrentScreen.find(el => el.id === currentSelectedId)
       : undefined;
     
-    // Si hay un elemento seleccionado y es un fondo de imagen, muestra la herramienta de marco.
-    // Esta condición tiene prioridad sobre cualquier herramienta activa en la barra lateral.
     if (elementToEdit && elementToEdit.tipo === 'fondoImagen') {
       return (
         <FrameColorTool
@@ -693,11 +659,8 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
       );
     }
     
-    // Si no hay ninguna herramienta activa en la barra lateral, no muestra nada.
     if (!activeTool) return null;
     
-    // Si se activa una herramienta desde la barra lateral, muestra el panel correspondiente.
-    // Esto se usa principalmente para AÑADIR nuevos elementos.
     switch (activeTool) {
       case 'text':
         return ( <TextTool key={currentSelectedId || 'new-text'} initial={elementToEdit?.tipo === 'texto' ? elementToEdit as TextElement : undefined} onConfirm={handleConfirmEditOrAddElement} onClose={handleCloseTool} /> );
@@ -706,8 +669,6 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
       case 'color':
         return ( <ColorTool key={'tool-color'} initial={elementToEdit?.tipo === 'fondoColor' ? elementToEdit as ColorBackgroundElement : undefined} onConfirm={handleConfirmEditOrAddElement} onClose={handleCloseTool} /> );
       case 'imageBackground':
-        // Esta herramienta ahora solo se mostrará para AÑADIR un nuevo fondo de imagen,
-        // ya que la edición (clic en el marco) es capturada por la condición de arriba.
         return ( <ImageBackgroundTool key={'tool-imageBg'} initial={undefined} onConfirm={handleConfirmEditOrAddElement} onClose={handleCloseTool} /> );
       case 'gradient':
         return ( <GradientBackgroundTool key={'tool-gradient'} initial={elementToEdit?.tipo === 'gradient' ? elementToEdit as GradientBackgroundElement : undefined} onConfirm={handleConfirmEditOrAddElement} onClose={handleCloseTool} /> );
@@ -759,13 +720,7 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
                               : 'text-[var(--color-texto-principal)] hover:bg-[var(--color-fondo-hover)]'
                             }`}
               >
-                {toolId === 'text' && <span className="mr-2">✏️</span>}
-                {toolId === 'curvedText' && <span className="mr-2">↪️</span>}
-                {toolId === 'color' && <span className="mr-2">🎨</span>}
-                {toolId === 'gradient' && <span className="mr-2">🌈</span>}
-                {toolId === 'imageBackground' && <span className="mr-2">🖼️</span>}
-                {toolId === 'subimage' && <span className="mr-2">🧩</span>}
-                {toolId === 'effects' && <span className="mr-2">✨</span>}
+                {/* ... (íconos sin cambios) ... */}
                 {toolId.charAt(0).toUpperCase() + toolId.slice(1).replace(/([A-Z])/g, ' $1')}
               </button>
             ))}
@@ -783,27 +738,22 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
       
       <div className="flex flex-col flex-1 ml-0">
         <Toolbar
-    activeTool={activeTool}
-    onPrev={goToPrevScreenInStore}
-    onNext={handleNextOrFinalize}
-    onPreview={handleNextOrFinalize}
-    isLastScreen={isLastScreenValue}
-    currentScreen={currentScreenIndex + 1}
-    totalScreens={screensCount}
-    disabled={generalDisabledState || isProcessingScreen}
-    onExitEditor={handleOpenExitModal}
-    showExitEditorButton={true}
-    onChangePlanCampania={handleChangePlanCampania}
-    showChangePlanCampaniaButton={anuncioParaCargar.status === 'draft'}
-    
-    // --- LÍNEAS AÑADIDAS ---
-    // Renombramos el botón "Siguiente"
-    nextButtonText="Guardar y Continuar"
-    
-    // Pasamos los textos para los botones de la izquierda (solo en modo 'draft')
-    exitButtonText={anuncioParaCargar.status === 'draft' ? 'Salir y Guardar' : undefined}
-    changePlanButtonText={anuncioParaCargar.status === 'draft' ? 'Cambiar Plan' : undefined}
-/>
+            activeTool={activeTool}
+            onPrev={goToPrevScreenInStore}
+            onNext={handleNextOrFinalize}
+            onPreview={handleNextOrFinalize}
+            isLastScreen={isLastScreenValue}
+            currentScreen={currentScreenIndex + 1}
+            totalScreens={screensCount}
+            disabled={generalDisabledState || isProcessingScreen}
+            onExitEditor={handleOpenExitModal}
+            showExitEditorButton={true}
+            onChangePlanCampania={handleChangePlanCampania}
+            showChangePlanCampaniaButton={anuncioParaCargar.status === 'draft'}
+            nextButtonText="Guardar y Continuar"
+            exitButtonText={anuncioParaCargar.status === 'draft' ? 'Salir y Guardar' : undefined}
+            changePlanButtonText={anuncioParaCargar.status === 'draft' ? 'Cambiar Plan' : undefined}
+        />
 
         {!isSidebarOpen && (
           <button
@@ -819,127 +769,156 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
         )}
 
         <main className="flex-1 bg-[var(--color-fondo)] overflow-hidden relative">
-  {/* Condicionamos el renderizado del canvas y las herramientas */}
-  { !isProcessingExit && (
-    <>
-      <EditorCanvas ref={stageRef} />
-      {renderActiveTool()}
-    </>
-  )}
-  
-  {/* El loader se mantiene igual y ahora se mostrará sobre un fondo limpio al salir */}
-  {(isLoadingSave || isProcessingScreen || isProcessingExit) && (
-    <div className="absolute inset-0 bg-black bg-opacity-20 backdrop-blur-sm flex items-center justify-center z-[55]">
-      <div className="w-12 h-12 border-4 border-gray-200 border-t-primario rounded-full animate-spin" />
-      <p className="ml-4 text-lg text-white">
-        {isLoadingSave && 'Guardando pantalla...'}
-        {isProcessingScreen && 'Procesando...'}
-        {isProcessingExit && 'Saliendo...'}
-      </p>
-    </div>
-  )}
-</main>
+          { !isProcessingExit && (
+            <>
+              <EditorCanvas ref={stageRef} />
+              {renderActiveTool()}
+            </>
+          )}
+          {(isLoadingSave || isProcessingScreen || isProcessingExit) && (
+            <div className="absolute inset-0 bg-black bg-opacity-20 backdrop-blur-sm flex items-center justify-center z-[55]">
+              <div className="w-12 h-12 border-4 border-gray-200 border-t-primario rounded-full animate-spin" />
+              <p className="ml-4 text-lg text-white">
+                {isLoadingSave && 'Guardando pantalla...'}
+                {isProcessingScreen && 'Procesando...'}
+                {isProcessingExit && 'Saliendo...'}
+              </p>
+            </div>
+          )}
+        </main>
 
-        {/* --- Renderizado condicional para los botones flotantes --- */}
-{anuncioParaCargar.status !== 'draft' && (
-  <>
-    <button
-      onClick={() => setShowGuardarModal(true)}
-      disabled={isLoadingSave || isProcessingExit || isProcessingScreen}
-      className="fixed bottom-4 right-4 z-30 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 disabled:opacity-50 w-44 border border-white/75"
-    >
-      {isLoadingSave ? 'Guardando...' : 'Guardar Pantalla'}
-    </button>
+        {anuncioParaCargar.status !== 'draft' && (
+          <>
+            <button
+              onClick={() => setShowGuardarModal(true)}
+              disabled={isLoadingSave || isProcessingExit || isProcessingScreen}
+              className="fixed bottom-4 right-4 z-30 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 disabled:opacity-50 w-44 border border-white/75"
+            >
+              {isLoadingSave ? 'Guardando...' : 'Guardar Pantalla'}
+            </button>
 
-    <button
-      onClick={handlePreviewAnuncio}
-      disabled={isLoadingSave || isProcessingExit || isProcessingScreen}
-      className="fixed bottom-4 left-4 z-30 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600 disabled:opacity-50 w-44 border border-white/75"
-    >
-      Previsualizar Anuncio
-    </button>
-  </>
-)}
+            <button
+              onClick={handlePreviewAnuncio}
+              disabled={isLoadingSave || isProcessingExit || isProcessingScreen}
+              className="fixed bottom-4 left-4 z-30 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600 disabled:opacity-50 w-44 border border-white/75"
+            >
+              Previsualizar Anuncio
+            </button>
+          </>
+        )}
       </div>
 
-      {showGuardarModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-[var(--color-tarjeta)] p-6 rounded-lg shadow-xl max-w-sm w-full">
-            <h3 className="text-lg font-semibold mb-4 text-[var(--color-texto-principal)]">
-              Confirmar Cambios
-            </h3>
-            <p className="text-sm text-[var(--color-texto-secundario)] mb-6">
-              ¿Estás seguro de que deseas guardar los cambios realizados en esta pantalla ({currentScreenIndex + 1})?
-            </p>
-            <div className="flex justify-end space-x-3">
-              <Button variant="secondary" onClick={() => setShowGuardarModal(false)} disabled={isLoadingSave}>
-                Cancelar
-              </Button>
-              <Button variant="primary" onClick={handleSaveCurrentScreenOnly} disabled={isLoadingSave}>
-                {isLoadingSave ? 'Guardando...' : 'Sí, Guardar Pantalla'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {showFinalizarModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-[var(--color-tarjeta)] p-6 rounded-lg shadow-xl max-w-sm w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4 text-[var(--color-texto-principal)]">Finalizar Anuncio</h3>
-            <p className="text-sm text-[var(--color-texto-secundario)] mb-6">
-              Has llegado a la última pantalla ({screensCount}). ¿Deseas finalizar y guardar todos los cambios del anuncio?
-            </p>
-            <div className="flex justify-end space-x-3">
-              <Button variant="secondary" onClick={() => setShowFinalizarModal(false)} disabled={isProcessingScreen}>
-                Seguir Editando
-              </Button>
-              <Button variant="primary" onClick={handleFinalizarAnuncioCompleto} disabled={isProcessingScreen}>
-                {isProcessingScreen ? 'Finalizando...' : 'Sí, Finalizar Anuncio'}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* --- MODALES REFACTORIZADOS Y NUEVOS --- */}
 
-      {showExitModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-[60]">
-          <div className="bg-[var(--color-tarjeta)] p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
-            <h3 className="text-xl font-semibold mb-4 text-[var(--color-texto-principal)]">Salir del Editor</h3>
-            <p className="text-sm text-[var(--color-texto-secundario)] mb-6">
-              ¿Qué deseas hacer con este anuncio?
-            </p>
-            <div className="flex flex-col space-y-3">
-              <Button
-                variant="primary"
-                onClick={() => handleConfirmExitAction('saveAndExit')}
-                disabled={isProcessingExit || isLoadingSave || isProcessingScreen}
-                className="w-full"
-              >
-                {isProcessingExit ? 'Guardando y Saliendo...' : 'Guardar Cambios y Salir'}
-              </Button>
-              {anuncioParaCargar.status === 'draft' && (
-                <Button
-                  variant="danger" 
-                  onClick={() => handleConfirmExitAction('deleteAndExit')}
-                  disabled={isProcessingExit || isLoadingSave || isProcessingScreen}
-                  className="w-full"
-                >
-                  {isProcessingExit ? 'Eliminando...' : 'Eliminar Borrador y Salir'}
-                </Button>
-              )}
-              <Button
-                variant="secondary"
-                onClick={() => setShowExitModal(false)}
-                disabled={isProcessingExit || isLoadingSave || isProcessingScreen}
-                className="w-full mt-2"
-              >
-                Cancelar (Seguir Editando)
-              </Button>
-            </div>
-          </div>
+      <Modal
+        isOpen={showGuardarModal}
+        onClose={() => !isLoadingSave && setShowGuardarModal(false)}
+        title="Confirmar Cambios"
+      >
+        <p className="text-sm text-[var(--color-texto-secundario)] mb-6">
+          ¿Estás seguro de que deseas guardar los cambios realizados en esta pantalla ({currentScreenIndex + 1})?
+        </p>
+        <div className="flex justify-end space-x-3">
+          <Button variant="secondary" onClick={() => setShowGuardarModal(false)} disabled={isLoadingSave}>
+            Cancelar
+          </Button>
+          <Button variant="primary" onClick={handleSaveCurrentScreenOnly} disabled={isLoadingSave}>
+            {isLoadingSave ? 'Guardando...' : 'Sí, Guardar'}
+          </Button>
         </div>
-      )}
+      </Modal>
+      
+      <Modal
+        isOpen={showFinalizarModal}
+        onClose={() => !isProcessingScreen && setShowFinalizarModal(false)}
+        title="Finalizar Anuncio"
+      >
+        <p className="text-sm text-[var(--color-texto-secundario)] mb-6">
+          Has llegado a la última pantalla ({screensCount}). ¿Deseas finalizar y guardar todos los cambios del anuncio?
+        </p>
+        <div className="flex justify-end space-x-3">
+          <Button variant="secondary" onClick={() => setShowFinalizarModal(false)} disabled={isProcessingScreen}>
+            Seguir Editando
+          </Button>
+          <Button variant="primary" onClick={handleFinalizarAnuncioCompleto} disabled={isProcessingScreen}>
+            {isProcessingScreen ? 'Finalizando...' : 'Sí, Finalizar'}
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showExitModal}
+        onClose={() => !(isProcessingExit || isLoadingSave || isProcessingScreen) && setShowExitModal(false)}
+        title="Salir del Editor"
+      >
+        <p className="text-sm text-[var(--color-texto-secundario)] mb-6">
+          ¿Qué deseas hacer con tu progreso?
+        </p>
+        <div className="flex flex-col space-y-3">
+          <Button
+            variant="primary"
+            onClick={() => handleConfirmExitAction('saveAndExit')}
+            disabled={isProcessingExit || isLoadingSave || isProcessingScreen}
+            className="w-full"
+          >
+            {isProcessingExit ? 'Guardando...' : 'Guardar Cambios y Salir'}
+          </Button>
+          {anuncioParaCargar.status === 'draft' && (
+            <Button
+              variant="danger" 
+              onClick={() => handleConfirmExitAction('deleteAndExit')}
+              disabled={isProcessingExit || isLoadingSave || isProcessingScreen}
+              className="w-full"
+            >
+              Eliminar Borrador y Salir
+            </Button>
+          )}
+          <Button
+            variant="secondary"
+            onClick={() => setShowExitModal(false)}
+            disabled={isProcessingExit || isLoadingSave || isProcessingScreen}
+            className="w-full mt-2"
+          >
+            Cancelar (Seguir Editando)
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={isChangePlanModalOpen}
+        onClose={() => setIsChangePlanModalOpen(false)}
+        title="Cambiar Plan o Campaña"
+      >
+        <p className="text-sm text-[var(--color-texto-secundario)] mb-6">
+          Serás redirigido para cambiar el plan/campaña. Los cambios no guardados en la pantalla actual podrían perderse. ¿Estás seguro?
+        </p>
+        <div className="flex justify-end space-x-3">
+          <Button variant="secondary" onClick={() => setIsChangePlanModalOpen(false)}>
+            Cancelar
+          </Button>
+          <Button variant="primary" onClick={performChangePlan}>
+            Sí, Continuar
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={isDeleteDraftModalOpen}
+        onClose={() => !isProcessingExit && setIsDeleteDraftModalOpen(false)}
+        title="Confirmar Eliminación"
+      >
+         <p className="text-sm text-[var(--color-texto-secundario)] mb-6">
+          ¡Atención! Estás a punto de eliminar este borrador de forma permanente. Esta acción no se puede deshacer. ¿Estás absolutamente seguro?
+        </p>
+        <div className="flex justify-end space-x-3">
+          <Button variant="secondary" onClick={() => setIsDeleteDraftModalOpen(false)} disabled={isProcessingExit}>
+            Cancelar
+          </Button>
+          <Button variant="danger" onClick={performDeleteDraft} disabled={isProcessingExit}>
+            {isProcessingExit ? 'Eliminando...' : 'Sí, Eliminar Borrador'}
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }

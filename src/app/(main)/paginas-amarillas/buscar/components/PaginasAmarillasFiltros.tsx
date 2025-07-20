@@ -16,6 +16,9 @@ import SelectorRubro, {
 } from '@/app/components/forms/SelectorRubro';
 import Button from '@/app/components/ui/Button';
 import Checkbox from '@/app/components/ui/Checkbox';
+import categoriasData from '@/data/categorias.json';
+import rubrosData from '@/data/rubro.json';
+
 
 interface Props {
   onBuscar: (f: PaginaAmarillaFiltros) => void;
@@ -28,7 +31,7 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
   isLoading = false,
   initialFiltros = {},
 }) => {
-  /* ------------- estado inicial (memorizado) ------------- */
+  /* ------------- estado inicial (memorizado y corregido) ------------- */
   const initialLocalidad = useMemo<LocalidadSeleccionada | null>(() => {
     return initialFiltros.provincia && initialFiltros.localidad
       ? {
@@ -40,22 +43,38 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
   }, [initialFiltros.localidad, initialFiltros.provincia]);
 
   const initialCat = useMemo<CategoriaSeleccionada | null>(() => {
-    return initialFiltros.categoria
+    if (!initialFiltros.categoria) return null;
+    const categoriaEncontrada = categoriasData.categorias.find(
+      (c) => c.nombre === initialFiltros.categoria
+    );
+    return categoriaEncontrada
       ? {
           categoria: initialFiltros.categoria,
           subcategoria: initialFiltros.subCategoria || null,
+          requiereMatricula: categoriaEncontrada.requiereMatricula,
         }
       : null;
   }, [initialFiltros.categoria, initialFiltros.subCategoria]);
 
   const initialRub = useMemo<RubroSeleccionado | null>(() => {
-    return initialFiltros.rubro
-      ? {
-          rubro: initialFiltros.rubro,
-          subrubro: initialFiltros.subRubro || null,
-        }
+    if (!initialFiltros.rubro) return null;
+    const rubroEncontrado = rubrosData.rubros.find(
+      (r) => r.nombre === initialFiltros.rubro
+    );
+    if (!rubroEncontrado) return null;
+
+    const subrubroEncontrado = initialFiltros.subRubro
+      ? rubroEncontrado.subrubros.find(
+          (s) => s.nombre === initialFiltros.subRubro
+        ) || null
       : null;
+      
+    return {
+      rubro: initialFiltros.rubro,
+      subrubro: subrubroEncontrado,
+    };
   }, [initialFiltros.rubro, initialFiltros.subRubro]);
+
 
   /* ---------------- estado controlado ---------------- */
   const [localidadSel, setLocalidadSel] = useState<LocalidadSeleccionada | null>(
@@ -64,14 +83,13 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
   const [rolSel, setRolSel] = useState<RolPaginaAmarilla | ''>(
     initialFiltros.rol || ''
   );
-  const [catSel, setCatSel] = useState<CategoriaSeleccionada | null>(null);
-  const [rubSel, setRubSel] = useState<RubroSeleccionado | null>(null);
+  const [catSel, setCatSel] = useState<CategoriaSeleccionada | null>(initialCat);
+  const [rubSel, setRubSel] = useState<RubroSeleccionado | null>(initialRub);
   const [realizaEnvios, setRealizaEnvios] = useState<boolean | undefined>(
     initialFiltros.realizaEnvios
   );
   const [localidadKey, setLocalidadKey] = useState(Date.now());
 
-  // --- Estados para el dropdown personalizado ---
   const [isRolOpen, setIsRolOpen] = useState(false);
   const rolDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -80,7 +98,7 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
     setRolSel(nuevoRol);
     setCatSel(null);
     setRubSel(null);
-    setIsRolOpen(false); // Cierra el dropdown al seleccionar
+    setIsRolOpen(false);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -93,20 +111,17 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
       subCategoria:
         rolSel === 'prestador' ? catSel?.subcategoria || undefined : undefined,
       rubro: rolSel === 'comercio' ? rubSel?.rubro : undefined,
-      subRubro: rolSel === 'comercio' ? rubSel?.subrubro || undefined : undefined,
+      subRubro: rolSel === 'comercio' ? rubSel?.subrubro?.nombre || undefined : undefined,
       realizaEnvios,
     };
     console.log('[Filtros] submit →', filtros);
     onBuscar(filtros);
 
-    // --- LÓGICA DE LIMPIEZA CORREGIDA ---
-    // Limpia la localidad y el tipo de publicación.
     setLocalidadSel(null);
-    setRolSel(''); // <--- CAMBIO AÑADIDO
+    setRolSel('');
     setLocalidadKey(Date.now());
   };
 
-  // --- Lógica para el dropdown personalizado ---
   const rolOptions = [
     { value: '', label: 'Todos (Prestadores y Comercios)' },
     { value: 'prestador', label: 'Prestadores / Profesionales' },
@@ -205,7 +220,7 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
         <SelectorCategoria
           idCategoria="busqCat"
           idSubcategoria="busqSubCat"
-          initialValue={initialCat}
+          initialValue={initialCat ? { categoria: initialCat.categoria, subcategoria: initialCat.subcategoria } : undefined}
           onCategoriaChange={setCatSel}
         />
       )}

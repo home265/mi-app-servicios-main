@@ -1,6 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { toast } from 'react-hot-toast';
 import {
   useUserStore,
   UserProfile,
@@ -12,8 +13,7 @@ import {
 import {
   subscribeToNotifications,
   removeNotification,
-  // sendAgreementConfirmed, // Ya no se usa directamente aquí, la nueva función lo llama en el backend
-  confirmAgreementAndCleanup, // <-- NUEVO: Se importa la función de limpieza
+  confirmAgreementAndCleanup,
   NotificationDoc as Notification,
   Sender as NotificationSender,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -22,7 +22,6 @@ import {
 import {
   doc,
   getDoc,
-  // deleteDoc, // Ya no se usa directamente aquí
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   DocumentData,
 } from 'firebase/firestore';
@@ -145,7 +144,7 @@ export default function RespuestasPage() {
     return null;
   }
 
-  /* ------------- acciones (modificadas para gestionar estado de procesamiento) ------------- */
+  /* ------------- acciones (modificadas para usar toast) ------------- */
   async function handleContactar(notif: Notification) {
     if (processingNotifId) return;
     setProcessingNotifId(notif.id);
@@ -175,37 +174,30 @@ export default function RespuestasPage() {
       setShowContacto(true);
     } catch (error) {
         console.error("Error al contactar:", error);
-        alert("Hubo un error al obtener los datos de contacto.");
+        toast.error("Hubo un error al obtener los datos de contacto.");
     } finally {
         setProcessingNotifId(null);
     }
   }
 
-  // ============================================================================================
-  // FUNCIÓN MODIFICADA: Ahora usa la nueva lógica centralizada del backend
-  // ============================================================================================
   async function handleConfirmarAcuerdo(notif: Notification) {
     if (processingNotifId) return;
     setProcessingNotifId(notif.id);
 
     try {
-      // 1. Obtener los datos necesarios para la función de limpieza
       const provider = getSender(notif);
       if (!provider) {
         throw new Error("No se pudo determinar el remitente para confirmar el acuerdo.");
       }
 
-      // 2. Obtener la ID de la notificación original (job_accept) desde el payload
       const originalNotifId = notif.payload?.originalNotifId as string | undefined;
       if (!originalNotifId) {
-        // Este es un caso de error importante. Significa que la cadena de IDs se rompió.
         console.error("Error crítico: No se encontró la 'originalNotifId' en el payload de la notificación de seguimiento.");
-        alert("Error: No se pudo procesar la solicitud por falta de un identificador clave.");
+        toast.error("Error: No se pudo procesar la solicitud por falta de un identificador clave.");
         setProcessingNotifId(null);
         return;
       }
 
-      // 3. Llamar a la única función de backend que hace todo el trabajo
       await confirmAgreementAndCleanup({
         user: { uid: userUid, collection: userCollection },
         provider: { uid: provider.uid, collection: provider.collection },
@@ -214,29 +206,23 @@ export default function RespuestasPage() {
         userName: userName || 'Usuario',
       });
 
-      // ¡Ya no necesitamos borrar nada manualmente desde aquí!
-      // El listener de notificaciones se encargará de actualizar la UI cuando los documentos se eliminen.
-      alert('Acuerdo confirmado. ¡Gracias por usar nuestros servicios!');
+      toast.success('Acuerdo confirmado. ¡Gracias por usar nuestros servicios!');
 
     } catch (error) {
       console.error('Error al confirmar acuerdo:', error);
-      alert('Hubo un error al confirmar el acuerdo.');
+      toast.error('Hubo un error al confirmar el acuerdo.');
     } finally {
       setProcessingNotifId(null);
     }
   }
 
   function handleAbrirResena(notif: Notification) {
-  if (processingNotifId) return;
-  const provider = getSender(notif);
-  if (provider) {
-    // Redirige a la nueva página de calificación pasándole el UID del prestador
-    router.push(`/calificar/${provider.uid}?notifId=${notif.id}`);
-    // Opcional: podrías eliminar la notificación aquí o en la página de calificación
+    if (processingNotifId) return;
+    const provider = getSender(notif);
+    if (provider) {
+      router.push(`/calificar/${provider.uid}?notifId=${notif.id}`);
+    }
   }
-}
-
-  
 
   async function handleDelete(notif: Notification) {
     if (processingNotifId) return;
@@ -249,7 +235,7 @@ export default function RespuestasPage() {
       );
     } catch (error) {
       console.error('Error al eliminar notificación:', error);
-      alert('Error al eliminar notificación.');
+      toast.error('Error al eliminar notificación.');
     } finally {
       setProcessingNotifId(null);
     }
@@ -264,7 +250,7 @@ export default function RespuestasPage() {
     }
   }
 
-  /* --------------- UI (Modificada para pasar el estado de procesamiento) ---------------- */
+  /* --------------- UI (Sin cambios) ---------------- */
   return (
     <div className="flex flex-col items-center p-4 min-h-screen bg-gray-50">
       <div className="mb-6 mt-2">
@@ -319,8 +305,6 @@ export default function RespuestasPage() {
           onClose={() => setShowContacto(false)}
         />
       )}
-
-      
 
       {showPerfilModal && perfilModalTarget && (
         <PerfilModal

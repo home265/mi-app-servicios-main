@@ -6,6 +6,7 @@ import { useTheme } from 'next-themes'
 import {
   ChevronLeftIcon,
 } from '@heroicons/react/24/outline'
+import { toast } from 'react-hot-toast';
 
 import {
   useUserStore,
@@ -200,7 +201,7 @@ export default function TrabajosPage() {
       );
     } catch (error) {
         console.error("Error al aceptar la solicitud:", error);
-        alert("Hubo un error al aceptar la solicitud.");
+        toast.error("Hubo un error al aceptar la solicitud.");
     } finally {
         setProcessingNotifId(null);
     }
@@ -217,21 +218,21 @@ export default function TrabajosPage() {
       );
     } catch (error) {
       console.error("Error al eliminar la notificación:", error);
-      alert("Hubo un error al eliminar la notificación.");
+      toast.error("Hubo un error al eliminar la notificación.");
     } finally {
       setProcessingNotifId(null);
     }
   }
 
   function openResenaFormForClient(n: Notification) {
-  if (processingNotifId) return;
-  
-  const cli = getSender(n)
-  if (cli) {
-    // Redirige a la nueva página pasándole el UID del usuario a calificar
-    router.push(`/calificar/${cli.uid}?notifId=${n.id}`);
+    if (processingNotifId) return;
+    
+    const cli = getSender(n)
+    if (cli) {
+      // Redirige a la nueva página pasándole el UID del usuario a calificar
+      router.push(`/calificar/${cli.uid}?notifId=${n.id}`);
+    }
   }
-}
 
   function handleAvatarClick(n: Notification) {
     if (processingNotifId) return;

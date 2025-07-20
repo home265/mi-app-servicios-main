@@ -1,57 +1,149 @@
 {
   "indexes": [
     {
-      "collectionGroup": "paginas_amarillas",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "provincia",        "order": "ASCENDING" },
-        { "fieldPath": "localidad",        "order": "ASCENDING" },
-        { "fieldPath": "activa",           "order": "ASCENDING" },
-        { "fieldPath": "fechaExpiracion",  "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "paginas_amarillas",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "creatorRole",      "order": "ASCENDING" },
-        { "fieldPath": "activa",           "order": "ASCENDING" },
-        { "fieldPath": "provincia",        "order": "ASCENDING" },
-        { "fieldPath": "localidad",        "order": "ASCENDING" },
-        { "fieldPath": "rubro",            "order": "ASCENDING" },
-        { "fieldPath": "subRubro",         "order": "ASCENDING" },
-        { "fieldPath": "fechaExpiracion",  "order": "ASCENDING" }
-      ]
-    },
-    {
-      "collectionGroup": "paginas_amarillas",
-      "queryScope": "COLLECTION",
-      "fields": [
-        { "fieldPath": "creatorRole",      "order": "ASCENDING" },
-        { "fieldPath": "activa",           "order": "ASCENDING" },
-        { "fieldPath": "provincia",        "order": "ASCENDING" },
-        { "fieldPath": "localidad",        "order": "ASCENDING" },
-        { "fieldPath": "categoria",        "order": "ASCENDING" },
-        { "fieldPath": "subCategoria",     "order": "ASCENDING" },
-        { "fieldPath": "fechaExpiracion",  "order": "ASCENDING" }
-      ]
-    },
-    {
       "collectionGroup": "anuncios",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "creatorId", "order": "ASCENDING" },
-        { "fieldPath": "status",    "order": "ASCENDING" },
-        { "fieldPath": "updatedAt", "order": "DESCENDING" }
+        {
+          "fieldPath": "creatorId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "status",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "updatedAt",
+          "order": "DESCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "DESCENDING"
+        }
       ]
     },
     {
       "collectionGroup": "cvs",
       "queryScope": "COLLECTION",
       "fields": [
-        { "fieldPath": "localidad.provinciaNombre", "order": "ASCENDING" },
-        { "fieldPath": "localidad.nombre", "order": "ASCENDING" },
-        { "fieldPath": "rubros", "arrayConfig": "CONTAINS" }
+        {
+          "fieldPath": "localidad.provinciaNombre",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "localidad.nombre",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "rubros",
+          "arrayConfig": "CONTAINS"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "paginas_amarillas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "creatorRole",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "activa",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "provincia",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "localidad",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "categoria",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "subCategoria",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "fechaExpiracion",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "paginas_amarillas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "creatorRole",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "activa",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "provincia",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "localidad",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "rubro",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "subRubro",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "fechaExpiracion",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "paginas_amarillas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "provincia",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "localidad",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "activa",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "fechaExpiracion",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "__name__",
+          "order": "ASCENDING"
+        }
       ]
     }
   ],
