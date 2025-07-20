@@ -77,15 +77,16 @@ const wallpoet = Wallpoet({ subsets: ['latin'], weight: '400', display: 'swap', 
 export const metadata: Metadata = {
   title: 'CODYS | Tu red de confianza',
   description: 'Conectamos necesidades con soluciones.',
-  // --- Datos para los íconos y la app web ---
-  manifest: '/manifest.json', // Next.js buscará este archivo en /public
+  manifest: '/manifest.json',
+
+  // --- AÑADE ESTA LÍNEA ---
+  themeColor: '#0F2623', // Define el color de la barra de estado y la splash screen
+
   appleWebApp: {
     title: 'CODYS',
     statusBarStyle: 'black-translucent',
   },
-  // La configuración de los íconos para favicon y apple-touch-icon
-  // es manejada automáticamente por Next.js si colocas los archivos
-  // con los nombres correctos (icon.png, apple-icon.png) en la carpeta /app
+  // El resto de la configuración de íconos es manejada automáticamente por Next.js
 };
 
 export default function RootLayout({
