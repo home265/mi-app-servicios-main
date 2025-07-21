@@ -102,9 +102,14 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
         <p className="text-sm text-error text-center">{error}</p>
       )}
 
-      <Button type="submit" isLoading={isLoading} fullWidth>
-        {isLoading ? 'Ingresando...' : 'Ingresar'}
-      </Button>
+      <Button
+  type="submit"
+  isLoading={isLoading}
+  fullWidth
+  className="!text-[var(--color-fondo)] !focus:shadow-none"
+>
+  {isLoading ? 'Ingresando...' : 'Ingresar'}
+</Button>
     </form>
   );
 }

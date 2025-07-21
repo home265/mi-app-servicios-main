@@ -276,99 +276,102 @@ export default function BusquedaPage() {
       className="min-h-screen flex flex-col"
       style={{ backgroundColor: P.fondo, color: P.texto }}
     >
-      <header className="relative flex items-center justify-center px-5 py-8">
-        <div className="absolute left-5">
-            <BotonAyuda>
-            <AyudaBusqueda />
-            </BotonAyuda>
-        </div>
-        <h1 className="text-lg font-medium">
-            Búsqueda de servicios
-        </h1>
-      </header>
-
-      <hr className="mx-5" style={{ borderColor: P.borde }} />
-
-      <main className="flex flex-col items-center flex-grow pt-6 pb-8 px-4">
-        <div
-          className="w-full max-w-lg space-y-6 p-6 rounded-2xl shadow-lg"
-          style={{
-            backgroundColor: P.tarjeta,
-            border: `1px solid ${P.borde}`,
-            color: palette.dark.texto
-          }}
-        >
-          <SelectorCategoria
-            idCategoria="busq-cat"
-            idSubcategoria="busq-sub"
-            onCategoriaChange={handleCategoriaChange}
-            labelColor={palette.dark.texto}
-          />
-
-          <div>
-            <label
-              htmlFor="descripcion"
-              className="block text-sm font-medium mb-1"
-              style={{ color: palette.dark.texto }}
-            >
-              Descripción (breve)
-            </label>
-            <textarea
-              id="descripcion"
-              rows={3}
-              value={description}
-              onChange={e => setDescription(e.target.value)}
-              placeholder="Ej: Necesito reparar una cañería en el baño..."
-              className="w-full px-4 py-2 rounded-lg focus:outline-none"
-              style={{
-                backgroundColor: 'rgba(255,255,255,0.08)',
-                color: palette.dark.texto,
-                border: `1px solid ${P.borde}`,
-                resize: 'none'
-              }}
-            />
+      {/* 1. Contenedor principal que limita y centra el contenido */}
+      <div className="w-full max-w-4xl mx-auto px-5 flex flex-col flex-grow">
+        <header className="relative flex items-center justify-center py-8">
+          <div className="absolute left-0">
+              <BotonAyuda>
+              <AyudaBusqueda />
+              </BotonAyuda>
           </div>
+          <h1 className="text-lg font-medium">
+              Búsqueda de servicios
+          </h1>
+        </header>
 
-          <Button
-            onClick={handleSearch}
-            disabled={!categorySel || !description.trim() || isSearching}
-            fullWidth
+        <hr style={{ borderColor: P.borde }} />
+
+        <main className="flex flex-col items-center flex-grow pt-6 pb-8">
+          <div
+            className="w-full max-w-lg space-y-6 p-6 rounded-2xl shadow-lg"
             style={{
-              backgroundColor: P.resalte,
-              color: P.fondo,
+              backgroundColor: P.tarjeta,
               border: `1px solid ${P.borde}`,
+              color: palette.dark.texto
             }}
           >
-            {isSearching ? 'Buscando...' : 'Buscar prestadores'}
-          </Button>
-        </div>
-
-        {notifications.length > 0 && (
-          <h3 className="text-xl font-semibold mt-10 mb-4" style={{ color: P.texto }}>
-            Notificaciones recibidas
-          </h3>
-        )}
-        <div className="w-full max-w-lg space-y-4">
-          {notifications.length === 0 && (
-            <p className="text-center text-sm opacity-70 py-4" style={{ color: P.subTxt }}>
-              Aquí aparecerán las respuestas de los prestadores.
-            </p>
-          )}
-          {notifications.map(n => (
-            <NotificacionCard
-              key={n.id}
-              data={n}
-              viewerMode="user"
-              isProcessing={processingNotifId === n.id}
-              onPrimary={() => handlePrimaryAction(n)}
-              onSecondary={() => handleSecondaryAction(n)}
-              onAvatarClick={() => handleAvatarClick(n)}
+            <SelectorCategoria
+              idCategoria="busq-cat"
+              idSubcategoria="busq-sub"
+              onCategoriaChange={handleCategoriaChange}
+              labelColor={palette.dark.texto}
             />
-          ))}
-        </div>
-      </main>
 
-      {/* Pop-ups */}
+            <div>
+              <label
+                htmlFor="descripcion"
+                className="block text-sm font-medium mb-1"
+                style={{ color: palette.dark.texto }}
+              >
+                Descripción (breve)
+              </label>
+              <textarea
+                id="descripcion"
+                rows={3}
+                value={description}
+                onChange={e => setDescription(e.target.value)}
+                placeholder="Ej: Necesito reparar una cañería en el baño..."
+                className="w-full px-4 py-2 rounded-lg focus:outline-none"
+                style={{
+                  backgroundColor: 'rgba(255,255,255,0.08)',
+                  color: palette.dark.texto,
+                  border: `1px solid ${P.borde}`,
+                  resize: 'none'
+                }}
+              />
+            </div>
+
+            <Button
+              onClick={handleSearch}
+              disabled={!categorySel || !description.trim() || isSearching}
+              fullWidth
+              style={{
+                backgroundColor: P.resalte,
+                color: P.fondo,
+                border: `1px solid ${P.borde}`,
+              }}
+            >
+              {isSearching ? 'Buscando...' : 'Buscar prestadores'}
+            </Button>
+          </div>
+
+          {notifications.length > 0 && (
+            <h3 className="text-xl font-semibold mt-10 mb-4" style={{ color: P.texto }}>
+              Notificaciones recibidas
+            </h3>
+          )}
+          <div className="w-full max-w-lg space-y-4">
+            {notifications.length === 0 && (
+              <p className="text-center text-sm opacity-70 py-4" style={{ color: P.subTxt }}>
+                Aquí aparecerán las respuestas de los prestadores.
+              </p>
+            )}
+            {notifications.map(n => (
+              <NotificacionCard
+                key={n.id}
+                data={n}
+                viewerMode="user"
+                isProcessing={processingNotifId === n.id}
+                onPrimary={() => handlePrimaryAction(n)}
+                onSecondary={() => handleSecondaryAction(n)}
+                onAvatarClick={() => handleAvatarClick(n)}
+              />
+            ))}
+          </div>
+        </main>
+      </div>
+
+      {/* Pop-ups, botón fijo y estilos DEBEN quedar FUERA del contenedor centrado */}
       {showContacto && selectedPrestador && (
         <ContactoPopup
           userUid={userUid}

@@ -11,36 +11,34 @@ export default function LoginPage() {
   const darkLogo  = '/logo1.png';
 
   return (
-  // 1. CAMBIO PRINCIPAL: Usamos 'justify-evenly' para distribuir el espacio verticalmente.
-  //    Quitamos el padding superior (pt-20) que causaba el scroll.
-  <div className="relative flex h-dvh min-h-[600px] w-full flex-col items-center justify-evenly bg-fondo p-4 text-texto">
-    
-    {/* 2. ESTRUCTURA SIMPLIFICADA: El logo y el contenedor del formulario son ahora
-           hermanos directos para que 'justify-evenly' los pueda espaciar. */}
-    
-    {/* Logo */}
-    <Image
-      src={resolvedTheme === 'dark' ? darkLogo : lightLogo}
-      alt="Logo CODYS"
-      width={300}
-      height={170}
-      priority
-      className="h-auto w-52 flex-shrink-0 object-contain md:w-64"
-    />
+  // Hacemos que el contenedor sea 'relative' y quitamos el 'gap'
+  <div className="relative flex h-dvh min-h-[600px] w-full flex-col items-center justify-center bg-fondo p-5 text-texto">
 
-    {/* Contenedor del formulario y los links */}
+    {/* PASO 1: Envolvemos el logo en un 'div' con posicionamiento absoluto */}
+    <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full flex justify-center">
+      <Image
+        src={resolvedTheme === 'dark' ? darkLogo : lightLogo}
+        alt="Logo CODYS"
+        width={360}
+        height={204}
+        priority
+        // PASO 2: Usamos las mismas clases de tamaño que en la página de PIN
+        className="h-auto w-60 flex-shrink-0 object-contain md:w-72"
+      />
+    </div>
+
+    {/* El resto del contenido se centrará automáticamente en el espacio restante */}
     <div className="flex w-full flex-col items-center">
-      {/* Card de login */}
       <div
         className={`
           login-card
           w-full max-w-md flex-shrink-0
           space-y-4
           rounded-xl border border-borde-tarjeta bg-tarjeta p-6 text-texto shadow-card dark:bg-tarjeta dark:text-texto
-          md:p-8
+          md:p-8 mt-40
         `}
       >
-        <h1 className="text-center text-3xl font-bold">Iniciar sesión</h1>
+        <h1 className="text-center text-2xl font-bold">Iniciar sesión</h1>
         <LoginForm />
         <p className="text-center text-sm">
           ¿No tienes cuenta?{' '}
@@ -53,8 +51,7 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* Enlaces legales */}
-      <div className="mt-6 flex-shrink-0 text-center">
+      <div className="mt-6 mb-0 flex-shrink-0 text-center">
         <p className="text-xs font-light text-gray-500 dark:text-gray-400">
             Al iniciar sesión, aceptas nuestros{' '}
             <Link href="/terminos-y-condiciones" className="underline hover:text-texto" target="_blank" rel="noopener noreferrer">

@@ -2,7 +2,8 @@
 import './globals.css';
 import { Providers } from './providers';
 import NotificationWatcher from '@/app/components/notificaciones/NotificationWatcher';
-import type { Metadata } from 'next'; // Se añade el tipo para Metadata
+// 1. CORRECCIÓN: Se importa 'Viewport' junto a 'Metadata'.
+import type { Metadata, Viewport } from 'next';
 import {
   Barlow,
   Roboto,
@@ -38,7 +39,7 @@ import {
   Wallpoet,
 } from 'next/font/google';
 
-// --- Toda la configuración de tus fuentes se mantiene intacta ---
+// --- La configuración de fuentes se mantiene intacta ---
 const barlow = Barlow({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-barlow' });
 const roboto = Roboto({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-roboto', preload: false });
 const lato = Lato({ subsets: ['latin'], weight: ['400', '700'], display: 'swap', variable: '--font-lato', preload: false });
@@ -73,21 +74,25 @@ const juliusSansOne = Julius_Sans_One({ subsets: ['latin'], weight: '400', displ
 const wallpoet = Wallpoet({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-wallpoet', preload: false });
 
 
-// --- OBJETO METADATA ACTUALIZADO ---
+// --- OBJETO METADATA CORREGIDO ---
+// 2. CORRECCIÓN: Se ha eliminado 'themeColor' de este objeto.
 export const metadata: Metadata = {
   title: 'CODYS | Tu red de confianza',
   description: 'Conectamos necesidades con soluciones.',
   manifest: '/manifest.json',
-
-  // --- AÑADE ESTA LÍNEA ---
-  themeColor: '#0F2623', // Define el color de la barra de estado y la splash screen
-
   appleWebApp: {
     title: 'CODYS',
     statusBarStyle: 'black-translucent',
   },
-  // El resto de la configuración de íconos es manejada automáticamente por Next.js
+  // La configuración de íconos (favicon, logo, etc.) es manejada automáticamente por Next.js
+  // si colocas los archivos (ej: icon.png, apple-icon.png) en la carpeta raíz /app.
 };
+
+// 3. CORRECCIÓN: Se crea y exporta un objeto 'viewport' para la configuración de la ventana gráfica.
+export const viewport: Viewport = {
+  themeColor: '#0F2623',
+};
+
 
 export default function RootLayout({
   children,
@@ -111,7 +116,8 @@ export default function RootLayout({
         ${juliusSansOne.variable} ${wallpoet.variable}
       `}
     >
-      <head />
+      {/* 4. CORRECCIÓN: Se elimina la etiqueta <head />. En el App Router de Next.js es innecesaria
+          y se gestiona automáticamente a través de los objetos 'metadata' y 'viewport'. */}
       <body>
         <NotificationWatcher />
         <Providers>

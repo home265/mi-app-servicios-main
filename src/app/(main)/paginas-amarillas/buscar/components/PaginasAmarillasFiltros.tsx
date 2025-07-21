@@ -243,16 +243,16 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
         />
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 pt-4">
+      <div className="flex flex-col sm:flex-row gap-3 mt-10 pt-4">
         <Button
-          type="submit"
-          variant="primary"
-          isLoading={isLoading}
-          disabled={isLoading}
-          className="flex-grow w-full border-2 border-white"
-        >
-          {isLoading ? 'Buscando…' : 'Buscar'}
-        </Button>
+    type="submit"
+    variant="primary"
+    isLoading={isLoading}
+    disabled={isLoading}
+    className="flex-grow w-full !bg-[var(--color-primario)] !text-[var(--color-fondo)] !focus:shadow-none hover:!brightness-90"
+>
+    {isLoading ? 'Buscando…' : 'Buscar'}
+</Button>
       </div>
     </form>
   );

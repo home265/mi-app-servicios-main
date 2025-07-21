@@ -345,9 +345,14 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
 
         {errors.root?.storageError && <p className="text-sm text-error text-center mt-4">{errors.root.storageError.message}</p>}
 
-        <Button type="submit" isLoading={isSubmitting} fullWidth className="mt-8">
-          {isSubmitting ? 'Procesando...' : 'Continuar a Verificación'}
-        </Button>
+        <Button
+  type="submit"
+  isLoading={isSubmitting}
+  fullWidth
+  className="mt-8 !bg-[var(--color-primario)] !text-[var(--color-fondo)] !focus:shadow-none hover:!brightness-90"
+>
+  {isSubmitting ? 'Procesando...' : 'Continuar a Verificación'}
+</Button>
       </form>
     </>
   );

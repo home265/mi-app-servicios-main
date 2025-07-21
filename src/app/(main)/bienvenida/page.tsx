@@ -263,35 +263,41 @@ export default function BienvenidaPage() {
       className="min-h-screen flex flex-col"
       style={{ backgroundColor: P.fondo, color: P.texto }}
     >
-      <header className="flex items-center justify-between px-5 py-4 mt-6">
-        <div className="flex items-center gap-4">
-          <Avatar selfieUrl={user?.selfieURL ?? undefined} nombre={fullName} size={64} />
-          <div>
-            <p className="text-lg font-semibold">{`Hola, ${fullName}`}</p>
-            <span className="text-xs uppercase opacity-70">{user?.rol}</span>
+      {/* 1. Contenedor principal que limita y centra TODO el contenido */}
+      <div className="w-full max-w-4xl mx-auto px-5 flex flex-col flex-grow">
+        
+        {/* 2. El HEADER ahora está DENTRO del contenedor, por lo que también se centrará */}
+        <header className="flex items-center justify-between py-4 mt-6">
+          <div className="flex items-center gap-4">
+            <Avatar selfieUrl={user?.selfieURL ?? undefined} nombre={fullName} size={64} />
+            <div>
+              <p className="text-lg font-semibold">{`Hola, ${fullName}`}</p>
+              <span className="text-xs uppercase opacity-70">{user?.rol}</span>
+            </div>
           </div>
-        </div>
 
-        <div className="flex items-center gap-4">
-          <BotonAyuda>
-            <AyudaAjustes />
-          </BotonAyuda>
+          <div className="flex items-center gap-4">
+            <BotonAyuda>
+              <AyudaAjustes />
+            </BotonAyuda>
 
-          <button
-            onClick={() => router.push('/ajustes')}
-            style={{ backgroundColor: P.tarjeta }}
-            className="rounded-full p-2.5"
-          >
-            <Bars3BottomRightIcon className="w-7 h-7" style={{ color: P.resalte }} />
-          </button>
-        </div>
-      </header>
+            <button
+              onClick={() => router.push('/ajustes')}
+              style={{ backgroundColor: P.tarjeta }}
+              className="rounded-full p-2.5"
+            >
+              <Bars3BottomRightIcon className="w-7 h-7" style={{ color: P.resalte }} />
+            </button>
+          </div>
+        </header>
 
-      <main className="flex-grow flex justify-center pt-16 pb-6">
-        <div className="w-full px-4">
+        {/* 3. El MAIN está DENTRO del mismo contenedor y ocupa el espacio restante */}
+        <main className="flex-grow flex justify-center items-start pt-16 pb-6">
+          
+          {/* 4. La cuadrícula ya no necesita wrappers internos y se ajustará al contenedor padre */}
           <div
             className="
-              grid gap-5 sm:gap-6 place-items-center
+              w-full grid gap-5 sm:gap-6
               [grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr))]
             "
           >
@@ -319,22 +325,19 @@ export default function BienvenidaPage() {
                 if (a.path && a.path !== '#') router.push(a.path);
               };
 
-              // --- NUEVO: Determina si el botón actual debe mostrar un indicador ---
-              // --- NUEVO: Determina si el botón actual debe mostrar un indicador ---
-const unreadCount =
-  a.id === 'trabajos'
-    ? jobRequests
-    : a.id === 'buscar'
-    ? jobResponses
-    : a.id === 'modo' // <--- AÑADE ESTA LÍNEA
-    ? jobResponses // <--- Y ESTA
-    : 0;
+              const unreadCount =
+                a.id === 'trabajos'
+                  ? jobRequests
+                  : a.id === 'buscar'
+                  ? jobResponses
+                  : a.id === 'modo'
+                  ? jobResponses
+                  : 0;
 
               return (
                 <button
                   key={a.id}
                   onClick={click}
-                  // --- MODIFICADO: Añadido `relative` para posicionar el indicador ---
                   className="
                     relative flex flex-col items-center justify-center
                     aspect-square w-full max-w-[180px]
@@ -346,7 +349,6 @@ const unreadCount =
                     color: P.iconTxt,
                   }}
                 >
-                  {/* --- NUEVO: Renderizado condicional del indicador de notificaciones --- */}
                   {unreadCount > 0 && (
                     <div
                       className="
@@ -368,8 +370,8 @@ const unreadCount =
               );
             })}
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

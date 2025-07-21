@@ -142,22 +142,30 @@ export default function PinEntryPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-fondo text-texto px-2 py-6">
+    // PASO 1: Hacemos que el contenedor principal sea 'relative' para
+    // que el posicionamiento absoluto del logo funcione dentro de él.
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-fondo text-texto px-2 py-6">
       
-      <Image
-        src={resolvedTheme === 'dark' ? darkLogo : lightLogo}
-        alt="Logo CODYS"
-        width={300}
-        height={170}
-        priority
-        className="mb-8 h-auto w-52 flex-shrink-0 object-contain md:w-64"
-      />
+      {/* PASO 2: Envolvemos el logo en un nuevo 'div' con posicionamiento absoluto. */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full flex justify-center">
+        <Image
+          src={resolvedTheme === 'dark' ? darkLogo : lightLogo}
+          alt="Logo CODYS"
+          width={360}
+          height={204}
+          priority
+          // Limpiamos las clases de margen anteriores.
+          className="h-auto w-60 flex-shrink-0 object-contain md:w-72"
+        />
+      </div>
 
+      {/* Como el logo ya no ocupa espacio en el flujo, el recuadro se centrará
+          verticalmente en la pantalla por sí solo gracias a 'justify-center'. */}
       <div className="
         w-[90vw] sm:max-w-md md:max-w-lg
         space-y-6 rounded-xl border border-borde-tarjeta
         bg-tarjeta p-6 shadow-xl md:p-8
-        text-center
+        text-center mt-30
       ">
         <h1 className="text-2xl font-bold text-primario">Ingresa tu PIN</h1>
         <p className="text-texto-secundario">
@@ -181,7 +189,7 @@ export default function PinEntryPage() {
             type="submit"
             fullWidth
             disabled={isLoading || pin.length !== 4}
-            className="!bg-[#307268] !text-white hover:!bg-[#276058] focus:!ring-[#307268]"
+            className="!bg-[var(--color-primario)] !text-[var(--color-fondo)] !focus:shadow-none hover:!brightness-90"
           >
             {isLoading ? 'Verificando…' : 'Ingresar'}
           </Button>

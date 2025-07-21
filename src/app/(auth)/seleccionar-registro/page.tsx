@@ -35,7 +35,6 @@ export default function SeleccionarRegistroPage() {
   };
 
   return (
-    // --- NUEVO: Envolvemos todo en un Fragment (<>) para poder añadir el Modal ---
     <>
       <Modal
         isOpen={isModalVisible}
@@ -52,29 +51,36 @@ export default function SeleccionarRegistroPage() {
         </div>
       </Modal>
 
-      <div className="relative flex min-h-screen flex-col items-center justify-center bg-fondo text-texto px-4">
-        <Image
-          src={resolvedTheme === 'dark' ? darkLogo : lightLogo}
-          alt="Logo CODYS"
-          width={300}
-          height={170}
-          priority
-          className="mb-12 h-auto w-60 md:w-80 object-contain"
-        />
-
+      {/* Mantenemos la estructura del contenedor principal */}
+      <div className="relative flex min-h-screen flex-col items-center justify-center bg-fondo text-texto px-5">
+        
+        {/* PASO 1: Envolvemos el logo en un 'div' con posicionamiento absoluto */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full flex justify-center">
+          <Image
+            src={resolvedTheme === 'dark' ? darkLogo : lightLogo}
+            alt="Logo CODYS"
+            // PASO 2: Unificamos el tamaño del logo con las otras pantallas
+            width={360}
+            height={204}
+            priority
+            // PASO 3: Unificamos las clases y quitamos el margen 'mb-12'
+            className="h-auto w-60 flex-shrink-0 object-contain md:w-72"
+          />
+        </div>
+        
+        {/* El resto del contenido se centrará automáticamente */}
         <div
           className={`
             w-full max-w-md space-y-6
             rounded-xl border border-borde-tarjeta shadow-card
             bg-tarjeta text-texto
             p-6 md:p-8
-            dark:bg-tarjeta dark:text-texto
+            dark:bg-tarjeta dark:text-texto mt-55 mb-15
           `}
         >
-          <h1 className="text-center text-3xl font-bold">Elige tu tipo de registro</h1>
+          <h1 className="text-center text-2xl font-bold">Elige tu tipo de registro</h1>
 
           <div className="grid gap-4">
-            {/* --- MODIFICADO: Usamos el nuevo handler 'handleRoleClick' --- */}
             <Link
               href={acceptedTerms ? "/registro/usuario" : "#"}
               className={!acceptedTerms ? "opacity-50 cursor-not-allowed" : ""}

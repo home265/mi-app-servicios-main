@@ -105,76 +105,76 @@ export default function CampaniasPage() {
   const precioBasePlan = planSeleccionado.priceARS;
 
   return (
-    <div className="min-h-screen bg-fondo text-texto p-4">
-      <div className="absolute left-0 top-1">
-                <BotonAyuda>
-                  <AyudaCrearEditarAnuncio fase="fase1b" />
-                </BotonAyuda>
-              </div>
-      <div className="relative w-full mb-10 mt-8">
+    <div className="min-h-screen bg-fondo text-texto">
+      {/* 1. Contenedor principal que limita y centra todo el contenido */}
+      <div className="w-full max-w-5xl mx-auto px-4 py-8">
 
-        <h1 className="text-3xl font-bold text-primario mb-2 text-center">
+        {/* --- Encabezado con posicionamiento relativo para el botón de ayuda --- */}
+        <div className="relative mb-10 mt-8">
+          <div className="absolute left-0 top-1">
+            <BotonAyuda>
+              <AyudaCrearEditarAnuncio fase="fase1b" />
+            </BotonAyuda>
+          </div>
+          <h1 className="text-3xl font-bold text-primario mb-2 text-center">
+            Elige tu Campaña para el Plan: {planSeleccionado.name}
+          </h1>
+        </div>
 
-        Elige tu Campaña para el Plan: {planSeleccionado.name}
+        <p className="text-center text-texto-secundario mb-8">
+          Has seleccionado el plan <span className="font-semibold">{planSeleccionado.name}</span>.
+          Ahora elige la duración de tu campaña.
+        </p>
 
-      </h1>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {campanias.map((campania) => {
+            const isSelected = campania.id === currentCampaniaIdFromStore;
+            const totalWithDiscount = precioBasePlan * campania.months * (1 - campania.discount);
 
-      </div>
-      <p className="text-center text-texto-secundario mb-8">
-        Has seleccionado el plan <span className="font-semibold">{planSeleccionado.name}</span>.
-        Ahora elige la duración de tu campaña.
-      </p>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {campanias.map((campania) => {
-          const isSelected = campania.id === currentCampaniaIdFromStore;
-          const totalWithDiscount = precioBasePlan * campania.months * (1 - campania.discount);
-
-          return (
-            <Card
-              key={campania.id}
-              onClick={() => handleSelectCampania(campania.id)}
-              className={`cursor-pointer hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between p-6
-                           ${isSelected ? 'ring-2 ring-primario shadow-xl border-primario' : 'border-transparent'}`}
-              role="button"
-              tabIndex={0}
-              aria-pressed={isSelected}
-            >
-              <div>
-                <h2 className="text-2xl font-semibold mb-4 text-center">{campania.name}</h2>
-                <p className="mb-2">
-                  <span className="font-medium">Duración:</span> {campania.months}{' '}
-                  {campania.months > 1 ? 'meses' : 'mes'}
-                </p>
-                <p className="mb-2">
-                  <span className="font-medium">Descuento:</span> {campania.discount * 100}%
-                </p>
-                <p className="mb-2">
-                  <span className="font-medium">Precio total:</span>{' '}
-                  ${totalWithDiscount.toLocaleString('es-AR')} ARS
-                </p>
-              </div>
-              {isSelected && (
-                <div className="mt-4 pt-2 border-t border-primario/30 text-center">
-                  <span className="text-sm font-semibold text-primario">Campaña Actual</span>
+            return (
+              <Card
+                key={campania.id}
+                onClick={() => handleSelectCampania(campania.id)}
+                className={`cursor-pointer hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between p-6
+                            ${isSelected ? 'ring-2 ring-primario shadow-xl border-primario' : 'border-transparent'}`}
+                role="button"
+                tabIndex={0}
+                aria-pressed={isSelected}
+              >
+                <div>
+                  <h2 className="text-2xl font-semibold mb-4 text-center">{campania.name}</h2>
+                  <p className="mb-2">
+                    <span className="font-medium">Duración:</span> {campania.months}{' '}
+                    {campania.months > 1 ? 'meses' : 'mes'}
+                  </p>
+                  <p className="mb-2">
+                    <span className="font-medium">Descuento:</span> {campania.discount * 100}%
+                  </p>
+                  <p className="mb-2">
+                    <span className="font-medium">Precio total:</span>{' '}
+                    ${totalWithDiscount.toLocaleString('es-AR')} ARS
+                  </p>
                 </div>
-              )}
-            </Card>
-          );
-        })}
-      </div>
+                {isSelected && (
+                  <div className="mt-4 pt-2 border-t border-primario/30 text-center">
+                    <span className="text-sm font-semibold text-primario">Campaña Actual</span>
+                  </div>
+                )}
+              </Card>
+            );
+          })}
+        </div>
 
-      <div className="text-center mt-12">
-        <button
-          onClick={() =>
-            // Si había un borradorId, se vuelve a planes con ese borradorId, si no, solo a planes.
-            // Si planIdQP estaba en la URL, también se podría considerar pasarlo de vuelta.
-            borradorId ? router.push(`/planes?borradorId=${borradorId}`) : router.push('/planes')
-          }
-          className="text-texto-secundario hover:text-primario underline"
-        >
-          Volver a Planes
-        </button>
+        <div className="text-center mt-12">
+          <button
+            onClick={() =>
+              borradorId ? router.push(`/planes?borradorId=${borradorId}`) : router.push('/planes')
+            }
+            className="text-texto-secundario hover:text-primario underline"
+          >
+            Volver a Planes
+          </button>
+        </div>
       </div>
     </div>
   );

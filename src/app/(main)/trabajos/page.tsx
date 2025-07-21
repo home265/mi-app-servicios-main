@@ -250,56 +250,64 @@ export default function TrabajosPage() {
       className="min-h-screen flex flex-col"
       style={{ backgroundColor: P.fondo, color: P.texto }}
     >
-      {/*────────── header ──────────*/}
-      <header className="relative flex items-center justify-center px-5 py-8">
-        <div className="absolute left-5 top-1/2 -translate-y-1/2">
-          <BotonAyuda>
-            <AyudaTrabajos />
-          </BotonAyuda>
-        </div>
-        <h1 className="text-lg md:text-xl font-medium tracking-wide">
-          Solicitudes y acuerdos
-        </h1>
-      </header>
+      {/* 1. Contenedor que limita y centra el contenido principal */}
+      <div className="w-full max-w-4xl mx-auto px-5 flex flex-col flex-grow">
 
-      <hr className="mx-5" style={{ borderColor: P.borde }} />
+        {/*────────── header ──────────*/}
+        {/* El header ahora está DENTRO del contenedor y se le quita el padding propio */}
+        <header className="relative flex items-center justify-center py-8">
+          <div className="absolute left-0 top-1/2 -translate-y-1/2">
+            <BotonAyuda>
+              <AyudaTrabajos />
+            </BotonAyuda>
+          </div>
+          <h1 className="text-lg md:text-xl font-medium tracking-wide">
+            Solicitudes y acuerdos
+          </h1>
+        </header>
 
-      {/*────────── contenido ──────────*/}
-      <main className="flex flex-col items-center flex-grow pt-6 pb-8 px-4">
-        <div className="w-full max-w-lg space-y-4">
-          {notifications.length === 0 && (
-            <p className="text-center text-sm opacity-70 py-8">
-              No tienes notificaciones.
-            </p>
-          )}
+        {/* La línea ahora respeta el ancho del contenedor padre */}
+        <hr style={{ borderColor: P.borde }} />
 
-          {notifications.map((n) => (
-            <NotificacionCard
-              key={n.id}
-              data={n}
+        {/*────────── contenido ──────────*/}
+        {/* El main también está DENTRO del contenedor y se simplifica */}
+        <main className="flex flex-col items-center flex-grow pt-6 pb-8">
+          <div className="w-full max-w-lg space-y-4">
+            {notifications.length === 0 && (
+              <p className="text-center text-sm opacity-70 py-8">
+                No tienes notificaciones.
+              </p>
+            )}
+
+            {notifications.map((n) => (
+              <NotificacionCard
+                key={n.id}
+                data={n}
+                viewerMode="provider"
+                isProcessing={processingNotifId === n.id}
+                onPrimary={() =>
+                  n.type === 'job_request'
+                    ? handleAccept(n)
+                    : openResenaFormForClient(n)
+                }
+                onSecondary={() => handleDelete(n)}
+                onAvatarClick={() => handleAvatarClick(n)}
+              />
+            ))}
+          </div>
+
+          {showPerfilModal && perfilModalTarget && (
+            <PerfilModal
+              target={perfilModalTarget}
               viewerMode="provider"
-              isProcessing={processingNotifId === n.id} // Se pasa el estado
-              onPrimary={() =>
-                n.type === 'job_request'
-                  ? handleAccept(n)
-                  : openResenaFormForClient(n)
-              }
-              onSecondary={() => handleDelete(n)}
-              onAvatarClick={() => handleAvatarClick(n)}
+              onClose={() => setShowPerfilModal(false)}
             />
-          ))}
-        </div>
-
-        {showPerfilModal && perfilModalTarget && (
-          <PerfilModal
-            target={perfilModalTarget}
-            viewerMode="provider"
-            onClose={() => setShowPerfilModal(false)}
-          />
-        )}
-      </main>
+          )}
+        </main>
+      </div>
 
       {/*────────── FAB volver ──────────*/}
+      {/* Este botón tiene `position: fixed`, por lo que DEBE estar FUERA del contenedor centrado */}
       <button
         onClick={() => router.push('/bienvenida')}
         aria-label="Volver a inicio"

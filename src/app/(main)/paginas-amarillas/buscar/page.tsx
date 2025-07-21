@@ -128,38 +128,40 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
   };
 
   return (
-    // El 'relative' en este div es clave para posicionar el botón de ayuda
-    <div className="container mx-auto px-2 sm:px-4 py-8 sm:py-12 space-y-6 relative">
-      
-      {/* --- CONTENEDOR PARA EL TÍTULO Y EL BOTÓN DE AYUDA --- */}
-      <div className="relative mx-auto w-fit">
-        {/* El título ya no necesita padding extra */}
-        <h2 className="text-2xl font-semibold text-texto-principal text-center">
-          Buscar en Páginas Amarillas
-        </h2>
+    <>
+      {/* 1. Contenedor principal que limita y centra el contenido */}
+      <div className="w-full max-w-4xl mx-auto px-5 py-8 sm:py-12 space-y-8 flex-grow">
         
-        {/* El botón de ayuda posicionado relativo al título */}
-        <div className="absolute top-full right-0 mt-3">
-          <BotonAyuda>
-            <AyudaPaginasAmarillas />
-          </BotonAyuda>
+        {/* --- CONTENEDOR PARA EL TÍTULO Y EL BOTÓN DE AYUDA --- */}
+        <div className="relative mx-auto w-fit">
+          <h2 className="text-2xl font-semibold text-texto-principal text-center">
+            Buscar en Páginas Amarillas
+          </h2>
+          
+          <div className="absolute top-full right-0 mt-3 sm:left-full sm:top-1/2 sm:-translate-y-1/2 sm:mt-0 sm:ml-4">
+            <BotonAyuda>
+              <AyudaPaginasAmarillas />
+            </BotonAyuda>
+          </div>
         </div>
-      </div>
 
-      <div className="mt-15">
-        <PaginasAmarillasFiltros
-          onBuscar={handleBuscar}
+        {/* --- FILTROS Y RESULTADOS --- */}
+        <div className="mt-6"> {/* Ajuste de margen si es necesario */}
+          <PaginasAmarillasFiltros
+            onBuscar={handleBuscar}
+            isLoading={estadoCarga === 'loading'}
+            initialFiltros={filtrosActivos}
+          />
+        </div>
+        <PaginasAmarillasResultados
+          publicaciones={publicaciones}
           isLoading={estadoCarga === 'loading'}
-          initialFiltros={filtrosActivos}
+          error={mensajeError}
+          hasSearched={hasSearched}
         />
       </div>
-      <PaginasAmarillasResultados
-        publicaciones={publicaciones}
-        isLoading={estadoCarga === 'loading'}
-        error={mensajeError}
-        hasSearched={hasSearched}
-      />
 
+      {/* 2. El botón fijo DEBE estar FUERA del contenedor principal para que se posicione correctamente */}
       <button
         onClick={() => router.push('/bienvenida')}
         aria-label="Volver a inicio"
@@ -168,7 +170,7 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
       >
         <ChevronLeftIcon className="h-6 w-6" style={{ color: '#EFC71D' }} />
       </button>
-    </div>
+    </>
   );
 };
 

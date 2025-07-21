@@ -147,78 +147,81 @@ export default function PlanesPage() {
 
   /* ---------- render ---------- */
   return (
-    <div className="min-h-screen bg-fondo text-texto p-4">
-  
-  {/* --- Encabezado con posicionamiento relativo --- */}
-  <div className="relative">
-    {/* 1. Contenedor para posicionar el botón en la esquina */}
-    <div className="absolute top-0 left-0">
-      <BotonAyuda>
-        <AyudaCrearEditarAnuncio fase="fase1a" />
-      </BotonAyuda>
-    </div>
+    <div className="min-h-screen bg-fondo text-texto">
+      {/* 1. Contenedor principal que limita y centra todo el contenido */}
+      <div className="w-full max-w-5xl mx-auto px-4 py-8">
 
-    {/* 2. Título centrado y con más espacio inferior (mb-8) */}
-    <h1 className="text-3xl font-bold text-primario mb-8 text-center">
-      {existingDraft || borradorIdQueryParam ? 'Modifica tu Plan' : 'Elige tu Plan'}
-    </h1>
-  </div>
+        {/* --- Encabezado con posicionamiento relativo --- */}
+        <div className="relative">
+          {/* Contenedor para posicionar el botón en la esquina */}
+          <div className="absolute top-0 left-0">
+            <BotonAyuda>
+              <AyudaCrearEditarAnuncio fase="fase1a" />
+            </BotonAyuda>
+          </div>
 
-      {(existingDraft || borradorIdQueryParam) && (
-        <p className="text-center text-texto-secundario mb-8">
-          Estás modificando la configuración de tu borrador existente.
-        </p>
-      )}
+          {/* Título centrado y con más espacio inferior (mb-8) */}
+          <h1 className="text-3xl font-bold text-primario mb-8 text-center">
+            {existingDraft || borradorIdQueryParam ? 'Modifica tu Plan' : 'Elige tu Plan'}
+          </h1>
+        </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {planes.map((plan) => {
-          const isSelected = plan.id === planSeleccionadoId;
-          return (
-            <Card
-              key={plan.id}
-              onClick={() => handleSelectPlan(plan.id)}
-              className={`cursor-pointer hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between p-6
-                           ${isSelected ? 'ring-2 ring-primario shadow-xl border-primario' : 'border-transparent'}`}
-              role="button"
-              tabIndex={0}
-              aria-pressed={isSelected}
-            >
-              <div>
-                <h2 className="text-2xl font-semibold mb-4 text-center">{plan.name}</h2>
-                <p className="mb-2">
-                  <span className="font-medium">Precio:</span>{' '}
-                  ${plan.priceARS.toLocaleString('es-AR')} ARS/mes
-                </p>
-                <p className="mb-2">
-                  <span className="font-medium">Duración anuncio:</span> {plan.durationSeconds} segundos
-                </p>
-                <p className="mb-2">
-                  <span className="font-medium">Imágenes:</span> hasta {plan.maxImages}
-                </p>
-                <p className="text-sm text-texto-secundario">
-                  <span className="font-medium">Se mostrará:</span>{' '}
-                  {plan.displayMode === 'inicio' ? 'Al inicio de la app' : 'En secciones aleatorias'}
-                </p>
-              </div>
-              {isSelected && (
-                <div className="mt-4 pt-2 border-t border-primario/30 text-center">
-                  <span className="text-sm font-semibold text-primario">Plan Actual</span>
+        {(existingDraft || borradorIdQueryParam) && (
+          <p className="text-center text-texto-secundario mb-8">
+            Estás modificando la configuración de tu borrador existente.
+          </p>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {planes.map((plan) => {
+            const isSelected = plan.id === planSeleccionadoId;
+            return (
+              <Card
+                key={plan.id}
+                onClick={() => handleSelectPlan(plan.id)}
+                className={`cursor-pointer hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between p-6
+                            ${isSelected ? 'ring-2 ring-primario shadow-xl border-primario' : 'border-transparent'}`}
+                role="button"
+                tabIndex={0}
+                aria-pressed={isSelected}
+              >
+                <div>
+                  <h2 className="text-2xl font-semibold mb-4 text-center">{plan.name}</h2>
+                  <p className="mb-2">
+                    <span className="font-medium">Precio:</span>{' '}
+                    ${plan.priceARS.toLocaleString('es-AR')} ARS/mes
+                  </p>
+                  <p className="mb-2">
+                    <span className="font-medium">Duración anuncio:</span> {plan.durationSeconds} segundos
+                  </p>
+                  <p className="mb-2">
+                    <span className="font-medium">Imágenes:</span> hasta {plan.maxImages}
+                  </p>
+                  <p className="text-sm text-texto-secundario">
+                    <span className="font-medium">Se mostrará:</span>{' '}
+                    {plan.displayMode === 'inicio' ? 'Al inicio de la app' : 'En secciones aleatorias'}
+                  </p>
                 </div>
-              )}
-            </Card>
-          );
-        })}
-      </div>
+                {isSelected && (
+                  <div className="mt-4 pt-2 border-t border-primario/30 text-center">
+                    <span className="text-sm font-semibold text-primario">Plan Actual</span>
+                  </div>
+                )}
+              </Card>
+            );
+          })}
+        </div>
 
-      <div className="text-center mt-12">
-        <button
-          onClick={() =>
-            router.push(existingDraft || borradorIdQueryParam ? '/mis-anuncios' : '/bienvenida')
-          }
-          className="text-texto-secundario hover:text-primario underline"
-        >
-          {existingDraft || borradorIdQueryParam ? 'Volver a Mis Anuncios' : 'Cancelar y Volver'}
-        </button>
+        <div className="text-center mt-12">
+          <button
+            onClick={() =>
+              router.push(existingDraft || borradorIdQueryParam ? '/mis-anuncios' : '/bienvenida')
+            }
+            className="text-texto-secundario hover:text-primario underline"
+          >
+            {existingDraft || borradorIdQueryParam ? 'Volver a Mis Anuncios' : 'Cancelar y Volver'}
+          </button>
+        </div>
       </div>
     </div>
   );
