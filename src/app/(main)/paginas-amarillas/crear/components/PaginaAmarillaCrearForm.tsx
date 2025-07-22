@@ -428,9 +428,15 @@ const PaginaAmarillaCrearForm: React.FC = () => {
 
           {apiError && (<p className="text-sm text-red-600 bg-red-100 p-3 rounded-md">{apiError}</p>)}
 
-          <Button type="submit" variant="primary" isLoading={isLoading} disabled={isLoading} fullWidth className="py-3">
-            {isLoading ? 'Creando Publicación...' : 'Crear Publicación'}
-          </Button>
+          <Button
+  type="submit"
+  isLoading={isLoading}
+  disabled={isLoading}
+  fullWidth
+  className="py-3 !bg-[var(--color-primario)] !text-[var(--color-fondo)] !focus:shadow-none hover:!brightness-90"
+>
+  {isLoading ? 'Creando Publicación...' : 'Crear Publicación'}
+</Button>
         </form>
       </div>
 

@@ -39,17 +39,19 @@ const CvCard: React.FC<CvCardProps> = ({ cv, highlightRubro }) => {
           </p>
 
           <div className="flex space-x-2 mt-3">
-            <Button variant="outline" className="px-3 py-1 text-sm" onClick={() => setShowCv(true)}>
-              Ver CV
-            </Button>
             <Button
-              className="px-3 py-1 text-sm"
-              variant="primary"
-              onClick={() => setShowContact(true)}
-              disabled={!currentUser}
-            >
-              Contactar
-            </Button>
+  className="px-3 py-1 text-sm !bg-[var(--color-primario)] !text-[var(--color-fondo)] border-none !focus:shadow-none hover:!brightness-90"
+  onClick={() => setShowCv(true)}
+>
+  Ver CV
+</Button>
+<Button
+  className="px-3 py-1 text-sm !bg-[var(--color-primario)] !text-[var(--color-fondo)] border-none !focus:shadow-none hover:!brightness-90"
+  onClick={() => setShowContact(true)}
+  disabled={!currentUser}
+>
+  Contactar
+</Button>
           </div>
         </div>
       </Card>

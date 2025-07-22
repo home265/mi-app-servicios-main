@@ -8,7 +8,7 @@ import { getAnuncioById, listCapturas } from '@/lib/services/anunciosService'; /
 import Image from 'next/image';
 import Link from 'next/link';
 import Button from '@/app/components/ui/Button';
-import { Play, Pause, RotateCcw, Edit3, CheckCircle, AlertTriangle, Loader2, Info } from 'lucide-react';
+import { Play, Pause, RotateCcw, Edit3, CheckCircle, AlertTriangle, Loader2, Info, LogOut } from 'lucide-react';
 import { useParams } from 'next/navigation';
 
 // Componente Principal (Wrapper)
@@ -253,34 +253,31 @@ function PreviewClient({ anuncioId }: PreviewClientProps) {
       {/* Barra de Progreso */}
       <div className="absolute top-0 left-0 w-full h-1.5 bg-gray-700/50 z-20">
         <div
-          className="h-full bg-white transition-all duration-100 ease-linear" // 'transition-all' para suavizar
+          className="h-full bg-white transition-all duration-100 ease-linear"
           style={{ width: `${progress}%` }}
         />
       </div>
 
       {/* Visor de Imagen */}
       <div className="flex-grow relative flex items-center justify-center">
-        {/* La key ahora incluye animationClass para forzar el remount si la animación cambia en la misma imagen (aunque no es el caso aquí) */}
         <Image
           key={`${currentCaptura.imageUrl}-${currentIndex}-${animationClass || 'no-anim'}`}
           src={currentCaptura.imageUrl}
           alt={`Captura ${currentIndex + 1} del anuncio`}
           fill
-          className={`object-contain ${animationClass}`} // Aplicar clase de animación
-          priority={currentIndex === 0} // Priorizar carga de la primera imagen
-          sizes="100vw" // Ocupa el ancho de la ventana gráfica
+          className={`object-contain ${animationClass}`}
+          priority={currentIndex === 0}
+          sizes="100vw"
           onError={(e) => {
             console.error(`PreviewClient: Error al cargar imagen ${currentCaptura.imageUrl}`, e);
             setError(`No se pudo cargar la imagen para la pantalla ${currentIndex + 1}. Verifica la URL o la conexión.`);
-            setIsPlaying(false); // Detener reproducción si una imagen falla
+            setIsPlaying(false);
           }}
         />
       </div>
 
       {/* Controles Inferiores */}
-      <div className="absolute inset-0 flex flex-col justify-between p-4 z-10 pointer-events-none">
-        <div>{/* Espacio para posibles controles superiores en el futuro */}</div>
-
+      <div className="absolute inset-0 flex flex-col justify-end p-4 z-10 pointer-events-none">
         <div className="flex flex-col items-center gap-4 pointer-events-auto">
           <button
             onClick={handlePlayPause}
@@ -289,55 +286,65 @@ function PreviewClient({ anuncioId }: PreviewClientProps) {
           >
             {reelCompleted ? <RotateCcw size={28} /> : isPlaying ? <Pause size={28} /> : <Play size={28} />}
           </button>
+          
+          {/* --- CÓDIGO FINAL --- */}
+          {/* Usamos flexbox para forzar que los 3 elementos ocupen el mismo espacio */}
+          <div className="w-full max-w-lg mx-auto flex flex-col sm:flex-row items-center gap-3 p-3 bg-gradient-to-t from-black/70 via-black/50 to-transparent">
+            
+            {(() => {
+              const buttonStyle = "w-full h-full flex items-center justify-center text-sm text-center py-2.5 px-3 bg-neutral-800/90 border border-white/75 hover:bg-neutral-700/90 transition-colors rounded-lg";
+              
+              // Esta es la clase clave: w-full para móvil, sm:flex-1 para escritorio
+              const linkStyle = "w-full sm:flex-1"; 
 
-          <div className="w-full grid grid-cols-3 gap-3 p-3 bg-gradient-to-t from-black/70 via-black/50 to-transparent">
-  {/* ① Volver a editar */}
-  <Link href={`/editor/${anuncioId}`} passHref legacyBehavior>
-    <a className="w-full">
-      <Button variant="secondary" className="w-full text-sm py-2.5 px-3">
-        <Edit3 size={16} className="mr-1.5" />
-        Volver a Editar
-      </Button>
-    </a>
-  </Link>
-
-  {/* ② Pagar o estado del anuncio */}
-  {mostrarBotonPagar ? (
-    <Link href={`/pago/${anuncioId}`} passHref legacyBehavior>
-      <a className="w-full">
-        <Button variant="primary" className="w-full text-sm py-2.5 px-3">
-          <CheckCircle size={16} className="mr-1.5" />
-          Continuar y Pagar
+              return (
+    <>
+      <Link href={`/editor/${anuncioId}`} className={linkStyle}>
+        <Button className={buttonStyle}>
+          <Edit3 size={16} className="mr-2 shrink-0" />
+          <span>Volver a Editar</span>
         </Button>
-      </a>
-    </Link>
-  ) : (
-    anuncioStatus && (
-      <div className="text-center flex flex-col justify-center items-center">
-        <p className="text-sm font-semibold">
-          {anuncioStatus === 'active' && 'Anuncio Activo'}
-          {anuncioStatus === 'expired' && 'Anuncio Expirado'}
-          {anuncioStatus === 'cancelled' && 'Anuncio Cancelado'}
-        </p>
-        {(anuncioStatus === 'active' || anuncioStatus === 'expired' || anuncioStatus === 'cancelled') && (
-          <Link href="/mis-anuncios" className="text-xs text-blue-400 hover:text-blue-300 mt-1 underline">
-            Ver mis anuncios
+      </Link>
+
+      {mostrarBotonPagar ? (
+        <Link href={`/pago/${anuncioId}`} className={linkStyle}>
+          <Button className={buttonStyle}>
+            <CheckCircle size={16} className="mr-2 shrink-0" />
+            <span>Continuar y Pagar</span>
+          </Button>
+        </Link>
+      ) : (
+        // --- INICIO DE LA SECCIÓN MODIFICADA ---
+        // Ahora todo este bloque es un enlace con el estilo de los otros botones.
+        anuncioStatus && (
+          <Link href="/mis-anuncios" className={linkStyle}>
+            <div className={buttonStyle}>
+              <div className="flex flex-col text-center">
+                <span className="text-sm font-semibold">
+                  {anuncioStatus === 'active' && 'Anuncio Activo'}
+                  {anuncioStatus === 'expired' && 'Anuncio Expirado'}
+                  {anuncioStatus === 'cancelled' && 'Anuncio Cancelado'}
+                </span>
+                <span className="text-xs underline">
+                  Ver mis anuncios
+                </span>
+              </div>
+            </div>
           </Link>
-        )}
-      </div>
-    )
-  )}
+        )
+        // --- FIN DE LA SECCIÓN MODIFICADA ---
+      )}
 
-  {/* ③ Ir al inicio / bienvenida */}
-  <Link href="/bienvenida" passHref legacyBehavior>
-    <a className="w-full">
-      <Button variant="outline" className="w-full text-sm py-2.5 px-3">
-        Salir
-      </Button>
-    </a>
-  </Link>
-</div>
-
+      <Link href="/bienvenida" className={linkStyle}>
+        <Button className={buttonStyle}>
+          <LogOut size={16} className="mr-2 shrink-0" />
+          <span>Tocar para Salir</span>
+        </Button>
+      </Link>
+    </>
+);
+            })()}
+          </div>
         </div>
       </div>
     </div>

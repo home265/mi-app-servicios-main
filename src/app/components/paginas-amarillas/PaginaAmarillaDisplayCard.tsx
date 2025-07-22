@@ -127,9 +127,13 @@ const PaginaAmarillaDisplayCard: React.FC<PaginaAmarillaDisplayCardProps> = ({
           )}
           {/* --- FIN DEL CAMBIO --- */}
 
-          <Button variant="primary" fullWidth onClick={handleContactarClick}>
-            Contactar
-          </Button>
+          <Button
+  fullWidth
+  onClick={handleContactarClick}
+  className="!bg-[var(--color-primario)] !text-[var(--color-fondo)] !focus:shadow-none hover:!brightness-90"
+>
+  Contactar
+</Button>
         </div>
       </Card>
 

@@ -788,24 +788,25 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
         </main>
 
         {anuncioParaCargar.status !== 'draft' && (
-          <>
-            <button
-              onClick={() => setShowGuardarModal(true)}
-              disabled={isLoadingSave || isProcessingExit || isProcessingScreen}
-              className="fixed bottom-4 right-4 z-30 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 disabled:opacity-50 w-44 border border-white/75"
-            >
-              {isLoadingSave ? 'Guardando...' : 'Guardar Pantalla'}
-            </button>
+    <>
+        <button
+            onClick={() => setShowGuardarModal(true)}
+            disabled={isLoadingSave || isProcessingExit || isProcessingScreen}
+            className="fixed bottom-4 right-4 z-30 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 disabled:opacity-50 w-44 border border-white/75"
+        >
+            {isLoadingSave ? 'Guardando...' : 'Guardar Pantalla'}
+        </button>
 
-            <button
-              onClick={handlePreviewAnuncio}
-              disabled={isLoadingSave || isProcessingExit || isProcessingScreen}
-              className="fixed bottom-4 left-4 z-30 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-md hover:bg-gray-600 disabled:opacity-50 w-44 border border-white/75"
-            >
-              Previsualizar Anuncio
-            </button>
-          </>
-        )}
+        {/* --- BOTÓN MODIFICADO --- */}
+        <button
+            onClick={handlePreviewAnuncio}
+            disabled={isLoadingSave || isProcessingExit || isProcessingScreen}
+            className="fixed bottom-4 left-4 z-30 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 disabled:opacity-50 w-44 border border-white/75"
+        >
+            Vista Previa
+        </button>
+    </>
+)}
       </div>
 
       {/* --- MODALES REFACTORIZADOS Y NUEVOS --- */}

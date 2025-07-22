@@ -157,9 +157,14 @@ const FormularioResenaDetallado: React.FC<FormularioResenaDetalladoProps> = ({
 
       {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
-      <Button type="submit" disabled={!isFormValid} fullWidth>
-        {isSubmitting ? 'Enviando...' : 'Enviar Reseña'}
-      </Button>
+      <Button
+  type="submit"
+  disabled={!isFormValid}
+  fullWidth
+  className="!bg-[var(--color-primario)] !text-[var(--color-fondo)] border-none !focus:shadow-none hover:!brightness-90"
+>
+  {isSubmitting ? 'Enviando...' : 'Enviar Reseña'}
+</Button>
     </form>
   );
 };

@@ -145,7 +145,7 @@ service cloud.firestore {
       // PERMISO DE ESCRITURA (sin cambios)
       allow create: if isAuthenticated() && request.auth.uid == cvId && 
                        request.resource.data.uid == request.auth.uid;
-      allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.userId;
+      allow update, delete: if isAuthenticated() && request.auth.uid == resource.data.uid;
     }
     
     // =====================================================================

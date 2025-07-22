@@ -69,7 +69,7 @@ export default function ContactoPopup({
     // Overlay para el popup
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 anim-fadeIn">
       {/* Contenedor del Popup con estilos de tema */}
-      <div className="relative bg-tarjeta p-6 pt-10 rounded-xl shadow-xl max-w-xs w-full text-texto-principal border border-borde-tarjeta anim-zoomIn">
+      <div className="relative bg-gray-800 p-6 pt-10 rounded-xl shadow-xl max-w-xs w-full text-texto-principal border border-borde-tarjeta anim-zoomIn">
         {/* Botón de Cierre */}
         <button
           onClick={onClose}
@@ -87,10 +87,21 @@ export default function ContactoPopup({
           <p className="text-center text-sm text-texto-secundario mb-2">
             ¿Cómo deseas ponerte en contacto?
           </p>
-          <Button fullWidth disabled={loading} onClick={() => handleClick('whatsapp')} variant="primary">
+          {/* --- BOTONES CORREGIDOS --- */}
+          <Button
+            fullWidth
+            disabled={loading}
+            onClick={() => handleClick('whatsapp')}
+            className="!bg-[var(--color-primario)] !text-[var(--color-fondo)] border-none !focus:shadow-none hover:!brightness-90"
+          >
             WhatsApp
           </Button>
-          <Button fullWidth variant="outline" disabled={loading} onClick={() => handleClick('call')}>
+          <Button
+            fullWidth
+            disabled={loading}
+            onClick={() => handleClick('call')}
+            className="!bg-[var(--color-primario)] !text-[var(--color-fondo)] border-none !focus:shadow-none hover:!brightness-90"
+          >
             Llamar por Teléfono
           </Button>
         </div>

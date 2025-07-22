@@ -77,9 +77,13 @@ export default function EmpleadosPage() {
           />
         </div>
 
-        <Button onClick={handleBuscar} disabled={cargando}>
-          {cargando ? 'Buscando…' : 'Buscar'}
-        </Button>
+        <Button
+  onClick={handleBuscar}
+  disabled={cargando}
+  className="!bg-[var(--color-primario)] !text-[var(--color-fondo)] !focus:shadow-none hover:!brightness-90"
+>
+  {cargando ? 'Buscando…' : 'Buscar'}
+</Button>
       </Card>
 
       <div className="w-full max-w-md space-y-4 pb-20">

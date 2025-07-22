@@ -164,7 +164,12 @@ export default function CvPage() {
           )
         )}
     
-        <Button onClick={handleSave}>Guardar CV</Button>
+        <Button
+  onClick={handleSave}
+  className="!bg-[var(--color-primario)] !text-[var(--color-fondo)] border-none !focus:shadow-none hover:!brightness-90"
+>
+  Guardar CV
+</Button>
       </Card>
       
       <button

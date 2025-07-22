@@ -146,7 +146,7 @@ export default function NotificacionCard({
   // El campo `timestamp` ahora puede venir directamente en el documento o en el payload
   const dateStr = fmtDate(data.timestamp ?? typedPayload.timestamp);
 
-  return (
+ return (
     <article
       className="relative flex gap-3 rounded-xl p-4 shadow-md w-full max-w-[380px]"
       style={{ backgroundColor: C.cardBg, border: `1px solid ${C.cardBrd}` }}
@@ -199,25 +199,22 @@ export default function NotificacionCard({
           )}
         </span>
 
+        {/* --- INICIO DE LA SECCIÓN MODIFICADA --- */}
         {(primary || hasSecondaryAction) && (
           <div className={`mt-3 grid gap-2 ${primary && hasSecondaryAction ? 'grid-cols-2' : 'grid-cols-1'}`}>
             {primary && (
               <button
                 onClick={onPrimary}
                 disabled={isProcessing}
-                className="flex items-center justify-center gap-2 px-3 py-[6px] rounded-md text-[13px] font-medium w-full transition-opacity duration-200"
-                style={{
-                  backgroundColor: C.accBg,
-                  color: C.accTxt,
-                  border: `1px solid ${C.accBrd}`,
-                  opacity: isProcessing ? 0.6 : 1,
-                }}
+                // Se aplican las clases del estilo estándar de la app
+                className="flex items-center justify-center gap-2 px-3 py-[6px] rounded-md text-[13px] font-medium w-full !bg-[var(--color-primario)] !text-[var(--color-fondo)] border-none !focus:shadow-none hover:!brightness-90 disabled:opacity-60"
               >
                 {isProcessing ? <Spinner /> : <CheckCircleIcon className="w-4 h-4" />}
                 {isProcessing ? 'Procesando...' : primary}
               </button>
             )}
             {hasSecondaryAction && (
+              // Este botón de eliminar se mantiene sin cambios, con su estilo rojo original
               <button
                 onClick={onSecondary}
                 disabled={isProcessing}
@@ -234,6 +231,7 @@ export default function NotificacionCard({
             )}
           </div>
         )}
+        {/* --- FIN DE LA SECCIÓN MODIFICADA --- */}
       </div>
     </article>
   );

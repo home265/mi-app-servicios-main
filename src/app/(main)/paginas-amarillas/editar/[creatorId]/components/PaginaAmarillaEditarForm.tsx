@@ -522,9 +522,15 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
           )}
 
           {apiError && <p className="text-sm text-red-600 bg-red-100 p-3 rounded-md">{apiError}</p>}
-          <Button type="submit" variant="primary" isLoading={isLoading} disabled={isLoading || !isDirty} fullWidth className="py-3">
-            {isLoading ? 'Actualizando Publicación...' : 'Guardar Cambios'}
-          </Button>
+          <Button
+  type="submit"
+  isLoading={isLoading}
+  disabled={isLoading || !isDirty}
+  fullWidth
+  className="py-3 !bg-[var(--color-primario)] !text-[var(--color-fondo)] !focus:shadow-none hover:!brightness-90"
+>
+  {isLoading ? 'Actualizando Publicación...' : 'Guardar Cambios'}
+</Button>
         </form>
       </div>
       <div className="lg:w-1/3 xl:w-2/5 mt-8 lg:mt-0">

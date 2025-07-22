@@ -102,25 +102,35 @@ export default function AnuncioCard({ anuncio }: AnuncioCardProps) {
         <div className="flex-grow"></div>
 
         <div className="mt-auto pt-3 border-t border-[var(--color-borde-tarjeta)]">
-          <div className="flex justify-between items-center space-x-2">
-            <Link 
-              href={`/preview/${anuncio.id}`}
-              className="flex items-center justify-center px-3 py-2 text-xs sm:text-sm text-[var(--color-texto-principal)] bg-[var(--color-fondo-sutil)] hover:bg-[var(--color-fondo-hover)] rounded-md transition-colors"
-              title="Ver Previa"
-            >
-              <Eye size={16} className="mr-1 sm:mr-2"/>
-              Previa
-            </Link>
-            <Link 
-              href={editHref} // Usar la variable editHref
-              className="flex items-center justify-center px-3 py-2 text-xs sm:text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
-              title={editTitle} // Usar la variable editTitle
-            >
-              <Edit3 size={16} className="mr-1 sm:mr-2" />
-              {editText} {/* Usar la variable editText */}
-            </Link>
-            {/* Botón de eliminar comentado como en el original */}
+          {/* --- INICIO DE LA SECCIÓN MODIFICADA --- */}
+          <div className="flex justify-between items-center space-x-3">
+            {(() => {
+              // Estilo uniforme para ambos botones
+              const buttonStyle = "flex-1 flex items-center justify-center px-3 py-2 text-xs sm:text-sm text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors";
+              
+              return (
+                <>
+                  <Link 
+                    href={`/preview/${anuncio.id}`}
+                    className={buttonStyle}
+                    title="Ver Previa"
+                  >
+                    <Eye size={16} className="mr-1 sm:mr-2"/>
+                    Previa
+                  </Link>
+                  <Link 
+                    href={editHref}
+                    className={buttonStyle}
+                    title={editTitle}
+                  >
+                    <Edit3 size={16} className="mr-1 sm:mr-2" />
+                    {editText}
+                  </Link>
+                </>
+              );
+            })()}
           </div>
+          {/* --- FIN DE LA SECCIÓN MODIFICADA --- */}
         </div>
       </div>
     </div>
