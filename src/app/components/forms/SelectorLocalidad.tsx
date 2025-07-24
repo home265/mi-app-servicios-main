@@ -1,11 +1,9 @@
 'use client';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React, { useState, useEffect, useCallback } from 'react';
 
-// 1. Se elimina la importación del archivo JSON.
-// import localidadesData from '@/data/localidades.json';
-
-// Las interfaces ahora definen la estructura de los datos que se cargarán.
+// Las interfaces permanecen intactas.
 export interface Localidad {
   id: string;
   nombre: string;
@@ -29,8 +27,6 @@ interface SelectorLocalidadProps {
   onLocalidadSeleccionada: (localidad: LocalidadSeleccionada | null) => void;
 }
 
-// 2. Ya no se crea la constante 'todasLasLocalidades' desde el import.
-
 const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
   id,
   label,
@@ -38,62 +34,52 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
   error,
   onLocalidadSeleccionada,
 }) => {
-  // 3. Se añaden estados para manejar la carga de datos.
-  const [todasLasLocalidades, setTodasLasLocalidades] = useState<Localidad[]>([]);
+  // Se elimina el estado 'todasLasLocalidades' para no almacenar el JSON en el cliente.
   const [estadoCarga, setEstadoCarga] = useState<'idle' | 'loading' | 'error'>('idle');
-
   const [terminoBusqueda, setTerminoBusqueda] = useState('');
   const [sugerencias, setSugerencias] = useState<Localidad[]>([]);
   const [seleccionActual, setSeleccionActual] = useState<string>('');
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
 
-  // 4. useEffect para cargar los datos desde la carpeta 'public'.
-  useEffect(() => {
-    setEstadoCarga('loading');
-    fetch('/localidades.json') // La URL es relativa a la carpeta 'public'.
-      .then((res) => {
-        if (!res.ok) {
-          throw new Error(`Error HTTP: ${res.status}`);
-        }
-        return res.json();
-      })
-      .then((data) => {
-        // Asumimos que el JSON tiene una clave 'localidades' que contiene el array.
-        setTodasLasLocalidades(data.localidades || []);
-        setEstadoCarga('idle');
-      })
-      .catch((err) => {
-        console.error("Error al cargar localidades.json:", err);
-        setEstadoCarga('error');
-      });
-  }, []); // El array vacío [] asegura que esto se ejecute solo una vez.
+  // Se elimina el useEffect que cargaba el archivo completo al inicio.
 
-  const filtrarLocalidades = useCallback((busqueda: string) => {
-    if (busqueda.length < 2) {
-      setSugerencias([]);
-      return;
-    }
-    const busquedaNormalizada = busqueda.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    // 5. La función ahora usa el estado 'todasLasLocalidades' que se cargó con fetch.
-    const filtradas = todasLasLocalidades
-      .filter(loc => {
-        const nombreNormalizado = loc.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        const provinciaNormalizada = loc.provincia.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-        return nombreNormalizado.includes(busquedaNormalizada) || provinciaNormalizada.includes(busquedaNormalizada);
-      })
-      .slice(0, 10);
-    setSugerencias(filtradas);
-  }, [todasLasLocalidades]); // Se añade dependencia para que se actualice cuando los datos carguen.
-
+  // Este useEffect ahora maneja la búsqueda dinámica con "debounce".
   useEffect(() => {
-    if (terminoBusqueda.length >= 2) {
-      filtrarLocalidades(terminoBusqueda);
-      setMostrarSugerencias(true);
-    } else {
+    // Si el término de búsqueda es muy corto, no hacemos nada.
+    if (terminoBusqueda.length < 2) {
       setSugerencias([]);
       setMostrarSugerencias(false);
+      return;
     }
-  }, [terminoBusqueda, filtrarLocalidades]);
+
+    // "Debounce": Espera 300ms después de que el usuario deja de escribir.
+    const temporizador = setTimeout(() => {
+      setEstadoCarga('loading');
+      // Llama a la nueva API de búsqueda.
+      fetch(`/api/buscar-localidades?query=${encodeURIComponent(terminoBusqueda)}`)
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error('Error en la respuesta del servidor');
+          }
+          return res.json();
+        })
+        .then((data: { sugerencias: Localidad[] }) => {
+          setSugerencias(data.sugerencias || []);
+          setMostrarSugerencias(true);
+          setEstadoCarga('idle');
+        })
+        .catch((err) => {
+          console.error("Error al buscar localidades:", err);
+          setEstadoCarga('error');
+        });
+    }, 300);
+
+    // Limpia el temporizador si el usuario sigue escribiendo.
+    return () => clearTimeout(temporizador);
+  }, [terminoBusqueda]);
+
+  // Las siguientes funciones y lógicas de manejo de eventos se mantienen
+  // exactamente como las tenías, ya que están bien implementadas.
 
   const handleSeleccion = (localidad: Localidad) => {
     const seleccion: LocalidadSeleccionada = {
@@ -112,7 +98,7 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
     setSeleccionActual(nuevoValor);
     setTerminoBusqueda(nuevoValor);
     if (nuevoValor === '') {
-        onLocalidadSeleccionada(null);
+      onLocalidadSeleccionada(null);
     }
   };
 
@@ -128,11 +114,10 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
     };
   }, [mostrarSugerencias, id]);
 
-  // 6. Se mejora el placeholder y se deshabilita el input mientras carga.
   const placeholderActual = estadoCarga === 'loading'
-    ? 'Cargando localidades...'
+    ? 'Buscando...'
     : estadoCarga === 'error'
-    ? 'Error al cargar datos'
+    ? 'Error en la búsqueda'
     : placeholder;
 
   return (
@@ -146,13 +131,13 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
         value={seleccionActual}
         onChange={handleChange}
         onFocus={() => {
-          if (terminoBusqueda.length >= 2 && sugerencias.length > 0) {
+          if (sugerencias.length > 0) {
             setMostrarSugerencias(true);
           }
         }}
         placeholder={placeholderActual}
         autoComplete="off"
-        disabled={estadoCarga !== 'idle'}
+        // El input ya no se deshabilita, solo cambia el placeholder para indicar el estado.
         className="block w-full px-3 py-2 bg-fondo border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primario focus:border-primario sm:text-sm text-texto dark:text-texto-dark disabled:bg-gray-200 disabled:dark:bg-gray-700"
       />
 
