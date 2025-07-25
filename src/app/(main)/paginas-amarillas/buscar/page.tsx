@@ -135,7 +135,7 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
         {/* --- CONTENEDOR PARA EL TÍTULO Y EL BOTÓN DE AYUDA --- */}
         <div className="relative mx-auto w-fit">
           <h2 className="text-2xl font-semibold text-texto-principal text-center">
-            Buscar en Páginas Amarillas
+            Buscar en Guía Local
           </h2>
           
           <div className="absolute top-full right-0 mt-3 sm:left-full sm:top-1/2 sm:-translate-y-1/2 sm:mt-0 sm:ml-4">

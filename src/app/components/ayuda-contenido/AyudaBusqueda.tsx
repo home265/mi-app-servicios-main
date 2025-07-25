@@ -15,8 +15,8 @@ export default function AyudaBusqueda() {
     <div className="text-sm">
       <div className="flex justify-center mb-4">
         {/* CORRECCIÓN FINAL: Envolvemos el Logo en un div y le damos el tamaño al div. */}
-        <div className="w-20 h-auto">
-          <Logo />
+        <div className="flex justify-center mb-2 -mt-15">
+          <Logo width={240} height={240} />
         </div>
       </div>
       <h2 className="text-2xl font-bold text-center mb-6">¿Cómo buscar un servicio?</h2>

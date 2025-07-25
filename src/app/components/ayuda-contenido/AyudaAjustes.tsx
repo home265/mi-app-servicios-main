@@ -13,13 +13,10 @@ import Logo from '@/app/components/ui/Logo';
 export default function AyudaAjustes() {
   return (
     <div className="text-sm">
-      <div className="flex justify-center mb-4">
-        {/* Manejo correcto del componente Logo */}
-        <div className="w-20 h-auto">
-          <Logo />
-        </div>
-      </div>
-      <h2 className="text-2xl font-bold text-center mb-4">Guía Rápida de CODYS</h2>
+      <div className="flex justify-center mb-2 -mt-15">
+  <Logo width={240} height={240} />
+</div>
+      <h2 className="text-2xl font-bold text-center mb-4 ">Guía Rápida de CODYS</h2>
       <p className="text-center text-texto-secundario mb-6">
         Aquí encontrarás cómo navegar la app y configurar tu experiencia.
       </p>

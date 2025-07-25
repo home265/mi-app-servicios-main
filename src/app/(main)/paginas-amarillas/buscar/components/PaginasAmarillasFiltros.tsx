@@ -123,13 +123,13 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
   };
 
   const rolOptions = [
-    { value: '', label: 'Todos (Prestadores y Comercios)' },
+    { value: '', label: 'Todos (Profesionales,Prestadores y Comercios)' },
     { value: 'prestador', label: 'Prestadores / Profesionales' },
     { value: 'comercio', label: 'Comercios' },
   ];
   const selectedRolLabel =
     rolOptions.find((opt) => opt.value === rolSel)?.label ||
-    'Todos (Prestadores y Comercios)';
+    'Todos (Profesionales,Prestadores y Comercios)';
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

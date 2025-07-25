@@ -12,11 +12,11 @@ export default function AyudaPaginasAmarillas() {
     <div className="text-sm">
       <div className="flex justify-center mb-4">
         {/* Manejo correcto del componente Logo */}
-        <div className="w-20 h-auto">
-          <Logo />
-        </div>
+       <div className="flex justify-center mb-2 -mt-15">
+         <Logo width={240} height={240} />
+       </div>
       </div>
-      <h2 className="text-2xl font-bold text-center mb-4">Explorando las Páginas Amarillas</h2>
+      <h2 className="text-2xl font-bold text-center mb-4">Explorando la Guía Local</h2>
       <p className="text-center text-texto-secundario mb-6">
         Encuentra comercios y prestadores de servicios como en las guías telefónicas de antes, ¡pero de forma digital!
       </p>

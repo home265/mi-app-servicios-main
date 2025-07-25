@@ -98,7 +98,7 @@ const base: Record<'prestador' | 'comercio', Action[]> = {
     },
     {
       id: 'paginas',
-      label: 'Ver Páginas Amarillas',
+      label: 'Guía Local',
       Icon: BookOpenIcon,
       path: '/paginas-amarillas/buscar',
     },
@@ -130,7 +130,7 @@ const base: Record<'prestador' | 'comercio', Action[]> = {
     },
     {
       id: 'paginas',
-      label: 'Ver Páginas Amarillas',
+      label: 'Guía Local',
       Icon: BookOpenIcon,
       path: '/paginas-amarillas/buscar',
     },
@@ -235,7 +235,7 @@ export default function BienvenidaPage() {
         : { id: 'newCv', label: 'Crear CV', Icon: DocumentPlusIcon, path: '/cv' },
       {
         id: 'pagUsr',
-        label: 'Páginas Amarillas',
+        label: 'Guía Local',
         Icon: BookOpenIcon,
         path: '/paginas-amarillas/buscar',
       },

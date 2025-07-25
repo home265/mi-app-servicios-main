@@ -14,8 +14,8 @@ export default function AyudaCrearPublicacionPA() {
     <div className="text-sm">
       <div className="flex justify-center mb-4">
         {/* Manejo correcto del componente Logo */}
-        <div className="w-20 h-auto">
-          <Logo />
+        <div className="flex justify-center mb-2 -mt-15">
+          <Logo width={240} height={240} />
         </div>
       </div>
       <h2 className="text-2xl font-bold text-center mb-4">Tu Tarjeta en Páginas Amarillas</h2>
