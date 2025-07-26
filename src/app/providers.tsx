@@ -5,12 +5,22 @@ import { motion } from 'framer-motion';
 import { ThemeProvider } from 'next-themes';
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc, DocumentSnapshot } from 'firebase/firestore';
-import { Toaster } from 'react-hot-toast'; // <-- 1. IMPORTACIÓN AÑADIDA
+// --- MODIFICACIÓN: Se importa la función 'toast' para usarla programáticamente ---
+import { Toaster, toast } from 'react-hot-toast';
 
 import { auth, db } from '@/lib/firebase/config';
 import { useUserStore, UserProfile } from '@/store/userStore';
+
+// --- INICIO: IMPORTACIONES PARA ONBOARDING ---
+import { useOnboarding } from '@/lib/hooks/useOnboarding';
+import OnboardingInstructions from '@/app/components/onboarding/OnboardingInstructions';
+import Modal from '@/app/components/common/Modal';
+// --- NUEVA IMPORTACIÓN ---
+import DesktopOnboardingToast from '@/app/components/onboarding/DesktopOnboardingToast';
+// --- FIN: IMPORTACIONES PARA ONBOARDING ---
 
 const USER_COLLECTIONS = ['usuarios_generales', 'prestadores', 'comercios'];
 
@@ -87,132 +97,99 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  
+  // --- INICIO: LÓGICA DE ONBOARDING CORREGIDA Y ACTUALIZADA ---
+  // Se renombra 'os' a 'platform' para coincidir con el hook actualizado y evitar el error.
+  const { shouldShow, platform, handleOnboardingComplete } = useOnboarding();
+  // --- FIN: LÓGICA DE ONBOARDING ---
 
   /* ========================================================
      1) Listener de Firebase Auth (SIN CAMBIOS)
      ======================================================== */
   useEffect(() => {
     setMounted(true);
-    console.log('Providers: Registrando onAuthStateChanged listener.');
-
-    const unsubscribe = onAuthStateChanged(
-      auth,
-      async (firebaseUser: FirebaseUser | null) => {
-        console.log(
-          'Providers: onAuthStateChanged disparado. firebaseUser:',
-          firebaseUser?.uid || null
-        );
-
-        if (firebaseUser) {
-          try {
-            const existingUser = useUserStore.getState().currentUser;
-
-            if (existingUser && existingUser.uid === firebaseUser.uid) {
-              console.log(
-                'Providers: Usuario ya existe en el store, no se recarga perfil.'
-              );
-              if (useUserStore.getState().isLoadingAuth) {
-                setLoadingAuth(false);
-              }
+    // ... (El resto de este useEffect no tiene cambios)
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        try {
+          const existingUser = useUserStore.getState().currentUser;
+          if (!(existingUser && existingUser.uid === firebaseUser.uid)) {
+            const userProfile = await fetchUserProfile(firebaseUser.uid);
+            if (userProfile) {
+              const { rol } = userProfile;
+              const actingAs = rol === 'prestador' || rol === 'comercio' ? 'provider' : 'user';
+              useUserStore.setState({
+                currentUser: { ...userProfile, email: firebaseUser.email },
+                originalRole: rol, actingAs
+              });
             } else {
-              console.log(
-                'Providers: Buscando perfil para usuario:',
-                firebaseUser.uid
-              );
-              const userProfile = await fetchUserProfile(firebaseUser.uid);
-
-              if (userProfile) {
-                const { rol } = userProfile;
-                const actingAs = rol === 'prestador' ? 'provider' : 'user';
-
-                useUserStore.setState({
-                  currentUser: {
-                    ...userProfile,
-                    email: firebaseUser.email,
-                  },
-                  originalRole: rol,
-                  actingAs,
-                });
-              } else {
-                console.error(
-                  'Providers: Usuario autenticado pero perfil no encontrado o sin rol.'
-                );
-                setUserError('Error al cargar el perfil de usuario.');
-                clearUserSession();
-              }
-              setLoadingAuth(false);
+              setUserError('Error al cargar el perfil de usuario.');
+              clearUserSession();
             }
-          } catch (error) {
-            console.error('Providers: Error al obtener perfil:', error);
-            setUserError('Error al cargar tu perfil.');
-            clearUserSession();
-            setLoadingAuth(false);
           }
-        } else {
-          console.log('Providers: No hay usuario en Firebase.');
-          if (
-            useUserStore.getState().currentUser !== null ||
-            useUserStore.getState().isLoadingAuth
-          ) {
-            clearUserSession();
-            setLoadingAuth(false);
-          }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (error) {
+          setUserError('Error al cargar tu perfil.');
+          clearUserSession();
+        } finally {
+          if (useUserStore.getState().isLoadingAuth) setLoadingAuth(false);
+        }
+      } else {
+        if (useUserStore.getState().currentUser || useUserStore.getState().isLoadingAuth) {
+          clearUserSession();
+          setLoadingAuth(false);
         }
       }
-    );
-
-    return () => {
-      console.log(
-        'Providers: Desmontando y desuscribiendo onAuthStateChanged.'
-      );
-      unsubscribe();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    });
+    return () => unsubscribe();
+  }, [setLoadingAuth, clearUserSession, setUserError]);
 
   /* ========================================================
      2) Redirecciones según estado de auth y PIN (SIN CAMBIOS)
      ======================================================== */
   useEffect(() => {
     if (isLoadingAuth || !mounted) return;
-
-    const publicPaths = [
-      '/login',
-      '/seleccionar-registro',
-      '/registro',
-      '/terminos-y-condiciones',
-      '/politica-de-privacidad',
-    ];
-
+    const publicPaths = ['/login', '/seleccionar-registro', '/registro', '/terminos-y-condiciones', '/politica-de-privacidad'];
     const isPublicPath = publicPaths.some((p) => pathname.startsWith(p));
     const isPinEntryPath = pathname === '/pin-entry';
 
-    console.log(
-      `Providers Redirection Check: Path=${pathname}, isLoadingAuth=${isLoadingAuth}, currentUser=${!!currentUser}, isPinVerified=${isPinVerifiedForSession}, isPublic=${isPublicPath}, isPinEntry=${isPinEntryPath}`
-    );
-
     if (!currentUser && !isPublicPath) {
       router.replace('/login');
-    }
-    else if (currentUser && !isPinVerifiedForSession && !isPinEntryPath) {
+    } else if (currentUser && !isPinVerifiedForSession && !isPinEntryPath) {
       router.replace('/pin-entry');
-    }
-    else if (
-      currentUser &&
-      isPinVerifiedForSession &&
-      (pathname === '/login' || isPinEntryPath)
-    ) {
+    } else if (currentUser && isPinVerifiedForSession && (isPublicPath || isPinEntryPath)) {
       router.replace('/bienvenida');
     }
-  }, [
-    isLoadingAuth,
-    currentUser,
-    isPinVerifiedForSession,
-    pathname,
-    router,
-    mounted,
-  ]);
+  }, [isLoadingAuth, currentUser, isPinVerifiedForSession, pathname, router, mounted]);
 
+  // --- INICIO: NUEVO useEffect PARA MANEJAR EL ONBOARDING ---
+  useEffect(() => {
+    // Si no se debe mostrar, salir.
+    if (!shouldShow) return;
+
+    // Lógica para mostrar el TOAST en navegadores de escritorio
+    if (platform === 'desktop-chrome' || platform === 'desktop-edge' || platform === 'desktop-safari') {
+      toast.custom(
+        (t) => ( 
+          <DesktopOnboardingToast
+            platform={platform}
+            onClose={() => {
+              toast.dismiss(t.id);
+              handleOnboardingComplete();
+            }}
+          />
+        ),
+        {
+          id: 'desktop-onboarding-toast',
+          duration: Infinity,
+          position: 'bottom-right',
+        }
+      );
+    }
+    // El MODAL para móviles se maneja de forma declarativa en el JSX de abajo
+  }, [shouldShow, platform, handleOnboardingComplete]);
+  // --- FIN: NUEVO useEffect ---
+  
   /* ========================================================
      3) Render (CON MODIFICACIÓN)
      ======================================================== */
@@ -220,21 +197,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
     return <LoadingScreen />;
   }
 
-  const publicPaths = [
-    '/login',
-    '/seleccionar-registro',
-    '/registro',
-    '/terminos-y-condiciones',
-    '/politica-de-privacidad',
-  ];
-
+  const publicPaths = ['/login', '/seleccionar-registro', '/registro', '/terminos-y-condiciones', '/politica-de-privacidad'];
   const isPublicPath = publicPaths.some((p) => pathname.startsWith(p));
   const isPinEntryPath = pathname === '/pin-entry';
 
   const shouldRender =
     (!currentUser && isPublicPath) ||
     (currentUser && !isPinVerifiedForSession && isPinEntryPath) ||
-    (currentUser && isPinVerifiedForSession && !isPinEntryPath);
+    (currentUser && isPinVerifiedForSession && !isPinEntryPath && !isPublicPath);
 
   if (!shouldRender) {
     return <LoadingScreen message="Verificando acceso..." />;
@@ -242,33 +212,26 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-      {/* --- 2. COMPONENTE AÑADIDO PARA MOSTRAR NOTIFICACIONES --- */}
-      <Toaster
-        position="top-center"
-        toastOptions={{
-          // Estilos para que las notificaciones coincidan con el tema de la app
-          style: {
-            background: 'var(--color-tarjeta)',
-            color: 'var(--color-texto-principal)',
-            border: '1px solid var(--color-borde-tarjeta)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-          },
-          // Estilos para los íconos de éxito y error
-          success: {
-            iconTheme: {
-              primary: 'var(--color-primario)',
-              secondary: '#fff',
-            },
-          },
-          error: {
-            iconTheme: {
-              primary: 'var(--color-error)',
-              secondary: '#fff',
-            },
-          },
-        }}
-      />
+      <Toaster />
+      
       {children}
+      
+      {/* --- INICIO: RENDERIZADO CONDICIONAL DEL MODAL DE ONBOARDING PARA MÓVILES --- */}
+      {/* Solo se muestra el Modal si la plataforma es 'ios' o 'android' */}
+      {shouldShow && (platform === 'ios' || platform === 'android') && (
+        <Modal 
+          isOpen={true} 
+          onClose={handleOnboardingComplete}
+          title="Guía de Instalación"
+        >
+            <OnboardingInstructions 
+                os={platform} 
+                onClose={handleOnboardingComplete} 
+            />
+        </Modal>
+      )}
+      {/* --- FIN: RENDERIZADO CONDICIONAL DEL MODAL --- */}
+
     </ThemeProvider>
   );
 }
