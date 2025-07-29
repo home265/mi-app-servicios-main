@@ -4,6 +4,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import rubrosData from '@/data/rubro.json';
 
+// Las interfaces y tipos de datos se mantienen sin cambios.
 interface Subrubro {
   nombre: string;
   requiereMatricula: boolean;
@@ -28,7 +29,6 @@ interface SelectorRubroProps {
   error?: string;
   onRubroChange: (seleccion: RubroSeleccionado | null) => void;
   initialValue?: RubroSeleccionado | null;
-  labelColor?: string;
 }
 
 const todosLosRubros: Rubro[] = rubrosData.rubros;
@@ -41,7 +41,6 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
   error,
   onRubroChange,
   initialValue,
-  labelColor = '#F9F3D9',
 }) => {
   const [openRubroPanel, setOpenRubroPanel] = useState(false);
   const [openSubRubroPanel, setOpenSubRubroPanel] = useState(false);
@@ -49,16 +48,7 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
   const [rubro, setRubro] = useState<Rubro | null>(null);
   const [subrubro, setSubrubro] = useState<Subrubro | null>(initialValue?.subrubro || null);
 
-  const highlight = '#EFC71D';
-  const borderColor = '#2F5854';
-  const cardBg = 'rgba(0,0,0,0)';
-  const hoverBg = 'rgba(255,255,255,0.1)';
-
-  const selectorBtn =
-    'inline-flex items-center justify-start px-3 py-1 text-sm rounded-md border transition whitespace-normal';
-  const listBtn =
-    'h-16 flex items-center justify-center px-3 py-2 text-sm rounded-md border transition w-full whitespace-normal break-words';
-
+  // Lógica de filtrado y efectos (sin cambios)
   const rubrosFiltrados = useMemo(() => {
     const q = search.trim().toLowerCase();
     return q
@@ -100,8 +90,7 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
       <div>
         <label
           htmlFor={idRubro}
-          className="block text-sm font-medium mb-1"
-          style={{ color: labelColor }}
+          className="block text-sm font-medium text-texto-principal mb-1"
         >
           {labelRubro}
         </label>
@@ -111,12 +100,9 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
             setOpenRubroPanel((o) => !o);
             setOpenSubRubroPanel(false);
           }}
-          className={selectorBtn}
-          style={{
-            backgroundColor: openRubroPanel ? hoverBg : cardBg,
-            color: rubro?.nombre ? highlight : labelColor,
-            borderColor: highlight,
-          }}
+          className={`inline-flex items-center justify-start px-3 py-1 text-sm rounded-md border transition whitespace-normal border-primario ${
+            rubro?.nombre ? 'text-primario' : 'text-texto-principal'
+          } ${openRubroPanel ? 'bg-white/10' : 'bg-transparent'}`}
         >
           {rubro?.nombre || '— ninguno —'}
         </button>
@@ -129,12 +115,7 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Buscar rubro…"
-              className="w-full px-4 py-2 mb-2 rounded-md focus:outline-none transition"
-              style={{
-                backgroundColor: cardBg,
-                color: labelColor,
-                border: `1px solid ${borderColor}`,
-              }}
+              className="w-full px-4 py-2 mb-2 rounded-md focus:outline-none transition bg-transparent text-texto-principal border border-borde-tarjeta"
             />
             <div className="grid grid-cols-3 gap-2 max-h-60 overflow-auto">
               {rubrosFiltrados.length ? (
@@ -148,21 +129,17 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
                       setOpenRubroPanel(false);
                       setSearch('');
                     }}
-                    className={listBtn + ' hover:bg-white/10'}
-                    style={{
-                      backgroundColor: r.nombre === rubro?.nombre ? highlight : cardBg,
-                      color: r.nombre === rubro?.nombre ? '#0F2623' : labelColor,
-                      borderColor: highlight,
-                    }}
+                    className={`h-16 flex items-center justify-center px-3 py-2 text-sm rounded-md border transition w-full whitespace-normal break-words border-primario hover:bg-white/10 ${
+                      r.nombre === rubro?.nombre
+                        ? 'bg-primario text-fondo'
+                        : 'bg-transparent text-texto-principal'
+                    }`}
                   >
                     {r.nombre}
                   </button>
                 ))
               ) : (
-                <p
-                  className="col-span-3 text-center text-sm py-4"
-                  style={{ color: labelColor, opacity: 0.6 }}
-                >
+                <p className="col-span-3 text-center text-sm py-4 text-texto-secundario opacity-60">
                   Sin resultados
                 </p>
               )}
@@ -175,20 +152,16 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
         <div>
           <label
             htmlFor={idSubrubro}
-            className="block text-sm font-medium mb-1"
-            style={{ color: labelColor }}
+            className="block text-sm font-medium text-texto-principal mb-1"
           >
             {labelSubrubro}
           </label>
           <button
             type="button"
             onClick={() => setOpenSubRubroPanel((o) => !o)}
-            className={selectorBtn}
-            style={{
-              backgroundColor: openSubRubroPanel ? hoverBg : cardBg,
-              color: subrubro ? highlight : labelColor,
-              borderColor: highlight,
-            }}
+            className={`inline-flex items-center justify-start px-3 py-1 text-sm rounded-md border transition whitespace-normal border-primario ${
+              subrubro ? 'text-primario' : 'text-texto-principal'
+            } ${openSubRubroPanel ? 'bg-white/10' : 'bg-transparent'}`}
           >
             {subrubro?.nombre || '— ninguna —'}
           </button>
@@ -203,12 +176,11 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
                     setSubrubro(s);
                     setOpenSubRubroPanel(false);
                   }}
-                  className={listBtn + ' hover:bg-white/10'}
-                  style={{
-                    backgroundColor: s.nombre === subrubro?.nombre ? highlight : cardBg,
-                    color: s.nombre === subrubro?.nombre ? '#0F2623' : labelColor,
-                    borderColor: highlight,
-                  }}
+                  className={`h-16 flex items-center justify-center px-3 py-2 text-sm rounded-md border transition w-full whitespace-normal break-words border-primario hover:bg-white/10 ${
+                    s.nombre === subrubro?.nombre
+                      ? 'bg-primario text-fondo'
+                      : 'bg-transparent text-texto-principal'
+                  }`}
                 >
                   {s.nombre}
                 </button>

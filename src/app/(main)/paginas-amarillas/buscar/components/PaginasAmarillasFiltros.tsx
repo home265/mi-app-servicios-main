@@ -31,7 +31,7 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
   isLoading = false,
   initialFiltros = {},
 }) => {
-  /* ------------- estado inicial (memorizado y corregido) ------------- */
+  // Lógica de estado y handlers (sin cambios)
   const initialLocalidad = useMemo<LocalidadSeleccionada | null>(() => {
     return initialFiltros.provincia && initialFiltros.localidad
       ? {
@@ -75,8 +75,6 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
     };
   }, [initialFiltros.rubro, initialFiltros.subRubro]);
 
-
-  /* ---------------- estado controlado ---------------- */
   const [localidadSel, setLocalidadSel] = useState<LocalidadSeleccionada | null>(
     initialLocalidad
   );
@@ -88,12 +86,11 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
   const [realizaEnvios, setRealizaEnvios] = useState<boolean | undefined>(
     initialFiltros.realizaEnvios
   );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [localidadKey, setLocalidadKey] = useState(Date.now());
-
   const [isRolOpen, setIsRolOpen] = useState(false);
   const rolDropdownRef = useRef<HTMLDivElement>(null);
 
-  /* ---------------- handlers ---------------- */
   const handleRolChange = (nuevoRol: RolPaginaAmarilla | '') => {
     setRolSel(nuevoRol);
     setCatSel(null);
@@ -116,10 +113,6 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
     };
     console.log('[Filtros] submit →', filtros);
     onBuscar(filtros);
-
-    setLocalidadSel(null);
-    setRolSel('');
-    setLocalidadKey(Date.now());
   };
 
   const rolOptions = [
@@ -172,9 +165,7 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
               type="button"
               id="rolBusq"
               onClick={() => setIsRolOpen(!isRolOpen)}
-              className="block w-full px-3 py-2 bg-fondo border border-gray-300 dark:border-gray-600 rounded-md
-                         shadow-sm focus:outline-none focus:ring-primario focus:border-primario
-                         text-base text-left text-texto dark:text-texto-dark justify-between items-center"
+              className="flex w-full items-center justify-between rounded-md border border-borde-tarjeta bg-fondo px-3 py-2 text-left text-base text-texto-principal shadow-sm focus:border-primario focus:outline-none focus:ring-primario"
             >
               <span>{selectedRolLabel}</span>
               <svg
@@ -196,8 +187,7 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
 
             {isRolOpen && (
               <ul
-                className="absolute z-20 w-full mt-1 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-gray-600 
-                           rounded-md shadow-lg max-h-60 overflow-y-auto"
+                className="absolute z-20 mt-1 w-full max-h-60 overflow-y-auto rounded-md border border-borde-tarjeta bg-tarjeta shadow-lg"
               >
                 {rolOptions.map((option) => (
                   <li
@@ -205,7 +195,7 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
                     onClick={() =>
                       handleRolChange(option.value as RolPaginaAmarilla | '')
                     }
-                    className="px-3 py-2 text-base text-texto dark:text-texto-dark cursor-pointer hover:bg-primario/20"
+                    className="cursor-pointer px-3 py-2 text-base text-texto-principal hover:bg-primario/20"
                   >
                     {option.label}
                   </li>
@@ -245,14 +235,14 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
 
       <div className="flex flex-col sm:flex-row gap-3 mt-10 pt-4">
         <Button
-    type="submit"
-    variant="primary"
-    isLoading={isLoading}
-    disabled={isLoading}
-    className="flex-grow w-full !bg-[var(--color-primario)] !text-[var(--color-fondo)] !focus:shadow-none hover:!brightness-90"
->
-    {isLoading ? 'Buscando…' : 'Buscar'}
-</Button>
+          type="submit"
+          variant="primary"
+          isLoading={isLoading}
+          disabled={isLoading}
+          className="w-full flex-grow !bg-primario !text-fondo !focus:shadow-none hover:!brightness-90"
+        >
+          {isLoading ? 'Buscando…' : 'Buscar'}
+        </Button>
       </div>
     </form>
   );

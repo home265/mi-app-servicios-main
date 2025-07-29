@@ -692,41 +692,50 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--color-fondo)]">
       <aside
-        className={`
-          fixed top-0 left-0 h-full bg-[var(--color-fondo-toolbar)] shadow-lg
-          transform transition-transform duration-300 ease-in-out
-          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-          w-56 md:w-64 z-40 overflow-y-auto
-        `}
-      >
-        <div className="flex flex-col h-full pt-4 px-2">
-          <button
-            onClick={() => setIsSidebarOpen(false)}
-            className="self-end p-2 mb-4 hover:bg-[var(--color-fondo-hover)] rounded-md"
-            aria-label="Cerrar menú de herramientas"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-          <div className="flex-1">
-            {(['text', 'curvedText', 'color', 'gradient', 'imageBackground', 'subimage', 'effects'] as ToolId[]).map(toolId => (
-              <button
-                key={toolId}
-                onClick={() => handleSelectTool(toolId)}
-                className={`w-full flex items-center p-3 mb-2 rounded-md transition-colors text-sm text-left
-                            ${activeTool === toolId && toolId !== 'effects'
-                              ? 'bg-primario text-white'
-                              : 'text-[var(--color-texto-principal)] hover:bg-[var(--color-fondo-hover)]'
-                            }`}
-              >
-                {/* ... (íconos sin cambios) ... */}
-                {toolId.charAt(0).toUpperCase() + toolId.slice(1).replace(/([A-Z])/g, ' $1')}
-              </button>
-            ))}
-          </div>
-        </div>
-      </aside>
+  className={`
+    fixed top-0 left-0 h-full bg-[var(--color-fondo-toolbar)] shadow-lg
+    transform transition-transform duration-300 ease-in-out
+    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+    w-56 md:w-64 z-40 overflow-y-auto
+  `}
+>
+  {/* 1. Se elimina el `h-full` de este div para que no ocupe toda la altura */}
+  <div className="flex flex-col px-2">
+    
+    {/* 2. Se elimina la clase `flex-1` y el div ahora envuelve tanto la lista como el botón */}
+    <div className="pt-16"> 
+      {(['text', 'curvedText', 'color', 'gradient', 'imageBackground', 'subimage', 'effects'] as ToolId[]).map(toolId => (
+        <button
+          key={toolId}
+          onClick={() => handleSelectTool(toolId)}
+          className={`w-full flex items-center p-3 mb-2 rounded-md transition-colors text-sm text-left
+                      ${activeTool === toolId && toolId !== 'effects'
+                        ? 'bg-primario text-white'
+                        : 'text-[var(--color-texto-principal)] hover:bg-[var(--color-fondo-hover)]'
+                      }`}
+        >
+          {/* ... (íconos sin cambios) ... */}
+          {toolId.charAt(0).toUpperCase() + toolId.slice(1).replace(/([A-Z])/g, ' $1')}
+        </button>
+      ))}
+
+      {/* 3. El botón de cierre se mueve aquí, DENTRO del mismo contenedor */}
+      <div className="py-2 mt-4 border-t border-white/10">
+        <button
+          onClick={() => setIsSidebarOpen(false)}
+          className="w-full flex items-center justify-center p-3 rounded-md transition-colors text-sm text-red-400 hover:bg-red-500/20 hover:text-red-300"
+          aria-label="Cerrar menú de herramientas"
+          title="Cerrar menú"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</aside>
 
       {isSidebarOpen && (
         <div

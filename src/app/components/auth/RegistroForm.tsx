@@ -220,7 +220,7 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
 
         {rol === 'prestador' && (
           <>
-            <hr className="my-6 border-gray-300 dark:border-gray-700" />
+            <hr className="my-6 border-borde-tarjeta" />
             <h2 className="text-lg font-semibold text-primario mb-3">
               Información de Prestador de Servicios
             </h2>
@@ -249,8 +249,8 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
               label={labelMatricula} 
               type="text" 
               placeholder="Ej: MP-12345"
-              {...matriculaRegisterProps} // <-- Usamos las props del register
-              ref={(e) => { // <-- Combinamos las refs
+              {...matriculaRegisterProps}
+              ref={(e) => {
                 matriculaRHFRef(e);
                 matriculaInputRef.current = e;
               }}
@@ -269,7 +269,7 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
               </label>
               <textarea id="descripcionPrestador" rows={4} spellCheck="true"
                 placeholder={placeholderDescripcion}
-                className="block w-full px-3 py-2 bg-fondo border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primario focus:border-primario sm:text-sm text-texto dark:text-texto-dark"
+                className="block w-full px-3 py-2 bg-fondo border border-borde-tarjeta rounded-md shadow-sm placeholder-texto-secundario focus:outline-none focus:ring-primario focus:border-primario sm:text-sm text-texto-principal"
                 maxLength={500}
                 {...register('descripcion', {
                   required: rol === 'prestador' ? 'La descripción de tus servicios es obligatoria' : false,
@@ -282,7 +282,7 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
 
         {rol === 'comercio' && (
           <>
-            <hr className="my-6 border-gray-300 dark:border-gray-700" />
+            <hr className="my-6 border-borde-tarjeta" />
             <h2 className="text-lg font-semibold text-primario mb-3">
               Información de Comercio/Profesional
             </h2>
@@ -291,7 +291,6 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
                 validate: (value) => {
                   if (!value?.rubro) return 'El rubro es obligatorio.';
                   const rubroActual = rubrosData.rubros.find(r => r.nombre === value.rubro);
-                  // La validación ahora debe tener en cuenta que 'subrubros' es un array de objetos
                   if (rubroActual && rubroActual.subrubros.length > 0 && !value.subrubro) {
                     return 'La especialidad/subrubro es obligatorio.';
                   }
@@ -312,8 +311,8 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
               label={labelMatricula}
               type="text" 
               placeholder="Ej: MP-12345 (para profesionales)"
-              {...matriculaRegisterProps} // <-- Usamos las props del register
-              ref={(e) => { // <-- Combinamos las refs
+              {...matriculaRegisterProps}
+              ref={(e) => {
                 matriculaRHFRef(e);
                 matriculaInputRef.current = e;
               }}
@@ -332,7 +331,7 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
               </label>
               <textarea id="descripcionComercio" rows={4} spellCheck="true"
                 placeholder={placeholderDescripcion}
-                className="block w-full px-3 py-2 bg-fondo border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primario focus:border-primario sm:text-sm text-texto dark:text-texto-dark"
+                className="block w-full px-3 py-2 bg-fondo border border-borde-tarjeta rounded-md shadow-sm placeholder-texto-secundario focus:outline-none focus:ring-primario focus:border-primario sm:text-sm text-texto-principal"
                 maxLength={500}
                 {...register('descripcion', {
                   required: rol === 'comercio' ? 'La descripción es obligatoria' : false,
@@ -346,13 +345,13 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
         {errors.root?.storageError && <p className="text-sm text-error text-center mt-4">{errors.root.storageError.message}</p>}
 
         <Button
-  type="submit"
-  isLoading={isSubmitting}
-  fullWidth
-  className="mt-8 !bg-[var(--color-primario)] !text-[var(--color-fondo)] !focus:shadow-none hover:!brightness-90"
->
-  {isSubmitting ? 'Procesando...' : 'Continuar a Verificación'}
-</Button>
+          type="submit"
+          isLoading={isSubmitting}
+          fullWidth
+          className="mt-8 !bg-primario !text-fondo !focus:shadow-none hover:!brightness-90"
+        >
+          {isSubmitting ? 'Procesando...' : 'Continuar a Verificación'}
+        </Button>
       </form>
     </>
   );

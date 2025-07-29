@@ -84,28 +84,28 @@ const EditorDiaHorario: React.FC<EditorDiaHorarioProps> = ({
   const inputsRangoDisabled = globalmenteDeshabilitado || !esPorRangos;
 
   return (
-    <div className="flex flex-col gap-y-3 p-3 border-b border-gray-200 dark:border-gray-700 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors duration-150">
+    <div className="flex flex-col gap-y-3 p-3 border-b border-borde-tarjeta last:border-b-0 hover:bg-white/5 transition-colors duration-150">
       <div className="flex items-center gap-x-4">
-        <span className="font-medium w-28 shrink-0">{diaNombre}</span>
+        <span className="font-medium w-28 shrink-0 text-texto-principal">{diaNombre}</span>
         
         <div className="relative w-full sm:w-auto" ref={dropdownRef}>
           <button
             type="button"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             disabled={globalmenteDeshabilitado}
-            className="flex items-center justify-between w-full rounded-md border border-gray-300 dark:border-gray-600 shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 px-3 py-2 text-base disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-between w-full rounded-md border border-borde-tarjeta shadow-sm bg-fondo text-texto-principal px-3 py-2 text-base disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label={`Estado del horario para ${diaNombre}`}
           >
             <span>{getLabelActual()}</span>
             <ChevronDownIcon className={`h-5 w-5 ml-2 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
           </button>
           {isDropdownOpen && (
-            <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 shadow-lg border border-gray-300 dark:border-gray-600 rounded-md">
+            <div className="absolute z-10 mt-1 w-full bg-tarjeta shadow-lg border border-borde-tarjeta rounded-md">
               {opcionesEstado.map(op => (
                 <div
                   key={op.id}
                   onClick={() => handleEstadoTipoChange(op.id as 'cerrado' | 'abierto24h' | 'porRangos')}
-                  className="px-4 py-2 text-base text-gray-900 dark:text-gray-100 hover:bg-primario/20 cursor-pointer" // <-- EFECTO HOVER AÑADIDO/CORREGIDO
+                  className="px-4 py-2 text-base text-texto-principal hover:bg-primario/20 cursor-pointer"
                 >
                   {op.label}
                 </div>
@@ -126,10 +126,10 @@ const EditorDiaHorario: React.FC<EditorDiaHorarioProps> = ({
                 maxLength={5}
                 onChange={(e) => handleRangoChange(rangoIdx, 'de', e.target.value)}
                 disabled={inputsRangoDisabled}
-                className="w-24 text-center text-base p-2 rounded-md bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600"
+                className="w-24 text-center text-base p-2 rounded-md bg-fondo border border-borde-tarjeta text-texto-principal disabled:opacity-50"
                 aria-label={`Hora de inicio del turno ${rangoIdx + 1} para ${diaNombre}`}
               />
-              <span className={`text-sm ${inputsRangoDisabled ? 'text-gray-400' : 'text-gray-500'}`}>-</span>
+              <span className={`text-sm ${inputsRangoDisabled ? 'text-texto-secundario opacity-50' : 'text-texto-secundario'}`}>-</span>
               <input
                 type="text"
                 value={rango.a}
@@ -137,7 +137,7 @@ const EditorDiaHorario: React.FC<EditorDiaHorarioProps> = ({
                 maxLength={5}
                 onChange={(e) => handleRangoChange(rangoIdx, 'a', e.target.value)}
                 disabled={inputsRangoDisabled}
-                className="w-24 text-center text-base p-2 rounded-md bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600"
+                className="w-24 text-center text-base p-2 rounded-md bg-fondo border border-borde-tarjeta text-texto-principal disabled:opacity-50"
                 aria-label={`Hora de fin del turno ${rangoIdx + 1} para ${diaNombre}`}
               />
               <button
@@ -145,7 +145,7 @@ const EditorDiaHorario: React.FC<EditorDiaHorarioProps> = ({
                 onClick={() => handleRemoveRango(rangoIdx)}
                 disabled={inputsRangoDisabled}
                 aria-label={`Eliminar turno ${rangoIdx + 1} para ${diaNombre}`}
-                className="ml-auto p-1 rounded-full text-red-500 hover:bg-red-500/10 disabled:text-gray-400 disabled:hover:bg-transparent"
+                className="ml-auto p-1 rounded-full text-error hover:bg-error/10 disabled:text-texto-secundario disabled:opacity-50 disabled:hover:bg-transparent"
               >
                 <XCircleIcon className="h-6 w-6" />
               </button>

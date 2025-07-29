@@ -2,7 +2,6 @@
 import './globals.css';
 import { Providers } from './providers';
 import NotificationWatcher from '@/app/components/notificaciones/NotificationWatcher';
-// 1. CORRECCIÓN: Se importa 'Viewport' junto a 'Metadata'.
 import type { Metadata, Viewport } from 'next';
 import {
   Barlow,
@@ -74,8 +73,6 @@ const juliusSansOne = Julius_Sans_One({ subsets: ['latin'], weight: '400', displ
 const wallpoet = Wallpoet({ subsets: ['latin'], weight: '400', display: 'swap', variable: '--font-wallpoet', preload: false });
 
 
-// --- OBJETO METADATA CORREGIDO ---
-// 2. CORRECCIÓN: Se ha eliminado 'themeColor' de este objeto.
 export const metadata: Metadata = {
   title: 'CODYS | Tu red de confianza',
   description: 'Conectamos necesidades con soluciones.',
@@ -84,11 +81,8 @@ export const metadata: Metadata = {
     title: 'CODYS',
     statusBarStyle: 'black-translucent',
   },
-  // La configuración de íconos (favicon, logo, etc.) es manejada automáticamente por Next.js
-  // si colocas los archivos (ej: icon.png, apple-icon.png) en la carpeta raíz /app.
 };
 
-// 3. CORRECCIÓN: Se crea y exporta un objeto 'viewport' para la configuración de la ventana gráfica.
 export const viewport: Viewport = {
   themeColor: '#0F2623',
 };
@@ -102,7 +96,6 @@ export default function RootLayout({
   return (
     <html
       lang="es"
-      suppressHydrationWarning
       className={`
         ${barlow.className} ${roboto.variable} ${lato.variable} ${oswald.variable}
         ${openSans.variable} ${montserrat.variable} ${raleway.variable} ${poppins.variable}
@@ -116,8 +109,6 @@ export default function RootLayout({
         ${juliusSansOne.variable} ${wallpoet.variable}
       `}
     >
-      {/* 4. CORRECCIÓN: Se elimina la etiqueta <head />. En el App Router de Next.js es innecesaria
-          y se gestiona automáticamente a través de los objetos 'metadata' y 'viewport'. */}
       <body>
         <NotificationWatcher />
         <Providers>

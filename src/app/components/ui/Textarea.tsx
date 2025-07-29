@@ -16,15 +16,16 @@ const Textarea: React.FC<TextareaProps> = ({
   ...props
 }) => {
   const baseClasses =
-    'block w-full px-3 py-2 bg-[var(--color-fondo)] border rounded-md shadow-sm placeholder-[var(--color-texto-placeholder)] focus:outline-none sm:text-sm text-[var(--color-texto)] dark:text-[var(--color-texto-dark)]';
+    'block w-full px-3 py-2 bg-fondo border rounded-md shadow-sm placeholder-texto-secundario focus:outline-none sm:text-sm text-texto-principal';
+  
   const borderClasses = error
     ? 'border-red-500 focus:ring-red-500 focus:border-red-500'
-    : 'border-[var(--color-borde-tarjeta)] focus:ring-[var(--color-primario)] focus:border-[var(--color-primario)]';
+    : 'border-borde-tarjeta focus:ring-primario focus:border-primario';
 
   return (
     <div className={`mb-4 ${className}`}>
       {label && (
-        <label htmlFor={id} className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1">
+        <label htmlFor={id} className="block text-sm font-medium text-texto-secundario mb-1">
           {label}
         </label>
       )}

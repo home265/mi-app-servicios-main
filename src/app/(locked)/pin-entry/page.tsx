@@ -2,10 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTheme } from 'next-themes';
 import Image from 'next/image';
-// Se elimina la importación de bcryptjs.
-// import bcrypt from 'bcryptjs';
 
 import { useUserStore } from '@/store/userStore';
 import PinInput from '@/app/components/forms/PinInput';
@@ -29,10 +26,6 @@ export default function PinEntryPage() {
   const [failedAttempts, setFailedAttempts] = useState(0);
   const [isLocked, setIsLocked] = useState(false);
   const MAX_ATTEMPTS = 5;
-
-  const { resolvedTheme } = useTheme();
-  const lightLogo = '/logo2.png';
-  const darkLogo  = '/logo1.png';
 
   useEffect(() => {
     if (isPinVerifiedForSession && currentUser) {
@@ -63,7 +56,6 @@ export default function PinEntryPage() {
     setPageError(null);
 
     try {
-      // Se llama a la nueva API para verificar el PIN de forma segura.
       const response = await fetch('/api/auth/verify-pin', {
         method: 'POST',
         headers: {
@@ -84,11 +76,10 @@ export default function PinEntryPage() {
       if (result.isMatch) {
         setPinVerified(true);
         setFailedAttempts(0);
-        // router.replace('/bienvenida') se maneja por el useEffect de arriba.
       } else {
         const newAttemptCount = failedAttempts + 1;
         setFailedAttempts(newAttemptCount);
-        setPin(''); // Limpia el input del PIN
+        setPin('');
 
         if (newAttemptCount >= MAX_ATTEMPTS) {
           setPageError(`Has superado los ${MAX_ATTEMPTS} intentos. Debes iniciar sesión de nuevo.`);
@@ -119,7 +110,7 @@ export default function PinEntryPage() {
 
   if (!currentUser) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-fondo text-texto p-4">
+      <div className="flex min-h-screen items-center justify-center bg-fondo text-texto-principal p-4">
         <p>Cargando…</p>
       </div>
     );
@@ -127,7 +118,7 @@ export default function PinEntryPage() {
 
   if (isLocked) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-fondo text-texto px-4">
+      <div className="flex min-h-screen flex-col items-center justify-center bg-fondo text-texto-principal px-4">
         <div className="
           w-full max-w-md space-y-6 rounded-xl border
           border-borde-tarjeta bg-tarjeta p-6 shadow-xl md:p-8
@@ -142,25 +133,19 @@ export default function PinEntryPage() {
   }
 
   return (
-    // PASO 1: Hacemos que el contenedor principal sea 'relative' para
-    // que el posicionamiento absoluto del logo funcione dentro de él.
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-fondo text-texto px-2 py-6">
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-fondo text-texto-principal px-2 py-6">
       
-      {/* PASO 2: Envolvemos el logo en un nuevo 'div' con posicionamiento absoluto. */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full flex justify-center">
         <Image
-          src={resolvedTheme === 'dark' ? darkLogo : lightLogo}
+          src="/logo1.png" // Se usa directamente el logo del tema oscuro.
           alt="Logo CODYS"
           width={360}
           height={204}
           priority
-          // Limpiamos las clases de margen anteriores.
           className="h-auto w-60 flex-shrink-0 object-contain md:w-72"
         />
       </div>
 
-      {/* Como el logo ya no ocupa espacio en el flujo, el recuadro se centrará
-          verticalmente en la pantalla por sí solo gracias a 'justify-center'. */}
       <div className="
         w-[90vw] sm:max-w-md md:max-w-lg
         space-y-6 rounded-xl border border-borde-tarjeta
@@ -186,13 +171,13 @@ export default function PinEntryPage() {
           {userError && !pageError && <p className="text-sm text-error">{userError}</p>}
 
           <Button
-            type="submit"
-            fullWidth
-            disabled={isLoading || pin.length !== 4}
-            className="!bg-[var(--color-primario)] !text-[var(--color-fondo)] !focus:shadow-none hover:!brightness-90"
-          >
-            {isLoading ? 'Verificando…' : 'Ingresar'}
-          </Button>
+  type="submit"
+  fullWidth
+  disabled={isLoading || pin.length !== 4}
+  className="btn-primary" // <-- APLICAS LA CLASE CORRECTA AQUÍ
+>
+  {isLoading ? 'Verificando…' : 'Ingresar'}
+</Button>
         </form>
 
         <div className="pt-2 text-center">

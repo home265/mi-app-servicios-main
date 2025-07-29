@@ -3,13 +3,12 @@ import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaBusqueda from '@/app/components/ayuda-contenido/AyudaBusqueda';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTheme } from 'next-themes';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
 
 import { useUserStore, UserProfile } from '@/store/userStore';
 import SelectorCategoria, { CategoriaSeleccionada } from '@/app/components/forms/SelectorCategoria';
-import Button from '@/app/components/ui/Button';
 import { getProvidersByFilter } from '@/lib/services/providersService';
 import {
   sendJobRequest,
@@ -22,32 +21,10 @@ import {
 } from '@/lib/services/notificationsService';
 import NotificacionCard from '@/app/components/notificaciones/NotificacionCard';
 import ContactoPopup from '@/app/components/notificaciones/ContactoPopup';
-
+import BotonVolver from '@/app/components/common/BotonVolver';
 import PerfilModal from '@/app/components/notificaciones/PerfilModal';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
-
-// paleta
-const palette = {
-  dark: {
-    fondo: '#0F2623',
-    tarjeta: '#184840',
-    borde: '#2F5854',
-    texto: '#F9F3D9',
-    subTxt: '#E4DEC4',
-    resalte: '#EFC71D',
-    marca: '/logo3.png',
-  },
-  light: {
-    fondo: '#F9F3D9',
-    tarjeta: '#184840',
-    borde: '#2F5854',
-    texto: '#0F2623',
-    subTxt: '#2C463F',
-    resalte: '#EFC71D',
-    marca: '/logo2.png',
-  },
-};
 
 /*────────── Tipos mejorados ──────────*/
 interface PrestadorData {
@@ -81,9 +58,6 @@ export default function BusquedaPage() {
   const currentUser = useUserStore(s => s.currentUser as UserProfileWithLocalidad | null);
   const originalRole = useUserStore(s => s.originalRole);
   const router = useRouter();
-
-  const { resolvedTheme } = useTheme();
-  const P = resolvedTheme === 'dark' ? palette.dark : palette.light;
 
   /*────────── Estado Local ──────────*/
   const [categorySel, setCategorySel] = useState<CategoriaSeleccionada | null>(null);
@@ -153,7 +127,7 @@ export default function BusquedaPage() {
     localidad: { provinciaNombre: province, nombre: locality },
   } = currentUser;
 
-  /*────────── Acciones (Modificadas con toast) ──────────*/
+  /*────────── Acciones ──────────*/
   async function handleSearch() {
     if (!categorySel || !description.trim() || isSearching) {
       if (!categorySel) toast.error('Debes elegir una categoría.');
@@ -272,11 +246,7 @@ export default function BusquedaPage() {
 
 
   return (
-    <div
-      className="min-h-screen flex flex-col"
-      style={{ backgroundColor: P.fondo, color: P.texto }}
-    >
-      {/* 1. Contenedor principal que limita y centra el contenido */}
+    <div className="min-h-screen flex flex-col bg-fondo text-texto-principal">
       <div className="w-full max-w-4xl mx-auto px-5 flex flex-col flex-grow">
         <header className="relative flex items-center justify-center py-8">
           <div className="absolute left-0">
@@ -289,29 +259,20 @@ export default function BusquedaPage() {
           </h1>
         </header>
 
-        <hr style={{ borderColor: P.borde }} />
+        <hr className="border-borde-tarjeta" />
 
         <main className="flex flex-col items-center flex-grow pt-6 pb-8">
-          <div
-            className="w-full max-w-lg space-y-6 p-6 rounded-2xl shadow-lg"
-            style={{
-              backgroundColor: P.tarjeta,
-              border: `1px solid ${P.borde}`,
-              color: palette.dark.texto
-            }}
-          >
+          <div className="w-full max-w-lg space-y-6 p-6 rounded-2xl shadow-lg bg-tarjeta border border-borde-tarjeta text-texto-principal">
             <SelectorCategoria
               idCategoria="busq-cat"
               idSubcategoria="busq-sub"
               onCategoriaChange={handleCategoriaChange}
-              labelColor={palette.dark.texto}
             />
 
             <div>
               <label
                 htmlFor="descripcion"
-                className="block text-sm font-medium mb-1"
-                style={{ color: palette.dark.texto }}
+                className="block text-sm font-medium text-texto-principal mb-1"
               >
                 Descripción (breve)
               </label>
@@ -321,38 +282,27 @@ export default function BusquedaPage() {
                 value={description}
                 onChange={e => setDescription(e.target.value)}
                 placeholder="Ej: Necesito reparar una cañería en el baño..."
-                className="w-full px-4 py-2 rounded-lg focus:outline-none"
-                style={{
-                  backgroundColor: 'rgba(255,255,255,0.08)',
-                  color: palette.dark.texto,
-                  border: `1px solid ${P.borde}`,
-                  resize: 'none'
-                }}
+                className="w-full px-4 py-2 rounded-lg focus:outline-none bg-white/10 text-texto-principal border border-borde-tarjeta resize-none placeholder:text-texto-secundario placeholder:opacity-70"
               />
             </div>
 
-            <Button
+            <button
               onClick={handleSearch}
               disabled={!categorySel || !description.trim() || isSearching}
-              fullWidth
-              style={{
-                backgroundColor: P.resalte,
-                color: P.fondo,
-                border: `1px solid ${P.borde}`,
-              }}
+              className="btn-primary w-full"
             >
               {isSearching ? 'Buscando...' : 'Buscar prestadores'}
-            </Button>
+            </button>
           </div>
 
           {notifications.length > 0 && (
-            <h3 className="text-xl font-semibold mt-10 mb-4" style={{ color: P.texto }}>
+            <h3 className="text-xl font-semibold mt-10 mb-4 text-texto-principal">
               Notificaciones recibidas
             </h3>
           )}
           <div className="w-full max-w-lg space-y-4">
             {notifications.length === 0 && (
-              <p className="text-center text-sm opacity-70 py-4" style={{ color: P.subTxt }}>
+              <p className="text-center text-sm opacity-70 py-4 text-texto-secundario">
                 Aquí aparecerán las respuestas de los prestadores.
               </p>
             )}
@@ -371,7 +321,6 @@ export default function BusquedaPage() {
         </main>
       </div>
 
-      {/* Pop-ups, botón fijo y estilos DEBEN quedar FUERA del contenedor centrado */}
       {showContacto && selectedPrestador && (
         <ContactoPopup
           userUid={userUid}
@@ -387,20 +336,8 @@ export default function BusquedaPage() {
         <PerfilModal target={perfilTarget} viewerMode="user" onClose={() => setShowPerfil(false)} />
       )}
 
-      <button
-        onClick={() => router.push('/bienvenida')}
-        className="fixed bottom-6 right-4 h-12 w-12 rounded-full shadow-lg flex items-center justify-center focus:outline-none"
-        style={{ backgroundColor: P.tarjeta }}
-      >
-        <ChevronLeftIcon className="h-6 w-6" style={{ color: P.resalte }} />
-      </button>
-
-      <style jsx global>{`
-        #descripcion::placeholder {
-          color: ${palette.dark.subTxt} !important;
-          opacity: 0.7 !important;
-        }
-      `}</style>
+      {/*────────── FAB volver ──────────*/}
+        <BotonVolver />
     </div>
   );
 }

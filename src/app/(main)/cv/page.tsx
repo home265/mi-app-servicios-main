@@ -4,14 +4,18 @@ import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/store/userStore';
 import { Timestamp } from 'firebase/firestore';
 import { createOrUpdateCv, getCvByUid } from '@/lib/services/cvService';
-import { toast } from 'react-hot-toast'; // 1. Importar toast
+import { toast } from 'react-hot-toast';
+
+// --- IMPORTS ACTUALIZADOS ---
 import Card from '@/app/components/ui/Card';
 import Button from '@/app/components/ui/Button';
+import Input from '@/app/components/ui/Input'; // Se importa el componente Input estandarizado
+import Textarea from '@/app/components/ui/Textarea'; // Se importa el componente Textarea estandarizado
 import SelectorCategoriasEmpleo from '@/app/components/forms/SelectorCategoriasEmpleo';
 import Avatar from '@/app/components/common/Avatar';
 import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaCrearEditarCV from '@/app/components/ayuda-contenido/AyudaCrearEditarCV';
-import { ChevronLeftIcon } from '@heroicons/react/24/outline';
+import BotonVolver from '@/app/components/common/BotonVolver'; // Se importa el botón de volver
 
 export default function CvPage() {
   const { currentUser } = useUserStore();
@@ -25,12 +29,11 @@ export default function CvPage() {
   });
   const [isLoading, setIsLoading] = useState(true);
 
-  /* --- redirige si no hay user --- */
+  // Lógica de carga y guardado (sin cambios)
   useEffect(() => {
     if (!currentUser) router.replace('/login');
   }, [currentUser, router]);
 
-  /* --- precarga si existe CV --- */
   useEffect(() => {
     if (!currentUser) return;
     
@@ -51,7 +54,6 @@ export default function CvPage() {
         }
       } catch (error) {
         console.error("Error al cargar el CV:", error);
-        // 2. Reemplazar alert con toast.error
         toast.error("No se pudo cargar la información de tu CV. Inténtalo de nuevo.");
       } finally {
         setIsLoading(false);
@@ -61,7 +63,6 @@ export default function CvPage() {
 
   const handleSave = async () => {
     if (!currentUser) return;
-
     try {
       await createOrUpdateCv(currentUser.uid, {
         nombreCompleto: `${currentUser.nombre} ${currentUser.apellido}`,
@@ -73,30 +74,28 @@ export default function CvPage() {
         localidad: currentUser.localidad,
         timestamp: Timestamp.now().toMillis(),
       });
-      // 3. Reemplazar alert con toast.success
       toast.success('CV guardado ✔');
       router.replace('/bienvenida');
     } catch (error) {
       console.error("Error al guardar el CV:", error);
-      // 4. Reemplazar alert con toast.error
       toast.error("Ocurrió un error al guardar tu CV. Por favor, inténtalo de nuevo.");
     }
   };
 
   if (isLoading || !currentUser) {
     return (
-        <div className="flex justify-center items-center h-screen">
-            <p>Cargando tu información...</p>
+        <div className="flex justify-center items-center h-screen bg-fondo text-texto-principal">
+            <p className="animate-pulse">Cargando tu información...</p>
         </div>
     );
   }
 
-  // Se envuelve el retorno en un Fragmento <> para incluir el botón flotante
   return (
-    <>
+    // Se añade padding inferior para que el botón flotante no tape el contenido
+    <div className="pb-24">
       <Card className="max-w-md mx-auto space-y-4 my-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold">Mi Curriculum</h2>
+          <h2 className="text-xl font-semibold text-texto-principal">Mi Curriculum</h2>
           <Avatar
             selfieUrl={currentUser.selfieURL}
             nombre={currentUser.nombre}
@@ -106,8 +105,8 @@ export default function CvPage() {
     
         <div className="flex items-start justify-between">
           <div>
-            <p className="font-medium">Nombre</p>
-            <p>
+            <p className="font-medium text-texto-principal">Nombre</p>
+            <p className="text-texto-secundario">
               {currentUser.nombre} {currentUser.apellido}
             </p>
           </div>
@@ -117,68 +116,61 @@ export default function CvPage() {
         </div>
     
         <div>
-          <p className="font-medium">Localidad</p>
-          <p>
+          <p className="font-medium text-texto-principal">Localidad</p>
+          <p className="text-texto-secundario">
             {currentUser.localidad.nombre}, {currentUser.localidad.provinciaNombre}
           </p>
         </div>
     
-        <div>
-          <label className="block font-medium">Descripción / habilidades</label>
-          <textarea
-            className="w-full border rounded p-2 text-sm"
-            rows={4}
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-            spellCheck="true"
-          />
-        </div>
+        {/* --- FORMULARIOS REFACTORIZADOS --- */}
+        <Textarea
+          id="descripcion"
+          label="Descripción / Habilidades"
+          rows={4}
+          value={descripcion}
+          onChange={(e) => setDescripcion(e.target.value)}
+          spellCheck="true"
+        />
+    
+        <Input
+          id="telefonoAlt"
+          label="Teléfono alternativo"
+          value={telefonoAlt}
+          onChange={(e) => setTelefonoAlt(e.target.value)}
+        />
     
         <div>
-          <label className="block font-medium">Teléfono alternativo</label>
-          <input
-            className="w-full border rounded p-2 text-sm"
-            value={telefonoAlt}
-            onChange={(e) => setTelefonoAlt(e.target.value)}
-          />
-        </div>
-    
-        <div>
-          <label className="block font-medium">Rubros (máx. 4)</label>
+          <label className="block text-sm font-medium text-texto-secundario mb-1">Rubros (máx. 4)</label>
           <SelectorCategoriasEmpleo value={rubros} onChange={setRubros} />
         </div>
     
         {(['primario', 'secundario', 'universitario', 'posgrado'] as const).map(
           (k) => (
-            <div key={k}>
-              <label className="block font-medium capitalize">{k}</label>
-              <input
-                className="w-full border rounded p-2 text-sm"
-                value={estudios[k]}
-                onChange={(e) =>
-                  setEstudios({ ...estudios, [k]: e.target.value })
-                }
-                placeholder="Ej.: Completo / Incompleto / Lic. en…"
-              />
-            </div>
+            <Input
+              key={k}
+              id={`estudios-${k}`}
+              label={`Estudios ${k}`}
+              className="capitalize"
+              value={estudios[k]}
+              onChange={(e) =>
+                setEstudios({ ...estudios, [k]: e.target.value })
+              }
+              placeholder="Ej.: Completo / Incompleto / Lic. en…"
+            />
           )
         )}
     
         <Button
-  onClick={handleSave}
-  className="!bg-[var(--color-primario)] !text-[var(--color-fondo)] border-none !focus:shadow-none hover:!brightness-90"
->
-  Guardar CV
-</Button>
+          onClick={handleSave}
+          fullWidth
+          className="!mt-6 !bg-primario !text-fondo border-none !focus:shadow-none hover:!brightness-90"
+        >
+          Guardar CV
+        </Button>
       </Card>
       
-      <button
-        onClick={() => router.push('/bienvenida')}
-        className="fixed bottom-6 right-4 h-12 w-12 rounded-full shadow-lg flex items-center justify-center focus:outline-none"
-        style={{ backgroundColor: '#184840' }}
-      >
-        <ChevronLeftIcon className="h-6 w-6" style={{ color: '#EFC71D' }} />
-      </button>
-    </>
+      {/* Se reemplaza el botón fijo por el componente reutilizable */}
+      <BotonVolver />
+    </div>
   );
 }

@@ -3,7 +3,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation'; // <-- 1. Se usa el import correcto.
+import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/store/userStore';
 import { listAnunciosByFilter, listCapturas } from '@/lib/services/anunciosService';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -12,9 +12,10 @@ import { planes, campanias } from '@/lib/constants/anuncios';
 import AnuncioCard from './components/AnuncioCard';
 import Navbar from '@/app/components/common/Navbar';
 import { Loader2 } from 'lucide-react';
-import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaMisAnuncios from '@/app/components/ayuda-contenido/AyudaMisAnuncios';
+import BotonVolver from '@/app/components/common/BotonVolver'; // Se importa el botón de volver
+
 interface AnuncioConPreview extends Anuncio {
   previewImageUrl?: string;
   tiempoRestante?: string;
@@ -40,7 +41,8 @@ function convertTimestampToDate(timestamp: Timestamp | Date | string | undefined
 
 
 export default function MisAnunciosPage() {
-  const router = useRouter(); // <-- 2. Se inicializa el router DENTRO del componente.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const router = useRouter();
   const currentUserUid = useUserStore(state => state.currentUser?.uid);
   const isLoadingAuth = useUserStore(state => state.isLoadingAuth);
 
@@ -162,100 +164,94 @@ export default function MisAnunciosPage() {
 
   if (isLoadingAuth) {
     return (
-      <>
+      <div className="min-h-screen bg-fondo">
         <Navbar hideSettings={true} />
         <div className="flex flex-col items-center justify-center min-h-[calc(100vh-var(--navbar-height,80px))] p-4">
           <Loader2 className="h-12 w-12 animate-spin text-primario" />
-          <p className="mt-4 text-lg text-[var(--color-texto-secundario)]">Verificando sesión...</p>
+          <p className="mt-4 text-lg text-texto-secundario">Verificando sesión...</p>
         </div>
-      </>
+      </div>
     );
   }
 
   if (error && error !== 'Debes iniciar sesión para ver tus anuncios.') { 
     return (
-      <>
+      <div className="min-h-screen bg-fondo">
         <Navbar hideSettings={true} />
         <div className="container mx-auto px-4 py-8 text-center">
-          <div className="p-6 bg-[var(--color-fondo-error)] text-[var(--color-texto-error)] rounded-lg shadow-md max-w-md mx-auto">
+          <div className="p-6 bg-error/10 text-error rounded-lg shadow-md max-w-md mx-auto">
             <h2 className="text-xl font-semibold mb-3">¡Error!</h2>
             <p className="mb-4">{error}</p>
             <button 
                 onClick={() => {
                     if(currentUserUid) fetchAnunciosYPreviews(currentUserUid);
                 }}
-                className="bg-primario text-white px-5 py-2 rounded-md hover:bg-primario-dark transition-colors font-medium"
+                className="bg-primario text-fondo px-5 py-2 rounded-md hover:brightness-90 transition-colors font-medium"
                 disabled={!currentUserUid}
             >
                 Reintentar
             </button>
           </div>
         </div>
-      </>
+      </div>
     );
   }
   
   if (isLoadingAnuncios) {
     return (
-      <>
+      <div className="min-h-screen bg-fondo">
         <Navbar hideSettings={true} />
         <div className="flex flex-col items-center justify-center min-h-[calc(100vh-var(--navbar-height,80px))] p-4">
           <Loader2 className="h-12 w-12 animate-spin text-primario" />
-          <p className="mt-4 text-lg text-[var(--color-texto-secundario)]">Cargando tus anuncios...</p>
+          <p className="mt-4 text-lg text-texto-secundario">Cargando tus anuncios...</p>
         </div>
-      </>
+      </div>
     );
   }
 
   return (
-    <>
+    <div className="min-h-screen bg-fondo">
       <Navbar hideSettings={true} />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-  {/* 1. Contenedor principal del encabezado con posicionamiento relativo */}
-  <div className="relative mb-6 text-center">
-    
-    {/* 2. Div del ícono, posicionado a la izquierda */}
-    <div className="absolute left-0 top-1/2 -translate-y-1/2">
-      <BotonAyuda>
-        <AyudaMisAnuncios />
-      </BotonAyuda>
-    </div>
+        <div className="relative mb-6 text-center">
+          <div className="absolute left-0 top-1/2 -translate-y-1/2">
+            <BotonAyuda>
+              <AyudaMisAnuncios />
+            </BotonAyuda>
+          </div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-texto-principal inline-block">
+            Mis Anuncios
+          </h1>
+        </div>
 
-    {/* 3. Título centrado que ocupa todo el ancho */}
-    <h1 className="text-2xl sm:text-3xl font-bold text-[var(--color-texto-principal)] inline-block">
-      Mis Anuncios
-    </h1>
-  </div>
-
-  {/* Botón para crear anuncio */}
-  <div className="text-center">
-    <Link href="/planes" className="inline-block bg-primario text-white px-6 py-3 rounded-lg shadow hover:bg-primario-dark transition-colors font-semibold">
-        Crear Nuevo Anuncio
-    </Link>
-  </div>
+        <div className="text-center">
+          <Link href="/planes" className="inline-block bg-primario text-fondo px-6 py-3 rounded-lg shadow hover:brightness-90 transition-colors font-semibold">
+              Crear Nuevo Anuncio
+          </Link>
+        </div>
 
         {!currentUserUid && !isLoadingAuth && (
-             <div className="text-center py-10 px-6 bg-[var(--color-tarjeta)] rounded-lg shadow-md max-w-lg mx-auto">
+             <div className="text-center py-10 px-6 bg-tarjeta rounded-lg shadow-md max-w-lg mx-auto">
                 <svg className="w-16 h-16 text-primario mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
-                <h2 className="text-xl font-semibold text-[var(--color-texto-principal)] mb-2">Acceso Restringido</h2>
-                <p className="text-md text-[var(--color-texto-secundario)] mb-6">
+                <h2 className="text-xl font-semibold text-texto-principal mb-2">Acceso Restringido</h2>
+                <p className="text-md text-texto-secundario mb-6">
                 Debes iniciar sesión para ver tus anuncios.
                 </p>
-                <Link href="/(auth)/login" className="mt-4 inline-block bg-primario text-white px-8 py-3 rounded-lg hover:bg-primario-dark transition-colors font-medium text-sm">
+                <Link href="/login" className="mt-4 inline-block bg-primario text-fondo px-8 py-3 rounded-lg hover:brightness-90 transition-colors font-medium text-sm">
                     Ir a Iniciar Sesión
                 </Link>
             </div>
         )}
 
         {currentUserUid && anunciosConPreview.length === 0 && !isLoadingAnuncios && !error && (
-            <div className="text-center py-10 px-6 bg-[var(--color-tarjeta)] rounded-lg shadow-md max-w-lg mx-auto">
-                <h2 className="text-xl font-semibold text-[var(--color-texto-principal)] mb-2">
+            <div className="text-center py-10 px-6 bg-tarjeta rounded-lg shadow-md max-w-lg mx-auto">
+                <h2 className="text-xl font-semibold text-texto-principal mb-2">
                 No has creado anuncios
                 </h2>
-                <p className="text-md text-[var(--color-texto-secundario)] mb-6">
+                <p className="text-md text-texto-secundario mb-6">
                 ¡Anímate a crear el primero para empezar a promocionarte!
                 </p>
-                <Link href="/planes" className="mt-4 inline-block bg-primario text-white px-8 py-3 rounded-lg hover:bg-primario-dark transition-colors font-medium text-sm">
+                <Link href="/planes" className="mt-4 inline-block bg-primario text-fondo px-8 py-3 rounded-lg hover:brightness-90 transition-colors font-medium text-sm">
                 Crear Nuevo Anuncio
                 </Link>
             </div>
@@ -271,15 +267,7 @@ export default function MisAnunciosPage() {
           </div>
         )}
       </div>
-      {/* 3. Se usa el router en el evento onClick. */}
-      <button
-        onClick={() => router.push('/bienvenida')}
-        aria-label="Volver a inicio"
-        className="fixed bottom-6 right-4 z-40 h-12 w-12 rounded-full shadow-lg flex items-center justify-center transition active:scale-95 focus:outline-none focus:ring"
-        style={{ backgroundColor: '#184840' }}
-      >
-        <ChevronLeftIcon className="h-6 w-6" style={{ color: '#EFC71D' }} />
-      </button>
-    </>
+      <BotonVolver />
+    </div>
   );
 }

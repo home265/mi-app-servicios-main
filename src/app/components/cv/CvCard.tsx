@@ -7,10 +7,10 @@ import ContactoPopup from '@/app/components/notificaciones/ContactoPopup';
 import CvModal from './CvModal';
 import { useUserStore } from '@/store/userStore';
 import Card from '@/app/components/ui/Card';
-import { type CvDocument } from '@/lib/services/cvService'; // ✅ 1. IMPORTAMOS EL TIPO DESDE EL SERVICIO
+import { type CvDocument } from '@/lib/services/cvService';
 
 interface CvCardProps {
-  cv: CvDocument; // ✅ 2. AHORA RECIBE EL DOCUMENTO COMPLETO DEL CV
+  cv: CvDocument;
   highlightRubro?: string;
 }
 
@@ -29,29 +29,28 @@ const CvCard: React.FC<CvCardProps> = ({ cv, highlightRubro }) => {
   return (
     <>
       <Card className="flex items-center space-x-4">
-        {/* ✅ 3. USAMOS LOS CAMPOS DEL NUEVO OBJETO 'cv' */}
         <Avatar selfieUrl={cv.selfieURL} nombre={cv.nombreCompleto} size={64} />
         <div className="flex-1">
-          <h3 className="font-semibold">{cv.nombreCompleto}</h3>
-          <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+          <h3 className="font-semibold text-texto-principal">{cv.nombreCompleto}</h3>
+          <p className="text-sm text-texto-secundario line-clamp-2">
             {cv.rubros.slice(0, 2).join(', ')}
             {cv.rubros.length > 2 && ` +${cv.rubros.length - 2}`}
           </p>
 
           <div className="flex space-x-2 mt-3">
             <Button
-  className="px-3 py-1 text-sm !bg-[var(--color-primario)] !text-[var(--color-fondo)] border-none !focus:shadow-none hover:!brightness-90"
-  onClick={() => setShowCv(true)}
->
-  Ver CV
-</Button>
-<Button
-  className="px-3 py-1 text-sm !bg-[var(--color-primario)] !text-[var(--color-fondo)] border-none !focus:shadow-none hover:!brightness-90"
-  onClick={() => setShowContact(true)}
-  disabled={!currentUser}
->
-  Contactar
-</Button>
+              className="px-3 py-1 text-sm !bg-primario !text-fondo border-none !focus:shadow-none hover:!brightness-90"
+              onClick={() => setShowCv(true)}
+            >
+              Ver CV
+            </Button>
+            <Button
+              className="px-3 py-1 text-sm !bg-primario !text-fondo border-none !focus:shadow-none hover:!brightness-90"
+              onClick={() => setShowContact(true)}
+              disabled={!currentUser}
+            >
+              Contactar
+            </Button>
           </div>
         </div>
       </Card>
@@ -59,10 +58,9 @@ const CvCard: React.FC<CvCardProps> = ({ cv, highlightRubro }) => {
       {/* modal CV */}
       {showCv && (
         <CvModal
-          uid={cv.uid} // ✅ 4. PASAMOS EL UID DEL USUARIO
+          uid={cv.uid}
           onClose={() => setShowCv(false)}
           highlightRubro={highlightRubro}
-          // El campo 'collection' ya no es necesario
         />
       )}
 
@@ -72,7 +70,6 @@ const CvCard: React.FC<CvCardProps> = ({ cv, highlightRubro }) => {
           userUid={currentUser.uid}
           userCollection={viewerCollection}
           providerUid={cv.uid}
-          // ✅ 5. LA COLECCIÓN DEL DUEÑO DEL CV AHORA SIEMPRE ES 'usuarios_generales'
           providerCollection="usuarios_generales"
           providerName={cv.nombreCompleto}
           notifId=""

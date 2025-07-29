@@ -37,20 +37,21 @@ const Checkbox: React.FC<CheckboxProps> = ({
     }
   };
 
-  // Construcción de clases de forma manual
+  // Clases del contenedor (sin cambios)
   const finalContainerClasses = `flex items-center ${containerClassName}`;
 
+  // Clases del input refactorizadas para usar el tema unificado
   const finalInputClasses = `
-    h-4 w-4 rounded border-gray-300 dark:border-gray-600
-    text-primary-600 focus:ring-2 focus:ring-primary-500 focus:ring-offset-0
-    dark:focus:ring-primary-600 dark:ring-offset-gray-800 dark:bg-gray-700
+    h-4 w-4 rounded border-borde-tarjeta bg-transparent
+    text-primario focus:ring-2 focus:ring-primario focus:ring-offset-2 focus:ring-offset-fondo
     ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
     ${inputClassName}
-  `.trim().replace(/\s+/g, ' '); // Limpia espacios extra
+  `.trim().replace(/\s+/g, ' ');
 
+  // Clases del label refactorizadas para usar el tema unificado
   const finalLabelClasses = `
-    ml-2 text-sm font-medium text-gray-900 dark:text-gray-300
-    ${disabled ? 'text-gray-400 dark:text-gray-500 cursor-not-allowed' : 'cursor-pointer'}
+    ml-2 text-sm font-medium
+    ${disabled ? 'text-texto-secundario cursor-not-allowed' : 'text-texto-principal cursor-pointer'}
     ${labelClassName}
   `.trim().replace(/\s+/g, ' ');
 

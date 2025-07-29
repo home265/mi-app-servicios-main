@@ -1,18 +1,15 @@
 // src/app/(main)/ajustes/page.tsx
 'use client';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore, type Role } from '@/store/userStore';
 import { signOutUser, performAccountDeletion } from '@/lib/firebase/auth';
 import { toast } from 'react-hot-toast';
 
-// Íconos unificados de lucide-react para consistencia y profesionalismo
 import {
   BellOff,
   AlertTriangle,
-  Palette,
   ChevronLeftIcon,
   ChevronRightIcon,
   LogOut,
@@ -21,11 +18,9 @@ import {
   Loader2,
 } from 'lucide-react';
 
-import { ThemeSwitcher } from '@/app/components/ThemeSwitcher';
 import Avatar from '@/app/components/common/Avatar';
-import Modal from '@/app/components/common/Modal'; // <-- IMPORTADO TU MODAL
+import Modal from '@/app/components/common/Modal';
 
-// --- COMPONENTE INTERNO PARA LAS FILAS DE ACCIONES (sin cambios) ---
 const ActionRow: React.FC<{
   onClick: () => void;
   title: string;
@@ -42,7 +37,7 @@ const ActionRow: React.FC<{
     <button
       onClick={onClick}
       disabled={disabled || isLoading}
-      className="w-full text-left p-3 flex items-center gap-4 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors duration-150 disabled:opacity-50 disabled:pointer-events-none group"
+      className="w-full text-left p-3 flex items-center gap-4 rounded-lg hover:bg-white/5 transition-colors duration-150 disabled:opacity-50 disabled:pointer-events-none group"
     >
       <div className={`flex-shrink-0 ${iconColor}`}>{icon}</div>
       <div className="flex-grow">
@@ -64,7 +59,6 @@ const ActionRow: React.FC<{
 export default function AjustesPage() {
   const router = useRouter();
 
-  // --- LÓGICA DE ESTADO Y HOOKS (sin cambios en lo existente) ---
   const {
     currentUser,
     fcmToken,
@@ -81,12 +75,10 @@ export default function AjustesPage() {
   const [isNotificationLoading, setIsNotificationLoading] = useState(false);
   const [notificationStatus, setNotificationStatus] = useState<NotificationPermission>('default');
   
-  // --- NUEVOS ESTADOS PARA CONTROLAR LOS MODALES ---
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDisableNotificationsModalOpen, setIsDisableNotificationsModalOpen] = useState(false);
 
-  // --- NUEVOS ESTADOS PARA LOS INPUTS DEL MODAL DE BORRADO ---
   const [deleteEmailConfirm, setDeleteEmailConfirm] = useState('');
   const [deletePassword, setDeletePassword] = useState('');
 
@@ -105,8 +97,6 @@ export default function AjustesPage() {
   }, [userError, setUserError]);
 
 
-  // --- HANDLERS REFACTORIZADOS PARA USAR MODALES Y TOASTS ---
-
   const handleLogout = async () => {
     setIsLoadingLogout(true);
     setError(null);
@@ -121,7 +111,6 @@ export default function AjustesPage() {
       toast.error(errorMessage);
       setIsLoadingLogout(false);
     }
-    // El estado de carga se resetea por si mismo al desmontar el componente al redirigir
   };
 
   const handleDeleteAccount = async () => {
@@ -163,7 +152,6 @@ export default function AjustesPage() {
       toast.error(errorMessage);
       setIsLoadingDelete(false);
     } finally {
-        // Cierra el modal independientemente del resultado
         setIsDeleteModalOpen(false);
     }
   };
@@ -184,7 +172,6 @@ export default function AjustesPage() {
     }
   };
 
-  // El handler para activar notificaciones no usaba confirm/alert, se mantiene igual
   const handleRequestNotificationPermission = async () => {
     setIsNotificationLoading(true);
     setError(null);
@@ -195,13 +182,12 @@ export default function AjustesPage() {
       }
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (err: unknown) {
-       // El error ya se setea en el store, no es necesario un toast aquí
+      // El error ya se setea en el store, no es necesario un toast aquí
     } finally {
       setIsNotificationLoading(false);
     }
   };
 
-  // Pre-flight para abrir el modal de borrado, reseteando los campos
   const openDeleteModal = () => {
     setError(null);
     setDeleteEmailConfirm('');
@@ -220,7 +206,6 @@ export default function AjustesPage() {
 
   return (
     <div className="container mx-auto max-w-2xl py-8 px-4 pb-28">
-      {/* --- ENCABEZADO (sin cambios) --- */}
       <header className="flex items-center justify-between px-1 pt-2 pb-4 mb-6">
         <div className="flex items-center gap-4">
           <Avatar
@@ -239,7 +224,6 @@ export default function AjustesPage() {
 
       <div className="space-y-6">
         
-        {/* --- SECCIÓN NOTIFICACIONES PUSH (lógica del botón modificada) --- */}
         <div className="p-4 bg-tarjeta rounded-lg shadow space-y-3">
           <h2 className="text-lg font-semibold text-texto-principal border-b border-borde-tarjeta pb-2 mb-2">
             Notificaciones Push
@@ -248,7 +232,7 @@ export default function AjustesPage() {
             <>
               {notificationStatus === 'granted' && fcmToken && (
                 <ActionRow
-                  onClick={() => setIsDisableNotificationsModalOpen(true)} // <-- MODIFICADO
+                  onClick={() => setIsDisableNotificationsModalOpen(true)}
                   isLoading={isNotificationLoading}
                   icon={<BellOff size={22} />}
                   title="Desactivar Notificaciones Push"
@@ -268,42 +252,27 @@ export default function AjustesPage() {
               )}
               
               {notificationStatus === 'denied' && (
-                <div className="flex items-center space-x-2 p-3 bg-orange-100 dark:bg-orange-900/30 rounded-md text-sm text-orange-700 dark:text-orange-300">
-                  <BellOff className="h-5 w-5 text-orange-600 dark:text-orange-400" />
+                <div className="flex items-center space-x-2 p-3 bg-orange-900/30 rounded-md text-sm text-orange-300">
+                  <BellOff className="h-5 w-5 text-orange-400" />
                   <p>Has bloqueado las notificaciones. Debes activarlas en los ajustes de tu navegador.</p>
                 </div>
               )}
             </>
           ) : (
-            <div className="flex items-center space-x-2 p-3 bg-yellow-100 dark:bg-yellow-900/30 rounded-md text-sm text-yellow-700 dark:text-yellow-300">
-              <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
+            <div className="flex items-center space-x-2 p-3 bg-yellow-900/30 rounded-md text-sm text-yellow-300">
+              <AlertTriangle className="h-5 w-5 text-yellow-400" />
               <p>Tu navegador no es compatible con las notificaciones push.</p>
             </div>
           )}
         </div>
 
-        {/* --- SECCIÓN APARIENCIA (sin cambios) --- */}
-        <div className="p-4 bg-tarjeta rounded-lg shadow space-y-3">
-          <h2 className="text-lg font-semibold text-texto-principal border-b border-borde-tarjeta pb-2 mb-2">
-            Apariencia
-          </h2>
-          <div className="flex items-center justify-between py-2 px-3">
-            <div className="flex items-center gap-4">
-              <Palette className="text-primario" size={22} />
-              <p className="font-medium text-texto-principal">Tema de la aplicación</p>
-            </div>
-            <ThemeSwitcher />
-          </div>
-        </div>
-
-        {/* --- SECCIÓN ACCIONES DE LA CUENTA (lógica de botones modificada) --- */}
         <div className="bg-tarjeta rounded-lg shadow">
           <h2 className="text-lg font-semibold text-texto-principal border-b border-borde-tarjeta pb-2 mb-2 p-4">
             Acciones de la Cuenta
           </h2>
           <div className="px-1 pb-1">
             <ActionRow
-              onClick={() => setIsLogoutModalOpen(true)} // <-- MODIFICADO
+              onClick={() => setIsLogoutModalOpen(true)}
               isLoading={isLoadingLogout}
               disabled={isLoadingDelete}
               icon={<LogOut size={22} />}
@@ -311,7 +280,7 @@ export default function AjustesPage() {
               description="Saldrás de tu cuenta en este dispositivo."
             />
             <ActionRow
-              onClick={openDeleteModal} // <-- MODIFICADO
+              onClick={openDeleteModal}
               isLoading={isLoadingDelete}
               disabled={isLoadingLogout}
               icon={<Trash2 size={22} />}
@@ -322,16 +291,14 @@ export default function AjustesPage() {
           </div>
         </div>
         
-        {/* --- ZONA DE ERRORES (sin cambios) --- */}
         {error && (
-            <div className="mt-4 flex items-center gap-3 p-3 bg-red-100/80 dark:bg-red-900/30 rounded-md text-sm text-red-700 dark:text-red-200">
+            <div className="mt-4 flex items-center gap-3 p-3 bg-red-900/30 rounded-md text-sm text-red-200">
                 <AlertTriangle className="h-5 w-5 flex-shrink-0" />
                 <p>{error}</p>
             </div>
         )}
       </div>
 
-      {/* --- BOTÓN FLOTANTE (sin cambios) --- */}
       <button
         onClick={() => router.back()}
         aria-label="Volver a la página anterior"
@@ -341,9 +308,6 @@ export default function AjustesPage() {
         <ChevronLeftIcon className="h-7 w-7" style={{ color: 'var(--color-primario)' }} />
       </button>
 
-      {/* --- NUEVOS MODALES DE CONFIRMACIÓN --- */}
-
-      {/* Modal para Cerrar Sesión */}
       <Modal
         isOpen={isLogoutModalOpen}
         onClose={() => !isLoadingLogout && setIsLogoutModalOpen(false)}
@@ -351,7 +315,7 @@ export default function AjustesPage() {
       >
         <p className="text-sm text-texto-secundario">¿Estás seguro de que deseas cerrar sesión?</p>
         <div className="mt-5 flex justify-end gap-3">
-          <button type="button" onClick={() => setIsLogoutModalOpen(false)} className="px-4 py-2 rounded-md text-texto-principal bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20">Cancelar</button>
+          <button type="button" onClick={() => setIsLogoutModalOpen(false)} className="px-4 py-2 rounded-md text-texto-principal bg-white/10 hover:bg-white/20">Cancelar</button>
           <button type="button" onClick={handleLogout} disabled={isLoadingLogout} className="px-4 py-2 rounded-md text-white bg-primario hover:bg-primario-hover disabled:bg-primario-disabled flex items-center gap-2">
             {isLoadingLogout && <Loader2 className="h-5 w-5 animate-spin" />}
             Confirmar
@@ -359,7 +323,6 @@ export default function AjustesPage() {
         </div>
       </Modal>
 
-      {/* Modal para Desactivar Notificaciones */}
       <Modal
         isOpen={isDisableNotificationsModalOpen}
         onClose={() => !isNotificationLoading && setIsDisableNotificationsModalOpen(false)}
@@ -367,7 +330,7 @@ export default function AjustesPage() {
       >
         <p className="text-sm text-texto-secundario">¿Estás seguro de que deseas desactivar las notificaciones push en este dispositivo?</p>
         <div className="mt-5 flex justify-end gap-3">
-          <button type="button" onClick={() => setIsDisableNotificationsModalOpen(false)} className="px-4 py-2 rounded-md text-texto-principal bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20">Cancelar</button>
+          <button type="button" onClick={() => setIsDisableNotificationsModalOpen(false)} className="px-4 py-2 rounded-md text-texto-principal bg-white/10 hover:bg-white/20">Cancelar</button>
           <button type="button" onClick={handleDisableNotifications} disabled={isNotificationLoading} className="px-4 py-2 rounded-md text-white bg-error hover:bg-red-700 flex items-center gap-2">
             {isNotificationLoading && <Loader2 className="h-5 w-5 animate-spin" />}
             Sí, desactivar
@@ -375,7 +338,6 @@ export default function AjustesPage() {
         </div>
       </Modal>
 
-       {/* Modal para Dar de Baja la Cuenta */}
       <Modal
         isOpen={isDeleteModalOpen}
         onClose={() => !isLoadingDelete && setIsDeleteModalOpen(false)}
@@ -399,7 +361,7 @@ export default function AjustesPage() {
                 className="w-full p-2 rounded-md bg-fondo-input border border-borde-input focus:ring-2 focus:ring-primario placeholder:text-texto-secundario/50"
                 disabled={isLoadingDelete}
                 required
-                autoComplete="email" // <-- AÑADIDO
+                autoComplete="email"
               />
               <input
                 type="password"
@@ -409,7 +371,7 @@ export default function AjustesPage() {
                 className="w-full p-2 rounded-md bg-fondo-input border border-borde-input focus:ring-2 focus:ring-primario"
                 disabled={isLoadingDelete}
                 required
-                autoComplete="current-password" // <-- AÑADIDO
+                autoComplete="current-password"
               />
             </div>
             <div className="mt-5 flex justify-end gap-3">
@@ -417,7 +379,7 @@ export default function AjustesPage() {
                 type="button" 
                 onClick={() => setIsDeleteModalOpen(false)} 
                 disabled={isLoadingDelete} 
-                className="px-4 py-2 rounded-md text-texto-principal bg-black/10 dark:bg-white/10 hover:bg-black/20 dark:hover:bg-white/20"
+                className="px-4 py-2 rounded-md text-texto-principal bg-white/10 hover:bg-white/20"
               >
                 Cancelar
               </button>

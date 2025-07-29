@@ -57,7 +57,6 @@ const SelectorHorariosAtencion: React.FC<SelectorHorariosAtencionProps> = ({
       setHorarios(nuevosHorarios);
       propsOnChange(nuevosHorarios);
 
-      // Si el usuario cambia manualmente un día, desactivamos el checkbox global "24hs"
       if (es24HorasGlobal && nuevoEstadoParaDia !== 'abierto24h') {
         setEs24HorasGlobal(false);
       }
@@ -81,12 +80,12 @@ const SelectorHorariosAtencion: React.FC<SelectorHorariosAtencionProps> = ({
 
   return (
     <div
-      className={`space-y-4 p-3 sm:p-4 border rounded-md shadow-sm bg-card ${
+      className={`space-y-4 p-3 sm:p-4 border border-borde-tarjeta rounded-md shadow-sm bg-tarjeta ${
         className
       }`}
     >
-      <div className="flex flex-col sm:flex-row items-center justify-between p-3 bg-gray-100 dark:bg-gray-800 rounded-t-md -m-3 sm:-m-4 mb-3 sm:mb-4 border-b dark:border-gray-700">
-        <h3 className="font-semibold text-lg text-gray-800 dark:text-gray-200 mb-2 sm:mb-0">
+      <div className="flex flex-col sm:flex-row items-center justify-between p-3 bg-fondo rounded-t-md -m-3 sm:-m-4 mb-3 sm:mb-4 border-b border-borde-tarjeta">
+        <h3 className="font-semibold text-lg text-texto-principal mb-2 sm:mb-0">
           Horario de Atención
         </h3>
         <div className="flex items-center gap-2">
@@ -95,7 +94,7 @@ const SelectorHorariosAtencion: React.FC<SelectorHorariosAtencionProps> = ({
             checked={es24HorasGlobal}
             onCheckedChange={toggle24HorasGlobal}
             label="Todos los días 24hs"
-            labelClassName="text-sm font-medium text-gray-700 dark:text-gray-300"
+            labelClassName="text-sm font-medium"
             containerClassName="flex-row-reverse sm:flex-row"
             inputClassName="ml-0 sm:ml-2 mr-2 sm:mr-0"
           />

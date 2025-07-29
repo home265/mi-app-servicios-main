@@ -6,8 +6,6 @@ import { useRouter } from 'next/navigation';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useTheme } from 'next-themes';
-import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import type { RolPaginaAmarilla } from '@/types/paginaAmarilla';
 import { DIAS_SEMANA_CONFIG_INICIAL } from '@/types/horarios';
 import {
@@ -32,24 +30,16 @@ import PaginaAmarillaFormPreview, {
 } from '@/app/components/paginas-amarillas/PaginaAmarillaFormPreview';
 import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaCrearPublicacionPA from '@/app/components/ayuda-contenido/AyudaCrearPublicacionPA';
+import BotonVolver from '@/app/components/common/BotonVolver'; // Se importa el botón de volver
 
-// --- INICIO: NUEVO COMPONENTE INPUT CON PREFIJO (VERSIÓN FINAL) ---
+// --- Componente Input con Prefijo Refactorizado ---
 interface InputConPrefijoProps extends InputHTMLAttributes<HTMLInputElement> {
   id: string;
   label: string;
   prefijo: string;
   error?: string;
 }
-const palette = {
-  dark: {
-    tarjeta: '#184840',
-    resalte: '#EFC71D',
-  },
-  light: {
-    tarjeta: '#184840',
-    resalte: '#EFC71D',
-  },
-};
+
 const InputConPrefijo = forwardRef<HTMLInputElement, InputConPrefijoProps>(
   ({ id, label, prefijo, error, ...props }, ref) => {
     return (
@@ -57,30 +47,27 @@ const InputConPrefijo = forwardRef<HTMLInputElement, InputConPrefijoProps>(
         <label htmlFor={id} className="block text-sm font-medium text-texto-secundario mb-1">
           {label}
         </label>
-        {/* El div exterior agrupa todo y maneja el borde y el foco */}
-        <div className="flex items-stretch rounded-md border border-gray-300 dark:border-gray-600 focus-within:ring-1 focus-within:ring-primario focus-within:border-primario overflow-hidden">
-          {/* El span del prefijo con su propio fondo y borde derecho */}
-          <span className="flex items-center whitespace-nowrap bg-gray-100 dark:bg-gray-800 px-3 text-gray-500 dark:text-gray-400 text-sm border-r border-gray-300 dark:border-gray-600">
+        <div className="flex items-stretch rounded-md border border-borde-tarjeta focus-within:ring-1 focus-within:ring-primario focus-within:border-primario overflow-hidden">
+          <span className="flex items-center whitespace-nowrap bg-tarjeta px-3 text-texto-secundario text-sm border-r border-borde-tarjeta">
             {prefijo}
           </span>
-          {/* El input sin borde propio para que se una visualmente */}
           <input
             id={id}
             ref={ref}
             {...props}
-            className="block w-full px-3 py-2 bg-fondo border-0 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-sm text-texto dark:text-texto-dark"
+            className="block w-full px-3 py-2 bg-fondo border-0 placeholder-texto-secundario focus:outline-none focus:ring-0 sm:text-sm text-texto-principal"
           />
         </div>
-        {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
+        {error && <p className="text-sm text-error mt-1">{error}</p>}
       </div>
     );
   }
 );
 InputConPrefijo.displayName = 'InputConPrefijo';
-// --- FIN: NUEVO COMPONENTE ---
+// --- FIN ---
 
 
-// Esquemas Zod (sin cambios)
+// Esquemas Zod y Tipos (sin cambios)
 const rangoHorarioSchema = z.object({
   de: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Formato de hora inválido (HH:MM)'),
   a: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Formato de hora inválido (HH:MM)'),
@@ -97,7 +84,6 @@ const configuracionDiaSchema = z.object({
   estado: estadoHorarioDiaSchema,
 });
 
-// --- Esquema de formulario MODIFICADO para los campos sin prefijo ---
 const paginaAmarillaSchema = z.object({
   nombrePublico: z.string().min(3, 'El nombre público es requerido (mín. 3 caracteres)').max(100),
   tituloCard: z.string().max(100).optional().nullable(),
@@ -120,7 +106,6 @@ const paginaAmarillaSchema = z.object({
 });
 type FormValues = z.infer<typeof paginaAmarillaSchema>;
 
-// Tipos de perfil extendidos
 interface ProvinciaEnLocalidad { id: string; nombre: string; }
 interface LocalidadPerfil { id: string; nombre: string; provincia?: ProvinciaEnLocalidad; provinciaNombre?: string; }
 interface RubroPerfil { rubro: string; subrubro?: string; }
@@ -132,8 +117,6 @@ const PaginaAmarillaCrearForm: React.FC = () => {
   const router = useRouter();
   const currentUser = useUserStore(s => s.currentUser) as UserProfile | null;
   const originalRole = useUserStore(s => s.originalRole);
-  const { resolvedTheme } = useTheme(); // <-- Esta línea
-  const P = resolvedTheme === 'dark' ? palette.dark : palette.light;
   const [isLoading, setIsLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | undefined>();
   const [apiError, setApiError] = useState<string | null>(null);
@@ -161,6 +144,7 @@ const PaginaAmarillaCrearForm: React.FC = () => {
 
   const formDataForPreview = watch();
 
+  // Lógica de hooks y envío (sin cambios)
   useEffect(() => {
     if (currentUser && originalRole === 'prestador') {
       setValue('nombrePublico', currentUser.nombre || '');
@@ -204,7 +188,6 @@ const PaginaAmarillaCrearForm: React.FC = () => {
     const categoriaPayload = creatorRole === 'prestador' ? currentUser.categoria?.categoria : undefined;
     const subCategoriaPayload = creatorRole === 'prestador' ? currentUser.categoria?.subcategoria : undefined;
     
-    // --- LÓGICA DE GUARDADO MODIFICADA para unir prefijos ---
     const payload: CreatePaginaAmarillaDTO = {
       nombrePublico: data.nombrePublico,
       creatorRole,
@@ -242,13 +225,13 @@ const PaginaAmarillaCrearForm: React.FC = () => {
   };
 
   if (!currentUser || !originalRole) {
-    return <p className="p-4 text-center">Cargando datos del usuario...</p>;
+    return <p className="p-4 text-center text-texto-secundario animate-pulse">Cargando datos del usuario...</p>;
   }
   const rolValido = originalRole === 'prestador' || originalRole === 'comercio' ? originalRole : undefined;
   if (rolValido === undefined) {
     return (
       <div className="p-4 text-center">
-        <p className="text-red-600">
+        <p className="text-error">
           Tu rol de usuario ({originalRole}) no te permite crear publicaciones en Páginas Amarillas.
         </p>
       </div>
@@ -275,34 +258,23 @@ const PaginaAmarillaCrearForm: React.FC = () => {
     <div className="flex flex-col lg:flex-row gap-8 p-4 md:p-6">
       <div className="lg:w-2/3 xl:w-3/5 space-y-6">
   
-  {/* --- INICIO DE LA MODIFICACIÓN --- */}
-  {/* 1. Contenedor Flexbox para alinear los 3 elementos */}
-  <div className="flex items-center justify-between">
-    
-    {/* 2. Elemento Izquierdo: El Botón de Ayuda */}
-    <div>
-      <BotonAyuda>
-        <AyudaCrearPublicacionPA />
-      </BotonAyuda>
-    </div>
-    
-    {/* 3. Elemento Central: El Título */}
-    <h1 className="text-2xl font-bold text-texto-principal text-center">
-      Crea tu Publicación en Páginas Amarillas
-    </h1>
-    
-    {/* 4. Elemento Derecho: Un espacio invisible que ocupa lo mismo que el botón */}
-    <div className="w-12 h-12"></div> {/* Ancho y alto igual al de BotonAyuda */}
-    
-  </div>
-  {/* --- FIN DE LA MODIFICACIÓN --- */}
+        <div className="flex items-center justify-between">
+          <div>
+            <BotonAyuda>
+              <AyudaCrearPublicacionPA />
+            </BotonAyuda>
+          </div>
+          <h1 className="text-2xl font-bold text-texto-principal text-center">
+            Crea tu Publicación en Páginas Amarillas
+          </h1>
+          <div className="w-12 h-12"></div>
+        </div>
 
-  <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-4"> {/* Añadimos margen al form */}
-    <section>
-      {/* El subtítulo se mantiene limpio, sin el botón */}
-      <h2 className="text-lg font-semibold text-texto-principal mb-2">
-        {rolValido === 'comercio' ? 'Logo del Negocio' : 'Foto de Perfil'}
-      </h2>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-4">
+          <section>
+            <h2 className="text-lg font-semibold text-texto-principal mb-2">
+              {rolValido === 'comercio' ? 'Logo del Negocio' : 'Foto de Perfil'}
+            </h2>
             <div className="flex flex-col sm:flex-row items-center gap-4">
               <Avatar selfieUrl={previewImage} nombre={watch('nombrePublico')} size={100} />
               <div className="flex-grow">
@@ -327,13 +299,13 @@ const PaginaAmarillaCrearForm: React.FC = () => {
                             } else { setPreviewImage(undefined); }
                           }}
                         />
-                        {fieldState.error && <p className="text-sm text-red-500 mt-1">{fieldState.error.message as string}</p>}
-                        {previewImage && (<button type="button" className="mt-2 text-xs text-red-600" onClick={() => { setPreviewImage(undefined); field.onChange(null); }}>Quitar imagen</button>)}
+                        {fieldState.error && <p className="text-sm text-error mt-1">{fieldState.error.message as string}</p>}
+                        {previewImage && (<button type="button" className="mt-2 text-xs text-error" onClick={() => { setPreviewImage(undefined); field.onChange(null); }}>Quitar imagen</button>)}
                       </>
                     )}
                   />
                 ) : (
-                  <div className="text-sm text-texto-secundario p-3 bg-fondo-secundario rounded-md border border-borde-tarjeta">
+                  <div className="text-sm text-texto-secundario p-3 bg-tarjeta rounded-md border border-borde-tarjeta">
                     <p>Tu foto de perfil se usará como imagen de portada.</p>
                   </div>
                 )}
@@ -346,16 +318,15 @@ const PaginaAmarillaCrearForm: React.FC = () => {
               Información Principal
             </h2>
             <Controller name="nombrePublico" control={control} render={({ field }) => (<Input id="nombrePublico" label={rolValido === 'comercio' ? 'Nombre Público del Comercio*' : 'Tu Nombre Público*'} {...field} value={field.value ?? ''} placeholder={rolValido === 'comercio' ? 'Ej: Mi Super Tienda' : 'Ej: Juan Pérez Electricista'} disabled={rolValido === 'prestador'}/>)} />
-            {errors.nombrePublico && (<p className="text-sm text-red-500 -mt-3 mb-3">{errors.nombrePublico.message}</p>)}
+            {errors.nombrePublico && (<p className="text-sm text-error -mt-3 mb-3">{errors.nombrePublico.message}</p>)}
             <Controller name="tituloCard" control={control} render={({ field }) => (<Input id="tituloCard" label="Título para la Tarjeta (Opcional)" {...field} value={field.value ?? ''} placeholder="Ej: ¡La Mejor Calidad! / Servicios 24hs"/>)} />
-            {errors.tituloCard && (<p className="text-sm text-red-500 -mt-3 mb-3">{errors.tituloCard.message}</p>)}
+            {errors.tituloCard && (<p className="text-sm text-error -mt-3 mb-3">{errors.tituloCard.message}</p>)}
             <Controller name="subtituloCard" control={control} render={({ field }) => (<Input id="subtituloCard" label="Subtítulo para la Tarjeta (Opcional)" {...field} value={field.value ?? ''} placeholder="Ej: Expertos en tecnología / Tu solución en casa"/>)} />
-            {errors.subtituloCard && (<p className="text-sm text-red-500 -mt-3 mb-3">{errors.subtituloCard.message}</p>)}
+            {errors.subtituloCard && (<p className="text-sm text-error -mt-3 mb-3">{errors.subtituloCard.message}</p>)}
             <Controller name="descripcion" control={control} render={({ field }) => (<Textarea id="descripcion" spellCheck="true" label="Descripción (Párrafo)" {...field} value={field.value ?? ''} placeholder="Describe tus servicios, productos, historia, etc." rows={4}/>)} />
-            {errors.descripcion && (<p className="text-sm text-red-500 -mt-3 mb-3">{errors.descripcion.message}</p>)}
+            {errors.descripcion && (<p className="text-sm text-error -mt-3 mb-3">{errors.descripcion.message}</p>)}
           </section>
 
-          {/* --- INICIO: SECCIÓN DE CONTACTO MODIFICADA --- */}
           <section>
             <h2 className="text-lg font-semibold text-texto-principal mb-2">
               Información de Contacto
@@ -363,40 +334,30 @@ const PaginaAmarillaCrearForm: React.FC = () => {
             <div className="grid md:grid-cols-2 gap-x-4 gap-y-0">
               <Controller
                 name="telefonoContacto" control={control}
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <InputConPrefijo
-  id="telefonoContacto" label="Teléfono de Contacto" type="tel"
-  prefijo="+54 9"
-  {...field}
-  value={field.value ?? ''}
-  placeholder="261 1234567 (sin 0 ni 15)"
-/>
+                    id="telefonoContacto" label="Teléfono de Contacto" type="tel"
+                    prefijo="+54 9"
+                    {...field}
+                    value={field.value ?? ''}
+                    placeholder="261 1234567 (sin 0 ni 15)"
+                    error={fieldState.error?.message}
+                  />
                 )}
               />
-              {errors.telefonoContacto && (<p className="text-sm text-red-500 mt-1 mb-3">{errors.telefonoContacto.message}</p>)}
-
-              <Controller name="emailContacto" control={control} render={({ field }) => (<Input id="emailContacto" label="Email de Contacto" type="email" {...field} value={field.value ?? ''} placeholder="contacto@ejemplo.com"/>)}/>
-              {errors.emailContacto && (<p className="text-sm text-red-500 mt-1 mb-3">{errors.emailContacto.message}</p>)}
-            
-              <Controller name="enlaceWeb" control={control} render={({ field }) => (<InputConPrefijo id="enlaceWeb" label="Página Web (Opcional)" type="text" prefijo="https://" {...field} value={field.value ?? ''} placeholder="www.ejemplo.com"/>)}/>
-              {errors.enlaceWeb && (<p className="text-sm text-red-500 mt-1 mb-3">{errors.enlaceWeb.message}</p>)}
-
-              <Controller name="enlaceInstagram" control={control} render={({ field }) => (<InputConPrefijo id="enlaceInstagram" label="Instagram (Opcional)" type="text" prefijo="https://instagram.com/" {...field} value={field.value ?? ''} placeholder="tu_usuario"/>)}/>
-              {errors.enlaceInstagram && (<p className="text-sm text-red-500 mt-1 mb-3">{errors.enlaceInstagram.message}</p>)}
-
-              <Controller name="enlaceFacebook" control={control} render={({ field }) => (<InputConPrefijo id="enlaceFacebook" label="Facebook (Opcional)" type="text" prefijo="https://facebook.com/" {...field} value={field.value ?? ''} placeholder="tu.pagina"/>)}/>
-              {errors.enlaceFacebook && (<p className="text-sm text-red-500 mt-1 mb-3">{errors.enlaceFacebook.message}</p>)}
+              <Controller name="emailContacto" control={control} render={({ field, fieldState }) => (<Input id="emailContacto" label="Email de Contacto" type="email" {...field} value={field.value ?? ''} placeholder="contacto@ejemplo.com" error={fieldState.error?.message} />)}/>
+              <Controller name="enlaceWeb" control={control} render={({ field, fieldState }) => (<InputConPrefijo id="enlaceWeb" label="Página Web (Opcional)" type="text" prefijo="https://" {...field} value={field.value ?? ''} placeholder="www.ejemplo.com" error={fieldState.error?.message} />)}/>
+              <Controller name="enlaceInstagram" control={control} render={({ field, fieldState }) => (<InputConPrefijo id="enlaceInstagram" label="Instagram (Opcional)" type="text" prefijo="https://instagram.com/" {...field} value={field.value ?? ''} placeholder="tu_usuario" error={fieldState.error?.message} />)}/>
+              <Controller name="enlaceFacebook" control={control} render={({ field, fieldState }) => (<InputConPrefijo id="enlaceFacebook" label="Facebook (Opcional)" type="text" prefijo="https://facebook.com/" {...field} value={field.value ?? ''} placeholder="tu.pagina" error={fieldState.error?.message} />)}/>
             </div>
           </section>
-          {/* --- FIN: SECCIÓN DE CONTACTO MODIFICADA --- */}
 
           <section>
             <h2 className="text-lg font-semibold text-texto-principal mb-2">
               Ubicación (Información de tu Perfil)
             </h2>
-            <Controller name="direccionVisible" control={control} render={({ field }) => (<Input id="direccionVisible" label="Dirección Pública (Opcional, si quieres mostrarla)" {...field} value={field.value ?? ''} placeholder="Calle Falsa 123, Barrio"/>)}/>
-            {errors.direccionVisible && (<p className="text-sm text-red-500 -mt-3 mb-3">{errors.direccionVisible.message}</p>)}
-            <div className="mt-2 space-y-1 text-sm text-texto-secundario bg-fondo-secundario p-3 rounded-md border border-borde-tarjeta">
+            <Controller name="direccionVisible" control={control} render={({ field, fieldState }) => (<Input id="direccionVisible" label="Dirección Pública (Opcional, si quieres mostrarla)" {...field} value={field.value ?? ''} placeholder="Calle Falsa 123, Barrio" error={fieldState.error?.message} />)}/>
+            <div className="mt-2 space-y-1 text-sm text-texto-secundario bg-tarjeta p-3 rounded-md border border-borde-tarjeta">
               <p><strong>Provincia:</strong> {provinciaDisplay}</p>
               <p><strong>Localidad:</strong> {localidadDisplay}</p>
               {rolValido === 'comercio' && (<>
@@ -407,7 +368,7 @@ const PaginaAmarillaCrearForm: React.FC = () => {
                   <p><strong>Categoría:</strong>{' '}{currentUser.categoria?.categoria ?? 'No especificada'}</p>
                   {currentUser.categoria?.subcategoria && (<p><strong>Sub-Categoría:</strong> {currentUser.categoria.subcategoria}</p>)}
               </>)}
-              <p className="text-xs text-texto-placeholder mt-2">Esta información se toma de tu perfil y no es editable aquí.</p>
+              <p className="text-xs text-texto-secundario opacity-70 mt-2">Esta información se toma de tu perfil y no es editable aquí.</p>
             </div>
           </section>
 
@@ -416,7 +377,7 @@ const PaginaAmarillaCrearForm: React.FC = () => {
               Horarios de Atención
             </h2>
             <Controller name="horarios" control={control} render={({ field }) => (<SelectorHorariosAtencion horariosIniciales={field.value || undefined} onChange={field.onChange}/>)}/>
-            {errors.horarios && (<p className="text-sm text-red-500 mt-1 mb-3">{typeof errors.horarios.message === 'string' ? errors.horarios.message : 'Error en horarios.'}</p>)}
+            {errors.horarios && (<p className="text-sm text-error mt-1 mb-3">{typeof errors.horarios.message === 'string' ? errors.horarios.message : 'Error en horarios.'}</p>)}
           </section>
 
           {rolValido === 'comercio' && (
@@ -426,30 +387,25 @@ const PaginaAmarillaCrearForm: React.FC = () => {
             </section>
           )}
 
-          {apiError && (<p className="text-sm text-red-600 bg-red-100 p-3 rounded-md">{apiError}</p>)}
+          {apiError && (<p className="text-sm text-error bg-error/10 p-3 rounded-md">{apiError}</p>)}
 
           <Button
-  type="submit"
-  isLoading={isLoading}
-  disabled={isLoading}
-  fullWidth
-  className="py-3 !bg-[var(--color-primario)] !text-[var(--color-fondo)] !focus:shadow-none hover:!brightness-90"
->
-  {isLoading ? 'Creando Publicación...' : 'Crear Publicación'}
-</Button>
+            type="submit"
+            isLoading={isLoading}
+            disabled={isLoading}
+            fullWidth
+            className="py-3 !bg-primario !text-fondo !focus:shadow-none hover:!brightness-90"
+          >
+            {isLoading ? 'Creando Publicación...' : 'Crear Publicación'}
+          </Button>
         </form>
       </div>
 
       <div className="lg:w-1/3 xl:w-2/5 mt-8 lg:mt-0">
         <PaginaAmarillaFormPreview formData={formValuesForPreview} />
       </div>
-      <button
-  onClick={() => router.push('/bienvenida')}
-  className="fixed bottom-6 right-4 h-12 w-12 rounded-full shadow-lg flex items-center justify-center focus:outline-none"
-  style={{ backgroundColor: P.tarjeta }}
->
-  <ChevronLeftIcon className="h-6 w-6" style={{ color: P.resalte }} />
-</button>
+      
+      <BotonVolver />
     </div>
   );
 };

@@ -6,9 +6,9 @@ import React, { useState, Suspense } from 'react';
 import {
   useSearchParams,
   useRouter,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   usePathname,
 } from 'next/navigation';
-import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 
 import {
   PaginaAmarillaData,
@@ -17,14 +17,14 @@ import {
 } from '@/types/paginaAmarilla';
 import PaginasAmarillasFiltros from './components/PaginasAmarillasFiltros';
 import PaginasAmarillasResultados from './components/PaginasAmarillasResultados';
-import BotonAyuda from '@/app/components/common/BotonAyuda'; // <-- 1. AÑADIDO
-import AyudaPaginasAmarillas from '@/app/components/ayuda-contenido/AyudaPaginasAmarillas'; // <-- 2. AÑADIDO
-
+import BotonAyuda from '@/app/components/common/BotonAyuda';
+import AyudaPaginasAmarillas from '@/app/components/ayuda-contenido/AyudaPaginasAmarillas';
+import BotonVolver from '@/app/components/common/BotonVolver'; // Se importa el botón de volver
 
 type EstadoCarga = 'idle' | 'loading' | 'success' | 'error';
 
 /* -------------------------------------------------------------------- */
-/* Helpers                                                              */
+/* Helpers (sin cambios)                                                */
 /* -------------------------------------------------------------------- */
 const construirQueryString = (f: PaginaAmarillaFiltros): string => {
   const p = new URLSearchParams();
@@ -76,12 +76,11 @@ const parseQueryParamsToFiltros = (
 };
 
 /* -------------------------------------------------------------------- */
-/* Client-side logic                                                    */
+/* Client-side logic (sin cambios en la lógica)                         */
 /* -------------------------------------------------------------------- */
 const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
-  const router       = useRouter();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const pathname     = usePathname();
+  const router       = useRouter();
   const searchParams = useSearchParams();
 
   const [filtrosActivos, setFiltrosActivos] = useState<PaginaAmarillaFiltros>(
@@ -129,10 +128,8 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
 
   return (
     <>
-      {/* 1. Contenedor principal que limita y centra el contenido */}
       <div className="w-full max-w-4xl mx-auto px-5 py-8 sm:py-12 space-y-8 flex-grow">
         
-        {/* --- CONTENEDOR PARA EL TÍTULO Y EL BOTÓN DE AYUDA --- */}
         <div className="relative mx-auto w-fit">
           <h2 className="text-2xl font-semibold text-texto-principal text-center">
             Buscar en Guía Local
@@ -145,8 +142,7 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
           </div>
         </div>
 
-        {/* --- FILTROS Y RESULTADOS --- */}
-        <div className="mt-6"> {/* Ajuste de margen si es necesario */}
+        <div className="mt-6">
           <PaginasAmarillasFiltros
             onBuscar={handleBuscar}
             isLoading={estadoCarga === 'loading'}
@@ -161,26 +157,20 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
         />
       </div>
 
-      {/* 2. El botón fijo DEBE estar FUERA del contenedor principal para que se posicione correctamente */}
-      <button
-        onClick={() => router.push('/bienvenida')}
-        aria-label="Volver a inicio"
-        className="fixed bottom-6 right-4 z-40 h-12 w-12 rounded-full shadow-lg flex items-center justify-center transition active:scale-95 focus:outline-none focus:ring"
-        style={{ backgroundColor: '#184840' }}
-      >
-        <ChevronLeftIcon className="h-6 w-6" style={{ color: '#EFC71D' }} />
-      </button>
+      <BotonVolver />
     </>
   );
 };
 
 /* -------------------------------------------------------------------- */
-/* Page wrapper                                                         */
+/* Page wrapper (Estilos actualizados)                                  */
 /* -------------------------------------------------------------------- */
 const BuscarPaginaAmarillaPage: React.FC = () => (
-  <Suspense fallback={<div className="p-8 text-center">Cargando filtros…</div>}>
-    <BusquedaPaginasAmarillasClientLogic />
-  </Suspense>
+  <div className="min-h-screen flex flex-col bg-fondo">
+    <Suspense fallback={<div className="p-8 text-center text-texto-secundario animate-pulse">Cargando filtros…</div>}>
+      <BusquedaPaginasAmarillasClientLogic />
+    </Suspense>
+  </div>
 );
 
 export default BuscarPaginaAmarillaPage;

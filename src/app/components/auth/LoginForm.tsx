@@ -106,7 +106,7 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
   type="submit"
   isLoading={isLoading}
   fullWidth
-  className="!text-[var(--color-fondo)] !focus:shadow-none"
+  className="btn-primary"  // <-- APLICA LA CLASE CORRECTA AQUÍ
 >
   {isLoading ? 'Ingresando...' : 'Ingresar'}
 </Button>

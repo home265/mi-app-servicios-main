@@ -3,7 +3,6 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useTheme } from 'next-themes';
 import {
   MagnifyingGlassIcon,
   DocumentPlusIcon,
@@ -26,27 +25,6 @@ import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaAjustes from '@/app/components/ayuda-contenido/AyudaAjustes';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getPaginaAmarilla } from '@/lib/services/paginasAmarillasService';
-
-const palette = {
-  dark: {
-    fondo: '#0F2623',
-    tarjeta: '#184840',
-    borde: '#2F5854',
-    texto: '#F9F3D9',
-    iconTxt: '#F9F3D9',
-    resalte: '#EFC71D',
-    logo: '/logo1.png',
-  },
-  light: {
-    fondo: '#F9F3D9',
-    tarjeta: '#184840',
-    borde: '#2F5854',
-    texto: '#0F2623',
-    iconTxt: '#F9F3D9',
-    resalte: '#EFC71D',
-    logo: '/logo2.png',
-  },
-};
 
 const toTitleCase = (s: string) =>
   s
@@ -140,15 +118,12 @@ const base: Record<'prestador' | 'comercio', Action[]> = {
 
 export default function BienvenidaPage() {
   const router = useRouter();
-  const { resolvedTheme } = useTheme();
-  const P = resolvedTheme === 'dark' ? palette.dark : palette.light;
 
   const user = useUserStore((s) => s.currentUser);
   const pinOk = useUserStore((s) => s.isPinVerifiedForSession);
   const toggleMode = useUserStore((s) => s.toggleActingMode);
   const actingAs = useUserStore((s) => s.actingAs);
 
-  // --- NUEVO: Leer los contadores de notificaciones no leídas desde el store ---
   const { jobRequests, jobResponses } = useUserStore((s) => s.unread);
 
   const [hasCv, setCv] = useState<boolean | null>(null);
@@ -217,10 +192,7 @@ export default function BienvenidaPage() {
 
   if (loading) {
     return (
-      <div
-        className="flex items-center justify-center h-screen"
-        style={{ backgroundColor: P.fondo, color: P.resalte }}
-      >
+      <div className="flex items-center justify-center h-screen bg-fondo text-primario">
         <span className="animate-pulse text-lg">Cargando…</span>
       </div>
     );
@@ -259,14 +231,9 @@ export default function BienvenidaPage() {
   const fullName = user?.nombre ? toTitleCase(user.nombre) : '';
 
   return (
-    <div
-      className="min-h-screen flex flex-col"
-      style={{ backgroundColor: P.fondo, color: P.texto }}
-    >
-      {/* 1. Contenedor principal que limita y centra TODO el contenido */}
+    <div className="min-h-screen flex flex-col bg-fondo text-texto-principal">
       <div className="w-full max-w-4xl mx-auto px-5 flex flex-col flex-grow">
         
-        {/* 2. El HEADER ahora está DENTRO del contenedor, por lo que también se centrará */}
         <header className="flex items-center justify-between py-4 mt-6">
           <div className="flex items-center gap-4">
             <Avatar selfieUrl={user?.selfieURL ?? undefined} nombre={fullName} size={64} />
@@ -283,18 +250,15 @@ export default function BienvenidaPage() {
 
             <button
               onClick={() => router.push('/ajustes')}
-              style={{ backgroundColor: P.tarjeta }}
-              className="rounded-full p-2.5"
+              className="rounded-full p-2.5 bg-tarjeta"
             >
-              <Bars3BottomRightIcon className="w-7 h-7" style={{ color: P.resalte }} />
+              <Bars3BottomRightIcon className="w-7 h-7 text-primario" />
             </button>
           </div>
         </header>
 
-        {/* 3. El MAIN está DENTRO del mismo contenedor y ocupa el espacio restante */}
         <main className="flex-grow flex justify-center items-start pt-16 pb-6">
           
-          {/* 4. La cuadrícula ya no necesita wrappers internos y se ajustará al contenedor padre */}
           <div
             className="
               w-full grid gap-5 sm:gap-6
@@ -342,29 +306,22 @@ export default function BienvenidaPage() {
                     relative flex flex-col items-center justify-center
                     aspect-square w-full max-w-[180px]
                     rounded-xl transition active:scale-95 shadow-md hover:shadow-lg
+                    bg-tarjeta border border-borde-tarjeta text-texto-principal
                   "
-                  style={{
-                    backgroundColor: P.tarjeta,
-                    border: `1px solid ${P.borde}`,
-                    color: P.iconTxt,
-                  }}
                 >
                   {unreadCount > 0 && (
                     <div
                       className="
                         absolute top-2 right-2 h-6 w-6 bg-red-600 rounded-full
                         flex items-center justify-center text-white text-xs font-bold
-                        ring-2
+                        ring-2 ring-tarjeta
                       "
-                      style={{
-                        borderColor: P.tarjeta,
-                      }}
                     >
                       {unreadCount}
                     </div>
                   )}
 
-                  <Icon className="w-10 h-10 mb-2" style={{ color: P.iconTxt }} />
+                  <Icon className="w-10 h-10 mb-2 text-texto-principal" />
                   <span className="text-sm text-center px-1">{a.label}</span>
                 </button>
               );

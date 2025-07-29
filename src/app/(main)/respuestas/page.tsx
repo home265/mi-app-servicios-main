@@ -144,7 +144,7 @@ export default function RespuestasPage() {
     return null;
   }
 
-  /* ------------- acciones (modificadas para usar toast) ------------- */
+  /* ------------- acciones ------------- */
   async function handleContactar(notif: Notification) {
     if (processingNotifId) return;
     setProcessingNotifId(notif.id);
@@ -250,19 +250,19 @@ export default function RespuestasPage() {
     }
   }
 
-  /* --------------- UI (Sin cambios) ---------------- */
+  /* --------------- UI ---------------- */
   return (
-    <div className="flex flex-col items-center p-4 min-h-screen bg-gray-50">
+    <div className="flex flex-col items-center p-4 min-h-screen bg-fondo">
       <div className="mb-6 mt-2">
         <Logo />
       </div>
-      <h1 className="mb-6 text-2xl font-bold text-gray-800">
+      <h1 className="mb-6 text-2xl font-bold text-texto-principal">
         Mis Respuestas y Notificaciones
       </h1>
 
       <div className="w-full max-w-lg space-y-4">
         {notifications.length === 0 && (
-          <p className="text-center text-gray-500 py-8">
+          <p className="text-center text-texto-secundario py-8">
             No tienes respuestas o notificaciones nuevas.
           </p>
         )}

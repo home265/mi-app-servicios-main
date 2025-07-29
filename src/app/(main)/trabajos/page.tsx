@@ -2,19 +2,11 @@
 
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTheme } from 'next-themes'
-import {
-  ChevronLeftIcon,
-} from '@heroicons/react/24/outline'
 import { toast } from 'react-hot-toast';
-
+import BotonVolver from '@/app/components/common/BotonVolver';
 import {
   useUserStore,
   UserProfile,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Role as UserRole,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  ActingAs,
 } from '@/store/userStore'
 import {
   subscribeToNotifications,
@@ -29,26 +21,6 @@ import NotificacionCard from '@/app/components/notificaciones/NotificacionCard'
 import PerfilModal from '@/app/components/notificaciones/PerfilModal'
 import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaTrabajos from '@/app/components/ayuda-contenido/AyudaTrabajos';
-
-/*────────── paleta & assets ──────────*/
-const palette = {
-  dark: {
-    fondo: '#0F2623',
-    tarjeta: '#184840',
-    borde: '#2F5854',
-    texto: '#F9F3D9',
-    resalte: '#EFC71D',
-    marca: '/logo3.png',
-  },
-  light: {
-    fondo: '#F9F3D9',
-    tarjeta: '#184840',
-    borde: '#2F5854',
-    texto: '#0F2623',
-    resalte: '#EFC71D',
-    marca: '/logo2.png',
-  },
-}
 
 /*────────── Tipos mejorados ──────────*/
 interface ProviderUserProfile extends UserProfile {
@@ -75,25 +47,18 @@ export default function TrabajosPage() {
   const actingAs = useUserStore((s) => s.actingAs)
   const router = useRouter()
 
-  const { resolvedTheme } = useTheme()
-  const P = resolvedTheme === 'dark' ? palette.dark : palette.light
-
   /*────────── estado local ──────────*/
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [showPerfilModal, setShowPerfilModal] = useState(false)
   const [perfilModalTarget, setPerfilModalTarget] =
     useState<PerfilTarget | null>(null)
   
-  // NUEVO: Estado para gestionar la notificación en procesamiento
   const [processingNotifId, setProcessingNotifId] = useState<string | null>(null);
 
   /*────────── loader inicial ──────────*/
   if (!currentUser) {
     return (
-      <div
-        className="flex items-center justify-center h-screen"
-        style={{ backgroundColor: P.fondo, color: P.resalte }}
-      >
+      <div className="flex items-center justify-center h-screen bg-fondo text-primario">
         <span className="animate-pulse">Cargando…</span>
       </div>
     )
@@ -128,7 +93,6 @@ export default function TrabajosPage() {
       return n.from;
     }
     
-    // Acceso seguro a propiedades que podrían no existir
     const legacyNotif = n as NotificationWithLegacyFrom;
     const fromId = legacyNotif.fromId ?? (legacyNotif.payload as { fromId?: string }).fromId;
     const fromCollection = legacyNotif.fromCollection ?? (legacyNotif.payload as { fromCollection?: string }).fromCollection;
@@ -144,7 +108,6 @@ export default function TrabajosPage() {
    /*────────── suscripción a notificaciones ──────────*/
   // eslint-disable-next-line react-hooks/rules-of-hooks
   useEffect(() => {
-    // El rol original no debería cambiar, pero lo incluimos por consistencia
     if (!providerUid || !originalRole) return;
 
     const coll =
@@ -166,7 +129,7 @@ export default function TrabajosPage() {
     return unsub;
   }, [providerUid, originalRole])
 
-  /*────────── handlers (modificados para gestionar estado) ──────────*/
+  /*────────── handlers ──────────*/
   async function handleAccept(n: Notification) {
     if (processingNotifId) return;
     setProcessingNotifId(n.id);
@@ -177,7 +140,6 @@ export default function TrabajosPage() {
         throw new Error("No se pudo determinar el cliente para aceptar la solicitud.");
       }
 
-      // El payload se construye con seguridad de tipos
       const payload: NotificationPayload = {
         description: `${providerName || 'Un proveedor'} ha aceptado tu solicitud de trabajo.`,
         senderName: providerName || 'Proveedor',
@@ -193,8 +155,6 @@ export default function TrabajosPage() {
         payload,
       });
 
-      // Idealmente, esta eliminación debería ser parte de una transacción en el backend.
-      // Se mantiene aquí para no alterar la lógica existente.
       await removeNotification(
         { uid: providerUid, collection: providerCollection },
         n.id
@@ -229,7 +189,6 @@ export default function TrabajosPage() {
     
     const cli = getSender(n)
     if (cli) {
-      // Redirige a la nueva página pasándole el UID del usuario a calificar
       router.push(`/calificar/${cli.uid}?notifId=${n.id}`);
     }
   }
@@ -244,17 +203,12 @@ export default function TrabajosPage() {
     }
   }
 
-  /*────────── UI (modificada para pasar estado) ──────────*/
+  /*────────── UI ──────────*/
   return (
-    <div
-      className="min-h-screen flex flex-col"
-      style={{ backgroundColor: P.fondo, color: P.texto }}
-    >
-      {/* 1. Contenedor que limita y centra el contenido principal */}
+    <div className="min-h-screen flex flex-col bg-fondo text-texto-principal">
       <div className="w-full max-w-4xl mx-auto px-5 flex flex-col flex-grow">
 
         {/*────────── header ──────────*/}
-        {/* El header ahora está DENTRO del contenedor y se le quita el padding propio */}
         <header className="relative flex items-center justify-center py-8">
           <div className="absolute left-0 top-1/2 -translate-y-1/2">
             <BotonAyuda>
@@ -266,11 +220,9 @@ export default function TrabajosPage() {
           </h1>
         </header>
 
-        {/* La línea ahora respeta el ancho del contenedor padre */}
-        <hr style={{ borderColor: P.borde }} />
+        <hr className="border-borde-tarjeta" />
 
         {/*────────── contenido ──────────*/}
-        {/* El main también está DENTRO del contenedor y se simplifica */}
         <main className="flex flex-col items-center flex-grow pt-6 pb-8">
           <div className="w-full max-w-lg space-y-4">
             {notifications.length === 0 && (
@@ -307,15 +259,7 @@ export default function TrabajosPage() {
       </div>
 
       {/*────────── FAB volver ──────────*/}
-      {/* Este botón tiene `position: fixed`, por lo que DEBE estar FUERA del contenedor centrado */}
-      <button
-        onClick={() => router.push('/bienvenida')}
-        aria-label="Volver a inicio"
-        className="fixed bottom-6 right-4 md:bottom-8 md:left-6 z-40 h-12 w-12 rounded-full shadow-lg flex items-center justify-center transition active:scale-95 focus:outline-none focus:ring"
-        style={{ backgroundColor: P.tarjeta }}
-      >
-        <ChevronLeftIcon className="h-6 w-6" style={{ color: P.resalte }} />
-      </button>
+<BotonVolver />
     </div>
   )
 }

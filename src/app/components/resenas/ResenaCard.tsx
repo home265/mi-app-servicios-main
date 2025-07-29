@@ -6,12 +6,12 @@ import { doc, getDoc, type Timestamp } from 'firebase/firestore';
 import { StarIcon } from '@heroicons/react/24/solid';
 
 import { db } from '@/lib/firebase/config';
-import type { ReviewData } from '@/lib/services/reviewsService'; // <-- Se importa el nuevo tipo
+import type { ReviewData } from '@/lib/services/reviewsService';
 
 import Avatar from '@/app/components/common/Avatar';
 import Card from '@/app/components/ui/Card';
 
-// --- Tipos locales para mayor seguridad ---
+// --- Tipos locales (sin cambios) ---
 interface AuthorProfile {
   nombre: string;
   apellido: string;
@@ -19,10 +19,10 @@ interface AuthorProfile {
 }
 
 interface ResenaCardProps {
-  review: ReviewData; // <-- Se usa el nuevo tipo de reseña
+  review: ReviewData;
 }
 
-// --- Componente de Ayuda para renderizar estrellas ---
+// --- Componente de Ayuda para renderizar estrellas (Estilos actualizados) ---
 const StarRatingDisplay: React.FC<{ rating: number }> = ({ rating }) => {
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating - fullStars >= 0.5;
@@ -31,18 +31,18 @@ const StarRatingDisplay: React.FC<{ rating: number }> = ({ rating }) => {
   return (
     <div className="flex items-center">
       {Array.from({ length: fullStars }, (_, i) => (
-        <StarIcon key={`full-${i}`} className="h-5 w-5 text-yellow-400" />
+        <StarIcon key={`full-${i}`} className="h-5 w-5 text-primario" />
       ))}
       {hasHalfStar && (
         <div className="relative">
-          <StarIcon className="h-5 w-5 text-gray-300" />
+          <StarIcon className="h-5 w-5 text-texto-secundario opacity-50" />
           <div className="absolute top-0 left-0 h-full w-1/2 overflow-hidden">
-            <StarIcon className="h-5 w-5 text-yellow-400" />
+            <StarIcon className="h-5 w-5 text-primario" />
           </div>
         </div>
       )}
       {Array.from({ length: emptyStars }, (_, i) => (
-        <StarIcon key={`empty-${i}`} className="h-5 w-5 text-gray-300" />
+        <StarIcon key={`empty-${i}`} className="h-5 w-5 text-texto-secundario opacity-50" />
       ))}
     </div>
   );
@@ -52,14 +52,13 @@ const StarRatingDisplay: React.FC<{ rating: number }> = ({ rating }) => {
 const ResenaCard: React.FC<ResenaCardProps> = ({ review }) => {
   const [authorData, setAuthorData] = useState<AuthorProfile | null>(null);
 
-  // Carga los datos del autor de la reseña
+  // Lógica de carga de datos (sin cambios)
   useEffect(() => {
     async function fetchAuthor() {
       if (!review.authorCollection || !review.authorId) return;
       try {
         const snap = await getDoc(doc(db, review.authorCollection, review.authorId));
         if (snap.exists()) {
-          // Se asegura de que los datos corresponden al perfil esperado
           setAuthorData(snap.data() as AuthorProfile);
         }
       } catch (error) {
@@ -69,7 +68,6 @@ const ResenaCard: React.FC<ResenaCardProps> = ({ review }) => {
     fetchAuthor();
   }, [review.authorCollection, review.authorId]);
 
-  // Helper para formatear los nombres de los criterios
   const formatCriterionLabel = (key: string): string => {
     return key
       .split('_')
@@ -77,15 +75,15 @@ const ResenaCard: React.FC<ResenaCardProps> = ({ review }) => {
       .join(' ');
   };
 
-  // No renderizar nada hasta tener los datos del autor
+  // Estado de carga (Estilos actualizados)
   if (!authorData) {
     return (
       <Card className="flex space-x-3 p-4 animate-pulse">
-        <div className="rounded-full bg-gray-500 h-12 w-12"></div>
+        <div className="rounded-full bg-tarjeta opacity-50 h-12 w-12"></div>
         <div className="flex-1 space-y-3">
-          <div className="h-4 bg-gray-500 rounded w-3/4"></div>
-          <div className="h-3 bg-gray-500 rounded w-1/2"></div>
-          <div className="h-3 bg-gray-500 rounded w-1/4"></div>
+          <div className="h-4 bg-tarjeta opacity-50 rounded w-3/4"></div>
+          <div className="h-3 bg-tarjeta opacity-50 rounded w-1/2"></div>
+          <div className="h-3 bg-tarjeta opacity-50 rounded w-1/4"></div>
         </div>
       </Card>
     );
@@ -96,14 +94,14 @@ const ResenaCard: React.FC<ResenaCardProps> = ({ review }) => {
 
   return (
     <Card className="p-4 space-y-4">
-      {/* --- Encabezado: Avatar, Nombre y Promedio General --- */}
+      {/* --- Encabezado --- */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
           <Avatar selfieUrl={authorData.selfieURL} nombre={fullName} size={48} />
           <div>
-            <p className="font-semibold text-md text-[var(--color-texto-principal)]">{fullName}</p>
+            <p className="font-semibold text-md text-texto-principal">{fullName}</p>
             {date && (
-                <p className="text-xs text-[var(--color-texto-secundario)]">
+                <p className="text-xs text-texto-secundario">
                   {date.toLocaleDateString('es-ES', { year: 'numeric', month: 'long', day: 'numeric' })}
                 </p>
             )}
@@ -111,28 +109,28 @@ const ResenaCard: React.FC<ResenaCardProps> = ({ review }) => {
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <StarRatingDisplay rating={review.overallRating} />
-          <span className="font-bold text-lg text-[var(--color-texto-principal)]">
+          <span className="font-bold text-lg text-texto-principal">
             {review.overallRating.toFixed(1)}
           </span>
         </div>
       </div>
 
-      {/* --- Cuerpo: Desglose de Criterios y Comentario --- */}
-      <div className="pl-[60px] space-y-4"> {/* Alinear con el nombre */}
+      {/* --- Cuerpo --- */}
+      <div className="pl-[60px] space-y-4">
         
-        {/* Desglose de Calificaciones */}
-        <div className="space-y-2 rounded-lg border border-[var(--color-borde-input)] p-3">
+        {/* Desglose de Calificaciones (Estilos actualizados) */}
+        <div className="space-y-2 rounded-lg border border-borde-tarjeta p-3">
           {Object.entries(review.ratings).map(([key, value]) => (
             <div key={key} className="flex items-center justify-between text-sm">
-              <span className="text-[var(--color-texto-secundario)]">{formatCriterionLabel(key)}</span>
+              <span className="text-texto-secundario">{formatCriterionLabel(key)}</span>
               <StarRatingDisplay rating={value} />
             </div>
           ))}
         </div>
 
-        {/* Comentario */}
+        {/* Comentario (Estilos actualizados) */}
         {review.comment && (
-          <p className="text-sm text-[var(--color-texto-principal)] bg-[var(--color-input)] p-3 rounded-lg italic">
+          <p className="text-sm text-texto-principal bg-fondo p-3 rounded-lg italic">
             &quot;{review.comment}&quot;
           </p>
         )}

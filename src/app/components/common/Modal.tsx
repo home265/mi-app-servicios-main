@@ -3,7 +3,7 @@
 
 import { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon } from '@heroicons/react/24/outline'; // Icono para el botón de cerrar
+import { XMarkIcon } from '@heroicons/react/24/outline';
 
 interface ModalProps {
   isOpen: boolean;
@@ -14,10 +14,9 @@ interface ModalProps {
 
 export default function Modal({ isOpen, onClose, title, children }: ModalProps) {
   return (
-    // Transition maneja las animaciones de entrada y salida del modal
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
-        {/* El fondo oscuro (backdrop) */}
+        {/* El fondo (backdrop) */}
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -25,9 +24,11 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
           enterTo="opacity-100"
           leave="ease-in duration-200"
           leaveFrom="opacity-100"
+  
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-60" />
+          {/* AQUÍ ESTÁ EL CAMBIO CLAVE */}
+          <div className="modal-backdrop" />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -41,26 +42,24 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              {/* El panel principal del modal */}
+              {/* El panel principal del modal (SIN CAMBIOS) */}
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-fondo p-6 text-left align-middle shadow-xl transition-all">
                 <Dialog.Title
                   as="h3"
-                  className="text-lg font-medium leading-6 text-texto dark:text-texto-dark"
+                  className="text-lg font-medium leading-6 text-texto-principal"
                 >
                   {title}
                 </Dialog.Title>
 
-                {/* Botón para cerrar el modal */}
                 <button
                   type="button"
                   onClick={onClose}
-                  className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+                  className="absolute top-4 right-4 text-texto-secundario hover:text-texto-principal transition-colors"
                   aria-label="Cerrar modal"
                 >
                   <XMarkIcon className="h-6 w-6" />
                 </button>
                 
-                {/* Contenido dinámico que pasamos desde el componente padre */}
                 <div className="mt-4">
                   {children}
                 </div>

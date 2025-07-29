@@ -1,9 +1,7 @@
-/* NotificacionCard.tsx — Implementa estado de procesamiento y mejora de tipos (v2) */
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
-import { useTheme } from 'next-themes';
 import {
   CheckCircleIcon,
   TrashIcon,
@@ -17,7 +15,6 @@ import {
 import { Timestamp } from 'firebase/firestore';
 
 // --- Helper: Componente Spinner ---
-// Un spinner simple para mostrar durante el procesamiento.
 const Spinner = () => (
   <svg
     className="animate-spin h-4 w-4 text-white"
@@ -41,9 +38,7 @@ const Spinner = () => (
   </svg>
 );
 
-// --- Tipos Mejorados ---
-// Un tipo más específico para el payload para evitar el uso de `any` o `DocumentData`.
-// Extiende el tipo base y añade los campos opcionales que usas.
+// --- Tipos Mejorados (sin cambios) ---
 type CardNotificationPayload = NotificationPayload & {
   senderName?: string;
   avatarUrl?: string;
@@ -53,26 +48,19 @@ type CardNotificationPayload = NotificationPayload & {
   timestamp?: Timestamp | number | string;
 };
 
-// --- Utilidades ---
-// CORREGIDO: Se reestructura la lógica para evitar el error de `instanceof`.
+// --- Utilidades (sin cambios) ---
 const fmtDate = (ts?: Timestamp | number | string | { seconds: number; nanoseconds: number }) => {
   if (!ts) return '';
-
-  // 1. Maneja el caso de una instancia real de Timestamp.
   if (ts instanceof Timestamp) {
     return ts.toDate().toLocaleString('es-AR', {
       day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
     });
   }
-  
-  // 2. Maneja el caso de un objeto de Timestamp serializado desde Firestore.
   if (typeof ts === 'object' && 'seconds' in ts && 'nanoseconds' in ts) {
     return new Timestamp(ts.seconds, ts.nanoseconds).toDate().toLocaleString('es-AR', {
       day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
     });
   }
-
-  // 3. Maneja los casos restantes (string, number), que son válidos para `new Date()`.
   return new Date(ts).toLocaleString('es-AR', {
     day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
   });
@@ -83,11 +71,11 @@ const toTitleCase = (s: string) =>
     .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
 
-// --- Props del Componente ---
+// --- Props del Componente (sin cambios)---
 interface Props {
   data: Notification;
   viewerMode: 'user' | 'provider';
-  isProcessing?: boolean; // NUEVO: para controlar el estado de carga
+  isProcessing?: boolean;
   onPrimary: () => void | Promise<void>;
   onSecondary?: () => void | Promise<void>;
   onAvatarClick?: () => void;
@@ -97,28 +85,13 @@ interface Props {
 export default function NotificacionCard({
   data,
   viewerMode,
-  isProcessing = false, // Valor por defecto
+  isProcessing = false,
   onPrimary,
   onSecondary,
   onAvatarClick,
 }: Props) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const isDark = useTheme().resolvedTheme === 'dark';
-
-  const C = useMemo(() => ({
-    cardBg: '#184840',
-    cardBrd: '#2F5854',
-    txt: '#F9F3D9',
-    subTxt: '#F9F3D9',
-    accBg: 'transparent',
-    accTxt: '#F9F3D9',
-    accBrd: '#F9F3D9',
-    delBg: '#DC2626',
-    delTxt: '#F9F3D9',
-  }), []);
-
   const { payload, type } = data;
-  const typedPayload = payload as CardNotificationPayload; // Usamos el tipo específico
+  const typedPayload = payload as CardNotificationPayload;
 
   const senderName = toTitleCase(typedPayload.senderName ?? 'Usuario');
   const avatar =
@@ -142,17 +115,14 @@ export default function NotificacionCard({
 
   const { p: primary, s: secondary } = buttonConfig[type as keyof typeof buttonConfig] ?? { p: undefined, s: undefined };
   const hasSecondaryAction = !!(secondary && onSecondary);
-
-  // El campo `timestamp` ahora puede venir directamente en el documento o en el payload
   const dateStr = fmtDate(data.timestamp ?? typedPayload.timestamp);
 
  return (
     <article
-      className="relative flex gap-3 rounded-xl p-4 shadow-md w-full max-w-[380px]"
-      style={{ backgroundColor: C.cardBg, border: `1px solid ${C.cardBrd}` }}
+      className="relative flex gap-3 rounded-xl p-4 shadow-md w-full max-w-[380px] bg-tarjeta border border-borde-tarjeta"
     >
       {dateStr && (
-        <span className="absolute top-[10px] right-3 text-[10px]" style={{ color: C.subTxt, opacity: 0.9 }}>
+        <span className="absolute top-[10px] right-3 text-[10px] text-texto-secundario opacity-90">
           {dateStr}
         </span>
       )}
@@ -163,7 +133,7 @@ export default function NotificacionCard({
           <button
             onClick={onAvatarClick}
             className="relative w-full h-full focus:outline-none"
-            disabled={isProcessing} // Deshabilitar también al procesar
+            disabled={isProcessing}
           >
             <Image src={avatar} alt="Avatar del remitente" fill sizes="48px" className="object-cover" />
           </button>
@@ -174,11 +144,11 @@ export default function NotificacionCard({
 
       {/* Texto y Acciones */}
       <div className="flex-1 min-w-0">
-        <p className="text-[15px] font-semibold leading-none mb-[2px]" style={{ color: C.txt }}>
+        <p className="text-[15px] font-semibold leading-none mb-[2px] text-texto-principal">
           {senderName}
         </p>
 
-        <span className="text-[13px]" style={{ color: C.subTxt }}>
+        <span className="text-[13px] text-texto-secundario">
           {expanded || !needsTrunc ? full : preview}
           {needsTrunc && (
             <>
@@ -186,8 +156,7 @@ export default function NotificacionCard({
               <button
                 onClick={() => setExpanded(!expanded)}
                 disabled={isProcessing}
-                className="inline-flex items-center gap-[1px] text-[11px] font-medium ml-[2px]"
-                style={{ color: C.txt }}
+                className="inline-flex items-center gap-[1px] text-[11px] font-medium ml-[2px] text-texto-principal"
               >
                 {expanded ? (
                   <>ver menos <ChevronUpIcon className="w-3 h-3" /></>
@@ -199,31 +168,23 @@ export default function NotificacionCard({
           )}
         </span>
 
-        {/* --- INICIO DE LA SECCIÓN MODIFICADA --- */}
         {(primary || hasSecondaryAction) && (
           <div className={`mt-3 grid gap-2 ${primary && hasSecondaryAction ? 'grid-cols-2' : 'grid-cols-1'}`}>
             {primary && (
               <button
                 onClick={onPrimary}
                 disabled={isProcessing}
-                // Se aplican las clases del estilo estándar de la app
-                className="flex items-center justify-center gap-2 px-3 py-[6px] rounded-md text-[13px] font-medium w-full !bg-[var(--color-primario)] !text-[var(--color-fondo)] border-none !focus:shadow-none hover:!brightness-90 disabled:opacity-60"
+                className="btn-primary text-[13px] py-[6px]"
               >
                 {isProcessing ? <Spinner /> : <CheckCircleIcon className="w-4 h-4" />}
                 {isProcessing ? 'Procesando...' : primary}
               </button>
             )}
             {hasSecondaryAction && (
-              // Este botón de eliminar se mantiene sin cambios, con su estilo rojo original
               <button
                 onClick={onSecondary}
                 disabled={isProcessing}
-                className="flex items-center justify-center gap-1 px-3 py-[6px] rounded-md text-[13px] font-medium w-full transition-opacity duration-200"
-                style={{
-                  backgroundColor: C.delBg,
-                  color: C.delTxt,
-                  opacity: isProcessing ? 0.6 : 1,
-                }}
+                className="btn-destructive text-[13px] py-[6px]"
               >
                 <TrashIcon className="w-4 h-4" />
                 {secondary}
@@ -231,7 +192,6 @@ export default function NotificacionCard({
             )}
           </div>
         )}
-        {/* --- FIN DE LA SECCIÓN MODIFICADA --- */}
       </div>
     </article>
   );

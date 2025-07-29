@@ -76,14 +76,14 @@ const PaginaAmarillaFormPreview: React.FC<PaginaAmarillaFormPreviewProps> = ({
   };
 
   return (
-    <div className={`sticky top-4 p-4 bg-fondo-secundario dark:bg-gray-800 rounded-lg shadow-md ${className}`}>
-      <h3 className="text-lg font-semibold text-texto-principal mb-3 border-b pb-2">
+    <div className={`sticky top-4 p-4 bg-tarjeta rounded-lg shadow-md ${className}`}>
+      <h3 className="text-lg font-semibold text-texto-principal mb-3 border-b border-borde-tarjeta pb-2">
         Vista Previa de la Tarjeta
       </h3>
       <div className="flex justify-center items-start">
         <PaginaAmarillaDisplayCard publicacion={publicacionPreviewData} />
       </div>
-      <p className="text-xs text-texto-placeholder mt-3 text-center">
+      <p className="text-xs text-texto-secundario mt-3 text-center">
         Así se verá tu publicación. El contenido se actualiza en tiempo real.
       </p>
     </div>

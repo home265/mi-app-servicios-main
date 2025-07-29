@@ -6,8 +6,6 @@ import { useRouter } from 'next/navigation';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useTheme } from 'next-themes';
-import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { SerializablePaginaAmarillaData, RolPaginaAmarilla } from '@/types/paginaAmarilla';
 import {
   HorariosDeAtencion,
@@ -30,24 +28,16 @@ import PaginaAmarillaFormPreview, {
 } from '@/app/components/paginas-amarillas/PaginaAmarillaFormPreview';
 import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaEditarPublicacionPA from '@/app/components/ayuda-contenido/AyudaEditarPublicacionPA';
+import BotonVolver from '@/app/components/common/BotonVolver';
 
-// --- INICIO: NUEVO COMPONENTE INPUT CON PREFIJO ---
+// --- Componente Input con Prefijo Refactorizado ---
 interface InputConPrefijoProps extends InputHTMLAttributes<HTMLInputElement> {
   id: string;
   label: string;
   prefijo: string;
   error?: string;
 }
-const palette = {
-  dark: {
-    tarjeta: '#184840',
-    resalte: '#EFC71D',
-  },
-  light: {
-    tarjeta: '#184840',
-    resalte: '#EFC71D',
-  },
-};
+
 const InputConPrefijo = forwardRef<HTMLInputElement, InputConPrefijoProps>(
   ({ id, label, prefijo, error, ...props }, ref) => {
     return (
@@ -55,26 +45,26 @@ const InputConPrefijo = forwardRef<HTMLInputElement, InputConPrefijoProps>(
         <label htmlFor={id} className="block text-sm font-medium text-texto-secundario mb-1">
           {label}
         </label>
-        <div className="flex items-stretch rounded-md border border-gray-300 dark:border-gray-600 focus-within:ring-1 focus-within:ring-primario focus-within:border-primario overflow-hidden">
-          <span className="flex items-center whitespace-nowrap bg-gray-100 dark:bg-gray-800 px-3 text-gray-500 dark:text-gray-400 text-sm border-r border-gray-300 dark:border-gray-600">
+        <div className="flex items-stretch rounded-md border border-borde-tarjeta focus-within:ring-1 focus-within:ring-primario focus-within:border-primario overflow-hidden">
+          <span className="flex items-center whitespace-nowrap bg-tarjeta px-3 text-texto-secundario text-sm border-r border-borde-tarjeta">
             {prefijo}
           </span>
           <input
             id={id}
             ref={ref}
             {...props}
-            className="block w-full px-3 py-2 bg-fondo border-0 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-0 sm:text-sm text-texto dark:text-texto-dark"
+            className="block w-full px-3 py-2 bg-fondo border-0 placeholder-texto-secundario focus:outline-none focus:ring-0 sm:text-sm text-texto-principal"
           />
         </div>
-        {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
+        {error && <p className="text-sm text-error mt-1">{error}</p>}
       </div>
     );
   }
 );
 InputConPrefijo.displayName = 'InputConPrefijo';
-// --- FIN: NUEVO COMPONENTE ---
+// --- FIN ---
 
-// Funciones de utilidad para adaptar datos
+// Funciones de utilidad y Schemas Zod (sin cambios)
 const stripPrefix = (value: string | null | undefined, prefix: string): string => {
   if (!value) return '';
   return value.startsWith(prefix) ? value.substring(prefix.length) : value;
@@ -88,8 +78,6 @@ const stripPhonePrefix = (value: string | null | undefined): string => {
   return value;
 };
 
-
-// Función para adaptar horarios (Corregida sin 'any')
 function adaptarHorariosAntiguosANuevos(
   horariosAntiguosOActuales?: HorarioDiaAntiguo[] | HorariosDeAtencion | null
 ): HorariosDeAtencion {
@@ -100,7 +88,6 @@ function adaptarHorariosAntiguosANuevos(
     }));
   }
   
-  // Guardia de tipo para diferenciar entre el formato nuevo y el antiguo sin usar 'any'
   if ('estado' in horariosAntiguosOActuales[0]) {
     const horariosNuevos = horariosAntiguosOActuales as HorariosDeAtencion;
     return DIAS_SEMANA_CONFIG_INICIAL.map(base => {
@@ -115,7 +102,6 @@ function adaptarHorariosAntiguosANuevos(
     });
   }
 
-  // Si el guardia falla, se asume el formato antiguo
   const antiguos = horariosAntiguosOActuales as HorarioDiaAntiguo[];
   return DIAS_SEMANA_CONFIG_INICIAL.map(base => {
     const h = antiguos.find(h => h.diaIndice === base.diaIndice);
@@ -131,7 +117,6 @@ function adaptarHorariosAntiguosANuevos(
   });
 }
 
-// Schemas Zod (sin cambios)
 const rangoHorarioSchema = z.object({
   de: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Formato de hora inválido (HH:MM)'),
   a: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Formato de hora inválido (HH:MM)'),
@@ -179,8 +164,6 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
   const router = useRouter();
   const currentUser = useUserStore(s => s.currentUser) as UserProfile | null;
   const { creatorRole, creatorId } = publicacionInicial;
-  const { resolvedTheme } = useTheme(); // <-- AÑADIR ESTO
-  const P = resolvedTheme === 'dark' ? palette.dark : palette.light; 
   const [isLoading, setIsLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null | undefined>(
     publicacionInicial.imagenPortadaUrl
@@ -325,57 +308,28 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
   };
 
   if (!currentUser) {
-    return <p className="p-4 text-center">Cargando datos del usuario...</p>;
+    return <p className="p-4 text-center text-texto-secundario animate-pulse">Cargando datos del usuario...</p>;
   }
   if (currentUser.uid !== creatorId) {
-    return <p className="p-4 text-center text-red-600">No tienes permiso para editar esta publicación.</p>;
+    return <p className="p-4 text-center text-error">No tienes permiso para editar esta publicación.</p>;
   }
 
   return (
-    <div className="flex flex-col lg:flex-row gap-8 p-4 md:p-6">
+    <div className="flex flex-col lg:flex-row gap-8 p-4 md:p-6 pb-24 lg:pb-6">
       <div className="lg:w-2/3 xl:w-3/5 space-y-6">
-
-  
-
-  {/* --- INICIO DE LA MODIFICACIÓN --- */}
-
-  {/* 1. Contenedor Flexbox para alinear los 3 elementos */}
-
-  <div className="flex items-center justify-between">
-
-    
-
-    {/* 2. Elemento Izquierdo: El Botón de Ayuda */}
-
-    <div>
-
-      <BotonAyuda>
-
-        <AyudaEditarPublicacionPA />
-
-      </BotonAyuda>
-
-    </div>
-
-    
-
-    {/* 3. Elemento Central: El Título */}
-
-   <h1 className="text-2xl font-bold text-texto-principal">Editar Publicación en Páginas Amarillas</h1>
-
-    
-
-    {/* 4. Elemento Derecho: Un espacio invisible que ocupa lo mismo que el botón */}
-
-    <div className="w-12 h-12"></div> {/* Ancho y alto igual al de BotonAyuda */}
-
-    
-
-  </div>
-
-  {/* --- FIN DE LA MODIFICACIÓN --- */}
+        <div className="flex items-center justify-between">
+          <div>
+            <BotonAyuda>
+              <AyudaEditarPublicacionPA />
+            </BotonAyuda>
+          </div>
+          <h1 className="text-2xl font-bold text-texto-principal text-center">
+            Editar Publicación en Páginas Amarillas
+          </h1>
+          <div className="w-12 h-12"></div>
+        </div>
+        
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          
           <section>
             <h2 className="text-lg font-semibold text-texto-principal mb-2">
               {creatorRole === 'comercio' ? 'Logo del Negocio' : 'Foto de Perfil'}
@@ -406,9 +360,9 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
                             }
                           }}
                         />
-                        {fieldState.error && <p className="text-sm text-red-500 mt-1">{fieldState.error.message}</p>}
+                        {fieldState.error && <p className="text-sm text-error mt-1">{fieldState.error.message}</p>}
                         {previewImage && (
-                          <button type="button" className="mt-2 text-xs text-red-600" onClick={() => {
+                          <button type="button" className="mt-2 text-xs text-error" onClick={() => {
                             setValue('imagenFile', undefined, { shouldDirty: true });
                             setPreviewImage(null);
                             field.onChange(null);
@@ -420,7 +374,7 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
                     )}
                   />
                 ) : (
-                  <div className="text-sm text-texto-secundario p-3 bg-fondo-secundario rounded-md border border-borde-tarjeta">
+                  <div className="text-sm text-texto-secundario p-3 bg-tarjeta rounded-md border border-borde-tarjeta">
                     <p>Tu foto de perfil se usa como imagen de portada y se actualiza desde tu perfil de usuario.</p>
                   </div>
                 )}
@@ -430,14 +384,10 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
 
           <section>
             <h2 className="text-lg font-semibold text-texto-principal mb-2">Información Principal</h2>
-            <Controller name="nombrePublico" control={control} render={({ field }) => (<Input id="nombrePublico" label={creatorRole === 'comercio' ? 'Nombre Público del Comercio*' : 'Tu Nombre Público*'} {...field} value={field.value ?? ''} disabled={creatorRole === 'prestador'} />)} />
-            {errors.nombrePublico && <p className="text-sm text-red-500 -mt-3 mb-3">{errors.nombrePublico.message}</p>}
-            <Controller name="tituloCard" control={control} render={({ field }) => (<Input id="tituloCard" label="Título para la Tarjeta (Opcional)" {...field} value={field.value ?? ''} />)} />
-            {errors.tituloCard && <p className="text-sm text-red-500 -mt-3 mb-3">{errors.tituloCard.message}</p>}
-            <Controller name="subtituloCard" control={control} render={({ field }) => (<Input id="subtituloCard" label="Subtítulo para la Tarjeta (Opcional)" {...field} value={field.value ?? ''} />)} />
-            {errors.subtituloCard && <p className="text-sm text-red-500 -mt-3 mb-3">{errors.subtituloCard.message}</p>}
-            <Controller name="descripcion" control={control} render={({ field }) => (<Textarea id="descripcion" spellCheck="true" label="Descripción (Párrafo)" rows={4} {...field} value={field.value ?? ''} />)} />
-            {errors.descripcion && <p className="text-sm text-red-500 -mt-3 mb-3">{errors.descripcion.message}</p>}
+            <Controller name="nombrePublico" control={control} render={({ field, fieldState }) => (<Input id="nombrePublico" label={creatorRole === 'comercio' ? 'Nombre Público del Comercio*' : 'Tu Nombre Público*'} {...field} value={field.value ?? ''} disabled={creatorRole === 'prestador'} error={fieldState.error?.message} />)} />
+            <Controller name="tituloCard" control={control} render={({ field, fieldState }) => (<Input id="tituloCard" label="Título para la Tarjeta (Opcional)" {...field} value={field.value ?? ''} error={fieldState.error?.message} />)} />
+            <Controller name="subtituloCard" control={control} render={({ field, fieldState }) => (<Input id="subtituloCard" label="Subtítulo para la Tarjeta (Opcional)" {...field} value={field.value ?? ''} error={fieldState.error?.message} />)} />
+            <Controller name="descripcion" control={control} render={({ field, fieldState }) => (<Textarea id="descripcion" spellCheck="true" label="Descripción (Párrafo)" rows={4} {...field} value={field.value ?? ''} error={fieldState.error?.message} />)} />
           </section>
 
           <section>
@@ -456,29 +406,25 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
               />
               <Controller
                 name="emailContacto" control={control}
-                render={({ field }) => (
+                render={({ field, fieldState }) => (
                   <Input
                     id="emailContacto" label="Email de Contacto" type="email"
                     {...field} value={field.value ?? ''}
                     placeholder="contacto@ejemplo.com"
+                    error={fieldState.error?.message}
                   />
                 )}
               />
-              {errors.emailContacto && <p className="text-sm text-red-500 mt-1 mb-3">{errors.emailContacto.message}</p>}
-            
               <Controller name="enlaceWeb" control={control} render={({ field, fieldState }) => (<InputConPrefijo id="enlaceWeb" label="Página Web (Opcional)" type="text" prefijo="https://" {...field} value={field.value ?? ''} placeholder="www.ejemplo.com" error={fieldState.error?.message}/>)}/>
-              
               <Controller name="enlaceInstagram" control={control} render={({ field, fieldState }) => (<InputConPrefijo id="enlaceInstagram" label="Instagram (Opcional)" type="text" prefijo="https://instagram.com/" {...field} value={field.value ?? ''} placeholder="tu_usuario" error={fieldState.error?.message}/>)}/>
-
               <Controller name="enlaceFacebook" control={control} render={({ field, fieldState }) => (<InputConPrefijo id="enlaceFacebook" label="Facebook (Opcional)" type="text" prefijo="https://facebook.com/" {...field} value={field.value ?? ''} placeholder="tu.pagina" error={fieldState.error?.message}/>)}/>
             </div>
           </section>
 
           <section>
             <h2 className="text-lg font-semibold text-texto-principal mb-2">Ubicación (Información Fija)</h2>
-            <Controller name="direccionVisible" control={control} render={({ field }) => (<Input id="direccionVisible" label="Dirección Pública (Opcional)" {...field} value={field.value ?? ''} />)} />
-            {errors.direccionVisible && <p className="text-sm text-red-500 -mt-3 mb-3">{errors.direccionVisible.message}</p>}
-            <div className="mt-2 space-y-1 text-sm text-texto-secundario bg-fondo-secundario p-3 rounded-md border border-borde-tarjeta">
+            <Controller name="direccionVisible" control={control} render={({ field, fieldState }) => (<Input id="direccionVisible" label="Dirección Pública (Opcional)" {...field} value={field.value ?? ''} error={fieldState.error?.message} />)}/>
+            <div className="mt-2 space-y-1 text-sm text-texto-secundario bg-tarjeta p-3 rounded-md border border-borde-tarjeta">
               <p><strong>Provincia:</strong> {publicacionInicial.provincia}</p>
               <p><strong>Localidad:</strong> {publicacionInicial.localidad}</p>
               {creatorRole === 'comercio' && (
@@ -500,7 +446,8 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
             <h2 className="text-lg font-semibold text-texto-principal mb-2">Horarios de Atención</h2>
             <Controller
               name="horarios" control={control}
-              render={({ field }) => (
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              render={({ field, fieldState }) => (
                 <SelectorHorariosAtencion
                   horariosIniciales={field.value ?? undefined}
                   onChange={field.onChange}
@@ -508,7 +455,7 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
               )}
             />
             {errors.horarios && (
-              <p className="text-sm text-red-500 mt-1 mb-3">
+              <p className="text-sm text-error mt-1 mb-3">
                 {typeof errors.horarios.message === 'string' ? errors.horarios.message : 'Error en horarios.'}
               </p>
             )}
@@ -521,31 +468,24 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
             </section>
           )}
 
-          {apiError && <p className="text-sm text-red-600 bg-red-100 p-3 rounded-md">{apiError}</p>}
+          {apiError && <p className="text-sm text-error bg-error/10 p-3 rounded-md">{apiError}</p>}
           <Button
-  type="submit"
-  isLoading={isLoading}
-  disabled={isLoading || !isDirty}
-  fullWidth
-  className="py-3 !bg-[var(--color-primario)] !text-[var(--color-fondo)] !focus:shadow-none hover:!brightness-90"
->
-  {isLoading ? 'Actualizando Publicación...' : 'Guardar Cambios'}
-</Button>
+            type="submit"
+            isLoading={isLoading}
+            disabled={isLoading || !isDirty}
+            fullWidth
+            className="py-3 !bg-primario !text-fondo !focus:shadow-none hover:!brightness-90"
+          >
+            {isLoading ? 'Actualizando Publicación...' : 'Guardar Cambios'}
+          </Button>
         </form>
       </div>
       <div className="lg:w-1/3 xl:w-2/5 mt-8 lg:mt-0">
         <PaginaAmarillaFormPreview formData={previewVals} />
       </div>
-      <button
-      onClick={() => router.push('/bienvenida')}
-      className="fixed bottom-6 right-4 h-12 w-12 rounded-full shadow-lg flex items-center justify-center focus:outline-none"
-      style={{ backgroundColor: P.tarjeta }}
-    >
-      <ChevronLeftIcon className="h-6 w-6" style={{ color: P.resalte }} />
-    </button>
+      <BotonVolver />
     </div>
   );
-  
 };
 
 export default PaginaAmarillaEditarForm;

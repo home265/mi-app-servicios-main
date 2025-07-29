@@ -3,15 +3,11 @@
 
 import React from 'react';
 import {
-  XMarkIcon, // Para el botón de cerrar
+  XMarkIcon,
   PhoneIcon,
-  GlobeAltIcon, // Para sitio web
-  // No tenemos iconos directos para Instagram o Facebook en Heroicons v2 outline/solid.
-  // Usaremos GlobeAltIcon como genérico o consideraremos otra librería si son estrictamente necesarios.
-  // Para WhatsApp, se suele usar un icono de chat o el propio logo de WhatsApp (imagen).
-  // Por simplicidad y para usar Heroicons, podemos usar ChatBubbleLeftEllipsisIcon o similar.
-  ChatBubbleLeftEllipsisIcon, // Para WhatsApp (o un genérico de chat)
-  LinkIcon, // Placeholder genérico para redes sociales si no hay específicos
+  GlobeAltIcon,
+  ChatBubbleLeftEllipsisIcon,
+  LinkIcon,
 } from '@heroicons/react/24/outline';
 
 import Card from '@/app/components/ui/Card';
@@ -23,7 +19,6 @@ import { PaginaAmarillaData } from '@/types/paginaAmarilla';
 // --- Helper para generar enlaces ---
 const generarEnlaceWhatsApp = (telefono: string | null | undefined): string | undefined => {
   if (!telefono) return undefined;
-  // Limpiar el número de caracteres no numéricos, excepto el '+' inicial si existe
   const numeroLimpio = telefono.replace(/[^\d+]/g, '');
   return `https://wa.me/${numeroLimpio}`;
 };
@@ -34,17 +29,16 @@ interface PaginaAmarillaContactoPopupProps {
   onClose: () => void;
 }
 
-// --- Componente Interno para cada Botón de Contacto (para evitar repetición) ---
+// --- Componente Interno para cada Botón de Contacto ---
 interface ContactoBotonProps {
   href: string | undefined;
   label: string;
   ariaLabel: string;
-  icon: React.ReactNode; // Recibe el componente icono ya instanciado
-  //   onClick?: () => void; // Por si alguna acción no es un simple enlace
+  icon: React.ReactNode;
 }
 
 const ContactoBoton: React.FC<ContactoBotonProps> = ({ href, label, ariaLabel, icon }) => {
-  if (!href) return null; // No renderizar si no hay enlace
+  if (!href) return null;
 
   return (
     <a
@@ -69,23 +63,12 @@ const PaginaAmarillaContactoPopup: React.FC<PaginaAmarillaContactoPopupProps> = 
     nombrePublico,
     imagenPortadaUrl,
     telefonoContacto,
-    emailContacto, // Ya existe en PaginaAmarillaData
-    // --- Campos que NECESITAMOS añadir a PaginaAmarillaData para el popup ---
-    // enlaceInstagram?: string;
-    // enlaceFacebook?: string;
-    // enlaceWeb?: string; // Este sí parece estar contemplado en la descripción
+    emailContacto,
   } = publicacion;
 
-  // Simulamos los campos que faltan en PaginaAmarillaData para desarrollo.
-  // En producción, estos vendrían de `publicacion` si se añaden al tipo y al backend.
   const enlaceWeb = (publicacion as PaginaAmarillaData & { enlaceWeb?: string }).enlaceWeb;
   const enlaceInstagram = (publicacion as PaginaAmarillaData & { enlaceInstagram?: string }).enlaceInstagram;
   const enlaceFacebook = (publicacion as PaginaAmarillaData & { enlaceFacebook?: string }).enlaceFacebook;
-
-
-  // No podemos tener un botón "Cancelar" que llame a onClose directamente dentro del Card
-  // si usamos el Card como un modal completo con overlay.
-  // El overlay debe manejar el onClose, o el botón de cerrar.
 
   return (
     // Overlay semitransparente para el modal
@@ -102,13 +85,13 @@ const PaginaAmarillaContactoPopup: React.FC<PaginaAmarillaContactoPopupProps> = 
           <button
             onClick={onClose}
             aria-label="Cerrar popup"
-            className="absolute top-3 right-3 text-texto-secundario hover:text-texto-principal p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
+            className="absolute top-3 right-3 text-texto-secundario hover:text-texto-principal p-1 rounded-full hover:bg-white/10 transition-colors"
           >
             <XMarkIcon className="h-6 w-6" />
           </button>
 
           {/* Sección del Logo y Nombre */}
-          <div className="flex flex-col items-center mb-6 mt-4"> {/* mt-4 para dejar espacio al botón cerrar */}
+          <div className="flex flex-col items-center mb-6 mt-4">
             <Avatar
               selfieUrl={imagenPortadaUrl}
               nombre={nombrePublico}
@@ -121,7 +104,6 @@ const PaginaAmarillaContactoPopup: React.FC<PaginaAmarillaContactoPopupProps> = 
 
           {/* Iconos Clicleables */}
           <div className="grid grid-cols-3 gap-x-2 gap-y-6 mb-6">
-            {/* Teléfono */}
             <ContactoBoton
               href={telefonoContacto ? `tel:${telefonoContacto}` : undefined}
               label="Llamar"
@@ -129,7 +111,6 @@ const PaginaAmarillaContactoPopup: React.FC<PaginaAmarillaContactoPopupProps> = 
               icon={<PhoneIcon className="h-7 w-7" />}
             />
 
-            {/* WhatsApp */}
             <ContactoBoton
               href={generarEnlaceWhatsApp(telefonoContacto)}
               label="WhatsApp"
@@ -137,46 +118,34 @@ const PaginaAmarillaContactoPopup: React.FC<PaginaAmarillaContactoPopupProps> = 
               icon={<ChatBubbleLeftEllipsisIcon className="h-7 w-7" />}
             />
 
-            {/* Email */}
             <ContactoBoton
               href={emailContacto ? `mailto:${emailContacto}` : undefined}
               label="Email"
               ariaLabel={`Enviar email a ${nombrePublico}`}
-              icon={<LinkIcon className="h-7 w-7" />} // Cambiado de EnvelopeIcon a LinkIcon temporalmente
+              icon={<LinkIcon className="h-7 w-7" />}
             />
             
-            {/* Página Web */}
             <ContactoBoton
-              href={enlaceWeb} // Usará el simulado o el real si se añade a PaginaAmarillaData
+              href={enlaceWeb}
               label="Sitio Web"
               ariaLabel={`Visitar sitio web de ${nombrePublico}`}
               icon={<GlobeAltIcon className="h-7 w-7" />}
             />
 
-            {/* Instagram */}
             <ContactoBoton
-              href={enlaceInstagram} // Usará el simulado o el real
+              href={enlaceInstagram}
               label="Instagram"
               ariaLabel={`Visitar Instagram de ${nombrePublico}`}
-              // Podríamos usar un SVG personalizado si Heroicons no tiene uno adecuado
-              // o un icono genérico de "enlace" o "red social".
-              icon={<LinkIcon className="h-7 w-7" />} // Placeholder
+              icon={<LinkIcon className="h-7 w-7" />}
             />
 
-            {/* Facebook */}
             <ContactoBoton
-              href={enlaceFacebook} // Usará el simulado o el real
+              href={enlaceFacebook}
               label="Facebook"
               ariaLabel={`Visitar Facebook de ${nombrePublico}`}
-              icon={<LinkIcon className="h-7 w-7" />} // Placeholder
+              icon={<LinkIcon className="h-7 w-7" />}
             />
           </div>
-
-          {/* Botón de "Hecho" o "Cerrar" dentro de la card si se prefiere al X */}
-          {/* <Button variant="secondary" fullWidth onClick={onClose}>
-            Cerrar
-          </Button> */}
-          {/* Por ahora, el XMarkIcon y el click en overlay son suficientes */}
         </div>
       </Card>
     </div>

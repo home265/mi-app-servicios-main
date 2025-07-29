@@ -3,7 +3,6 @@
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useTheme } from 'next-themes';
 import RegistroForm from '@/app/components/auth/RegistroForm';
 
 /* ─ utilidades ─ */
@@ -15,19 +14,14 @@ const esRolValido = (r: string): r is RolValido =>
 
 export default function RegistroRolPage() {
   const { rol } = useParams() as { rol: string };
-  const { resolvedTheme } = useTheme();
-
-  /* Logos decorativos (solo icono) */
-  const logoClaro = '/logo2.png'; // verde
-  const logoOscuro = '/logo3.png'; // amarillo
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-fondo text-texto px-4 py-12 overscroll-y-auto">
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-fondo text-texto-principal px-4 py-12 overscroll-y-auto">
 
       {/* ──────────── Marca de agua ──────────── */}
       <div className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center">
         <Image
-          src={resolvedTheme === 'dark' ? logoOscuro : logoClaro}
+          src="/logo3.png" // Se usa directamente el logo del tema oscuro
           alt=""
           width={300}
           height={300}
@@ -42,9 +36,8 @@ export default function RegistroRolPage() {
           registro-card
           w-full max-w-lg space-y-6 mx-auto
           rounded-xl border border-borde-tarjeta shadow-card
-          bg-tarjeta text-texto
+          bg-tarjeta text-texto-principal
           p-6 md:p-8
-          dark:bg-tarjeta dark:text-texto
         "
       >
         {esRolValido(rol) ? (
@@ -64,9 +57,10 @@ export default function RegistroRolPage() {
             <p className="text-center text-base">
               El tipo de registro “{rol}” no es válido.
               <br />
+              {/* Se eliminó la clase dark:* del enlace */}
               <Link
                 href="/seleccionar-registro"
-                className="mt-4 inline-block font-semibold text-secundario hover:underline dark:text-primario"
+                className="mt-4 inline-block font-semibold text-secundario hover:underline"
               >
                 Volver a seleccionar rol
               </Link>

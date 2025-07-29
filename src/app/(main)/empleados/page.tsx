@@ -3,18 +3,17 @@
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/store/userStore';
-import { toast } from 'react-hot-toast'; // 1. Importar toast
+import { toast } from 'react-hot-toast';
 
-// ✅ Se mantienen las importaciones del servicio y tipos
 import { searchCvs, type CvDocument } from '@/lib/services/cvService';
 
-import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import SelectorCategoriasEmpleo from '@/app/components/forms/SelectorCategoriasEmpleo';
 import CvCard from '@/app/components/cv/CvCard';
 import Button from '@/app/components/ui/Button';
 import Card from '@/app/components/ui/Card';
 import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaEmpleados from '@/app/components/ayuda-contenido/AyudaEmpleados';
+import BotonVolver from '@/app/components/common/BotonVolver'; // Se importa el botón de volver
 
 export default function EmpleadosPage() {
   const router = useRouter();
@@ -51,7 +50,6 @@ export default function EmpleadosPage() {
 
     } catch (error) {
       console.error("handleBuscar: Error durante la búsqueda:", error);
-      // 2. Reemplazar alert con toast.error
       toast.error("Ocurrió un error al buscar. Revisa la consola para más detalles.");
     } finally {
       setCargando(false);
@@ -60,17 +58,17 @@ export default function EmpleadosPage() {
   };
 
   return (
-    <div className="flex flex-col items-center p-4 space-y-6 min-h-screen">
+    <div className="flex flex-col items-center p-4 space-y-6 min-h-screen bg-fondo">
       <Card className="max-w-md w-full space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Buscar Empleados</h2>
+          <h2 className="text-lg font-semibold text-texto-principal">Buscar Empleados</h2>
           <BotonAyuda>
             <AyudaEmpleados />
           </BotonAyuda>
         </div>
 
         <div>
-          <label className="block font-medium mb-1">Rubro (opcional)</label>
+          <label className="block font-medium text-texto-secundario mb-1">Rubro (opcional)</label>
           <SelectorCategoriasEmpleo
             value={rubroSel}
             onChange={(arr) => setRubroSel(arr.slice(0, 1))}
@@ -78,12 +76,12 @@ export default function EmpleadosPage() {
         </div>
 
         <Button
-  onClick={handleBuscar}
-  disabled={cargando}
-  className="!bg-[var(--color-primario)] !text-[var(--color-fondo)] !focus:shadow-none hover:!brightness-90"
->
-  {cargando ? 'Buscando…' : 'Buscar'}
-</Button>
+          onClick={handleBuscar}
+          disabled={cargando}
+          className="!bg-primario !text-fondo !focus:shadow-none hover:!brightness-90"
+        >
+          {cargando ? 'Buscando…' : 'Buscar'}
+        </Button>
       </Card>
 
       <div className="w-full max-w-md space-y-4 pb-20">
@@ -96,20 +94,13 @@ export default function EmpleadosPage() {
         ))}
 
         {!cargando && resultados.length === 0 && (
-          <p className="text-sm text-center text-gray-500">
+          <p className="text-sm text-center text-texto-secundario">
             No se encontraron candidatos que coincidan con tu búsqueda.
           </p>
         )}
       </div>
 
-      <button
-        onClick={() => router.push('/bienvenida')}
-        aria-label="Volver a inicio"
-        className="fixed bottom-6 right-4 z-40 h-12 w-12 rounded-full shadow-lg flex items-center justify-center transition active:scale-95 focus:outline-none focus:ring"
-        style={{ backgroundColor: '#184840' }}
-      >
-        <ChevronLeftIcon className="h-6 w-6" style={{ color: '#EFC71D' }} />
-      </button>
+      <BotonVolver />
     </div>
   );
 }

@@ -22,16 +22,16 @@ const PinInput: React.FC<PinInputProps> = ({
   disabled = false,
   ariaLabel = 'PIN input',
 }) => {
-  // Inicializa el estado de los dígitos del PIN. Si se proporciona un valor, se usa.
+  // La lógica del componente, incluyendo estado y refs, no se altera.
   const initialPin = value && value.length === length ? value.split('') : Array(length).fill('');
   const [pin, setPin] = useState<string[]>(initialPin);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // Sincronizar con el prop 'value' si se usa como componente controlado
+  // Los efectos y manejadores de eventos se mantienen sin cambios.
   useEffect(() => {
     if (value && value.length === length) {
       setPin(value.split(''));
-    } else if (value === '') { // Permitir resetear desde fuera
+    } else if (value === '') {
         setPin(Array(length).fill(''));
     }
   }, [value, length]);
@@ -40,7 +40,7 @@ const PinInput: React.FC<PinInputProps> = ({
     const newPin = [...pin];
     const inputValue = e.target.value;
 
-    if (disabled || !/^[0-9]?$/.test(inputValue)) { // Solo permitir un dígito numérico o vacío
+    if (disabled || !/^[0-9]?$/.test(inputValue)) {
       return;
     }
 
@@ -52,12 +52,10 @@ const PinInput: React.FC<PinInputProps> = ({
       onChange(currentPinString);
     }
 
-    // Mover foco al siguiente input si se ingresó un dígito y no es el último
     if (inputValue && index < length - 1) {
       inputRefs.current[index + 1]?.focus();
     }
 
-    // Verificar si todos los inputs están llenos
     if (newPin.every(digit => digit !== '')) {
       if (onComplete) {
         onComplete(newPin.join(''));
@@ -70,12 +68,11 @@ const PinInput: React.FC<PinInputProps> = ({
 
     if (e.key === 'Backspace') {
       const newPin = [...pin];
-      // Si el input actual está vacío y no es el primero, mover foco y borrar el anterior
       if (!newPin[index] && index > 0) {
         inputRefs.current[index - 1]?.focus();
-        newPin[index - 1] = ''; // Opcional: borrar el anterior al hacer backspace en uno vacío
+        newPin[index - 1] = '';
       } else {
-        newPin[index] = ''; // Borrar el input actual
+        newPin[index] = '';
       }
       setPin(newPin);
       const currentPinString = newPin.join('');
@@ -87,11 +84,10 @@ const PinInput: React.FC<PinInputProps> = ({
     } else if (e.key === 'ArrowRight' && index < length - 1) {
       inputRefs.current[index + 1]?.focus();
     }
-    // Podrías añadir manejo para pegar (paste) aquí si lo deseas
   };
 
   const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
-    e.target.select(); // Seleccionar el contenido del input al enfocar
+    e.target.select();
   };
 
   return (
@@ -105,10 +101,10 @@ const PinInput: React.FC<PinInputProps> = ({
             ref={(el: HTMLInputElement | null) => {
                 inputRefs.current[index] = el;
               }}
-            type="tel" // Usar 'tel' para sugerir teclado numérico en móviles
+            type="tel"
             maxLength={1}
-            pattern="[0-9]" // Solo números
-            inputMode="numeric" // Mejor para móviles
+            pattern="[0-9]"
+            inputMode="numeric"
             value={pin[index]}
             onChange={(e) => handleChange(e, index)}
             onKeyDown={(e) => handleKeyDown(e, index)}
@@ -117,9 +113,9 @@ const PinInput: React.FC<PinInputProps> = ({
             className={`
                 w-12 h-14 md:w-14 md:h-16 
                 text-center text-2xl md:text-3xl font-semibold 
-                bg-fondo border border-gray-300 dark:border-gray-600 rounded-md shadow-sm
+                bg-fondo border border-borde-tarjeta rounded-md shadow-sm
                 focus:outline-none focus:ring-primario focus:border-primario 
-                text-texto 
+                text-texto-principal 
                 ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
               `}
             aria-label={`Dígito ${index + 1} del PIN`}

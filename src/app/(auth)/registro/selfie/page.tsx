@@ -12,9 +12,6 @@ import {
   FaceDetectorResult
 } from '@mediapipe/tasks-vision';
 
-// Se eliminan los imports de Firebase y bcrypt, ya que esa lógica ahora vive en la API.
-import { useTheme } from 'next-themes';
-
 interface StoredFormData {
   nombre?: string;
   apellido?: string;
@@ -52,7 +49,6 @@ const ACTIVE_LIVENESS_STATES: LivenessState[] = [
 export default function SelfiePage() {
   console.log("SelfiePage RENDERIZANDO INICIO - Timestamp:", Date.now());
   const router = useRouter();
-  const { resolvedTheme } = useTheme();
   const [formData, setFormData] = useState<StoredFormData | null>(null);
   const [rol, setRol] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -67,7 +63,6 @@ export default function SelfiePage() {
   const datosInicialesProcesadosRef = useRef(false);
   const [livenessStatus, setLivenessStatus] = useState<LivenessState>("INITIAL");
   const [attempts, setAttempts] = useState<number>(3);
-  // Se cambia el estado de la selfie a una ref para evitar re-renders innecesarios.
   const selfieImageDataUrlRef = useRef<string | null>(null);
   const initialFaceMetricsRef = useRef<{ noseX: number; faceWidth: number } | null>(null);
 
@@ -389,7 +384,7 @@ export default function SelfiePage() {
     }
   }, [livenessStatus]);
 
-  // CAMBIO PRINCIPAL: La lógica de registro ahora llama a la API.
+  // Lógica de registro ahora llama a la API (SIN CAMBIOS)
   const handleFinalizarRegistro = async (selfieData: string | null) => {
     console.log("SelfiePage: handleFinalizarRegistro - Iniciado.");
     if (!formData || !rol || !selfieData) {
@@ -403,7 +398,6 @@ export default function SelfiePage() {
     setUiMessage("Procesando tu registro de forma segura...");
 
     try {
-      // Se hace la llamada a la API segura que creamos.
       const response = await fetch('/api/auth/register', {
         method: 'POST',
         headers: {
@@ -419,17 +413,14 @@ export default function SelfiePage() {
       const result = await response.json();
 
       if (!response.ok) {
-        // Si la API devuelve un error, se lo mostramos al usuario.
         throw new Error(result.error || `Error del servidor: ${response.status}`);
       }
       
-      // Si la API devuelve éxito (status 201)
       setUiMessage("¡Registro exitoso! Redirigiendo...");
       setIsProcessingAction(false);
       setTimeout(() => router.push('/bienvenida'), 2000);
 
     } catch (err) {
-      // Se manejan errores de red o los errores lanzados desde la API.
       const errorMessage = err instanceof Error ? err.message : "Ocurrió un error inesperado.";
       console.error("SelfiePage: handleFinalizarRegistro - Error:", errorMessage);
       setError(errorMessage);
@@ -460,12 +451,12 @@ export default function SelfiePage() {
       context.setTransform(1, 0, 0, 1, 0, 0); 
       
       const imageDataUrl = canvas.toDataURL('image/jpeg', 0.9);
-      selfieImageDataUrlRef.current = imageDataUrl; // Se guarda la selfie en la ref.
+      selfieImageDataUrlRef.current = imageDataUrl;
       
       console.log("SelfiePage: handleCapturarSelfie - Selfie capturada.");
       setUiMessage("Selfie capturada. Finalizando registro...");
       
-      handleFinalizarRegistro(imageDataUrl); // Se llama a la función de registro.
+      handleFinalizarRegistro(imageDataUrl);
     } else {
       console.error("SelfiePage: handleCapturarSelfie - No se pudo obtener contexto 2D del canvas.");
       setError("No se pudo procesar la imagen de la selfie.");
@@ -474,7 +465,7 @@ export default function SelfiePage() {
     }
   };
 
-  // --- Lógica de Renderizado (SIN CAMBIOS FUNCIONALES, SOLO AJUSTES DE REF) ---
+  // Lógica de Renderizado (SIN CAMBIOS FUNCIONALES)
   const shouldDisplayCameraInterface = formData && rol && !selfieImageDataUrlRef.current &&
                                      (livenessStatus === "MODEL_LOADED" ||
                                       livenessStatus === "INITIALIZING_CAMERA" ||
@@ -487,7 +478,7 @@ export default function SelfiePage() {
 
   if ( (livenessStatus === "INITIAL" || livenessStatus === "LOADING_MODEL") || (isProcessingAction && selfieImageDataUrlRef.current) ) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-fondo text-texto p-4">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-fondo text-texto-principal p-4">
         <p className="animate-pulse text-lg">{uiMessage}</p>
       </div>
     );
@@ -495,7 +486,7 @@ export default function SelfiePage() {
 
   if (livenessStatus === "FAILED_ATTEMPT" && !error) {
       return (
-          <div className="flex flex-col items-center justify-center min-h-screen bg-fondo text-texto p-4">
+          <div className="flex flex-col items-center justify-center min-h-screen bg-fondo text-texto-principal p-4">
               <Logo />
               <p className="text-xl text-yellow-400 mb-4">Intento Fallido</p>
               <p className="mb-6 text-center text-lg">{uiMessage}</p>
@@ -524,7 +515,7 @@ export default function SelfiePage() {
   
   if (!formData || !rol) { 
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen bg-fondo text-texto p-4">
+      <div className="flex flex-col items-center justify-center min-h-screen bg-fondo text-texto-principal p-4">
         <p className="animate-pulse text-lg">{uiMessage || "Cargando datos del registro..."}</p>
       </div>
     );
@@ -532,74 +523,72 @@ export default function SelfiePage() {
 
   if (shouldDisplayCameraInterface) {
   
-
- return (
-  <div className="flex min-h-screen flex-col items-center justify-center bg-fondo text-texto px-2 py-6">
-
-    <img
-      src={resolvedTheme === 'dark' ? '/logo3.png' : '/logo2.png'}
-      alt="Isotipo CODYS"
-      className="mx-auto mb-6 w-36 md:w-44 object-contain"
-      width={128}
-      height={128}
-    />
-
-    <div className="
-      w-[90vw] sm:max-w-md md:max-w-xl
-      space-y-4 rounded-xl border border-borde-tarjeta
-      bg-tarjeta p-5 shadow-xl md:p-8
-    ">
-      <h1 className="text-center text-lg font-bold text-primario md:text-xl">
-        Verificación de Identidad
-      </h1>
-      <p className="text-center text-xs text-texto-secundario md:text-sm">
-        Intentos restantes: {attempts}
-      </p>
-      <p className="h-9 flex items-center justify-center text-center text-xs md:text-sm text-texto-secundario">
-        {uiMessage}
-      </p>
-      <div className="
-        relative mx-auto my-2 flex items-center justify-center
-        w-full pt-[75%]
-        rounded-lg overflow-hidden border-2 border-primario bg-gray-700
-      ">
-        <video
-          ref={videoRef}
-          playsInline
-          autoPlay
-          muted
-          className="absolute inset-0 h-full w-full object-cover transform scale-x-[-1]"
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-fondo text-texto-principal px-2 py-6">
+    
+        <img
+          src="/logo3.png" // Se usa directamente el logo del tema oscuro
+          alt="Isotipo CODYS"
+          className="mx-auto mb-6 w-36 md:w-44 object-contain"
+          width={128}
+          height={128}
         />
-        {livenessStatus === 'INITIALIZING_CAMERA' && !isCameraReady && (
-          <div className="absolute inset-0 flex items-center justify-center bg-gray-700/50">
-            <p className="animate-pulse text-white text-sm md:text-base">
-              Configurando cámara…
-            </p>
+    
+        <div className="
+          w-[90vw] sm:max-w-md md:max-w-xl
+          space-y-4 rounded-xl border border-borde-tarjeta
+          bg-tarjeta p-5 shadow-xl md:p-8
+        ">
+          <h1 className="text-center text-lg font-bold text-primario md:text-xl">
+            Verificación de Identidad
+          </h1>
+          <p className="text-center text-xs text-texto-secundario md:text-sm">
+            Intentos restantes: {attempts}
+          </p>
+          <p className="h-9 flex items-center justify-center text-center text-xs md:text-sm text-texto-secundario">
+            {uiMessage}
+          </p>
+          <div className="
+            relative mx-auto my-2 flex items-center justify-center
+            w-full pt-[75%]
+            rounded-lg overflow-hidden border-2 border-primario bg-gray-700
+          ">
+            <video
+              ref={videoRef}
+              playsInline
+              autoPlay
+              muted
+              className="absolute inset-0 h-full w-full object-cover transform scale-x-[-1]"
+            />
+            {livenessStatus === 'INITIALIZING_CAMERA' && !isCameraReady && (
+              <div className="absolute inset-0 flex items-center justify-center bg-gray-700/50">
+                <p className="animate-pulse text-white text-sm md:text-base">
+                  Configurando cámara…
+                </p>
+              </div>
+            )}
           </div>
-        )}
+    
+          <canvas ref={canvasRef} style={{ display: 'none' }} />
+    
+          {livenessStatus === 'SUCCESS' && (
+            <Button
+              onClick={handleCapturarSelfie}
+              disabled={isProcessingAction}
+              fullWidth
+              className="mt-2"
+            >
+              {isProcessingAction ? 'Procesando Selfie…' : 'Tomar Selfie y Continuar'}
+            </Button>
+          )}
+        </div>
       </div>
-
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
-
-      {livenessStatus === 'SUCCESS' && (
-        <Button
-          onClick={handleCapturarSelfie}
-          disabled={isProcessingAction}
-          fullWidth
-          className="mt-2"
-        >
-          {isProcessingAction ? 'Procesando Selfie…' : 'Tomar Selfie y Continuar'}
-        </Button>
-      )}
-    </div>
-  </div>
-);
-
+    );
   }
 
   // Fallback final.
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-fondo text-texto p-4">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-fondo text-texto-principal p-4">
       <p className="text-lg">{uiMessage || "Por favor, espera..."}</p>
     </div>
   );

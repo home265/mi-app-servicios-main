@@ -1,10 +1,11 @@
-/* ContactoPopup.tsx – Corregido para no crear notificaciones fantasma */
+/* ContactoPopup.tsx – Refactorizado para usar el componente Modal y estilos centralizados */
 import { useState } from 'react';
-import Button from '@/app/components/ui/Button';
-// Se elimina la importación de sendContactRequest que ya no se utiliza
 import { db } from '@/lib/firebase/config';
 import { doc, setDoc } from 'firebase/firestore';
-import { XMarkIcon } from '@heroicons/react/24/solid';
+import Modal from '@/app/components/common/Modal'; // Se importa el Modal genérico
+
+// Nota: Ya no se necesita XMarkIcon porque el Modal lo gestiona.
+// Nota: Ya no se necesita el componente Button de ui, se usarán botones estándar con clases.
 
 interface Props {
   userUid: string;
@@ -27,12 +28,10 @@ export default function ContactoPopup({
 }: Props) {
   const [loading, setLoading] = useState(false);
 
+  // La lógica interna del componente no se modifica, ya que funciona correctamente.
   async function handleClick(via: 'whatsapp' | 'call') {
     setLoading(true);
 
-    // Se elimina la llamada a sendContactRequest que generaba la notificación fantasma.
-
-    // 2. guarda primer clic en /contactPendings/
     const ref = doc(
       db,
       userCollection,
@@ -48,64 +47,52 @@ export default function ContactoPopup({
         providerName,
         via,
         firstClickTs: Date.now(),
-        originalNotifId: notifId, // <-- Guarda la ID de la notificación original
+        originalNotifId: notifId,
       },
       { merge: true },
     );
 
-    // 3. YA NO se elimina la notificación original de "job_accept" desde aquí.
-
-    // 4. abre medio real
     if (via === 'whatsapp') {
       window.open(`https://wa.me/${providerUid}`, '_blank');
     } else {
       window.location.href = `tel:${providerUid}`;
     }
     setLoading(false);
-    onClose(); // Llama a onClose para cerrar el popup después de la acción
+    onClose();
   }
 
+  // Se refactoriza el JSX para usar el componente Modal.
   return (
-    // Overlay para el popup
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 anim-fadeIn">
-      {/* Contenedor del Popup con estilos de tema */}
-      <div className="relative bg-gray-800 p-6 pt-10 rounded-xl shadow-xl max-w-xs w-full text-texto-principal border border-borde-tarjeta anim-zoomIn">
-        {/* Botón de Cierre */}
+    <Modal
+      isOpen={true}
+      onClose={onClose}
+      title={`Contactar a ${providerName}`}
+    >
+      <div className="flex flex-col gap-4 pt-2">
+        <p className="text-center text-sm text-texto-secundario mb-2">
+          ¿Cómo deseas ponerte en contacto?
+        </p>
+
+        {/* Botones de acción refactorizados. 
+          Se eliminan las clases con "!" y se usa la clase ".btn-primary" centralizada.
+          Se usa un <button> estándar para asegurar la aplicación directa de las clases globales.
+        */}
         <button
-          onClick={onClose}
-          className="absolute top-3 right-3 text-texto-secundario hover:text-texto-principal p-1 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
-          aria-label="Cerrar"
+          disabled={loading}
+          onClick={() => handleClick('whatsapp')}
+          className="btn-primary w-full"
         >
-          <XMarkIcon className="h-6 w-6" />
+          {loading ? 'Procesando...' : 'WhatsApp'}
         </button>
 
-        {/* Contenido del Popup */}
-        <div className="flex flex-col gap-4">
-          <p className="text-center text-lg font-semibold">
-            Contactar a <strong className="text-primario">{providerName}</strong>
-          </p>
-          <p className="text-center text-sm text-texto-secundario mb-2">
-            ¿Cómo deseas ponerte en contacto?
-          </p>
-          {/* --- BOTONES CORREGIDOS --- */}
-          <Button
-            fullWidth
-            disabled={loading}
-            onClick={() => handleClick('whatsapp')}
-            className="!bg-[var(--color-primario)] !text-[var(--color-fondo)] border-none !focus:shadow-none hover:!brightness-90"
-          >
-            WhatsApp
-          </Button>
-          <Button
-            fullWidth
-            disabled={loading}
-            onClick={() => handleClick('call')}
-            className="!bg-[var(--color-primario)] !text-[var(--color-fondo)] border-none !focus:shadow-none hover:!brightness-90"
-          >
-            Llamar por Teléfono
-          </Button>
-        </div>
+        <button
+          disabled={loading}
+          onClick={() => handleClick('call')}
+          className="btn-primary w-full"
+        >
+          {loading ? 'Procesando...' : 'Llamar por Teléfono'}
+        </button>
       </div>
-    </div>
+    </Modal>
   );
 }

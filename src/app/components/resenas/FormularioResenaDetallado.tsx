@@ -64,7 +64,7 @@ const FormularioResenaDetallado: React.FC<FormularioResenaDetalladoProps> = ({
   const isFormValid =
     criteriosAMostrar.every((c) => (ratings[c.id] ?? 0) > 0) && !isSubmitting;
 
-  // 4. LÓGICA DE ENVÍO ACTUALIZADA ---
+  // 4. LÓGICA DE ENVÍO (sin cambios) ---
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -89,16 +89,12 @@ const FormularioResenaDetallado: React.FC<FormularioResenaDetalladoProps> = ({
 
       // --- INICIO DE LA SECUENCIA DE OPERACIONES ---
 
-      // Paso A: Crea la reseña en la base de datos.
       await createReview(target, author, context, ratings, comment.trim());
 
-      // Paso B: Elimina la notificación "Calificar a..." que trajo al usuario a esta página.
       if (originalNotifId) {
         await removeNotification(author, originalNotifId);
       }
 
-      // Paso C: Envía una nueva notificación a la otra persona para que califique de vuelta.
-      // (Solo si se acaba de calificar a un usuario, para evitar el bucle).
       if (context === 'as_user') {
         await sendRatingRequest({
           to: [{ uid: target.uid, collection: target.collection }],
@@ -114,7 +110,6 @@ const FormularioResenaDetallado: React.FC<FormularioResenaDetalladoProps> = ({
       
       // --- FIN DE LA SECUENCIA ---
 
-      // Llama a onSubmitted solo después de que todo haya terminado con éxito.
       onSubmitted?.();
 
     } catch (err) {
@@ -125,7 +120,7 @@ const FormularioResenaDetallado: React.FC<FormularioResenaDetalladoProps> = ({
     }
   };
 
-  // --- JSX (sin cambios) ---
+  // --- JSX (Estilos actualizados) ---
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       <div className="space-y-6">
@@ -142,7 +137,7 @@ const FormularioResenaDetallado: React.FC<FormularioResenaDetalladoProps> = ({
       </div>
 
       <div>
-        <label htmlFor="comment" className="block mb-2 font-medium text-[var(--color-texto-principal)]">
+        <label htmlFor="comment" className="block mb-2 font-medium text-texto-principal">
           Comentario adicional (opcional)
         </label>
         <textarea
@@ -151,20 +146,20 @@ const FormularioResenaDetallado: React.FC<FormularioResenaDetalladoProps> = ({
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder="Describe tu experiencia..."
-          className="w-full p-3 rounded-lg bg-[var(--color-input)] border border-[var(--color-borde-input)] text-[var(--color-texto-principal)] focus:ring-2 focus:ring-[var(--color-resalte)] focus:outline-none transition"
+          className="w-full p-3 rounded-lg bg-fondo border border-borde-tarjeta text-texto-principal focus:ring-2 focus:ring-primario focus:outline-none transition"
         />
       </div>
 
-      {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+      {error && <p className="text-error text-sm text-center">{error}</p>}
 
       <Button
-  type="submit"
-  disabled={!isFormValid}
-  fullWidth
-  className="!bg-[var(--color-primario)] !text-[var(--color-fondo)] border-none !focus:shadow-none hover:!brightness-90"
->
-  {isSubmitting ? 'Enviando...' : 'Enviar Reseña'}
-</Button>
+        type="submit"
+        disabled={!isFormValid}
+        fullWidth
+        className="!bg-primario !text-fondo border-none !focus:shadow-none hover:!brightness-90"
+      >
+        {isSubmitting ? 'Enviando...' : 'Enviar Reseña'}
+      </Button>
     </form>
   );
 };

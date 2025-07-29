@@ -2,25 +2,21 @@
 'use client';
 
 import { motion } from 'framer-motion';
-import { ThemeProvider } from 'next-themes';
+// Se ha eliminado la importación de 'ThemeProvider' de 'next-themes'
 import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
 import { doc, getDoc, DocumentSnapshot } from 'firebase/firestore';
-// --- MODIFICACIÓN: Se importa la función 'toast' para usarla programáticamente ---
 import { Toaster, toast } from 'react-hot-toast';
 
 import { auth, db } from '@/lib/firebase/config';
 import { useUserStore, UserProfile } from '@/store/userStore';
 
-// --- INICIO: IMPORTACIONES PARA ONBOARDING ---
 import { useOnboarding } from '@/lib/hooks/useOnboarding';
 import OnboardingInstructions from '@/app/components/onboarding/OnboardingInstructions';
 import Modal from '@/app/components/common/Modal';
-// --- NUEVA IMPORTACIÓN ---
 import DesktopOnboardingToast from '@/app/components/onboarding/DesktopOnboardingToast';
-// --- FIN: IMPORTACIONES PARA ONBOARDING ---
 
 const USER_COLLECTIONS = ['usuarios_generales', 'prestadores', 'comercios'];
 
@@ -99,7 +95,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false);
   
   // --- INICIO: LÓGICA DE ONBOARDING CORREGIDA Y ACTUALIZADA ---
-  // Se renombra 'os' a 'platform' para coincidir con el hook actualizado y evitar el error.
   const { shouldShow, platform, handleOnboardingComplete } = useOnboarding();
   // --- FIN: LÓGICA DE ONBOARDING ---
 
@@ -108,7 +103,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
      ======================================================== */
   useEffect(() => {
     setMounted(true);
-    // ... (El resto de este useEffect no tiene cambios)
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         try {
@@ -164,10 +158,8 @@ export function Providers({ children }: { children: React.ReactNode }) {
 
   // --- INICIO: NUEVO useEffect PARA MANEJAR EL ONBOARDING ---
   useEffect(() => {
-    // Si no se debe mostrar, salir.
     if (!shouldShow) return;
 
-    // Lógica para mostrar el TOAST en navegadores de escritorio
     if (platform === 'desktop-chrome' || platform === 'desktop-edge' || platform === 'desktop-safari') {
       toast.custom(
         (t) => ( 
@@ -186,7 +178,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
         }
       );
     }
-    // El MODAL para móviles se maneja de forma declarativa en el JSX de abajo
   }, [shouldShow, platform, handleOnboardingComplete]);
   // --- FIN: NUEVO useEffect ---
   
@@ -211,13 +202,12 @@ export function Providers({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <>
       <Toaster />
       
       {children}
       
       {/* --- INICIO: RENDERIZADO CONDICIONAL DEL MODAL DE ONBOARDING PARA MÓVILES --- */}
-      {/* Solo se muestra el Modal si la plataforma es 'ios' o 'android' */}
       {shouldShow && (platform === 'ios' || platform === 'android') && (
         <Modal 
           isOpen={true} 
@@ -231,7 +221,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
         </Modal>
       )}
       {/* --- FIN: RENDERIZADO CONDICIONAL DEL MODAL --- */}
-
-    </ThemeProvider>
+    </>
   );
 }

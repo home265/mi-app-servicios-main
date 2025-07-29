@@ -19,7 +19,7 @@ const CriterioRating: React.FC<CriterioRatingProps> = ({
 
   return (
     <div>
-      <label className="block mb-2 font-medium text-[var(--color-texto-principal)]">
+      <label className="block mb-2 font-medium text-texto-principal">
         {label}
       </label>
       <div
@@ -35,7 +35,7 @@ const CriterioRating: React.FC<CriterioRatingProps> = ({
               onClick={() => onRatingChange(starIndex)}
               onMouseEnter={() => setHoverRating(starIndex)} // Muestra el hover al entrar
               className={`transition-colors duration-150 ${
-                isFilled ? 'text-yellow-400' : 'text-gray-400 hover:text-yellow-300'
+                isFilled ? 'text-primario' : 'text-texto-secundario opacity-50 hover:text-primario hover:opacity-75'
               }`}
             >
               <StarIcon className="h-8 w-8" />

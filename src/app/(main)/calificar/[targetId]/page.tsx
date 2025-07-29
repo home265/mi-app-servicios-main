@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { doc, getDoc, type DocumentData } from 'firebase/firestore';
 import { ChevronLeftIcon } from '@heroicons/react/24/outline';
-import { toast } from 'react-hot-toast'; // 1. Importar toast
+import { toast } from 'react-hot-toast';
 
 import { db } from '@/lib/firebase/config';
 import { useUserStore } from '@/store/userStore';
@@ -53,6 +53,7 @@ export default function CalificarPage() {
   const targetId = typeof params.targetId === 'string' ? params.targetId : '';
   const notifId = searchParams.get('notifId');
 
+  // Lógica de carga de datos (sin cambios)
   useEffect(() => {
     if (!targetId) {
       setError('No se ha especificado un usuario para calificar.');
@@ -97,11 +98,11 @@ export default function CalificarPage() {
 
   const renderContent = () => {
     if (isLoading) {
-      return <p className="text-center animate-pulse">Cargando datos del usuario...</p>;
+      return <p className="text-center animate-pulse text-texto-secundario">Cargando datos del usuario...</p>;
     }
 
     if (error) {
-      return <p className="text-center text-red-500">{error}</p>;
+      return <p className="text-center text-error">{error}</p>;
     }
 
     if (targetUser) {
@@ -109,7 +110,7 @@ export default function CalificarPage() {
         <>
           <div className="flex flex-col items-center gap-3 mb-8">
             <Avatar selfieUrl={targetUser.selfieURL} nombre={targetUser.nombre} size={80} />
-            <h2 className="text-xl font-semibold text-center">
+            <h2 className="text-xl font-semibold text-center text-texto-principal">
               Calificar a {targetUser.nombre}
             </h2>
           </div>
@@ -118,7 +119,6 @@ export default function CalificarPage() {
             target={targetUser}
             originalNotifId={notifId}
             onSubmitted={() => {
-              // 2. Reemplazar alert con toast.success
               toast.success('¡Gracias por tu reseña!');
               const homePage = actingAs === 'provider' ? '/trabajos' : '/bienvenida';
               router.push(homePage);
@@ -132,7 +132,7 @@ export default function CalificarPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[var(--color-fondo)] text-[var(--color-texto-principal)] p-4">
+    <div className="min-h-screen bg-fondo text-texto-principal p-4">
       <header className="relative flex items-center justify-center mb-6">
         <button
           onClick={handleGoBack}

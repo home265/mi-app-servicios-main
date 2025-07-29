@@ -1,29 +1,19 @@
 @import "tailwindcss";
 
-/* ---------- PALETA ---------- */
-
-/* --- MODO CLARO --- */
+/* ---------- PALETA ÚNICA DE LA APP ---------- */
+/* Se ha unificado la paleta utilizando los colores del modo oscuro. */
 :root {
-  --color-fondo:            #F9F3D9;
-  --color-primario:         #307268;  /* verde para botones en modo claro */
-  --color-secundario:       #EFC71D;
-  --color-texto-principal:  #2c4b46;
-  --color-texto-secundario: #6e8380;
-  --color-tarjeta:          #307268;
-  --color-error:            #D32F2F;
-  --color-borde-tarjeta:    #E2D2BF;
-}
-
-/* --- MODO OSCURO --- */
-.dark {
   --color-fondo:            #1a3b36;
-  --color-primario:         #EFC71D;  /* amarillo para botones en modo oscuro */
+  --color-primario:         #EFC71D;
   --color-secundario:       #E2D2BF;
   --color-texto-principal:  #F9F3D9;
   --color-texto-secundario: #BBC8CA;
   --color-tarjeta:          #254e48;
   --color-error:            #EF5350;
   --color-borde-tarjeta:    #307268;
+  --color-backdrop: rgba(15, 38, 35, 0.7); /* Aumentamos la 
+  opacidad de 0.5 a 0.7 */
+
 }
 
 /* ---------- BASE ---------- */
@@ -55,26 +45,76 @@ a:hover { text-decoration: underline; }
   padding: 1.5rem;
 }
 
-/* Botón primario: usa var(--color-primario) (verde en claro, amarillo en oscuro) */
+/* ---------- BOTONES ---------- */
+/* Estas son las nuevas definiciones centralizadas para los botones. */
+
+/* --- BOTÓN PRIMARIO (Aceptar, Ingresar, etc.) --- */
 .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  border-radius: 0.75rem;
+  border-radius: 0.5rem;
   font-weight: 500;
+  border: none;
   background-color: var(--color-primario);
-  color: #fff;
-  transition: background-color .15s, box-shadow .15s, transform .15s;
+  color: var(--color-fondo); /* Texto oscuro */
+  transition: background-color .15s, transform .15s;
 }
-.btn-primary:hover  { background-color: color-mix(in srgb, var(--color-primario) 90%, black); }
-.btn-primary:focus  { outline: none; box-shadow: 0 0 0 4px color-mix(in srgb, var(--color-primario) 30%, transparent); }
-.btn-primary:active { transform: scale(.97); }
 
-/* Aseguramos que el botón de LoginForm herede el color correcto en modo claro */
-.login-card button[type="submit"] {
-  background-color: var(--color-primario);
+.btn-primary:hover {
+  background-color: color-mix(in srgb, var(--color-primario) 90%, black);
+}
+
+.btn-primary:active {
+  transform: scale(.97);
+}
+
+.btn-primary:disabled {
+  background-color: color-mix(in srgb, var(--color-primario) 40%, var(--color-tarjeta));
+  color: color-mix(in srgb, var(--color-fondo) 50%, transparent);
+  cursor: not-allowed;
+}
+
+
+/* --- BOTÓN DESTRUCTIVO (Eliminar) --- */
+.btn-destructive {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  border: none;
+  background-color: var(--color-error);
+  color: white;
+  transition: background-color .15s, transform .15s;
+}
+
+.btn-destructive:hover {
+  background-color: color-mix(in srgb, var(--color-error) 85%, black);
+}
+
+.btn-destructive:active {
+  transform: scale(.97);
+}
+
+.btn-destructive:disabled {
+  background-color: color-mix(in srgb, var(--color-error) 40%, var(--color-tarjeta));
+  color: color-mix(in srgb, white 50%, transparent);
+  cursor: not-allowed;
+}
+
+/* --- NUEVA CLASE PARA MODAL ESMERILADO --- */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: var(--color-backdrop);
+  -webkit-backdrop-filter: blur(8px); /* Aumentamos el desenfoque de 4px a 8px */
+backdrop-filter: blur(8px);
+  transition: opacity 0.3s ease;
 }
 
 /* ---------- ANIMACIONES ---------- */
@@ -88,12 +128,3 @@ a:hover { text-decoration: underline; }
 .anim-zoomIn          { animation: zoomInAnimation         0.7s ease-out forwards; }
 .anim-slideInFromLeft { animation: slideInFromLeftAnimation 0.7s ease-out forwards; }
 .anim-pulse           { animation: pulseAnimation          0.8s ease-in-out; }
-
-/* === fuerza botón verde en la card de registro === */
-.registro-card button[type="submit"] {
-  background-color: var(--color-primario) !important;
-  color: #ffffff !important;
-}
-.registro-card button[type="submit"]:hover {
-  background-color: color-mix(in srgb, var(--color-primario) 90%, black) !important;
-}

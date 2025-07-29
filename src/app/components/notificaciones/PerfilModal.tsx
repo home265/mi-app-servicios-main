@@ -11,11 +11,10 @@ import Button from '@/app/components/ui/Button';
 import { ResenaList } from '@/app/components/resenas/ResenaList';
 
 import { getUserData } from '@/lib/firebase/authHelpers';
-// 1. CORRECCIÓN: Se importa 'ReviewData' en lugar de 'Review', que ya no existe.
 import { getReviews, type ReviewData } from '@/lib/services/reviewsService';
 
 /* ------------------------------------------------------------------ */
-// Tipos locales para mayor seguridad y claridad
+// Tipos locales (sin cambios)
 /* ------------------------------------------------------------------ */
 interface PerfilModalProps {
   target: { uid: string; collection: string };
@@ -23,7 +22,6 @@ interface PerfilModalProps {
   onClose: () => void;
 }
 
-// Tipo específico para los datos del perfil, evitando el uso de DocumentData genérico.
 interface UserProfileData extends DocumentData {
   nombre: string;
   apellido: string;
@@ -35,11 +33,11 @@ interface UserProfileData extends DocumentData {
   };
 }
 
-// --- Componente de Ayuda para mostrar estrellas (solo visual) ---
+// --- Componente de Ayuda para mostrar estrellas (Estilos actualizados) ---
 const StarRatingDisplay: React.FC<{ rating: number }> = ({ rating }) => (
     <div className="flex items-center gap-0.5">
         {[1, 2, 3, 4, 5].map(i => (
-            <StarIcon key={i} className={`h-4 w-4 ${rating >= i ? 'text-yellow-400' : 'text-gray-400'}`} />
+            <StarIcon key={i} className={`h-4 w-4 ${rating >= i ? 'text-primario' : 'text-texto-secundario opacity-50'}`} />
         ))}
     </div>
 );
@@ -53,13 +51,11 @@ const PerfilModal: React.FC<PerfilModalProps> = ({
   onClose,
 }) => {
   const [userData, setUserData] = useState<UserProfileData | null>(null);
-  // 2. CORRECCIÓN: El estado ahora almacena un array de 'ReviewData'.
   const [reviews, setReviews] = useState<ReviewData[]>([]);
-  
-  // --- NUEVOS ESTADOS para el promedio y la carga ---
   const [averageRating, setAverageRating] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Lógica de carga de datos (sin cambios)
   useEffect(() => {
     async function load() {
       setIsLoading(true);
@@ -73,12 +69,11 @@ const PerfilModal: React.FC<PerfilModalProps> = ({
         const fetchedReviews = await getReviews(target, context);
         setReviews(fetchedReviews);
 
-        // 3. NUEVO: Se calcula y guarda el promedio de las calificaciones.
         if (fetchedReviews.length > 0) {
           const total = fetchedReviews.reduce((sum, rev) => sum + rev.overallRating, 0);
           setAverageRating(total / fetchedReviews.length);
         } else {
-          setAverageRating(0); // Si no hay reseñas, el promedio es 0.
+          setAverageRating(0);
         }
 
       } catch (error) {
@@ -90,16 +85,14 @@ const PerfilModal: React.FC<PerfilModalProps> = ({
     load();
   }, [target, viewerMode]);
 
-  // Renderiza un estado de carga
   if (isLoading) {
     return (
       <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
-        <div className="text-white text-lg animate-pulse">Cargando perfil...</div>
+        <div className="text-texto-principal text-lg animate-pulse">Cargando perfil...</div>
       </div>
     );
   }
 
-  // Si no se encontraron datos de usuario, no se renderiza nada.
   if (!userData) return null;
 
   const fullName = `${userData.nombre} ${userData.apellido}`;
@@ -112,7 +105,7 @@ const PerfilModal: React.FC<PerfilModalProps> = ({
       <Card className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto space-y-4 p-5 anim-zoomIn">
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 p-1 rounded-full text-gray-400 hover:bg-white/10 hover:text-white transition-colors"
+          className="absolute top-2 right-2 p-1 rounded-full text-texto-secundario hover:bg-white/10 hover:text-texto-principal transition-colors"
         >
           <XMarkIcon className="h-6 w-6" />
         </button>
@@ -120,18 +113,17 @@ const PerfilModal: React.FC<PerfilModalProps> = ({
         <div className="flex items-center space-x-4">
           <Avatar selfieUrl={userData.selfieURL} nombre={fullName} size={80} />
           <div className="space-y-1">
-            <h2 className="text-xl font-semibold text-[var(--color-texto-principal)]">
+            <h2 className="text-xl font-semibold text-texto-principal">
               {fullName}
             </h2>
-            <p className="text-sm text-[var(--color-texto-secundario)]">
+            <p className="text-sm text-texto-secundario">
               {location}
             </p>
-            {/* 4. NUEVO: Muestra el promedio general de calificaciones */}
             {reviews.length > 0 && (
                 <div className="flex items-center gap-2 pt-1">
-                    <span className="font-bold text-lg text-yellow-400">{averageRating.toFixed(1)}</span>
+                    <span className="font-bold text-lg text-primario">{averageRating.toFixed(1)}</span>
                     <StarRatingDisplay rating={averageRating} />
-                    <span className="text-xs text-[var(--color-texto-secundario)]">
+                    <span className="text-xs text-texto-secundario">
                         ({reviews.length} {reviews.length === 1 ? 'reseña' : 'reseñas'})
                     </span>
                 </div>
@@ -140,13 +132,13 @@ const PerfilModal: React.FC<PerfilModalProps> = ({
         </div>
 
         {userData.descripcion && (
-          <p className="text-[var(--color-texto-principal)] pt-4 border-t border-white/10">
+          <p className="text-texto-principal pt-4 border-t border-borde-tarjeta">
             {userData.descripcion}
           </p>
         )}
 
-        <div className="pt-4 border-t border-white/10 space-y-3">
-          <h3 className="text-lg font-medium text-[var(--color-texto-principal)]">
+        <div className="pt-4 border-t border-borde-tarjeta space-y-3">
+          <h3 className="text-lg font-medium text-texto-principal">
             Reseñas Recibidas
           </h3>
           <ResenaList reviews={reviews} />

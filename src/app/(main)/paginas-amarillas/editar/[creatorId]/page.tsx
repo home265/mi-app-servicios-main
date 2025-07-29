@@ -46,7 +46,7 @@ export default async function EditarPaginaAmarillaPage({ params }: PageProps) {
   };
 
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-6 sm:py-8">
+    <div className="container mx-auto px-2 sm:px-4 py-6 sm:py-8 bg-fondo">
       <PaginaAmarillaEditarForm publicacionInicial={serializablePublicacion} />
     </div>
   );

@@ -34,28 +34,22 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
   error,
   onLocalidadSeleccionada,
 }) => {
-  // Se elimina el estado 'todasLasLocalidades' para no almacenar el JSON en el cliente.
   const [estadoCarga, setEstadoCarga] = useState<'idle' | 'loading' | 'error'>('idle');
   const [terminoBusqueda, setTerminoBusqueda] = useState('');
   const [sugerencias, setSugerencias] = useState<Localidad[]>([]);
   const [seleccionActual, setSeleccionActual] = useState<string>('');
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
 
-  // Se elimina el useEffect que cargaba el archivo completo al inicio.
-
-  // Este useEffect ahora maneja la búsqueda dinámica con "debounce".
+  // Lógica de búsqueda con debounce (sin cambios)
   useEffect(() => {
-    // Si el término de búsqueda es muy corto, no hacemos nada.
     if (terminoBusqueda.length < 2) {
       setSugerencias([]);
       setMostrarSugerencias(false);
       return;
     }
 
-    // "Debounce": Espera 300ms después de que el usuario deja de escribir.
     const temporizador = setTimeout(() => {
       setEstadoCarga('loading');
-      // Llama a la nueva API de búsqueda.
       fetch(`/api/buscar-localidades?query=${encodeURIComponent(terminoBusqueda)}`)
         .then((res) => {
           if (!res.ok) {
@@ -74,13 +68,10 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
         });
     }, 300);
 
-    // Limpia el temporizador si el usuario sigue escribiendo.
     return () => clearTimeout(temporizador);
   }, [terminoBusqueda]);
 
-  // Las siguientes funciones y lógicas de manejo de eventos se mantienen
-  // exactamente como las tenías, ya que están bien implementadas.
-
+  // Lógica de manejo de eventos (sin cambios)
   const handleSeleccion = (localidad: Localidad) => {
     const seleccion: LocalidadSeleccionada = {
       id: localidad.id,
@@ -137,15 +128,14 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
         }}
         placeholder={placeholderActual}
         autoComplete="off"
-        // El input ya no se deshabilita, solo cambia el placeholder para indicar el estado.
-        className="block w-full px-3 py-2 bg-fondo border border-gray-300 dark:border-gray-600 rounded-md shadow-sm placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-primario focus:border-primario sm:text-sm text-texto dark:text-texto-dark disabled:bg-gray-200 disabled:dark:bg-gray-700"
+        className="block w-full px-3 py-2 bg-fondo border border-borde-tarjeta rounded-md shadow-sm placeholder-texto-secundario focus:outline-none focus:ring-primario focus:border-primario sm:text-sm text-texto-principal"
       />
 
       {mostrarSugerencias && sugerencias.length > 0 && (
         <ul
           className="
             absolute w-full
-            bg-white dark:bg-zinc-800
+            bg-tarjeta
             border border-borde-tarjeta
             rounded-md shadow-xl
             mt-1 max-h-60 overflow-y-auto
@@ -156,7 +146,7 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
             <li
               key={loc.id}
               onClick={() => handleSeleccion(loc)}
-              className="px-3 py-2 hover:bg-secundario hover:text-white cursor-pointer text-sm text-texto dark:text-texto-dark dark:hover:text-secundario dark:hover:bg-opacity-80"
+              className="px-3 py-2 hover:bg-secundario hover:text-texto-principal cursor-pointer text-sm text-texto-secundario"
             >
               {loc.nombre}, {loc.provincia.nombre}
             </li>
