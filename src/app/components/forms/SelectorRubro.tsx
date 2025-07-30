@@ -3,6 +3,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import rubrosData from '@/data/rubro.json';
+import BotonDeSeleccion from '@/app/components/common/BotonDeSeleccion';
 
 // Las interfaces y tipos de datos se mantienen sin cambios.
 interface Subrubro {
@@ -46,7 +47,9 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
   const [openSubRubroPanel, setOpenSubRubroPanel] = useState(false);
   const [search, setSearch] = useState('');
   const [rubro, setRubro] = useState<Rubro | null>(null);
-  const [subrubro, setSubrubro] = useState<Subrubro | null>(initialValue?.subrubro || null);
+  const [subrubro, setSubrubro] = useState<Subrubro | null>(
+    initialValue?.subrubro || null
+  );
 
   // Lógica de filtrado y efectos (sin cambios)
   const rubrosFiltrados = useMemo(() => {
@@ -58,14 +61,16 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
 
   useEffect(() => {
     if (initialValue?.rubro) {
-      const found = todosLosRubros.find(r => r.nombre === initialValue.rubro);
+      const found = todosLosRubros.find((r) => r.nombre === initialValue.rubro);
       setRubro(found || null);
     }
   }, [initialValue]);
 
   useEffect(() => {
     if (rubro) {
-      const subrubroValido = rubro.subrubros.find(s => s.nombre === subrubro?.nombre);
+      const subrubroValido = rubro.subrubros.find(
+        (s) => s.nombre === subrubro?.nombre
+      );
       setSubrubro(subrubroValido || null);
     } else {
       setSubrubro(null);
@@ -117,26 +122,20 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
               placeholder="Buscar rubro…"
               className="w-full px-4 py-2 mb-2 rounded-md focus:outline-none transition bg-transparent text-texto-principal border border-borde-tarjeta"
             />
-            <div className="grid grid-cols-3 gap-2 max-h-60 overflow-auto">
-              {rubrosFiltrados.length ? (
+            <div className="grid grid-cols-3 gap-3 max-h-60 overflow-y-auto p-1">
+              {rubrosFiltrados.length > 0 ? (
                 rubrosFiltrados.map((r) => (
-                  <button
+                  <BotonDeSeleccion
                     key={r.nombre}
-                    type="button"
+                    label={r.nombre}
                     onClick={() => {
                       setRubro(r);
                       setSubrubro(null);
                       setOpenRubroPanel(false);
                       setSearch('');
                     }}
-                    className={`h-16 flex items-center justify-center px-3 py-2 text-sm rounded-md border transition w-full whitespace-normal break-words border-primario hover:bg-white/10 ${
-                      r.nombre === rubro?.nombre
-                        ? 'bg-primario text-fondo'
-                        : 'bg-transparent text-texto-principal'
-                    }`}
-                  >
-                    {r.nombre}
-                  </button>
+                    isSelected={r.nombre === rubro?.nombre}
+                  />
                 ))
               ) : (
                 <p className="col-span-3 text-center text-sm py-4 text-texto-secundario opacity-60">
@@ -167,23 +166,17 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
           </button>
 
           {openSubRubroPanel && (
-            <div className="grid grid-cols-3 gap-2 mt-2 max-h-60 overflow-auto">
+            <div className="grid grid-cols-3 gap-3 mt-2 max-h-60 overflow-y-auto p-1">
               {rubro.subrubros.map((s) => (
-                <button
+                <BotonDeSeleccion
                   key={s.nombre}
-                  type="button"
+                  label={s.nombre}
                   onClick={() => {
                     setSubrubro(s);
                     setOpenSubRubroPanel(false);
                   }}
-                  className={`h-16 flex items-center justify-center px-3 py-2 text-sm rounded-md border transition w-full whitespace-normal break-words border-primario hover:bg-white/10 ${
-                    s.nombre === subrubro?.nombre
-                      ? 'bg-primario text-fondo'
-                      : 'bg-transparent text-texto-principal'
-                  }`}
-                >
-                  {s.nombre}
-                </button>
+                  isSelected={s.nombre === subrubro?.nombre}
+                />
               ))}
             </div>
           )}

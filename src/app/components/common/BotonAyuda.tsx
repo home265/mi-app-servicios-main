@@ -51,18 +51,34 @@ export default function BotonAyuda({ children }: Props) {
     <>
       <button
         onClick={abrirModal}
+        aria-label="Mostrar ayuda"
         className="
           w-12 h-12 rounded-full
           flex items-center justify-center 
-          bg-tarjeta shadow-lg
-          transition-transform transform 
-          hover:scale-110 active:scale-95
-          focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primario
+          bg-tarjeta text-texto-principal
+          transition-all duration-150 ease-in-out
+
+          /* Efecto de Relieve (Outset) */
+          shadow-[4px_4px_8px_rgba(0,0,0,0.3),-2px_-2px_6px_rgba(255,255,255,0.05)]
+
+          /* Efecto al pasar el mouse (Hover) */
+          hover:brightness-110 hover:shadow-[5px_5px_10px_rgba(0,0,0,0.3),-3px_-3px_8px_rgba(255,255,255,0.05)]
+
+          /* Efecto al Presionar (Active) */
+          active:scale-95 active:brightness-90
+          active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.3)]
         "
-        aria-label="Mostrar ayuda"
       >
-        {/* Se usa un solo ícono, el correspondiente al tema oscuro */}
-        <Image src="/icons/foco-claro.jpg" alt="Ícono de ayuda" width={32} height={32} />
+        <div className="w-7 h-7 relative">
+          {/* ---- MODIFICADO ---- */}
+          <Image
+            src="/icons/foco-claro.jpg"
+            alt="Ícono de ayuda"
+            fill
+            sizes="32px"
+            className="object-contain"
+          />
+        </div>
       </button>
 
       {/* La lógica del portal para el modal se mantiene intacta */}

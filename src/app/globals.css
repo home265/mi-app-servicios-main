@@ -3,22 +3,32 @@
 /* ---------- PALETA ÚNICA DE LA APP ---------- */
 /* Se ha unificado la paleta utilizando los colores del modo oscuro. */
 :root {
-  --color-fondo:            #1a3b36;
-  --color-primario:         #EFC71D;
-  --color-secundario:       #E2D2BF;
-  --color-texto-principal:  #F9F3D9;
-  --color-texto-secundario: #BBC8CA;
-  --color-tarjeta:          #254e48;
-  --color-error:            #EF5350;
-  --color-borde-tarjeta:    #307268;
-  --color-backdrop: rgba(15, 38, 35, 0.7); /* Aumentamos la 
-  opacidad de 0.5 a 0.7 */
+  --color-fondo:            #1a3b36;   /* Verde oscuro serio y confiable */
+  --color-primario:         #EFC71D;   /* Amarillo dorado: destaca sin ser agresivo */
+  --color-secundario:       #D9CBB3;   /* Más sobrio que #E2D2BF */
+  --color-texto-principal:  #F9F3D9;   /* Ligero y cálido */
+  --color-texto-secundario: #A9B9BB;   /* Gris-azulado accesible */
+  --color-tarjeta:          #254e48;   /* Verde intermedio */
+  --color-borde-tarjeta:    #4F8077;   /* Más equilibrado que #307268 */
+  --color-error:            #EF5350;   /* Mantiene visibilidad para alertas */
+  --color-backdrop:         rgba(15, 38, 35, 0.7);
 
+  /* Acentos para botones */
+  --color-boton:            #EFC71D;   /* Usá el color primario: profesional y visible */
+  --color-boton-hover:      #d6b01b;   /* Una variante más oscura para feedback */
+  --color-boton-alt:        #4F8077;   /* Verde suave como alternativa */
+  --color-borde-boton:      #698E85;   /* Contorno que mantiene armonía */
 }
 
 /* ---------- BASE ---------- */
 body {
+  /* Tu nuevo fondo degradado, generado con la paleta de la app */
+  background: radial-gradient(at 56.73975673846064% 6.854841651830146%, hsla(170.9090909090909, 38.82352941176471%, 16.666666666666668%, 1) 0%, hsla(170.9090909090909, 38.82352941176471%, 16.666666666666668%, 0) 100%), radial-gradient(at 83.92338720437485% 0.10625177676969466%, hsla(171.21951219512195, 35.65217391304348%, 22.54901960784314%, 1) 0%, hsla(171.21951219512195, 35.65217391304348%, 22.54901960784314%, 0) 100%), radial-gradient(at 29.576584621503933% 66.12049636127414%, hsla(168.9795918367347, 23.67149758454106%, 40.588235294117645%, 1) 0%, hsla(168.9795918367347, 23.67149758454106%, 40.588235294117645%, 0) 100%), radial-gradient(at 11.840339178109904% 96.72998209105967%, hsla(50.86956521739132, 42.59259259259259%, 21.176470588235293%, 1) 0%, hsla(50.86956521739132, 42.59259259259259%, 21.176470588235293%, 0) 100%);
+  
+  /* Usamos tu color de fondo original como respaldo */
   background-color: var(--color-fondo);
+
+  /* Propiedades originales que se mantienen */
   color: var(--color-texto-principal);
   font-family: theme('fontFamily.sans');
   -webkit-font-smoothing: antialiased;

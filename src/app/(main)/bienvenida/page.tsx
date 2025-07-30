@@ -25,6 +25,8 @@ import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaAjustes from '@/app/components/ayuda-contenido/AyudaAjustes';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { getPaginaAmarilla } from '@/lib/services/paginasAmarillasService';
+import BotonDeAccion from '@/app/components/bienvenida/BotonDeAccion';
+
 
 const toTitleCase = (s: string) =>
   s
@@ -230,27 +232,63 @@ export default function BienvenidaPage() {
 
   const fullName = user?.nombre ? toTitleCase(user.nombre) : '';
 
-  return (
+  // --- PEGA ESTA FUNCIÓN JUSTO ANTES DE TU "return" ---
+  // Función auxiliar para navegar con un pequeño retraso y ver la animación.
+  const delayedNavigate = (path: string) => {
+    setTimeout(() => {
+      router.push(path);
+    }, 150); // 150ms para que la animación se complete
+  };
+  // ---------------------------------------------------
+
+ return (
     <div className="min-h-screen flex flex-col bg-fondo text-texto-principal">
       <div className="w-full max-w-4xl mx-auto px-5 flex flex-col flex-grow">
-        
-        <header className="flex items-center justify-between py-4 mt-6">
-          <div className="flex items-center gap-4">
+        <header 
+          // <-- MODIFICADO: Revertido a su estado original
+          className="flex items-center justify-between py-4 mt-6"
+        >
+          <button
+            onClick={() => delayedNavigate('/perfil')}
+            aria-label="Ver mi perfil"
+            className="
+              flex items-center gap-4 p-3 rounded-xl
+              bg-tarjeta text-texto-principal
+              transition-all duration-150 ease-in-out
+              shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]
+              hover:brightness-110 hover:shadow-[6px_6px_12px_rgba(0,0,0,0.4),-6px_-6px_12px_rgba(255,255,255,0.05)]
+              active:scale-[0.98] active:brightness-90
+              active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4)]
+            "
+          >
             <Avatar selfieUrl={user?.selfieURL ?? undefined} nombre={fullName} size={64} />
-            <div>
+            <div className="text-left">
               <p className="text-lg font-semibold">{`Hola, ${fullName}`}</p>
               <span className="text-xs uppercase opacity-70">{user?.rol}</span>
             </div>
-          </div>
+          </button>
 
-          <div className="flex items-center gap-4">
+          <div 
+            // <-- MODIFICADO: Clases responsivas añadidas a este div
+            className="flex flex-col md:flex-row items-center gap-3 md:gap-4"
+          >
             <BotonAyuda>
               <AyudaAjustes />
             </BotonAyuda>
 
             <button
-              onClick={() => router.push('/ajustes')}
-              className="rounded-full p-2.5 bg-tarjeta"
+              onClick={() => delayedNavigate('/ajustes')}
+              aria-label="Abrir menú de ajustes"
+              className="
+                  w-12 h-12 rounded-full
+                  flex items-center justify-center
+                  bg-tarjeta
+                  transition-all duration-150 ease-in-out
+                  shadow-[4px_4px_8px_rgba(0,0,0,0.3),-2px_-2px_6px_rgba(255,255,255,0.05)]
+                  hover:brightness-110 hover:shadow-[5px_5px_10px_rgba(0,0,0,0.3),-3px_-3px_8px_rgba(255,255,255,0.05)]
+                  active:scale-95 active:brightness-90
+                  active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.3)]
+              "
             >
               <Bars3BottomRightIcon className="w-7 h-7 text-primario" />
             </button>
@@ -258,7 +296,6 @@ export default function BienvenidaPage() {
         </header>
 
         <main className="flex-grow flex justify-center items-start pt-16 pb-6">
-          
           <div
             className="
               w-full grid gap-5 sm:gap-6
@@ -270,23 +307,27 @@ export default function BienvenidaPage() {
                 return <React.Fragment key={a.id}>{a.component}</React.Fragment>;
               }
               if (!a.Icon) return null;
+              
               const Icon = a.Icon;
+
               const click = () => {
                 if (a.id === 'trabajos' && actingAs === 'user') {
                   toggleMode();
-                  router.push('/trabajos');
+                  delayedNavigate('/trabajos');
                   return;
                 }
                 if (a.id.startsWith('modo')) {
                   toggleMode();
-                  router.push('/busqueda');
+                  delayedNavigate('/busqueda');
                   return;
                 }
                 if (a.id === 'editarPub') {
-                  router.push(`/paginas-amarillas/editar/${user?.uid}`);
+                  delayedNavigate(`/paginas-amarillas/editar/${user?.uid}`);
                   return;
                 }
-                if (a.path && a.path !== '#') router.push(a.path);
+                if (a.path && a.path !== '#') {
+                  delayedNavigate(a.path);
+                }
               };
 
               const unreadCount =
@@ -299,15 +340,11 @@ export default function BienvenidaPage() {
                   : 0;
 
               return (
-                <button
+                <BotonDeAccion
                   key={a.id}
+                  label={a.label}
+                  Icon={Icon}
                   onClick={click}
-                  className="
-                    relative flex flex-col items-center justify-center
-                    aspect-square w-full max-w-[180px]
-                    rounded-xl transition active:scale-95 shadow-md hover:shadow-lg
-                    bg-tarjeta border border-borde-tarjeta text-texto-principal
-                  "
                 >
                   {unreadCount > 0 && (
                     <div
@@ -320,10 +357,7 @@ export default function BienvenidaPage() {
                       {unreadCount}
                     </div>
                   )}
-
-                  <Icon className="w-10 h-10 mb-2 text-texto-principal" />
-                  <span className="text-sm text-center px-1">{a.label}</span>
-                </button>
+                </BotonDeAccion>
               );
             })}
           </div>

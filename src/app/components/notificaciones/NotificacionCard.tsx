@@ -1,3 +1,4 @@
+// NotificacionCard.tsx
 'use client';
 
 import { useState } from 'react';
@@ -14,7 +15,7 @@ import {
 } from '@/lib/services/notificationsService';
 import { Timestamp } from 'firebase/firestore';
 
-// --- Helper: Componente Spinner ---
+// --- Helper: Componente Spinner (sin cambios) ---
 const Spinner = () => (
   <svg
     className="animate-spin h-4 w-4 text-white"
@@ -119,7 +120,8 @@ export default function NotificacionCard({
 
  return (
     <article
-      className="relative flex gap-3 rounded-xl p-4 shadow-md w-full max-w-[380px] bg-tarjeta border border-borde-tarjeta"
+      className="relative flex gap-4 rounded-2xl p-4 w-full max-w-[380px] bg-tarjeta
+                 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]"
     >
       {dateStr && (
         <span className="absolute top-[10px] right-3 text-[10px] text-texto-secundario opacity-90">
@@ -127,22 +129,37 @@ export default function NotificacionCard({
         </span>
       )}
 
-      {/* Avatar */}
-      <div className="relative h-12 w-12 shrink-0 rounded-full overflow-hidden">
+      {/* --- Avatar Interactivo --- */}
+      <div className="relative h-12 w-12 shrink-0">
         {onAvatarClick ? (
           <button
             onClick={onAvatarClick}
-            className="relative w-full h-full focus:outline-none"
             disabled={isProcessing}
+            className="relative w-full h-full rounded-xl bg-tarjeta transition-all duration-150 ease-in-out
+                       shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]
+                       hover:brightness-110 hover:shadow-[6px_6px_12px_rgba(0,0,0,0.4),-6px_-6px_12px_rgba(255,255,255,0.05)]
+                       active:scale-95 active:brightness-90
+                       active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4)]
+                       focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-tarjeta focus:ring-primario"
           >
-            <Image src={avatar} alt="Avatar del remitente" fill sizes="48px" className="object-cover" />
+            <div className="relative w-full h-full rounded-full overflow-hidden">
+              <Image
+                src={avatar}
+                alt="Avatar del remitente"
+                fill
+                sizes="48px"
+                className="object-cover"
+              />
+            </div>
           </button>
         ) : (
-          <Image src={avatar} alt="Avatar del remitente" fill sizes="48px" className="object-cover" />
+          <div className="relative w-full h-full rounded-full overflow-hidden">
+            <Image src={avatar} alt="Avatar del remitente" fill sizes="48px" className="object-cover" />
+          </div>
         )}
       </div>
 
-      {/* Texto y Acciones */}
+      {/* Texto y Acciones (sin cambios en la lógica) */}
       <div className="flex-1 min-w-0">
         <p className="text-[15px] font-semibold leading-none mb-[2px] text-texto-principal">
           {senderName}
@@ -156,7 +173,7 @@ export default function NotificacionCard({
               <button
                 onClick={() => setExpanded(!expanded)}
                 disabled={isProcessing}
-                className="inline-flex items-center gap-[1px] text-[11px] font-medium ml-[2px] text-texto-principal"
+                className="inline-flex items-center gap-[1px] text-[11px] font-medium ml-[2px] text-texto-principal hover:text-primario transition"
               >
                 {expanded ? (
                   <>ver menos <ChevronUpIcon className="w-3 h-3" /></>
@@ -195,4 +212,5 @@ export default function NotificacionCard({
       </div>
     </article>
   );
+
 }

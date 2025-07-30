@@ -11,46 +11,68 @@ import {
   BellOff,
   AlertTriangle,
   ChevronLeftIcon,
-  ChevronRightIcon,
   LogOut,
   Trash2,
   BellRing,
   Loader2,
+  type LucideProps,
 } from 'lucide-react';
 
 import Avatar from '@/app/components/common/Avatar';
 import Modal from '@/app/components/common/Modal';
 
-const ActionRow: React.FC<{
+// --- Nuevo Componente de Botón para Ajustes ---
+// Este componente encapsula el estilo visual de "relieve" solicitado.
+interface BotonDeAjusteProps {
+  label: string;
+  Icon: React.ComponentType<LucideProps>;
   onClick: () => void;
-  title: string;
-  description: string;
-  icon: React.ReactNode;
   isLoading?: boolean;
   disabled?: boolean;
   variant?: 'default' | 'danger';
-}> = ({ onClick, title, description, icon, isLoading = false, disabled = false, variant = 'default' }) => {
-  const textColor = variant === 'danger' ? 'text-error' : 'text-texto-principal';
+}
+
+const BotonDeAjuste: React.FC<BotonDeAjusteProps> = ({
+  label,
+  Icon,
+  onClick,
+  isLoading = false,
+  disabled = false,
+  variant = 'default',
+}) => {
+  const labelColor = variant === 'danger' ? 'text-error' : 'text-texto-principal';
   const iconColor = variant === 'danger' ? 'text-error' : 'text-primario';
 
   return (
     <button
       onClick={onClick}
       disabled={disabled || isLoading}
-      className="w-full text-left p-3 flex items-center gap-4 rounded-lg hover:bg-white/5 transition-colors duration-150 disabled:opacity-50 disabled:pointer-events-none group"
+      className={`
+        relative flex flex-col items-center justify-center
+        aspect-square w-full max-w-[160px] min-h-[120px] p-4
+        rounded-xl
+        bg-tarjeta
+        transition-all duration-150 ease-in-out
+        disabled:opacity-60 disabled:pointer-events-none
+
+        /* --- Efecto de Relieve (Outset) --- */
+        shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]
+
+        /* --- Efecto Hover y Focus --- */
+        hover:brightness-110 hover:shadow-[6px_6px_12px_rgba(0,0,0,0.4),-6px_-6px_12px_rgba(255,255,255,0.05)]
+        focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-fondo focus:ring-primario
+
+        /* --- Efecto al Presionar (Active) --- */
+        active:scale-95 active:brightness-90
+        active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4)]
+      `}
     >
-      <div className={`flex-shrink-0 ${iconColor}`}>{icon}</div>
-      <div className="flex-grow">
-        <p className={`font-medium ${textColor}`}>{title}</p>
-        <p className="text-xs text-texto-secundario">{description}</p>
-      </div>
-      <div className="flex-shrink-0">
-        {isLoading ? (
-          <Loader2 className="h-5 w-5 animate-spin text-texto-secundario" />
-        ) : (
-          <ChevronRightIcon className="h-5 w-5 text-texto-secundario transition-transform duration-200 group-hover:translate-x-1" />
-        )}
-      </div>
+      {isLoading ? (
+        <Loader2 className="w-8 h-8 mb-2 animate-spin text-texto-secundario" />
+      ) : (
+        <Icon className={`w-8 h-8 mb-2 ${iconColor}`} />
+      )}
+      <span className={`text-sm text-center font-medium ${labelColor}`}>{label}</span>
     </button>
   );
 };
@@ -222,70 +244,66 @@ export default function AjustesPage() {
         </div>
       </header>
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         
-        <div className="p-4 bg-tarjeta rounded-lg shadow space-y-3">
-          <h2 className="text-lg font-semibold text-texto-principal border-b border-borde-tarjeta pb-2 mb-2">
+        <div className="p-4 bg-tarjeta rounded-lg shadow-lg">
+          <h2 className="text-lg font-semibold text-texto-principal border-b border-borde-tarjeta pb-3 mb-4">
             Notificaciones Push
           </h2>
           {typeof window !== 'undefined' && 'Notification' in window && 'serviceWorker' in navigator ? (
-            <>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 justify-items-center">
               {notificationStatus === 'granted' && fcmToken && (
-                <ActionRow
+                <BotonDeAjuste
                   onClick={() => setIsDisableNotificationsModalOpen(true)}
                   isLoading={isNotificationLoading}
-                  icon={<BellOff size={22} />}
-                  title="Desactivar Notificaciones Push"
-                  description="Dejarás de recibir alertas en este dispositivo."
+                  Icon={BellOff}
+                  label="Desactivar"
                   variant="danger"
                 />
               )}
 
               {(notificationStatus === 'default' || (notificationStatus === 'granted' && !fcmToken)) && (
-                <ActionRow
+                <BotonDeAjuste
                   onClick={handleRequestNotificationPermission}
                   isLoading={isNotificationLoading}
-                  icon={<BellRing size={22} />}
-                  title="Activar Notificaciones Push"
-                  description="Recibe alertas importantes incluso cuando la app está cerrada."
+                  Icon={BellRing}
+                  label="Activar"
                 />
               )}
               
               {notificationStatus === 'denied' && (
-                <div className="flex items-center space-x-2 p-3 bg-orange-900/30 rounded-md text-sm text-orange-300">
-                  <BellOff className="h-5 w-5 text-orange-400" />
-                  <p>Has bloqueado las notificaciones. Debes activarlas en los ajustes de tu navegador.</p>
+                <div className="col-span-full flex items-center space-x-3 p-3 bg-orange-900/30 rounded-md text-sm text-orange-300">
+                  <BellOff className="h-6 w-6 text-orange-400 flex-shrink-0" />
+                  <p>Has bloqueado las notificaciones. Debes activarlas en los ajustes de tu navegador para usar esta función.</p>
                 </div>
               )}
-            </>
+            </div>
           ) : (
-            <div className="flex items-center space-x-2 p-3 bg-yellow-900/30 rounded-md text-sm text-yellow-300">
-              <AlertTriangle className="h-5 w-5 text-yellow-400" />
+            <div className="flex items-center space-x-3 p-3 bg-yellow-900/30 rounded-md text-sm text-yellow-300">
+              <AlertTriangle className="h-6 w-6 text-yellow-400 flex-shrink-0" />
               <p>Tu navegador no es compatible con las notificaciones push.</p>
             </div>
           )}
         </div>
 
-        <div className="bg-tarjeta rounded-lg shadow">
-          <h2 className="text-lg font-semibold text-texto-principal border-b border-borde-tarjeta pb-2 mb-2 p-4">
+        <div className="p-4 bg-tarjeta rounded-lg shadow-lg">
+          <h2 className="text-lg font-semibold text-texto-principal border-b border-borde-tarjeta pb-3 mb-4">
             Acciones de la Cuenta
           </h2>
-          <div className="px-1 pb-1">
-            <ActionRow
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 justify-items-center">
+            <BotonDeAjuste
               onClick={() => setIsLogoutModalOpen(true)}
               isLoading={isLoadingLogout}
               disabled={isLoadingDelete}
-              icon={<LogOut size={22} />}
-              title="Cerrar Sesión"
-              description="Saldrás de tu cuenta en este dispositivo."
+              Icon={LogOut}
+              label="Cerrar Sesión"
             />
-            <ActionRow
+            <BotonDeAjuste
               onClick={openDeleteModal}
               isLoading={isLoadingDelete}
               disabled={isLoadingLogout}
-              icon={<Trash2 size={22} />}
-              title="Dar de baja mi cuenta"
-              description="¡Advertencia! Esta acción es permanente."
+              Icon={Trash2}
+              label="Eliminar Cuenta"
               variant="danger"
             />
           </div>
@@ -302,10 +320,11 @@ export default function AjustesPage() {
       <button
         onClick={() => router.back()}
         aria-label="Volver a la página anterior"
-        className="fixed bottom-6 right-4 z-40 h-14 w-14 rounded-full shadow-lg flex items-center justify-center transition active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primario"
-        style={{ backgroundColor: 'var(--color-tarjeta)', border: '1px solid var(--color-borde-tarjeta)' }}
+        className="fixed bottom-6 right-4 z-40 h-14 w-14 rounded-full flex items-center justify-center transition active:scale-95 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primario
+                   bg-tarjeta shadow-[4px_4px_8px_rgba(0,0,0,0.3),-2px_-2px_6px_rgba(255,255,255,0.05)]
+                   hover:brightness-110 active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.3)]"
       >
-        <ChevronLeftIcon className="h-7 w-7" style={{ color: 'var(--color-primario)' }} />
+        <ChevronLeftIcon className="h-7 w-7 text-primario" />
       </button>
 
       <Modal

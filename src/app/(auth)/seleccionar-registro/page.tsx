@@ -49,7 +49,6 @@ export default function SeleccionarRegistroPage() {
           />
         </div>
         
-        {/* Se eliminaron las clases dark:* del contenedor */}
         <div
           className={`
             w-full max-w-md space-y-6
@@ -64,7 +63,8 @@ export default function SeleccionarRegistroPage() {
           <div className="grid gap-4">
             <Link
               href={acceptedTerms ? "/registro/usuario" : "#"}
-              className={!acceptedTerms ? "opacity-50 cursor-not-allowed" : ""}
+              // <-- MODIFICADO
+              className={`group ${!acceptedTerms ? "opacity-50 cursor-not-allowed" : ""}`}
               onClick={handleRoleClick}
               aria-disabled={!acceptedTerms}
             >
@@ -72,7 +72,8 @@ export default function SeleccionarRegistroPage() {
             </Link>
             <Link
               href={acceptedTerms ? "/registro/prestador" : "#"}
-              className={!acceptedTerms ? "opacity-50 cursor-not-allowed" : ""}
+              // <-- MODIFICADO
+              className={`group ${!acceptedTerms ? "opacity-50 cursor-not-allowed" : ""}`}
               onClick={handleRoleClick}
               aria-disabled={!acceptedTerms}
             >
@@ -80,7 +81,8 @@ export default function SeleccionarRegistroPage() {
             </Link>
             <Link
               href={acceptedTerms ? "/registro/comercio" : "#"}
-              className={!acceptedTerms ? "opacity-50 cursor-not-allowed" : ""}
+              // <-- MODIFICADO
+              className={`group ${!acceptedTerms ? "opacity-50 cursor-not-allowed" : ""}`}
               onClick={handleRoleClick}
               aria-disabled={!acceptedTerms}
             >
@@ -90,7 +92,6 @@ export default function SeleccionarRegistroPage() {
 
           <div className="border-t border-borde-tarjeta pt-4">
               <div className="flex items-center justify-center space-x-3">
-                  {/* Checkbox estilizado para ser coherente con el tema */}
                   <input
                       type="checkbox"
                       id="terms"
@@ -98,7 +99,6 @@ export default function SeleccionarRegistroPage() {
                       onChange={(e) => setAcceptedTerms(e.target.checked)}
                       className="h-5 w-5 rounded-sm border-borde-tarjeta bg-transparent text-primario focus:ring-2 focus:ring-primario focus:ring-offset-fondo"
                   />
-                  {/* Label estilizado para ser coherente con el tema */}
                   <label htmlFor="terms" className="text-sm font-light text-texto-secundario">
                       Acepto los{' '}
                       <Link href="/terminos-y-condiciones" className="underline hover:text-primario" target="_blank" rel="noopener noreferrer">
@@ -114,7 +114,6 @@ export default function SeleccionarRegistroPage() {
 
           <p className="text-center text-sm">
             ¿Ya tienes cuenta?{' '}
-            {/* Se eliminó la clase dark:* del enlace */}
             <Link
               href="/login"
               className="font-medium text-secundario hover:underline"
