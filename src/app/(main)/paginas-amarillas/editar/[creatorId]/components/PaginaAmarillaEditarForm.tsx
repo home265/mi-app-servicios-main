@@ -19,6 +19,7 @@ import { useUserStore, UserProfile } from '@/store/userStore';
 // UI Components
 import Input from '@/app/components/ui/Input';
 import Textarea from '@/app/components/ui/Textarea';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Button from '@/app/components/ui/Button';
 import Checkbox from '@/app/components/ui/Checkbox';
 import Avatar from '@/app/components/common/Avatar';
@@ -318,23 +319,22 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
     <div className="flex flex-col lg:flex-row gap-8 p-4 md:p-6 pb-24 lg:pb-6">
       <div className="lg:w-2/3 xl:w-3/5 space-y-6">
         <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-texto-principal text-center">
+            Editar Publicación en Páginas Amarillas
+          </h1>
           <div>
             <BotonAyuda>
               <AyudaEditarPublicacionPA />
             </BotonAyuda>
           </div>
-          <h1 className="text-2xl font-bold text-texto-principal text-center">
-            Editar Publicación en Páginas Amarillas
-          </h1>
-          <div className="w-12 h-12"></div>
         </div>
         
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <section>
-            <h2 className="text-lg font-semibold text-texto-principal mb-2">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 mt-4">
+          <section className="p-4 rounded-2xl bg-tarjeta shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]">
+            <h2 className="text-lg font-semibold text-texto-principal mb-3 pb-3 border-b border-borde-tarjeta">
               {creatorRole === 'comercio' ? 'Logo del Negocio' : 'Foto de Perfil'}
             </h2>
-            <div className="flex flex-col sm:flex-row items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
               <Avatar selfieUrl={previewImage ?? undefined} nombre={watch('nombrePublico')} size={100} />
               <div className="flex-grow">
                 {creatorRole === 'comercio' ? (
@@ -347,7 +347,7 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
                         </label>
                         <input
                           id="imagenFile" type="file" accept="image/jpeg,image/png,image/webp"
-                          className="block w-full text-sm text-texto-secundario file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primario/10 file:text-primario hover:file:bg-primario/20"
+                          className="block w-full text-sm text-texto-secundario file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primario/20 file:text-primario hover:file:bg-primario/30 cursor-pointer"
                           onChange={(e) => {
                             const file = e.target.files?.[0];
                             field.onChange(file);
@@ -362,7 +362,7 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
                         />
                         {fieldState.error && <p className="text-sm text-error mt-1">{fieldState.error.message}</p>}
                         {previewImage && (
-                          <button type="button" className="mt-2 text-xs text-error" onClick={() => {
+                          <button type="button" className="mt-2 text-xs text-error hover:underline" onClick={() => {
                             setValue('imagenFile', undefined, { shouldDirty: true });
                             setPreviewImage(null);
                             field.onChange(null);
@@ -374,7 +374,7 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
                     )}
                   />
                 ) : (
-                  <div className="text-sm text-texto-secundario p-3 bg-tarjeta rounded-md border border-borde-tarjeta">
+                  <div className="text-sm text-texto-secundario p-3 bg-fondo rounded-lg border border-borde-tarjeta">
                     <p>Tu foto de perfil se usa como imagen de portada y se actualiza desde tu perfil de usuario.</p>
                   </div>
                 )}
@@ -382,17 +382,19 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
             </div>
           </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-texto-principal mb-2">Información Principal</h2>
-            <Controller name="nombrePublico" control={control} render={({ field, fieldState }) => (<Input id="nombrePublico" label={creatorRole === 'comercio' ? 'Nombre Público del Comercio*' : 'Tu Nombre Público*'} {...field} value={field.value ?? ''} disabled={creatorRole === 'prestador'} error={fieldState.error?.message} />)} />
-            <Controller name="tituloCard" control={control} render={({ field, fieldState }) => (<Input id="tituloCard" label="Título para la Tarjeta (Opcional)" {...field} value={field.value ?? ''} error={fieldState.error?.message} />)} />
-            <Controller name="subtituloCard" control={control} render={({ field, fieldState }) => (<Input id="subtituloCard" label="Subtítulo para la Tarjeta (Opcional)" {...field} value={field.value ?? ''} error={fieldState.error?.message} />)} />
-            <Controller name="descripcion" control={control} render={({ field, fieldState }) => (<Textarea id="descripcion" spellCheck="true" label="Descripción (Párrafo)" rows={4} {...field} value={field.value ?? ''} error={fieldState.error?.message} />)} />
+          <section className="p-4 rounded-2xl bg-tarjeta shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]">
+            <h2 className="text-lg font-semibold text-texto-principal mb-3 pb-3 border-b border-borde-tarjeta">Información Principal</h2>
+            <div className="pt-2 space-y-4">
+              <Controller name="nombrePublico" control={control} render={({ field, fieldState }) => (<Input id="nombrePublico" label={creatorRole === 'comercio' ? 'Nombre Público del Comercio*' : 'Tu Nombre Público*'} {...field} value={field.value ?? ''} disabled={creatorRole === 'prestador'} error={fieldState.error?.message} />)} />
+              <Controller name="tituloCard" control={control} render={({ field, fieldState }) => (<Input id="tituloCard" label="Título para la Tarjeta (Opcional)" {...field} value={field.value ?? ''} error={fieldState.error?.message} />)} />
+              <Controller name="subtituloCard" control={control} render={({ field, fieldState }) => (<Input id="subtituloCard" label="Subtítulo para la Tarjeta (Opcional)" {...field} value={field.value ?? ''} error={fieldState.error?.message} />)} />
+              <Controller name="descripcion" control={control} render={({ field, fieldState }) => (<Textarea id="descripcion" spellCheck="true" label="Descripción (Párrafo)" rows={4} {...field} value={field.value ?? ''} error={fieldState.error?.message} />)} />
+            </div>
           </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-texto-principal mb-2">Información de Contacto</h2>
-            <div className="grid md:grid-cols-2 gap-x-4 gap-y-0">
+          <section className="p-4 rounded-2xl bg-tarjeta shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]">
+            <h2 className="text-lg font-semibold text-texto-principal mb-3 pb-3 border-b border-borde-tarjeta">Información de Contacto</h2>
+            <div className="grid md:grid-cols-2 gap-x-4 gap-y-0 pt-2">
               <Controller
                 name="telefonoContacto" control={control}
                 render={({ field, fieldState }) => (
@@ -421,63 +423,64 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
             </div>
           </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-texto-principal mb-2">Ubicación (Información Fija)</h2>
-            <Controller name="direccionVisible" control={control} render={({ field, fieldState }) => (<Input id="direccionVisible" label="Dirección Pública (Opcional)" {...field} value={field.value ?? ''} error={fieldState.error?.message} />)}/>
-            <div className="mt-2 space-y-1 text-sm text-texto-secundario bg-tarjeta p-3 rounded-md border border-borde-tarjeta">
-              <p><strong>Provincia:</strong> {publicacionInicial.provincia}</p>
-              <p><strong>Localidad:</strong> {publicacionInicial.localidad}</p>
-              {creatorRole === 'comercio' && (
-                <>
-                  <p><strong>Rubro:</strong> {publicacionInicial.rubro ?? 'No especificado'}</p>
-                  {publicacionInicial.subRubro && (<p><strong>Sub-Rubro:</strong> {publicacionInicial.subRubro}</p>)}
-                </>
-              )}
-              {creatorRole === 'prestador' && (
-                <>
-                  <p><strong>Categoría:</strong> {publicacionInicial.categoria ?? 'No especificada'}</p>
-                  {publicacionInicial.subCategoria && (<p><strong>Sub-Categoría:</strong> {publicacionInicial.subCategoria}</p>)}
-                </>
-              )}
+          <section className="p-4 rounded-2xl bg-tarjeta shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]">
+            <h2 className="text-lg font-semibold text-texto-principal mb-3 pb-3 border-b border-borde-tarjeta">Ubicación (Información Fija)</h2>
+            <div className="pt-2">
+              <Controller name="direccionVisible" control={control} render={({ field, fieldState }) => (<Input id="direccionVisible" label="Dirección Pública (Opcional)" {...field} value={field.value ?? ''} error={fieldState.error?.message} />)}/>
+              <div className="mt-4 space-y-1 text-sm text-texto-secundario bg-fondo p-3 rounded-lg border border-borde-tarjeta">
+                <p><strong>Provincia:</strong> {publicacionInicial.provincia}</p>
+                <p><strong>Localidad:</strong> {publicacionInicial.localidad}</p>
+                {creatorRole === 'comercio' && (
+                  <>
+                    <p><strong>Rubro:</strong> {publicacionInicial.rubro ?? 'No especificado'}</p>
+                    {publicacionInicial.subRubro && (<p><strong>Sub-Rubro:</strong> {publicacionInicial.subRubro}</p>)}
+                  </>
+                )}
+                {creatorRole === 'prestador' && (
+                  <>
+                    <p><strong>Categoría:</strong> {publicacionInicial.categoria ?? 'No especificada'}</p>
+                    {publicacionInicial.subCategoria && (<p><strong>Sub-Categoría:</strong> {publicacionInicial.subCategoria}</p>)}
+                  </>
+                )}
+              </div>
             </div>
           </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-texto-principal mb-2">Horarios de Atención</h2>
-            <Controller
-              name="horarios" control={control}
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              render={({ field, fieldState }) => (
-                <SelectorHorariosAtencion
-                  horariosIniciales={field.value ?? undefined}
-                  onChange={field.onChange}
-                />
-              )}
-            />
-            {errors.horarios && (
-              <p className="text-sm text-error mt-1 mb-3">
-                {typeof errors.horarios.message === 'string' ? errors.horarios.message : 'Error en horarios.'}
-              </p>
+          <Controller
+            name="horarios" control={control}
+            render={({ field }) => (
+              <SelectorHorariosAtencion
+                horariosIniciales={field.value ?? undefined}
+                onChange={field.onChange}
+              />
             )}
-          </section>
+          />
+          {errors.horarios && (
+            <p className="text-sm text-error mt-1 mb-3">
+              {typeof errors.horarios.message === 'string' ? errors.horarios.message : 'Error en horarios.'}
+            </p>
+          )}
 
           {creatorRole === 'comercio' && (
-            <section>
-              <h2 className="text-lg font-semibold text-texto-principal mb-2">Otros Detalles</h2>
-              <Controller name="realizaEnvios" control={control} render={({ field }) => (<Checkbox id="realizaEnvios" label="¿Realizas envíos?" checked={field.value ?? false} onCheckedChange={field.onChange} containerClassName="mb-4" />)} />
+            <section className="p-4 rounded-2xl bg-tarjeta shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]">
+              <h2 className="text-lg font-semibold text-texto-principal mb-3 pb-3 border-b border-borde-tarjeta">Otros Detalles</h2>
+              <div className="pt-2">
+                <Controller name="realizaEnvios" control={control} render={({ field }) => (<Checkbox id="realizaEnvios" label="¿Realizas envíos?" checked={field.value ?? false} onCheckedChange={field.onChange} containerClassName="mb-4" />)} />
+              </div>
             </section>
           )}
 
           {apiError && <p className="text-sm text-error bg-error/10 p-3 rounded-md">{apiError}</p>}
-          <Button
-            type="submit"
-            isLoading={isLoading}
-            disabled={isLoading || !isDirty}
-            fullWidth
-            className="py-3 !bg-primario !text-fondo !focus:shadow-none hover:!brightness-90"
-          >
-            {isLoading ? 'Actualizando Publicación...' : 'Guardar Cambios'}
-          </Button>
+          
+          <div className="flex justify-center pt-4">
+            <button
+              type="submit"
+              disabled={isLoading || !isDirty}
+              className="btn-primary"
+            >
+              {isLoading ? 'Actualizando Publicación...' : 'Guardar Cambios'}
+            </button>
+          </div>
         </form>
       </div>
       <div className="lg:w-1/3 xl:w-2/5 mt-8 lg:mt-0">

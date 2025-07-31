@@ -4,7 +4,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ConfiguracionDia, RangoHorario, EstadoHorarioDia } from '@/types/horarios';
 import { XCircleIcon, PlusCircleIcon, ChevronDownIcon } from '@heroicons/react/24/outline';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Button from '../ui/Button';
+import BotonDeSeleccion from '../common/BotonDeSeleccion';
 
 interface EditorDiaHorarioProps {
   configDia: ConfiguracionDia;
@@ -89,26 +91,31 @@ const EditorDiaHorario: React.FC<EditorDiaHorarioProps> = ({
         <span className="font-medium w-28 shrink-0 text-texto-principal">{diaNombre}</span>
         
         <div className="relative w-full sm:w-auto" ref={dropdownRef}>
+          {/* --- DESPLEGABLE DE ESTADO 3D --- */}
           <button
             type="button"
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
             disabled={globalmenteDeshabilitado}
-            className="flex items-center justify-between w-full rounded-md border border-borde-tarjeta shadow-sm bg-fondo text-texto-principal px-3 py-2 text-base disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center justify-between w-full rounded-xl bg-tarjeta px-4 py-2 text-left text-base text-texto-principal
+                       disabled:opacity-60 disabled:cursor-not-allowed
+                       shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+                       transition-all duration-150 ease-in-out
+                       hover:brightness-110 active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]"
             aria-label={`Estado del horario para ${diaNombre}`}
           >
             <span>{getLabelActual()}</span>
             <ChevronDownIcon className={`h-5 w-5 ml-2 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
           </button>
+
           {isDropdownOpen && (
-            <div className="absolute z-10 mt-1 w-full bg-tarjeta shadow-lg border border-borde-tarjeta rounded-md">
+            <div className="absolute z-10 mt-2 w-full max-h-60 overflow-y-auto rounded-2xl border border-borde-tarjeta bg-tarjeta shadow-xl p-2 space-y-2">
               {opcionesEstado.map(op => (
-                <div
+                <BotonDeSeleccion
                   key={op.id}
+                  label={op.label}
                   onClick={() => handleEstadoTipoChange(op.id as 'cerrado' | 'abierto24h' | 'porRangos')}
-                  className="px-4 py-2 text-base text-texto-principal hover:bg-primario/20 cursor-pointer"
-                >
-                  {op.label}
-                </div>
+                  isSelected={getLabelActual() === op.label}
+                />
               ))}
             </div>
           )}
@@ -116,9 +123,10 @@ const EditorDiaHorario: React.FC<EditorDiaHorarioProps> = ({
       </div>
 
       {esPorRangos && (
-        <div className="pl-0 sm:pl-8 space-y-3">
+        <div className="pl-0 sm:pl-32 space-y-3">
           {(estado as RangoHorario[]).map((rango, rangoIdx) => (
             <div key={rangoIdx} className="flex items-center gap-x-2">
+              {/* --- INPUTS DE HORA CON ESTILO "HUNDIDO" --- */}
               <input
                 type="text"
                 value={rango.de}
@@ -126,7 +134,8 @@ const EditorDiaHorario: React.FC<EditorDiaHorarioProps> = ({
                 maxLength={5}
                 onChange={(e) => handleRangoChange(rangoIdx, 'de', e.target.value)}
                 disabled={inputsRangoDisabled}
-                className="w-24 text-center text-base p-2 rounded-md bg-fondo border border-borde-tarjeta text-texto-principal disabled:opacity-50"
+                className="w-24 text-center text-base p-2 rounded-xl bg-tarjeta border-none text-texto-principal disabled:opacity-50
+                           shadow-[inset_2px_2px_5px_rgba(0,0,0,0.6)] focus:outline-none focus:ring-2 focus:ring-primario"
                 aria-label={`Hora de inicio del turno ${rangoIdx + 1} para ${diaNombre}`}
               />
               <span className={`text-sm ${inputsRangoDisabled ? 'text-texto-secundario opacity-50' : 'text-texto-secundario'}`}>-</span>
@@ -137,7 +146,8 @@ const EditorDiaHorario: React.FC<EditorDiaHorarioProps> = ({
                 maxLength={5}
                 onChange={(e) => handleRangoChange(rangoIdx, 'a', e.target.value)}
                 disabled={inputsRangoDisabled}
-                className="w-24 text-center text-base p-2 rounded-md bg-fondo border border-borde-tarjeta text-texto-principal disabled:opacity-50"
+                className="w-24 text-center text-base p-2 rounded-xl bg-tarjeta border-none text-texto-principal disabled:opacity-50
+                           shadow-[inset_2px_2px_5px_rgba(0,0,0,0.6)] focus:outline-none focus:ring-2 focus:ring-primario"
                 aria-label={`Hora de fin del turno ${rangoIdx + 1} para ${diaNombre}`}
               />
               <button
@@ -151,20 +161,24 @@ const EditorDiaHorario: React.FC<EditorDiaHorarioProps> = ({
               </button>
             </div>
           ))}
-          <Button
+          {/* --- BOTÓN "AÑADIR TURNO" 3D SECUNDARIO --- */}
+          <button
             type="button"
-            variant="outline"
             onClick={handleAddRango}
             disabled={inputsRangoDisabled}
-            className="mt-2 text-xs px-2.5 py-1.5"
+            className="inline-flex items-center gap-2 text-xs px-3 py-2 rounded-xl bg-tarjeta text-texto-secundario
+                       disabled:opacity-60 disabled:cursor-not-allowed
+                       shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+                       transition-all duration-150 ease-in-out
+                       hover:text-texto-principal hover:brightness-110 active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]"
           >
-            <PlusCircleIcon className="h-4 w-4 mr-1" />
+            <PlusCircleIcon className="h-4 w-4" />
             Añadir Turno
-          </Button>
+          </button>
         </div>
       )}
     </div>
-  );
+);
 };
 
 export default EditorDiaHorario;

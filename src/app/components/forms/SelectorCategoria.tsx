@@ -120,7 +120,7 @@ export default function SelectorCategoria({
               placeholder="Buscar categoría…"
               className="w-full px-4 py-2 mb-2 rounded-md focus:outline-none transition bg-transparent text-texto-principal border border-borde-tarjeta"
             />
-            <div className="grid grid-cols-3 gap-3 max-h-60 overflow-y-auto p-1">
+            <div className="flex flex-col gap-2 max-h-60 overflow-y-auto p-1">
               {catsFiltradas.length > 0 ? (
                 catsFiltradas.map((c) => (
                   <BotonDeSeleccion
@@ -165,7 +165,7 @@ export default function SelectorCategoria({
           </button>
 
           {openSubPanel && (
-            <div className="grid grid-cols-3 gap-3 mt-2 max-h-60 overflow-y-auto p-1">
+            <div className="flex flex-col gap-2 mt-2 max-h-60 overflow-y-auto p-1">
               {categoria.subcategorias.map((s) => (
                 <BotonDeSeleccion
                   key={s}

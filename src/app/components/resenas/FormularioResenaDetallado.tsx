@@ -4,13 +4,13 @@
 import React, { useState } from 'react';
 import { useUserStore } from '@/store/userStore';
 import { createReview, type DetailedRatings, type ReviewContext } from '@/lib/services/reviewsService';
-// 1. AÑADIR IMPORTS: Se importan las funciones para manejar notificaciones.
 import {
   removeNotification,
   sendRatingRequest,
 } from '@/lib/services/notificationsService';
 import CriterioRating from './CriterioRating';
-import Button from '@/app/components/ui/Button';
+// El import del botón genérico ya no es necesario, lo eliminamos.
+// import Button from '@/app/components/ui/Button';
 
 interface TargetUser {
   uid: string;
@@ -19,7 +19,6 @@ interface TargetUser {
 
 interface FormularioResenaDetalladoProps {
   target: TargetUser;
-  // 2. AÑADIR PROP: Se recibe el ID de la notificación original para poder eliminarla.
   originalNotifId: string | null;
   onSubmitted?: () => void;
 }
@@ -40,7 +39,7 @@ const CRITERIOS = {
 
 const FormularioResenaDetallado: React.FC<FormularioResenaDetalladoProps> = ({
   target,
-  originalNotifId, // 3. RECIBIR PROP
+  originalNotifId,
   onSubmitted,
 }) => {
   // --- Estados y Store (sin cambios) ---
@@ -64,7 +63,7 @@ const FormularioResenaDetallado: React.FC<FormularioResenaDetalladoProps> = ({
   const isFormValid =
     criteriosAMostrar.every((c) => (ratings[c.id] ?? 0) > 0) && !isSubmitting;
 
-  // 4. LÓGICA DE ENVÍO (sin cambios) ---
+  // --- LÓGICA DE ENVÍO (sin cambios) ---
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -120,7 +119,7 @@ const FormularioResenaDetallado: React.FC<FormularioResenaDetalladoProps> = ({
     }
   };
 
-  // --- JSX (Estilos actualizados) ---
+  // --- JSX (con el botón actualizado) ---
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       <div className="space-y-6">
@@ -151,15 +150,15 @@ const FormularioResenaDetallado: React.FC<FormularioResenaDetalladoProps> = ({
       </div>
 
       {error && <p className="text-error text-sm text-center">{error}</p>}
-
-      <Button
-        type="submit"
-        disabled={!isFormValid}
-        fullWidth
-        className="!bg-primario !text-fondo border-none !focus:shadow-none hover:!brightness-90"
-      >
-        {isSubmitting ? 'Enviando...' : 'Enviar Reseña'}
-      </Button>
+      <div className="flex justify-center">
+        <button
+          type="submit"
+          disabled={!isFormValid}
+          className="btn-primary"
+        >
+          {isSubmitting ? 'Enviando...' : 'Enviar Reseña'}
+        </button>
+      </div>
     </form>
   );
 };

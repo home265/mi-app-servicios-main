@@ -14,10 +14,12 @@ import SelectorCategoria, {
 import SelectorRubro, {
   RubroSeleccionado,
 } from '@/app/components/forms/SelectorRubro';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Button from '@/app/components/ui/Button';
 import Checkbox from '@/app/components/ui/Checkbox';
 import categoriasData from '@/data/categorias.json';
 import rubrosData from '@/data/rubro.json';
+import BotonDeSeleccion from '@/app/components/common/BotonDeSeleccion';
 
 
 interface Props {
@@ -156,16 +158,20 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
         <div>
           <label
             htmlFor="rolBusq"
-            className="block text-sm font-medium text-texto-secundario mb-1"
+            className="block text-sm font-medium text-texto-secundario mb-2"
           >
             Tipo de Publicación*
           </label>
           <div className="relative" ref={rolDropdownRef}>
+            {/* --- BOTÓN DESPLEGABLE CON ESTILO 3D --- */}
             <button
               type="button"
               id="rolBusq"
               onClick={() => setIsRolOpen(!isRolOpen)}
-              className="flex w-full items-center justify-between rounded-md border border-borde-tarjeta bg-fondo px-3 py-2 text-left text-base text-texto-principal shadow-sm focus:border-primario focus:outline-none focus:ring-primario"
+              className="flex w-full items-center justify-between rounded-xl bg-tarjeta px-4 py-3 text-left text-base text-texto-principal
+           shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+           transition-all duration-150 ease-in-out
+           hover:brightness-110 active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]"
             >
               <span>{selectedRolLabel}</span>
               <svg
@@ -186,21 +192,21 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
             </button>
 
             {isRolOpen && (
-              <ul
-                className="absolute z-20 mt-1 w-full max-h-60 overflow-y-auto rounded-md border border-borde-tarjeta bg-tarjeta shadow-lg"
+              // --- OPCIONES DEL MENÚ AHORA SON BOTONES 3D ---
+              <div
+                className="absolute z-20 mt-2 w-full max-h-60 overflow-y-auto rounded-2xl border border-borde-tarjeta bg-tarjeta shadow-xl p-2 space-y-2"
               >
                 {rolOptions.map((option) => (
-                  <li
+                  <BotonDeSeleccion
                     key={option.value}
+                    label={option.label}
                     onClick={() =>
                       handleRolChange(option.value as RolPaginaAmarilla | '')
                     }
-                    className="cursor-pointer px-3 py-2 text-base text-texto-principal hover:bg-primario/20"
-                  >
-                    {option.label}
-                  </li>
+                    isSelected={option.value === rolSel}
+                  />
                 ))}
-              </ul>
+              </div>
             )}
           </div>
         </div>
@@ -233,16 +239,15 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
         />
       </div>
 
-      <div className="flex flex-col sm:flex-row gap-3 mt-10 pt-4">
-        <Button
+      {/* --- BOTÓN DE BÚSQUEDA CENTRADO Y CON ESTILO GLOBAL --- */}
+      <div className="flex justify-center mt-10 pt-4">
+        <button
           type="submit"
-          variant="primary"
-          isLoading={isLoading}
           disabled={isLoading}
-          className="w-full flex-grow !bg-primario !text-fondo !focus:shadow-none hover:!brightness-90"
+          className="btn-primary"
         >
           {isLoading ? 'Buscando…' : 'Buscar'}
-        </Button>
+        </button>
       </div>
     </form>
   );

@@ -76,7 +76,8 @@ const PaginaAmarillaFormPreview: React.FC<PaginaAmarillaFormPreviewProps> = ({
   };
 
   return (
-    <div className={`sticky top-4 p-4 bg-tarjeta rounded-lg shadow-md ${className}`}>
+    <div className={`sticky top-4 p-4 bg-tarjeta rounded-2xl 
+                   shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)] ${className}`}>
       <h3 className="text-lg font-semibold text-texto-principal mb-3 border-b border-borde-tarjeta pb-2">
         Vista Previa de la Tarjeta
       </h3>

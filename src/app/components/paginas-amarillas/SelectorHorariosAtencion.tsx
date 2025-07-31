@@ -8,6 +8,7 @@ import {
   DIAS_SEMANA_CONFIG_INICIAL,
 } from '@/types/horarios';
 import EditorDiaHorario from './EditorDiaHorario';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Checkbox from '@/app/components/ui/Checkbox';
 
 interface SelectorHorariosAtencionProps {
@@ -79,28 +80,42 @@ const SelectorHorariosAtencion: React.FC<SelectorHorariosAtencionProps> = ({
   );
 
   return (
+    // --- CONTENEDOR PRINCIPAL CON ESTILO 3D ---
     <div
-      className={`space-y-4 p-3 sm:p-4 border border-borde-tarjeta rounded-md shadow-sm bg-tarjeta ${
+      className={`space-y-4 rounded-2xl bg-tarjeta p-4
+                 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)] ${
         className
       }`}
     >
-      <div className="flex flex-col sm:flex-row items-center justify-between p-3 bg-fondo rounded-t-md -m-3 sm:-m-4 mb-3 sm:mb-4 border-b border-borde-tarjeta">
-        <h3 className="font-semibold text-lg text-texto-principal mb-2 sm:mb-0">
+      {/* Encabezado de la sección */}
+      <div className="flex flex-col sm:flex-row items-center justify-between pb-3 border-b border-borde-tarjeta">
+        <h3 className="font-semibold text-lg text-texto-principal mb-3 sm:mb-0">
           Horario de Atención
         </h3>
-        <div className="flex items-center gap-2">
-          <Checkbox
-            id="check-24h-global"
-            checked={es24HorasGlobal}
-            onCheckedChange={toggle24HorasGlobal}
-            label="Todos los días 24hs"
-            labelClassName="text-sm font-medium"
-            containerClassName="flex-row-reverse sm:flex-row"
-            inputClassName="ml-0 sm:ml-2 mr-2 sm:mr-0"
-          />
-        </div>
+        
+        {/* --- CHECKBOX MODERNO (INTERRUPTOR) --- */}
+        <label htmlFor="check-24h-global" className="flex items-center cursor-pointer group">
+          <span className="text-sm font-medium text-texto-principal mr-3 select-none">
+            Todos los días 24hs
+          </span>
+          <div className="relative">
+            <input
+              type="checkbox"
+              id="check-24h-global"
+              className="sr-only peer" // Oculta el checkbox nativo
+              checked={es24HorasGlobal}
+              onChange={(e) => toggle24HorasGlobal(e.target.checked)}
+            />
+            {/* Base del interruptor */}
+            <div className="w-12 h-7 bg-fondo rounded-full shadow-[inset_1px_1px_4px_rgba(0,0,0,0.6)] peer-checked:bg-primario transition-colors duration-300"></div>
+            {/* Círculo del interruptor */}
+            <div className="absolute left-1 top-1 w-5 h-5 bg-texto-secundario rounded-full transition-transform duration-300 ease-in-out
+                           peer-checked:translate-x-5 peer-checked:bg-fondo"></div>
+          </div>
+        </label>
       </div>
 
+      {/* Lista de editores de día (sin cambios en la lógica) */}
       <div className="space-y-1">
         {horarios.map(configDia => (
           <EditorDiaHorario

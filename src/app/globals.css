@@ -54,6 +54,9 @@ a:hover { text-decoration: underline; }
   box-shadow: 0 2px 8px rgba(0,0,0,.06);
   padding: 1.5rem;
 }
+.bg-tarjeta {
+  background-color: var(--color-tarjeta);
+}
 
 /* ---------- BOTONES ---------- */
 /* Estas son las nuevas definiciones centralizadas para los botones. */

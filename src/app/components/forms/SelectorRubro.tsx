@@ -122,7 +122,7 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
               placeholder="Buscar rubro…"
               className="w-full px-4 py-2 mb-2 rounded-md focus:outline-none transition bg-transparent text-texto-principal border border-borde-tarjeta"
             />
-            <div className="grid grid-cols-3 gap-3 max-h-60 overflow-y-auto p-1">
+            <div className="flex flex-col gap-2 max-h-60 overflow-y-auto p-1">
               {rubrosFiltrados.length > 0 ? (
                 rubrosFiltrados.map((r) => (
                   <BotonDeSeleccion
@@ -166,7 +166,7 @@ const SelectorRubro: React.FC<SelectorRubroProps> = ({
           </button>
 
           {openSubRubroPanel && (
-            <div className="grid grid-cols-3 gap-3 mt-2 max-h-60 overflow-y-auto p-1">
+            <div className="flex flex-col gap-2 mt-2 max-h-60 overflow-y-auto p-1">
               {rubro.subrubros.map((s) => (
                 <BotonDeSeleccion
                   key={s.nombre}

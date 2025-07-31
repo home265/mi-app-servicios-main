@@ -9,7 +9,6 @@ import { searchCvs, type CvDocument } from '@/lib/services/cvService';
 
 import SelectorCategoriasEmpleo from '@/app/components/forms/SelectorCategoriasEmpleo';
 import CvCard from '@/app/components/cv/CvCard';
-import Button from '@/app/components/ui/Button';
 import Card from '@/app/components/ui/Card';
 import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaEmpleados from '@/app/components/ayuda-contenido/AyudaEmpleados';
@@ -75,13 +74,15 @@ export default function EmpleadosPage() {
           />
         </div>
 
-        <Button
-          onClick={handleBuscar}
-          disabled={cargando}
-          className="!bg-primario !text-fondo !focus:shadow-none hover:!brightness-90"
-        >
-          {cargando ? 'Buscando…' : 'Buscar'}
-        </Button>
+        <div className="flex justify-center pt-2">
+          <button
+            onClick={handleBuscar}
+            disabled={cargando}
+            className="btn-primary"
+          >
+            {cargando ? 'Buscando…' : 'Buscar'}
+          </button>
+        </div>
       </Card>
 
       <div className="w-full max-w-md space-y-4 pb-20">

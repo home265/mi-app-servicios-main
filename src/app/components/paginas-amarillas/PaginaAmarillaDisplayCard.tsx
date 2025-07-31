@@ -6,8 +6,10 @@ import {
   MapPinIcon,
 } from '@heroicons/react/24/outline';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Card from '@/app/components/ui/Card';
 import Avatar from '@/app/components/common/Avatar';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Button from '@/app/components/ui/Button';
 import { PaginaAmarillaData } from '@/types/paginaAmarilla';
 import { HorariosDeAtencion, RangoHorario } from '@/types/horarios';
@@ -82,61 +84,72 @@ const PaginaAmarillaDisplayCard: React.FC<PaginaAmarillaDisplayCardProps> = ({
 
   return (
     <>
-      <Card className={`max-w-md w-full shadow-lg rounded-xl overflow-hidden ${className}`}>
-        <div className="p-5">
-          <div className="flex items-center mb-4">
-            <Avatar selfieUrl={imagenPortadaUrl} nombre={nombrePublico} size={80} />
-            <div className="ml-4 flex-grow">
-              <h2 className="text-xl font-bold text-texto-principal leading-tight">
-                {tituloCard}
-              </h2>
-              {subtituloCard && (
-                <p className="text-sm text-texto-secundario">{subtituloCard}</p>
-              )}
-            </div>
+      {/* --- TARJETA PRINCIPAL CON ESTILO 3D --- */}
+      <div className={`max-w-md w-full overflow-hidden bg-tarjeta rounded-2xl p-5
+                       shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)] ${className}`}>
+        
+        {/* Encabezado con Avatar y Título */}
+        <div className="flex items-center mb-4">
+          <Avatar selfieUrl={imagenPortadaUrl} nombre={nombrePublico} size={80} />
+          <div className="ml-4 flex-grow">
+            <h2 className="text-xl font-bold text-texto-principal leading-tight">
+              {tituloCard}
+            </h2>
+            {subtituloCard && (
+              <p className="text-sm text-texto-secundario">{subtituloCard}</p>
+            )}
           </div>
-
-          {descripcion && (
-            <p className="text-texto-secundario text-sm mb-4">
-              {descripcion}
-            </p>
-          )}
-
-          {(direccionVisible || localidad || provincia) && (
-            <div className="flex items-start text-sm text-texto-secundario mb-3">
-              <MapPinIcon className="h-5 w-5 mr-2 mt-0.5 text-primario shrink-0" />
-              <span>{direccionCompleta}</span>
-            </div>
-          )}
-
-          <div className="mb-3">
-            <p className="text-sm font-medium text-texto-principal mb-1">Horarios:</p>
-            <ul className="text-texto-secundario text-sm list-disc list-inside">
-              {lineasHorarios.map((linea, idx) => (
-                <li key={idx}>{linea}</li>
-              ))}
-            </ul>
-          </div>
-
-          {/* --- INICIO DEL CAMBIO --- */}
-          {/* Este bloque ahora solo se muestra si el rol es 'comercio' */}
-          {creatorRole === 'comercio' && (
-            <div className="flex items-start text-sm text-texto-secundario mb-4">
-              <span>Envíos: {realizaEnvios ? 'Sí' : 'No'}</span>
-            </div>
-          )}
-          {/* --- FIN DEL CAMBIO --- */}
-
-          <Button
-  fullWidth
-  onClick={handleContactarClick}
-  className="!bg-[var(--color-primario)] !text-[var(--color-fondo)] !focus:shadow-none hover:!brightness-90"
->
-  Contactar
-</Button>
         </div>
-      </Card>
 
+        {/* Descripción (si existe) */}
+        {descripcion && (
+          <p className="text-texto-secundario text-sm mb-4">
+            {descripcion}
+          </p>
+        )}
+
+        {/* Separador visual */}
+        {(direccionVisible || localidad || provincia) && <div className="border-t border-borde-tarjeta my-4"></div>}
+
+        {/* Dirección */}
+        {(direccionVisible || localidad || provincia) && (
+          <div className="flex items-start text-sm text-texto-secundario mb-3">
+            <MapPinIcon className="h-5 w-5 mr-3 mt-0.5 text-primario shrink-0" />
+            <span>{direccionCompleta}</span>
+          </div>
+        )}
+
+        {/* Horarios */}
+        <div className="mb-3">
+          <p className="text-sm font-medium text-texto-principal mb-1">Horarios:</p>
+          <ul className="text-texto-secundario text-sm list-disc list-inside space-y-1">
+            {lineasHorarios.map((linea, idx) => (
+              <li key={idx}>{linea}</li>
+            ))}
+          </ul>
+        </div>
+        
+        {/* Envíos (si aplica) */}
+        {creatorRole === 'comercio' && (
+          <div className="flex items-start text-sm text-texto-secundario mt-3">
+            <span>Envíos: {realizaEnvios ? 'Sí' : 'No'}</span>
+          </div>
+        )}
+        
+        {/* Separador visual */}
+        <div className="border-t border-borde-tarjeta my-4"></div>
+
+        {/* --- BOTÓN "CONTACTAR" CON ESTILO UNIFICADO --- */}
+        <button
+          onClick={handleContactarClick}
+          className="btn-primary w-full"
+        >
+          Contactar
+        </button>
+
+      </div>
+
+      {/* El Popup de contacto no se modifica */}
       {mostrarPopupContacto && (
         <PaginaAmarillaContactoPopup
           publicacion={publicacion}

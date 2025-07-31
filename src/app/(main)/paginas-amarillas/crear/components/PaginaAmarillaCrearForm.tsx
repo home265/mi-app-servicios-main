@@ -21,6 +21,7 @@ import {
 // UI Components
 import Input from '@/app/components/ui/Input';
 import Textarea from '@/app/components/ui/Textarea';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Button from '@/app/components/ui/Button';
 import Checkbox from '@/app/components/ui/Checkbox';
 import Avatar from '@/app/components/common/Avatar';
@@ -259,23 +260,22 @@ const PaginaAmarillaCrearForm: React.FC = () => {
       <div className="lg:w-2/3 xl:w-3/5 space-y-6">
   
         <div className="flex items-center justify-between">
+          <h1 className="text-2xl font-bold text-texto-principal">
+            Crea tu Publicación en Guía Local
+          </h1>
           <div>
             <BotonAyuda>
               <AyudaCrearPublicacionPA />
             </BotonAyuda>
           </div>
-          <h1 className="text-2xl font-bold text-texto-principal text-center">
-            Crea tu Publicación en Páginas Amarillas
-          </h1>
-          <div className="w-12 h-12"></div>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 mt-4">
-          <section>
-            <h2 className="text-lg font-semibold text-texto-principal mb-2">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 mt-4">
+          <section className="p-4 rounded-2xl bg-tarjeta shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]">
+            <h2 className="text-lg font-semibold text-texto-principal mb-3 pb-3 border-b border-borde-tarjeta">
               {rolValido === 'comercio' ? 'Logo del Negocio' : 'Foto de Perfil'}
             </h2>
-            <div className="flex flex-col sm:flex-row items-center gap-4">
+            <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
               <Avatar selfieUrl={previewImage} nombre={watch('nombrePublico')} size={100} />
               <div className="flex-grow">
                 {rolValido === 'comercio' ? (
@@ -288,7 +288,7 @@ const PaginaAmarillaCrearForm: React.FC = () => {
                         </label>
                         <input
                           id="imagenFile" type="file" accept="image/jpeg,image/png,image/webp"
-                          className="block w-full text-sm text-texto-secundario file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primario/10 file:text-primario hover:file:bg-primario/20"
+                          className="block w-full text-sm text-texto-secundario file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-primario/20 file:text-primario hover:file:bg-primario/30 cursor-pointer"
                           onChange={(e) => {
                             const file = e.target.files?.[0] ?? undefined;
                             field.onChange(file);
@@ -300,12 +300,12 @@ const PaginaAmarillaCrearForm: React.FC = () => {
                           }}
                         />
                         {fieldState.error && <p className="text-sm text-error mt-1">{fieldState.error.message as string}</p>}
-                        {previewImage && (<button type="button" className="mt-2 text-xs text-error" onClick={() => { setPreviewImage(undefined); field.onChange(null); }}>Quitar imagen</button>)}
+                        {previewImage && (<button type="button" className="mt-2 text-xs text-error hover:underline" onClick={() => { setPreviewImage(undefined); field.onChange(null); }}>Quitar imagen</button>)}
                       </>
                     )}
                   />
                 ) : (
-                  <div className="text-sm text-texto-secundario p-3 bg-tarjeta rounded-md border border-borde-tarjeta">
+                  <div className="text-sm text-texto-secundario p-3 bg-fondo rounded-lg border border-borde-tarjeta">
                     <p>Tu foto de perfil se usará como imagen de portada.</p>
                   </div>
                 )}
@@ -313,25 +313,27 @@ const PaginaAmarillaCrearForm: React.FC = () => {
             </div>
           </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-texto-principal mb-2">
+          <section className="p-4 rounded-2xl bg-tarjeta shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]">
+            <h2 className="text-lg font-semibold text-texto-principal mb-3 pb-3 border-b border-borde-tarjeta">
               Información Principal
             </h2>
-            <Controller name="nombrePublico" control={control} render={({ field }) => (<Input id="nombrePublico" label={rolValido === 'comercio' ? 'Nombre Público del Comercio*' : 'Tu Nombre Público*'} {...field} value={field.value ?? ''} placeholder={rolValido === 'comercio' ? 'Ej: Mi Super Tienda' : 'Ej: Juan Pérez Electricista'} disabled={rolValido === 'prestador'}/>)} />
-            {errors.nombrePublico && (<p className="text-sm text-error -mt-3 mb-3">{errors.nombrePublico.message}</p>)}
-            <Controller name="tituloCard" control={control} render={({ field }) => (<Input id="tituloCard" label="Título para la Tarjeta (Opcional)" {...field} value={field.value ?? ''} placeholder="Ej: ¡La Mejor Calidad! / Servicios 24hs"/>)} />
-            {errors.tituloCard && (<p className="text-sm text-error -mt-3 mb-3">{errors.tituloCard.message}</p>)}
-            <Controller name="subtituloCard" control={control} render={({ field }) => (<Input id="subtituloCard" label="Subtítulo para la Tarjeta (Opcional)" {...field} value={field.value ?? ''} placeholder="Ej: Expertos en tecnología / Tu solución en casa"/>)} />
-            {errors.subtituloCard && (<p className="text-sm text-error -mt-3 mb-3">{errors.subtituloCard.message}</p>)}
-            <Controller name="descripcion" control={control} render={({ field }) => (<Textarea id="descripcion" spellCheck="true" label="Descripción (Párrafo)" {...field} value={field.value ?? ''} placeholder="Describe tus servicios, productos, historia, etc." rows={4}/>)} />
-            {errors.descripcion && (<p className="text-sm text-error -mt-3 mb-3">{errors.descripcion.message}</p>)}
+            <div className="pt-2 space-y-4">
+              <Controller name="nombrePublico" control={control} render={({ field }) => (<Input id="nombrePublico" label={rolValido === 'comercio' ? 'Nombre Público del Comercio*' : 'Tu Nombre Público*'} {...field} value={field.value ?? ''} placeholder={rolValido === 'comercio' ? 'Ej: Mi Super Tienda' : 'Ej: Juan Pérez Electricista'} disabled={rolValido === 'prestador'}/>)} />
+              {errors.nombrePublico && (<p className="text-sm text-error -mt-3 mb-3">{errors.nombrePublico.message}</p>)}
+              <Controller name="tituloCard" control={control} render={({ field }) => (<Input id="tituloCard" label="Título para la Tarjeta (Opcional)" {...field} value={field.value ?? ''} placeholder="Ej: ¡La Mejor Calidad! / Servicios 24hs"/>)} />
+              {errors.tituloCard && (<p className="text-sm text-error -mt-3 mb-3">{errors.tituloCard.message}</p>)}
+              <Controller name="subtituloCard" control={control} render={({ field }) => (<Input id="subtituloCard" label="Subtítulo para la Tarjeta (Opcional)" {...field} value={field.value ?? ''} placeholder="Ej: Expertos en tecnología / Tu solución en casa"/>)} />
+              {errors.subtituloCard && (<p className="text-sm text-error -mt-3 mb-3">{errors.subtituloCard.message}</p>)}
+              <Controller name="descripcion" control={control} render={({ field }) => (<Textarea id="descripcion" spellCheck="true" label="Descripción (Párrafo)" {...field} value={field.value ?? ''} placeholder="Describe tus servicios, productos, historia, etc." rows={4}/>)} />
+              {errors.descripcion && (<p className="text-sm text-error -mt-3 mb-3">{errors.descripcion.message}</p>)}
+            </div>
           </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-texto-principal mb-2">
+          <section className="p-4 rounded-2xl bg-tarjeta shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]">
+            <h2 className="text-lg font-semibold text-texto-principal mb-3 pb-3 border-b border-borde-tarjeta">
               Información de Contacto
             </h2>
-            <div className="grid md:grid-cols-2 gap-x-4 gap-y-0">
+            <div className="grid md:grid-cols-2 gap-x-4 gap-y-0 pt-2">
               <Controller
                 name="telefonoContacto" control={control}
                 render={({ field, fieldState }) => (
@@ -352,52 +354,52 @@ const PaginaAmarillaCrearForm: React.FC = () => {
             </div>
           </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-texto-principal mb-2">
+          <section className="p-4 rounded-2xl bg-tarjeta shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]">
+            <h2 className="text-lg font-semibold text-texto-principal mb-3 pb-3 border-b border-borde-tarjeta">
               Ubicación (Información de tu Perfil)
             </h2>
-            <Controller name="direccionVisible" control={control} render={({ field, fieldState }) => (<Input id="direccionVisible" label="Dirección Pública (Opcional, si quieres mostrarla)" {...field} value={field.value ?? ''} placeholder="Calle Falsa 123, Barrio" error={fieldState.error?.message} />)}/>
-            <div className="mt-2 space-y-1 text-sm text-texto-secundario bg-tarjeta p-3 rounded-md border border-borde-tarjeta">
-              <p><strong>Provincia:</strong> {provinciaDisplay}</p>
-              <p><strong>Localidad:</strong> {localidadDisplay}</p>
-              {rolValido === 'comercio' && (<>
-                  <p><strong>Rubro:</strong>{' '}{currentUser.rubro?.rubro ?? 'No especificado'}</p>
-                  {currentUser.rubro?.subrubro && (<p><strong>Sub-Rubro:</strong> {currentUser.rubro.subrubro}</p>)}
-              </>)}
-              {rolValido === 'prestador' && (<>
-                  <p><strong>Categoría:</strong>{' '}{currentUser.categoria?.categoria ?? 'No especificada'}</p>
-                  {currentUser.categoria?.subcategoria && (<p><strong>Sub-Categoría:</strong> {currentUser.categoria.subcategoria}</p>)}
-              </>)}
-              <p className="text-xs text-texto-secundario opacity-70 mt-2">Esta información se toma de tu perfil y no es editable aquí.</p>
+            <div className="pt-2">
+              <Controller name="direccionVisible" control={control} render={({ field, fieldState }) => (<Input id="direccionVisible" label="Dirección Pública (Opcional, si quieres mostrarla)" {...field} value={field.value ?? ''} placeholder="Calle Falsa 123, Barrio" error={fieldState.error?.message} />)}/>
+              <div className="mt-4 space-y-1 text-sm text-texto-secundario bg-fondo p-3 rounded-lg border border-borde-tarjeta">
+                <p><strong>Provincia:</strong> {provinciaDisplay}</p>
+                <p><strong>Localidad:</strong> {localidadDisplay}</p>
+                {rolValido === 'comercio' && (<>
+                    <p><strong>Rubro:</strong>{' '}{currentUser.rubro?.rubro ?? 'No especificado'}</p>
+                    {currentUser.rubro?.subrubro && (<p><strong>Sub-Rubro:</strong> {currentUser.rubro.subrubro}</p>)}
+                </>)}
+                {rolValido === 'prestador' && (<>
+                    <p><strong>Categoría:</strong>{' '}{currentUser.categoria?.categoria ?? 'No especificada'}</p>
+                    {currentUser.categoria?.subcategoria && (<p><strong>Sub-Categoría:</strong> {currentUser.categoria.subcategoria}</p>)}
+                </>)}
+                <p className="text-xs text-texto-secundario opacity-70 mt-2">Esta información se toma de tu perfil y no es editable aquí.</p>
+              </div>
             </div>
           </section>
 
-          <section>
-            <h2 className="text-lg font-semibold text-texto-principal mb-2">
-              Horarios de Atención
-            </h2>
-            <Controller name="horarios" control={control} render={({ field }) => (<SelectorHorariosAtencion horariosIniciales={field.value || undefined} onChange={field.onChange}/>)}/>
-            {errors.horarios && (<p className="text-sm text-error mt-1 mb-3">{typeof errors.horarios.message === 'string' ? errors.horarios.message : 'Error en horarios.'}</p>)}
-          </section>
+          {/* El componente SelectorHorariosAtencion ya tiene su propio estilo de tarjeta 3D, por lo que no se envuelve */}
+          <Controller name="horarios" control={control} render={({ field }) => (<SelectorHorariosAtencion horariosIniciales={field.value || undefined} onChange={field.onChange}/>)}/>
+          {errors.horarios && (<p className="text-sm text-error mt-1 mb-3">{typeof errors.horarios.message === 'string' ? errors.horarios.message : 'Error en horarios.'}</p>)}
 
           {rolValido === 'comercio' && (
-            <section>
-              <h2 className="text-lg font-semibold text-texto-principal mb-2">Otros Detalles</h2>
-              <Controller name="realizaEnvios" control={control} render={({ field }) => (<Checkbox id="realizaEnvios" label="¿Realizas envíos?" checked={field.value ?? false} onCheckedChange={field.onChange} containerClassName="mb-4"/>)}/>
+            <section className="p-4 rounded-2xl bg-tarjeta shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]">
+              <h2 className="text-lg font-semibold text-texto-principal mb-3 pb-3 border-b border-borde-tarjeta">Otros Detalles</h2>
+              <div className="pt-2">
+                <Controller name="realizaEnvios" control={control} render={({ field }) => (<Checkbox id="realizaEnvios" label="¿Realizas envíos?" checked={field.value ?? false} onCheckedChange={field.onChange} containerClassName="mb-4"/>)}/>
+              </div>
             </section>
           )}
 
           {apiError && (<p className="text-sm text-error bg-error/10 p-3 rounded-md">{apiError}</p>)}
 
-          <Button
-            type="submit"
-            isLoading={isLoading}
-            disabled={isLoading}
-            fullWidth
-            className="py-3 !bg-primario !text-fondo !focus:shadow-none hover:!brightness-90"
-          >
-            {isLoading ? 'Creando Publicación...' : 'Crear Publicación'}
-          </Button>
+          <div className="flex justify-center pt-4">
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="btn-primary"
+            >
+              {isLoading ? 'Creando Publicación...' : 'Crear Publicación'}
+            </button>
+          </div>
         </form>
       </div>
 

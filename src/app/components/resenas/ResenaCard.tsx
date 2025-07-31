@@ -9,7 +9,8 @@ import { db } from '@/lib/firebase/config';
 import type { ReviewData } from '@/lib/services/reviewsService';
 
 import Avatar from '@/app/components/common/Avatar';
-import Card from '@/app/components/ui/Card';
+// El import de Card genérico ya no es necesario, usaremos un div con estilos directos.
+// import Card from '@/app/components/ui/Card';
 
 // --- Tipos locales (sin cambios) ---
 interface AuthorProfile {
@@ -22,7 +23,7 @@ interface ResenaCardProps {
   review: ReviewData;
 }
 
-// --- Componente de Ayuda para renderizar estrellas (Estilos actualizados) ---
+// --- Componente de Ayuda para renderizar estrellas (sin cambios) ---
 const StarRatingDisplay: React.FC<{ rating: number }> = ({ rating }) => {
   const fullStars = Math.floor(rating);
   const hasHalfStar = rating - fullStars >= 0.5;
@@ -75,17 +76,19 @@ const ResenaCard: React.FC<ResenaCardProps> = ({ review }) => {
       .join(' ');
   };
 
-  // Estado de carga (Estilos actualizados)
+  // Estado de carga con el nuevo estilo 3D
   if (!authorData) {
     return (
-      <Card className="flex space-x-3 p-4 animate-pulse">
-        <div className="rounded-full bg-tarjeta opacity-50 h-12 w-12"></div>
-        <div className="flex-1 space-y-3">
-          <div className="h-4 bg-tarjeta opacity-50 rounded w-3/4"></div>
-          <div className="h-3 bg-tarjeta opacity-50 rounded w-1/2"></div>
-          <div className="h-3 bg-tarjeta opacity-50 rounded w-1/4"></div>
+      <div
+        className="flex space-x-3 p-4 animate-pulse rounded-2xl bg-tarjeta
+                   shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]"
+      >
+        <div className="rounded-full bg-fondo h-12 w-12"></div>
+        <div className="flex-1 space-y-3 py-1">
+          <div className="h-4 bg-fondo rounded w-3/4"></div>
+          <div className="h-3 bg-fondo rounded w-1/2"></div>
         </div>
-      </Card>
+      </div>
     );
   }
 
@@ -93,8 +96,12 @@ const ResenaCard: React.FC<ResenaCardProps> = ({ review }) => {
   const date = (review.timestamp as Timestamp)?.toDate();
 
   return (
-    <Card className="p-4 space-y-4">
-      {/* --- Encabezado --- */}
+    // Contenedor principal con el nuevo estilo 3D
+    <div
+      className="p-4 space-y-4 rounded-2xl bg-tarjeta
+                 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]"
+    >
+      {/* --- Encabezado (sin cambios en la lógica) --- */}
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-center gap-3">
           <Avatar selfieUrl={authorData.selfieURL} nombre={fullName} size={48} />
@@ -107,7 +114,7 @@ const ResenaCard: React.FC<ResenaCardProps> = ({ review }) => {
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex items-center gap-0 flex-shrink-0">
           <StarRatingDisplay rating={review.overallRating} />
           <span className="font-bold text-lg text-texto-principal">
             {review.overallRating.toFixed(1)}
@@ -115,10 +122,10 @@ const ResenaCard: React.FC<ResenaCardProps> = ({ review }) => {
         </div>
       </div>
 
-      {/* --- Cuerpo --- */}
+      {/* --- Cuerpo (sin cambios en la lógica) --- */}
       <div className="pl-[60px] space-y-4">
         
-        {/* Desglose de Calificaciones (Estilos actualizados) */}
+        {/* Desglose de Calificaciones */}
         <div className="space-y-2 rounded-lg border border-borde-tarjeta p-3">
           {Object.entries(review.ratings).map(([key, value]) => (
             <div key={key} className="flex items-center justify-between text-sm">
@@ -128,14 +135,14 @@ const ResenaCard: React.FC<ResenaCardProps> = ({ review }) => {
           ))}
         </div>
 
-        {/* Comentario (Estilos actualizados) */}
+        {/* Comentario */}
         {review.comment && (
           <p className="text-sm text-texto-principal bg-fondo p-3 rounded-lg italic">
             &quot;{review.comment}&quot;
           </p>
         )}
       </div>
-    </Card>
+    </div>
   );
 };
 

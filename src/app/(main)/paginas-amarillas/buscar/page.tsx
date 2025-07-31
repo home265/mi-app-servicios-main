@@ -130,25 +130,27 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
     <>
       <div className="w-full max-w-4xl mx-auto px-5 py-8 sm:py-12 space-y-8 flex-grow">
         
-        <div className="relative mx-auto w-fit">
-          <h2 className="text-2xl font-semibold text-texto-principal text-center">
+        <div className="flex items-center justify-center gap-4">
+          <h2 className="text-2xl font-semibold text-texto-principal">
             Buscar en Guía Local
           </h2>
-          
-          <div className="absolute top-full right-0 mt-3 sm:left-full sm:top-1/2 sm:-translate-y-1/2 sm:mt-0 sm:ml-4">
-            <BotonAyuda>
-              <AyudaPaginasAmarillas />
-            </BotonAyuda>
-          </div>
+          <BotonAyuda>
+            <AyudaPaginasAmarillas />
+          </BotonAyuda>
         </div>
 
-        <div className="mt-6">
+        {/* --- INICIO DEL CAMBIO --- */}
+        {/* Este nuevo 'div' es la tarjeta 3D que envuelve los filtros */}
+        <div className="max-w-md mx-auto bg-tarjeta rounded-2xl p-6 sm:p-8 
+                       shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]">
           <PaginasAmarillasFiltros
             onBuscar={handleBuscar}
             isLoading={estadoCarga === 'loading'}
             initialFiltros={filtrosActivos}
           />
         </div>
+        {/* --- FIN DEL CAMBIO --- */}
+
         <PaginasAmarillasResultados
           publicaciones={publicaciones}
           isLoading={estadoCarga === 'loading'}

@@ -2,6 +2,7 @@
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import React, { useState, useEffect, useCallback } from 'react';
+import BotonDeSeleccion from '@/app/components/common/BotonDeSeleccion';
 
 // Las interfaces permanecen intactas.
 export interface Localidad {
@@ -34,22 +35,28 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
   error,
   onLocalidadSeleccionada,
 }) => {
+  // Se elimina el estado 'todasLasLocalidades' para no almacenar el JSON en el cliente.
   const [estadoCarga, setEstadoCarga] = useState<'idle' | 'loading' | 'error'>('idle');
   const [terminoBusqueda, setTerminoBusqueda] = useState('');
   const [sugerencias, setSugerencias] = useState<Localidad[]>([]);
   const [seleccionActual, setSeleccionActual] = useState<string>('');
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
 
-  // Lógica de búsqueda con debounce (sin cambios)
+  // Se elimina el useEffect que cargaba el archivo completo al inicio.
+
+  // Este useEffect ahora maneja la búsqueda dinámica con "debounce".
   useEffect(() => {
+    // Si el término de búsqueda es muy corto, no hacemos nada.
     if (terminoBusqueda.length < 2) {
       setSugerencias([]);
       setMostrarSugerencias(false);
       return;
     }
 
+    // "Debounce": Espera 300ms después de que el usuario deja de escribir.
     const temporizador = setTimeout(() => {
       setEstadoCarga('loading');
+      // Llama a la nueva API de búsqueda.
       fetch(`/api/buscar-localidades?query=${encodeURIComponent(terminoBusqueda)}`)
         .then((res) => {
           if (!res.ok) {
@@ -68,10 +75,13 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
         });
     }, 300);
 
+    // Limpia el temporizador si el usuario sigue escribiendo.
     return () => clearTimeout(temporizador);
   }, [terminoBusqueda]);
 
-  // Lógica de manejo de eventos (sin cambios)
+  // Las siguientes funciones y lógicas de manejo de eventos se mantienen
+  // exactamente como las tenías, ya que están bien implementadas.
+
   const handleSeleccion = (localidad: Localidad) => {
     const seleccion: LocalidadSeleccionada = {
       id: localidad.id,
@@ -113,9 +123,10 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
 
   return (
     <div id={`${id}-wrapper`} className="mb-4 relative">
-      <label htmlFor={id} className="block text-sm font-medium text-texto-secundario mb-1">
+      <label htmlFor={id} className="block text-sm font-medium text-texto-secundario mb-2">
         {label}
       </label>
+      {/* --- INPUT CON ESTILO 3D "HUNDIDO" --- */}
       <input
         type="text"
         id={id}
@@ -128,30 +139,29 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
         }}
         placeholder={placeholderActual}
         autoComplete="off"
-        className="block w-full px-3 py-2 bg-fondo border border-borde-tarjeta rounded-md shadow-sm placeholder-texto-secundario focus:outline-none focus:ring-primario focus:border-primario sm:text-sm text-texto-principal"
+        className="block w-full px-4 py-3 bg-tarjeta border-none rounded-xl shadow-[inset_2px_2px_5px_rgba(0,0,0,0.6)] placeholder-texto-secundario focus:outline-none focus:ring-2 focus:ring-primario text-texto-principal transition-shadow"
       />
 
+      {/* --- PANEL DE SUGERENCIAS 3D CON BOTONES --- */}
       {mostrarSugerencias && sugerencias.length > 0 && (
-        <ul
+        <div
           className="
             absolute w-full
             bg-tarjeta
-            border border-borde-tarjeta
-            rounded-md shadow-xl
-            mt-1 max-h-60 overflow-y-auto
+            rounded-2xl shadow-[4px_4px_8px_rgba(0,0,0,0.4),-2px_-2px_8px_rgba(249,243,217,0.08)]
+            mt-2 max-h-60 overflow-y-auto
             z-50
+            p-2 space-y-2
           "
         >
           {sugerencias.map((loc) => (
-            <li
+            <BotonDeSeleccion
               key={loc.id}
               onClick={() => handleSeleccion(loc)}
-              className="px-3 py-2 hover:bg-secundario hover:text-texto-principal cursor-pointer text-sm text-texto-secundario"
-            >
-              {loc.nombre}, {loc.provincia.nombre}
-            </li>
+              label={`${loc.nombre}, ${loc.provincia.nombre}`}
+            />
           ))}
-        </ul>
+        </div>
       )}
       {error && <p className="text-sm text-error mt-1">{error}</p>}
     </div>
