@@ -6,6 +6,7 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCircle,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   LogOut,
 } from 'lucide-react';
 import BotonAyuda from '@/app/components/common/BotonAyuda';
@@ -74,31 +75,34 @@ export default function Toolbar({
   }, [disabled, isLastScreen, onNext, onPreview]);
 
   return (
-    <div className="h-[var(--toolbar-height,60px)] bg-[var(--color-fondo-toolbar)] text-[var(--color-texto-toolbar)] shadow-md px-2 md:px-4 flex items-center justify-between select-none z-30 shrink-0">
+    <div className="h-[var(--toolbar-height,60px)] bg-tarjeta text-texto-principal shadow-lg px-2 md:px-4 flex items-center justify-between select-none z-30 shrink-0">
+      
       {/* Sección Izquierda: Salir y Ayuda */}
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-2">
         {showExitEditorButton && (
           <button
             onClick={() => {
               if (!disabled && onExitEditor) onExitEditor();
             }}
-            className="p-2 rounded text-[var(--color-texto-principal)] hover:bg-[var(--color-fondo-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
+            disabled={disabled}
             aria-label="Salir del Editor"
             title="Salir del Editor"
-            disabled={disabled}
+            className="
+              inline-flex items-center justify-center
+              px-3 py-2 rounded-xl text-sm font-medium text-texto-secundario
+              bg-tarjeta
+              shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+              transition-all duration-150 ease-in-out
+              hover:text-primario hover:brightness-110
+              active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]
+              disabled:opacity-60 disabled:cursor-not-allowed
+            "
           >
-            {exitButtonText ? (
-              <span className="text-sm font-semibold px-1 whitespace-nowrap">
-                <span className="hidden sm:inline">{exitButtonText}</span>
-                <span className="sm:hidden">Salir</span>
-              </span>
-            ) : (
-              <LogOut size={20} />
-            )}
+            <span className="hidden sm:inline">{exitButtonText}</span>
+            <span className="sm:hidden">Salir</span>
           </button>
         )}
 
-        {/* --- CORRECCIÓN APLICADA: Se vuelve a añadir la condición --- */}
         {showChangePlanCampaniaButton && (
           <BotonAyuda>
             <AyudaCrearEditarAnuncio fase="fase2" />
@@ -106,11 +110,11 @@ export default function Toolbar({
         )}
       </div>
 
-      {/* Sección Derecha: Navegación de Pantallas y Finalizar */}
-      <div className="flex items-center space-x-2 md:space-x-3">
+      {/* Sección Derecha: Navegación y Finalizar */}
+      <div className="flex items-center gap-2 md:gap-3">
         <div className="hidden md:flex items-center justify-center px-2">
           {totalScreens > 0 && (
-            <span className="text-sm text-[var(--color-texto-secundario)] select-none whitespace-nowrap">
+            <span className="text-sm text-texto-secundario select-none whitespace-nowrap">
               Pantalla {currentScreen} de {totalScreens}
             </span>
           )}
@@ -120,30 +124,46 @@ export default function Toolbar({
           onClick={() => {
             if (!disabled) onPrev?.();
           }}
-          className="p-2 rounded text-[var(--color-texto-principal)] hover:bg-[var(--color-fondo-hover)] disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-150"
+          disabled={disabled || currentScreen <= 1}
           aria-label="Pantalla anterior"
           title="Pantalla anterior"
-          disabled={disabled || currentScreen <= 1}
+          className="
+            flex items-center justify-center w-10 h-10 rounded-full
+            bg-tarjeta text-texto-secundario
+            shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+            transition-all duration-150 ease-in-out
+            hover:text-primario hover:brightness-110
+            active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]
+            disabled:opacity-60 disabled:cursor-not-allowed
+          "
         >
           <ArrowLeft size={20} />
         </button>
 
         <button
           onClick={handleNextOrFinalizeClick}
-          className={`px-3 py-2 rounded text-white flex items-center space-x-2 justify-center transition-opacity min-w-[120px] md:min-w-[150px] ${
-            isLastScreen
-              ? 'bg-green-500 hover:bg-green-600'
-              : 'bg-primario hover:bg-opacity-80'
-          } disabled:opacity-50 disabled:cursor-not-allowed`}
-          aria-label={finalNextButtonText}
-          title={finalNextButtonText}
           disabled={
             disabled ||
             (isLastScreen && !onPreview) ||
             (!isLastScreen && !onNext)
           }
+          aria-label={finalNextButtonText}
+          title={finalNextButtonText}
+          className={`
+            inline-flex items-center justify-center gap-2
+            px-4 py-2 rounded-xl text-sm font-semibold text-fondo
+            transition-all duration-150 ease-in-out
+            shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+            hover:brightness-110 active:scale-95
+            min-w-[120px] md:min-w-[150px]
+            disabled:opacity-60 disabled:cursor-not-allowed
+            ${isLastScreen
+              ? 'bg-green-500' // Color verde para finalizar
+              : 'bg-primario'   // Color primario para continuar
+            }
+          `}
         >
-          <span className="text-sm font-semibold">{finalNextButtonText}</span>
+          <span>{finalNextButtonText}</span>
           <NextButtonIcon size={18} className="shrink-0" />
         </button>
       </div>

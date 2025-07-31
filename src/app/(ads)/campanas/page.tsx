@@ -4,6 +4,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Card from '@/app/components/ui/Card'; // Asegúrate que la ruta a tu componente Card es correcta
 import { campanias, planes, CampaniaId, PlanId } from '@/lib/constants/anuncios';
 import { useAnuncioStore } from '@/store/anuncioStore';
@@ -109,16 +110,14 @@ export default function CampaniasPage() {
       {/* 1. Contenedor principal que limita y centra todo el contenido */}
       <div className="w-full max-w-5xl mx-auto px-4 py-8">
 
-        {/* --- Encabezado con posicionamiento relativo para el botón de ayuda --- */}
-        <div className="relative mb-10 mt-8">
-          <div className="absolute left-0 top-1">
-            <BotonAyuda>
-              <AyudaCrearEditarAnuncio fase="fase1b" />
-            </BotonAyuda>
-          </div>
-          <h1 className="text-3xl font-bold text-primario mb-2 text-center">
-            Elige tu Campaña para el Plan: {planSeleccionado.name}
+        {/* --- Encabezado actualizado con Flexbox --- */}
+        <div className="flex items-center justify-center gap-4 mb-10 mt-8">
+          <h1 className="text-3xl font-bold text-primario text-center">
+            Elige tu Campaña
           </h1>
+          <BotonAyuda>
+            <AyudaCrearEditarAnuncio fase="fase1b" />
+          </BotonAyuda>
         </div>
 
         <p className="text-center text-texto-secundario mb-8">
@@ -126,31 +125,39 @@ export default function CampaniasPage() {
           Ahora elige la duración de tu campaña.
         </p>
 
+        {/* --- Tarjetas de Campaña como Botones 3D --- */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {campanias.map((campania) => {
             const isSelected = campania.id === currentCampaniaIdFromStore;
             const totalWithDiscount = precioBasePlan * campania.months * (1 - campania.discount);
 
             return (
-              <Card
+              <button
                 key={campania.id}
                 onClick={() => handleSelectCampania(campania.id)}
-                className={`cursor-pointer hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between p-6
-                            ${isSelected ? 'ring-2 ring-primario shadow-xl border-primario' : 'border-transparent'}`}
+                className={`
+                  w-full rounded-2xl p-6 flex flex-col justify-between cursor-pointer text-left
+                  transition-all duration-200
+                  bg-tarjeta
+                  shadow-[4px_4px_8px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+                  hover:shadow-[6px_6px_12px_rgba(0,0,0,0.4),-6px_-6px_12px_rgba(249,243,217,0.08)] hover:-translate-y-1
+                  active:scale-95 active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4)]
+                  ${isSelected ? 'ring-2 ring-primario shadow-xl' : ''}
+                `}
                 role="button"
                 tabIndex={0}
                 aria-pressed={isSelected}
               >
                 <div>
-                  <h2 className="text-2xl font-semibold mb-4 text-center">{campania.name}</h2>
-                  <p className="mb-2">
+                  <h2 className="text-2xl font-semibold mb-4 text-center text-texto-principal">{campania.name}</h2>
+                  <p className="mb-2 text-texto-principal">
                     <span className="font-medium">Duración:</span> {campania.months}{' '}
                     {campania.months > 1 ? 'meses' : 'mes'}
                   </p>
-                  <p className="mb-2">
+                  <p className="mb-2 text-texto-principal">
                     <span className="font-medium">Descuento:</span> {campania.discount * 100}%
                   </p>
-                  <p className="mb-2">
+                  <p className="mb-2 text-texto-principal">
                     <span className="font-medium">Precio total:</span>{' '}
                     ${totalWithDiscount.toLocaleString('es-AR')} ARS
                   </p>
@@ -160,17 +167,26 @@ export default function CampaniasPage() {
                     <span className="text-sm font-semibold text-primario">Campaña Actual</span>
                   </div>
                 )}
-              </Card>
+              </button>
             );
           })}
         </div>
 
+        {/* --- Botón final con estilo 3D secundario --- */}
         <div className="text-center mt-12">
           <button
             onClick={() =>
               borradorId ? router.push(`/planes?borradorId=${borradorId}`) : router.push('/planes')
             }
-            className="text-texto-secundario hover:text-primario underline"
+            className="
+              inline-flex items-center justify-center
+              px-4 py-2 rounded-xl text-sm font-medium text-texto-secundario
+              bg-tarjeta
+              shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+              transition-all duration-150 ease-in-out
+              hover:text-primario hover:brightness-110
+              active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]
+            "
           >
             Volver a Planes
           </button>

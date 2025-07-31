@@ -44,6 +44,7 @@ import { planes, campanias } from '@/lib/constants/anuncios';
 
 import EditorCanvas from './EditorCanvas';
 import Toolbar, { type ToolId } from './Toolbar';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Button from '@/app/components/ui/Button';
 import Modal from '@/app/components/common/Modal';
 
@@ -691,55 +692,61 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
 
   return (
     <div className="flex h-screen overflow-hidden bg-[var(--color-fondo)]">
+      {/* --- INICIO DE LA MODIFICACIÓN: BARRA LATERAL CON EFECTO GLASS --- */}
       <aside
-  className={`
-    fixed top-0 left-0 h-full bg-[var(--color-fondo-toolbar)] shadow-lg
-    transform transition-transform duration-300 ease-in-out
-    ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-    w-56 md:w-64 z-40 overflow-y-auto
-  `}
->
-  {/* 1. Se elimina el `h-full` de este div para que no ocupe toda la altura */}
-  <div className="flex flex-col px-2">
-    
-    {/* 2. Se elimina la clase `flex-1` y el div ahora envuelve tanto la lista como el botón */}
-    <div className="pt-16"> 
-      {(['text', 'curvedText', 'color', 'gradient', 'imageBackground', 'subimage', 'effects'] as ToolId[]).map(toolId => (
-        <button
-          key={toolId}
-          onClick={() => handleSelectTool(toolId)}
-          className={`w-full flex items-center p-3 mb-2 rounded-md transition-colors text-sm text-left
-                      ${activeTool === toolId && toolId !== 'effects'
-                        ? 'bg-primario text-white'
-                        : 'text-[var(--color-texto-principal)] hover:bg-[var(--color-fondo-hover)]'
-                      }`}
-        >
-          {/* ... (íconos sin cambios) ... */}
-          {toolId.charAt(0).toUpperCase() + toolId.slice(1).replace(/([A-Z])/g, ' $1')}
-        </button>
-      ))}
+        className={`
+          fixed top-0 left-0 h-full 
+          bg-tarjeta/80 backdrop-blur-lg border-r border-white/10
+          transform transition-transform duration-300 ease-in-out
+          ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+          w-56 md:w-64 z-40
+        `}
+      >
+        <div className="flex flex-col h-full p-2">
+          {/* Espacio reservado para la Toolbar superior */}
+          <div className="h-[var(--toolbar-height,60px)] shrink-0"></div>
+          
+          <div className="flex-grow overflow-y-auto space-y-2 pt-2"> 
+            {(['text', 'curvedText', 'color', 'gradient', 'imageBackground', 'subimage', 'effects'] as ToolId[]).map(toolId => (
+              <button
+                key={toolId}
+                onClick={() => handleSelectTool(toolId)}
+                className={`
+                  w-full flex items-center p-3 rounded-lg transition-all duration-150 ease-in-out text-sm text-left
+                  ${activeTool === toolId && toolId !== 'effects'
+                    ? 'bg-primario/90 text-fondo font-semibold shadow-[inset_2px_2px_4px_rgba(0,0,0,0.6)]' // Estilo ACTIVO (Hundido)
+                    : `text-texto-principal bg-tarjeta 
+                       shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+                       hover:brightness-110
+                       active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.6)]` // Estilo por DEFECTO (Elevado)
+                  }
+                `}
+              >
+                {toolId.charAt(0).toUpperCase() + toolId.slice(1).replace(/([A-Z])/g, ' $1')}
+              </button>
+            ))}
+          </div>
 
-      {/* 3. El botón de cierre se mueve aquí, DENTRO del mismo contenedor */}
-      <div className="py-2 mt-4 border-t border-white/10">
-        <button
-          onClick={() => setIsSidebarOpen(false)}
-          className="w-full flex items-center justify-center p-3 rounded-md transition-colors text-sm text-red-400 hover:bg-red-500/20 hover:text-red-300"
-          aria-label="Cerrar menú de herramientas"
-          title="Cerrar menú"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-          Cerrar
-        </button>
-      </div>
-    </div>
-  </div>
-</aside>
+          <div className="py-2 mt-auto border-t border-white/10">
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="w-full flex items-center justify-center p-3 rounded-lg transition-colors text-sm text-red-400 hover:bg-red-500/20 hover:text-red-300"
+              aria-label="Cerrar menú de herramientas"
+              title="Cerrar menú"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </aside>
+      {/* --- FIN DE LA MODIFICACIÓN --- */}
 
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-black/30 z-30"
+          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-30"
           onClick={() => setIsSidebarOpen(false)}
           aria-hidden="true"
         />
@@ -767,7 +774,7 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
         {!isSidebarOpen && (
           <button
             onClick={() => setIsSidebarOpen(true)}
-            className="fixed top-1/2 left-0 transform -translate-y-1/2 bg-gray-900 text-white p-2 rounded-r-lg shadow-lg z-20 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500"
+            className="fixed top-1/2 left-0 transform -translate-y-1/2 bg-tarjeta/80 backdrop-blur-lg text-texto-principal p-2 rounded-r-lg shadow-lg z-20 hover:bg-tarjeta focus:outline-none focus:ring-2 focus:ring-primario"
             aria-label="Abrir menú de herramientas"
             title="Herramientas"
           >
@@ -797,44 +804,38 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
         </main>
 
         {anuncioParaCargar.status !== 'draft' && (
-    <>
-        <button
-            onClick={() => setShowGuardarModal(true)}
-            disabled={isLoadingSave || isProcessingExit || isProcessingScreen}
-            className="fixed bottom-4 right-4 z-30 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 disabled:opacity-50 w-44 border border-white/75"
-        >
-            {isLoadingSave ? 'Guardando...' : 'Guardar Pantalla'}
-        </button>
-
-        {/* --- BOTÓN MODIFICADO --- */}
-        <button
-            onClick={handlePreviewAnuncio}
-            disabled={isLoadingSave || isProcessingExit || isProcessingScreen}
-            className="fixed bottom-4 left-4 z-30 bg-blue-600 text-white px-4 py-2 rounded-lg shadow-md hover:bg-blue-700 disabled:opacity-50 w-44 border border-white/75"
-        >
-            Vista Previa
-        </button>
-    </>
-)}
+          <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-30 flex gap-4">
+            <button
+                onClick={handlePreviewAnuncio}
+                disabled={isLoadingSave || isProcessingExit || isProcessingScreen}
+                className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium bg-tarjeta text-texto-secundario shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)] transition-all hover:text-primario hover:brightness-110 active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)] disabled:opacity-60"
+            >
+                Vista Previa
+            </button>
+            <button
+                onClick={() => setShowGuardarModal(true)}
+                disabled={isLoadingSave || isProcessingExit || isProcessingScreen}
+                className="inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium bg-tarjeta text-texto-secundario shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)] transition-all hover:text-primario hover:brightness-110 active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)] disabled:opacity-60"
+            >
+                {isLoadingSave ? 'Guardando...' : 'Guardar Pantalla'}
+            </button>
+          </div>
+        )}
       </div>
-
-      {/* --- MODALES REFACTORIZADOS Y NUEVOS --- */}
 
       <Modal
         isOpen={showGuardarModal}
         onClose={() => !isLoadingSave && setShowGuardarModal(false)}
         title="Confirmar Cambios"
       >
-        <p className="text-sm text-[var(--color-texto-secundario)] mb-6">
+        <p className="text-sm text-texto-secundario mb-6">
           ¿Estás seguro de que deseas guardar los cambios realizados en esta pantalla ({currentScreenIndex + 1})?
         </p>
-        <div className="flex justify-end space-x-3">
-          <Button variant="secondary" onClick={() => setShowGuardarModal(false)} disabled={isLoadingSave}>
-            Cancelar
-          </Button>
-          <Button variant="primary" onClick={handleSaveCurrentScreenOnly} disabled={isLoadingSave}>
+        <div className="flex justify-end gap-3">
+          <button onClick={() => setShowGuardarModal(false)} disabled={isLoadingSave} className="px-4 py-2 rounded-md text-texto-principal bg-white/10 hover:bg-white/20">Cancelar</button>
+          <button onClick={handleSaveCurrentScreenOnly} disabled={isLoadingSave} className="btn-primary">
             {isLoadingSave ? 'Guardando...' : 'Sí, Guardar'}
-          </Button>
+          </button>
         </div>
       </Modal>
       
@@ -843,16 +844,14 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
         onClose={() => !isProcessingScreen && setShowFinalizarModal(false)}
         title="Finalizar Anuncio"
       >
-        <p className="text-sm text-[var(--color-texto-secundario)] mb-6">
+        <p className="text-sm text-texto-secundario mb-6">
           Has llegado a la última pantalla ({screensCount}). ¿Deseas finalizar y guardar todos los cambios del anuncio?
         </p>
-        <div className="flex justify-end space-x-3">
-          <Button variant="secondary" onClick={() => setShowFinalizarModal(false)} disabled={isProcessingScreen}>
-            Seguir Editando
-          </Button>
-          <Button variant="primary" onClick={handleFinalizarAnuncioCompleto} disabled={isProcessingScreen}>
+        <div className="flex justify-end gap-3">
+          <button onClick={() => setShowFinalizarModal(false)} disabled={isProcessingScreen} className="px-4 py-2 rounded-md text-texto-principal bg-white/10 hover:bg-white/20">Seguir Editando</button>
+          <button onClick={handleFinalizarAnuncioCompleto} disabled={isProcessingScreen} className="btn-primary">
             {isProcessingScreen ? 'Finalizando...' : 'Sí, Finalizar'}
-          </Button>
+          </button>
         </div>
       </Modal>
 
@@ -861,36 +860,21 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
         onClose={() => !(isProcessingExit || isLoadingSave || isProcessingScreen) && setShowExitModal(false)}
         title="Salir del Editor"
       >
-        <p className="text-sm text-[var(--color-texto-secundario)] mb-6">
+        <p className="text-sm text-texto-secundario mb-6">
           ¿Qué deseas hacer con tu progreso?
         </p>
-        <div className="flex flex-col space-y-3">
-          <Button
-            variant="primary"
-            onClick={() => handleConfirmExitAction('saveAndExit')}
-            disabled={isProcessingExit || isLoadingSave || isProcessingScreen}
-            className="w-full"
-          >
+        <div className="flex flex-col gap-3">
+          <button onClick={() => handleConfirmExitAction('saveAndExit')} disabled={isProcessingExit || isLoadingSave || isProcessingScreen} className="btn-primary w-full">
             {isProcessingExit ? 'Guardando...' : 'Guardar Cambios y Salir'}
-          </Button>
+          </button>
           {anuncioParaCargar.status === 'draft' && (
-            <Button
-              variant="danger" 
-              onClick={() => handleConfirmExitAction('deleteAndExit')}
-              disabled={isProcessingExit || isLoadingSave || isProcessingScreen}
-              className="w-full"
-            >
+            <button onClick={() => handleConfirmExitAction('deleteAndExit')} disabled={isProcessingExit || isLoadingSave || isProcessingScreen} className="btn-destructive w-full">
               Eliminar Borrador y Salir
-            </Button>
+            </button>
           )}
-          <Button
-            variant="secondary"
-            onClick={() => setShowExitModal(false)}
-            disabled={isProcessingExit || isLoadingSave || isProcessingScreen}
-            className="w-full mt-2"
-          >
+          <button onClick={() => setShowExitModal(false)} disabled={isProcessingExit || isLoadingSave || isProcessingScreen} className="w-full mt-2 px-4 py-2 rounded-md text-texto-principal bg-white/10 hover:bg-white/20">
             Cancelar (Seguir Editando)
-          </Button>
+          </button>
         </div>
       </Modal>
 
@@ -899,16 +883,14 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
         onClose={() => setIsChangePlanModalOpen(false)}
         title="Cambiar Plan o Campaña"
       >
-        <p className="text-sm text-[var(--color-texto-secundario)] mb-6">
+        <p className="text-sm text-texto-secundario mb-6">
           Serás redirigido para cambiar el plan/campaña. Los cambios no guardados en la pantalla actual podrían perderse. ¿Estás seguro?
         </p>
-        <div className="flex justify-end space-x-3">
-          <Button variant="secondary" onClick={() => setIsChangePlanModalOpen(false)}>
-            Cancelar
-          </Button>
-          <Button variant="primary" onClick={performChangePlan}>
+        <div className="flex justify-end gap-3">
+          <button onClick={() => setIsChangePlanModalOpen(false)} className="px-4 py-2 rounded-md text-texto-principal bg-white/10 hover:bg-white/20">Cancelar</button>
+          <button onClick={performChangePlan} className="btn-primary">
             Sí, Continuar
-          </Button>
+          </button>
         </div>
       </Modal>
 
@@ -917,16 +899,14 @@ export default function EditorConCarga({ anuncioParaCargar }: EditorConCargaProp
         onClose={() => !isProcessingExit && setIsDeleteDraftModalOpen(false)}
         title="Confirmar Eliminación"
       >
-         <p className="text-sm text-[var(--color-texto-secundario)] mb-6">
+         <p className="text-sm text-texto-secundario mb-6">
           ¡Atención! Estás a punto de eliminar este borrador de forma permanente. Esta acción no se puede deshacer. ¿Estás absolutamente seguro?
         </p>
-        <div className="flex justify-end space-x-3">
-          <Button variant="secondary" onClick={() => setIsDeleteDraftModalOpen(false)} disabled={isProcessingExit}>
-            Cancelar
-          </Button>
-          <Button variant="danger" onClick={performDeleteDraft} disabled={isProcessingExit}>
+        <div className="flex justify-end gap-3">
+          <button onClick={() => setIsDeleteDraftModalOpen(false)} disabled={isProcessingExit} className="px-4 py-2 rounded-md text-texto-principal bg-white/10 hover:bg-white/20">Cancelar</button>
+          <button onClick={performDeleteDraft} disabled={isProcessingExit} className="btn-destructive">
             {isProcessingExit ? 'Eliminando...' : 'Sí, Eliminar Borrador'}
-          </Button>
+          </button>
         </div>
       </Modal>
     </div>

@@ -3,6 +3,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Card from '@/app/components/ui/Card';
 import { planes, PlanId } from '@/lib/constants/anuncios';
 import { useAnuncioStore } from '@/store/anuncioStore';
@@ -153,16 +154,19 @@ export default function PlanesPage() {
 
         {/* --- Encabezado con posicionamiento relativo --- */}
         <div className="relative">
-          {/* Contenedor para posicionar el botón en la esquina */}
+          {/* Contenedor para posicionar el botón de ayuda en la esquina */}
           <div className="absolute top-0 left-0">
             <BotonAyuda>
               <AyudaCrearEditarAnuncio fase="fase1a" />
             </BotonAyuda>
           </div>
 
-          {/* Título centrado y con más espacio inferior (mb-8) */}
-          <h1 className="text-3xl font-bold text-primario mb-8 text-center">
+          {/* Título centrado con foco a la derecha y más espacio inferior */}
+          <h1 className="text-3xl font-bold text-primario mb-8 text-center flex items-center justify-center gap-2">
             {existingDraft || borradorIdQueryParam ? 'Modifica tu Plan' : 'Elige tu Plan'}
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0l2-2m-2 2l-2-2" />
+            </svg>
           </h1>
         </div>
 
@@ -176,25 +180,33 @@ export default function PlanesPage() {
           {planes.map((plan) => {
             const isSelected = plan.id === planSeleccionadoId;
             return (
-              <Card
+              <button
                 key={plan.id}
                 onClick={() => handleSelectPlan(plan.id)}
-                className={`cursor-pointer hover:shadow-lg transform hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between p-6
-                            ${isSelected ? 'ring-2 ring-primario shadow-xl border-primario' : 'border-transparent'}`}
+                className={`
+                  w-full rounded-2xl p-6 flex flex-col justify-between cursor-pointer
+                  transition-all duration-200
+                  bg-tarjeta
+                  shadow-[4px_4px_8px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+                  hover:shadow-[6px_6px_12px_rgba(0,0,0,0.4),-6px_-6px_12px_rgba(249,243,217,0.08)] hover:-translate-y-1
+                  active:scale-95 active:shadow-[inset_4px_4px_8px_rgba(0,0,0,0.4)]
+
+                  ${isSelected ? '!border-2 !border-primario !shadow-xl ring-2 ring-primario' : ''}
+                `}
                 role="button"
                 tabIndex={0}
                 aria-pressed={isSelected}
               >
                 <div>
-                  <h2 className="text-2xl font-semibold mb-4 text-center">{plan.name}</h2>
-                  <p className="mb-2">
+                  <h2 className="text-2xl font-semibold mb-4 text-center text-texto-principal">{plan.name}</h2>
+                  <p className="mb-2 text-texto-principal">
                     <span className="font-medium">Precio:</span>{' '}
                     ${plan.priceARS.toLocaleString('es-AR')} ARS/mes
                   </p>
-                  <p className="mb-2">
+                  <p className="mb-2 text-texto-principal">
                     <span className="font-medium">Duración anuncio:</span> {plan.durationSeconds} segundos
                   </p>
-                  <p className="mb-2">
+                  <p className="mb-2 text-texto-principal">
                     <span className="font-medium">Imágenes:</span> hasta {plan.maxImages}
                   </p>
                   <p className="text-sm text-texto-secundario">
@@ -207,21 +219,29 @@ export default function PlanesPage() {
                     <span className="text-sm font-semibold text-primario">Plan Actual</span>
                   </div>
                 )}
-              </Card>
+              </button>
             );
           })}
         </div>
 
         <div className="text-center mt-12">
-          <button
-            onClick={() =>
-              router.push(existingDraft || borradorIdQueryParam ? '/mis-anuncios' : '/bienvenida')
-            }
-            className="text-texto-secundario hover:text-primario underline"
-          >
-            {existingDraft || borradorIdQueryParam ? 'Volver a Mis Anuncios' : 'Cancelar y Volver'}
-          </button>
-        </div>
+  <button
+    onClick={() =>
+      router.push(existingDraft || borradorIdQueryParam ? '/mis-anuncios' : '/bienvenida')
+    }
+    className="
+      inline-flex items-center justify-center
+      px-4 py-2 rounded-xl text-sm font-medium text-texto-secundario
+      bg-tarjeta
+      shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+      transition-all duration-150 ease-in-out
+      hover:text-primario hover:brightness-110
+      active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]
+    "
+  >
+    {existingDraft || borradorIdQueryParam ? 'Volver a Mis Anuncios' : 'Cancelar y Volver'}
+  </button>
+</div>
       </div>
     </div>
   );

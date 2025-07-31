@@ -3,8 +3,6 @@
 
 import React, { useState, useEffect } from 'react'; // useEffect re-añadido
 import { useRouter, useSearchParams } from 'next/navigation';
-import Card from '@/app/components/ui/Card'; // Asegúrate que la ruta es correcta
-import Button from '@/app/components/ui/Button'; // Asegúrate que la ruta es correcta
 import { planes, campanias, Plan, Campania, PlanId, CampaniaId } from '@/lib/constants/anuncios'; // Tipos PlanId y CampaniaId importados para claridad
 import { useAnuncioStore } from '@/store/anuncioStore';
 import { updateAnuncio } from '@/lib/services/anunciosService';
@@ -122,81 +120,97 @@ export default function ResumenPage() {
 
   return (
     <div className="min-h-screen bg-fondo text-texto p-4 flex flex-col items-center">
-       <div className="absolute left-0 top-1">
-          <BotonAyuda>
-            <AyudaCrearEditarAnuncio fase="fase1c" />
-          </BotonAyuda>
-        </div>
       
-      <div className="relative w-full mb-10 mt-8">
+      {/* --- Encabezado con título y botón de ayuda alineados --- */}
+      <div className="flex items-center justify-center gap-4 w-full mb-10 mt-8">
         <h1 className="text-3xl font-bold text-primario text-center">
-          Resumen de tu Anuncio
+          Resumen
         </h1>
+        <BotonAyuda>
+          <AyudaCrearEditarAnuncio fase="fase1c" />
+        </BotonAyuda>
       </div>
 
-      <Card className="w-full max-w-2xl p-6 shadow-lg">
+      {/* --- Tarjeta de Resumen con estilo 3D --- */}
+      <div className="w-full max-w-2xl p-6 bg-tarjeta rounded-2xl 
+                     shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]">
         <div className="space-y-6">
           <div>
-            <h2 className="text-xl font-semibold text-texto- একটু mb-2">Plan Seleccionado</h2>
-            <p><span className="font-medium">Nombre:</span> {planSeleccionado.name}</p>
-            <p><span className="font-medium">Precio Base Mensual:</span> ${planSeleccionado.priceARS.toLocaleString('es-AR')} ARS</p>
-            <p><span className="font-medium">Imágenes Máximas por Pantalla:</span> {planSeleccionado.maxImages}</p>
-            <p><span className="font-medium">Duración por Imagen:</span> {planSeleccionado.durationSeconds}s</p>
+            <h2 className="text-xl font-semibold text-texto-principal mb-2">Plan Seleccionado</h2>
+            <p className="text-texto-secundario"><span className="font-medium text-texto-principal">Nombre:</span> {planSeleccionado.name}</p>
+            <p className="text-texto-secundario"><span className="font-medium text-texto-principal">Precio Base Mensual:</span> ${planSeleccionado.priceARS.toLocaleString('es-AR')} ARS</p>
+            <p className="text-texto-secundario"><span className="font-medium text-texto-principal">Imágenes Máximas por Pantalla:</span> {planSeleccionado.maxImages}</p>
+            <p className="text-texto-secundario"><span className="font-medium text-texto-principal">Duración por Imagen:</span> {planSeleccionado.durationSeconds}s</p>
           </div>
 
-          <hr className="border-border-muted" />
+          <div className="border-t border-borde-tarjeta"></div>
 
           <div>
-            <h2 className="text-xl font-semibold text-texto- একটু mb-2">Campaña Seleccionada</h2>
-            <p><span className="font-medium">Tipo:</span> {campaniaSeleccionada.name}</p>
-            <p><span className="font-medium">Duración:</span> {campaniaSeleccionada.months} {campaniaSeleccionada.months > 1 ? 'meses' : 'mes'}</p>
-            <p><span className="font-medium">Descuento Aplicado:</span> {campaniaSeleccionada.discount * 100}%</p>
+            <h2 className="text-xl font-semibold text-texto-principal mb-2">Campaña Seleccionada</h2>
+            <p className="text-texto-secundario"><span className="font-medium text-texto-principal">Tipo:</span> {campaniaSeleccionada.name}</p>
+            <p className="text-texto-secundario"><span className="font-medium text-texto-principal">Duración:</span> {campaniaSeleccionada.months} {campaniaSeleccionada.months > 1 ? 'meses' : 'mes'}</p>
+            <p className="text-texto-secundario"><span className="font-medium text-texto-principal">Descuento Aplicado:</span> {campaniaSeleccionada.discount * 100}%</p>
           </div>
 
-          <hr className="border-border-muted" />
+          <div className="border-t border-borde-tarjeta"></div>
 
           <div>
             <h2 className="text-2xl font-bold text-primario mb-3">Costo Total Estimado</h2>
-            <p className="text-3xl font-bold text-texto mb-1">
+            <p className="text-3xl font-bold text-texto-principal mb-1">
               ${precioTotalConDescuento.toLocaleString('es-AR')} ARS
             </p>
-            <p className="text-xs text-texto-muted">
+            <p className="text-xs text-texto-secundario opacity-80">
               (Este es el costo total por {campaniaSeleccionada.months} {campaniaSeleccionada.months > 1 ? 'meses' : 'mes'} de servicio con el plan y campaña seleccionados)
             </p>
           </div>
         </div>
-      </Card>
+      </div>
 
+      {/* --- Botones de Acción con estilo 3D --- */}
       <div className="flex flex-col sm:flex-row gap-4 w-full max-w-2xl mt-8">
-        <Button
-          variant="outline"
+        <button
           onClick={handleVolverACampanas}
           disabled={isLoadingUpdate}
-          className="w-full sm:w-auto"
+          className="
+            inline-flex items-center justify-center
+            px-4 py-2 rounded-xl text-sm font-medium text-texto-secundario
+            bg-tarjeta
+            shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+            transition-all duration-150 ease-in-out
+            hover:text-primario hover:brightness-110
+            active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]
+            disabled:opacity-60 disabled:cursor-not-allowed
+          "
         >
           Volver a Campañas
-        </Button>
-        <Button
-          variant="secondary"
+        </button>
+        <button
           onClick={() => {
             console.log('ResumenPage: Botón "Cancelar y Empezar de Nuevo" presionado.');
-            resetAnuncioStore(); // Limpia el store local (y localStorage debido a persist)
-            // El borrador en Firebase NO se elimina aquí.
-            router.replace('/bienvenida'); // Usar replace para una "salida limpia" del flujo
+            resetAnuncioStore();
+            router.replace('/bienvenida');
           }}
           disabled={isLoadingUpdate}
-          className="w-full sm:w-auto"
+          className="
+            inline-flex items-center justify-center
+            px-4 py-2 rounded-xl text-sm font-medium text-texto-secundario
+            bg-tarjeta
+            shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+            transition-all duration-150 ease-in-out
+            hover:text-primario hover:brightness-110
+            active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]
+            disabled:opacity-60 disabled:cursor-not-allowed
+          "
         >
           Cancelar y Empezar de Nuevo
-        </Button>
-        <Button
-          variant="primary"
+        </button>
+        <button
           onClick={handleContinuar}
           disabled={isLoadingUpdate}
-          className="w-full sm:w-auto flex-grow"
+          className="btn-primary w-full sm:w-auto flex-grow"
         >
           {isLoadingUpdate ? 'Guardando Cambios...' : (borradorId ? 'Guardar Cambios y Continuar' : 'Seleccionar Cantidad de Imágenes')}
-        </Button>
+        </button>
       </div>
     </div>
   );

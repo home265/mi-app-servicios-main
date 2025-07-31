@@ -3,8 +3,6 @@
 
 import React, { useState, useEffect as ReactUseEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import Card from '@/app/components/ui/Card';
-import Button from '@/app/components/ui/Button';
 import { useAnuncioStore } from '@/store/anuncioStore';
 import { planes, Plan, PlanId, CampaniaId } from '@/lib/constants/anuncios'; // CampaniaId y PlanId importados para claridad
 import { updateAnuncio } from '@/lib/services/anunciosService';
@@ -166,29 +164,17 @@ export default function CountSelectionPage() {
 
   return (
     <div className="min-h-screen bg-fondo text-texto p-4 flex flex-col items-center">
-      <div className="absolute left-0 top-1">
-
-                <BotonAyuda>
-
-                  <AyudaCrearEditarAnuncio fase="fase1d" />
-
-                </BotonAyuda>
-
-              </div>
-
-      <div className="relative w-full mb-10 mt-8">
-
-
-
-        <h1 className="text-3xl font-bold text-primario mb-2 text-center">
-
-        ¿Cuántas Imágenes por Pantalla?
-
-      </h1>
-
-
-
+      
+      {/* --- ENCABEZADO RESPONSIVO CON TÍTULO E ICONO ALINEADOS --- */}
+      <div className="flex flex-col sm:flex-row items-center justify-center text-center gap-4 w-full mb-10 mt-8">
+        <h1 className="text-3xl font-bold text-primario">
+          ¿Cuántas Imágenes por Pantalla?
+        </h1>
+        <BotonAyuda>
+          <AyudaCrearEditarAnuncio fase="fase1d" />
+        </BotonAyuda>
       </div>
+
       <p className="text-center text-texto-secundario mb-8 max-w-xl">
         Para tu plan <span className="font-semibold">{plan.name}</span>, puedes elegir hasta{' '}
         <span className="font-semibold">{plan.maxImages}</span> imágenes que rotarán.
@@ -198,22 +184,29 @@ export default function CountSelectionPage() {
         </span> segundos.
       </p>
 
-      <Card className="w-full max-w-xl p-6 shadow-lg">
-        <div className="space-y-4">
+      {/* --- TARJETA PRINCIPAL CON ESTILO 3D --- */}
+      <div className="w-full max-w-xl p-6 rounded-2xl bg-tarjeta
+                     shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]">
+        <div className="space-y-6">
           <label htmlFor="image-count-slider" className="block text-lg font-medium text-texto-principal text-center">
             Imágenes seleccionadas: <span className="text-2xl font-bold text-primario">{selectedCount}</span>
           </label>
-          <input
-            id="image-count-slider"
-            type="range"
-            min="1"
-            max={plan.maxImages} // Usar plan.maxImages que ya está validado
-            value={selectedCount} // selectedCount ya está validado para estar dentro de los límites
-            onChange={handleCountChange}
-            className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer dark:bg-gray-700 accent-primario"
-            disabled={isLoadingUpdate}
-          />
-          <div>
+          
+          {/* --- SLIDER CON ESTILO 3D "HUNDIDO" --- */}
+          <div className="relative h-2 w-full rounded-full bg-fondo shadow-[inset_1px_1px_3px_rgba(0,0,0,0.6)]">
+            <input
+              id="image-count-slider"
+              type="range"
+              min="1"
+              max={plan.maxImages}
+              value={selectedCount}
+              onChange={handleCountChange}
+              className="absolute w-full h-full appearance-none bg-transparent cursor-pointer accent-primario"
+              disabled={isLoadingUpdate}
+            />
+          </div>
+
+          <div className="text-center pt-2">
             <p className="text-texto-secundario">
               <span className="font-medium text-texto-principal">
                 Duración por imagen:
@@ -224,32 +217,41 @@ export default function CountSelectionPage() {
               })}{' '}
               segundos
             </p>
-            <p className="text-sm text-texto-muted">
+            <p className="text-sm text-texto-secundario opacity-80">
               Máximo permitido para tu plan ({plan.name}): {plan.maxImages} imágenes.
             </p>
-            <p className="text-xs text-texto-muted mt-1">
+            <p className="text-xs text-texto-secundario opacity-70 mt-1">
               Duración total del anuncio por ciclo de imágenes: {plan.durationSeconds} segundos.
             </p>
           </div>
         </div>
-      </Card>
+      </div>
+
+      {/* --- BOTONES DE NAVEGACIÓN CON ESTILO 3D --- */}
       <div className="flex flex-col sm:flex-row gap-4 w-full max-w-xl mt-8">
-        <Button
-          variant="outline"
+        <button
           onClick={handlePrevious}
           disabled={isLoadingUpdate}
-          className="w-full sm:w-auto"
+          className="
+            inline-flex items-center justify-center
+            px-4 py-2 rounded-xl text-sm font-medium text-texto-secundario
+            bg-tarjeta
+            shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+            transition-all duration-150 ease-in-out
+            hover:text-primario hover:brightness-110
+            active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]
+            disabled:opacity-60 disabled:cursor-not-allowed
+          "
         >
           Anterior
-        </Button>
-        <Button
-          variant="primary"
+        </button>
+        <button
           onClick={handleNext}
           disabled={isLoadingUpdate}
-          className="w-full sm:w-auto flex-grow"
+          className="btn-primary w-full sm:w-auto flex-grow"
         >
           {isLoadingUpdate ? 'Guardando...' : 'Continuar al Editor'}
-        </Button>
+        </button>
       </div>
     </div>
   );
