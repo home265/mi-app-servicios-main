@@ -1,4 +1,3 @@
-// src/app/(auth)/seleccionar-registro/page.tsx
 'use client';
 
 import { useState } from 'react';
@@ -6,7 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import SeleccionRolCard from '@/app/components/auth/SeleccionRolCard';
 import Modal from '@/app/components/common/Modal';
-import Button from '@/app/components/ui/Button';
+// --- 1. IMPORTAR LOS ÍCONOS DE CANDADO ---
+import { LockClosedIcon, LockOpenIcon } from '@heroicons/react/24/solid';
 
 export default function SeleccionarRegistroPage() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -30,9 +30,9 @@ export default function SeleccionarRegistroPage() {
           Para continuar, primero debes leer y aceptar los Términos y la Política de Privacidad.
         </p>
         <div className="mt-5 flex justify-end">
-          <Button onClick={() => setModalVisible(false)}>
+          <button onClick={() => setModalVisible(false)} className="btn-primary">
             Entendido
-          </Button>
+          </button>
         </div>
       </Modal>
 
@@ -40,7 +40,7 @@ export default function SeleccionarRegistroPage() {
         
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full flex justify-center">
           <Image
-            src="/logo1.png" // Logo estático del tema oscuro
+            src="/logo1.png"
             alt="Logo CODYS"
             width={360}
             height={204}
@@ -52,54 +52,64 @@ export default function SeleccionarRegistroPage() {
         <div
           className={`
             w-full max-w-md space-y-6
-            rounded-xl border border-borde-tarjeta shadow-card
-            bg-tarjeta text-texto-principal
+            rounded-2xl bg-tarjeta text-texto-principal
             p-6 md:p-8
-            mt-55 mb-15
+            shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]
+            mt-52 mb-10
           `}
         >
           <h1 className="text-center text-2xl font-bold">Elige tu tipo de registro</h1>
 
-          <div className="grid gap-4">
+          <div className="space-y-4">
+            {/* --- 2. SE AÑADEN LOS ÍCONOS DE CANDADO A CADA OPCIÓN --- */}
             <Link
               href={acceptedTerms ? "/registro/usuario" : "#"}
-              // <-- MODIFICADO
-              className={`group ${!acceptedTerms ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`relative block transition-opacity duration-300 ${!acceptedTerms ? "opacity-50 cursor-not-allowed" : "group"}`}
               onClick={handleRoleClick}
               aria-disabled={!acceptedTerms}
             >
               <SeleccionRolCard rol="usuario" />
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-texto-secundario">
+                {acceptedTerms 
+                  ? <LockOpenIcon className="h-5 w-5 text-primario transition-opacity duration-300" /> 
+                  : <LockClosedIcon className="h-5 w-5 transition-opacity duration-300" />
+                }
+              </div>
             </Link>
             <Link
               href={acceptedTerms ? "/registro/prestador" : "#"}
-              // <-- MODIFICADO
-              className={`group ${!acceptedTerms ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`relative block transition-opacity duration-300 ${!acceptedTerms ? "opacity-50 cursor-not-allowed" : "group"}`}
               onClick={handleRoleClick}
               aria-disabled={!acceptedTerms}
             >
               <SeleccionRolCard rol="prestador" />
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-texto-secundario">
+                {acceptedTerms 
+                  ? <LockOpenIcon className="h-5 w-5 text-primario transition-opacity duration-300" /> 
+                  : <LockClosedIcon className="h-5 w-5 transition-opacity duration-300" />
+                }
+              </div>
             </Link>
             <Link
               href={acceptedTerms ? "/registro/comercio" : "#"}
-              // <-- MODIFICADO
-              className={`group ${!acceptedTerms ? "opacity-50 cursor-not-allowed" : ""}`}
+              className={`relative block transition-opacity duration-300 ${!acceptedTerms ? "opacity-50 cursor-not-allowed" : "group"}`}
               onClick={handleRoleClick}
               aria-disabled={!acceptedTerms}
             >
               <SeleccionRolCard rol="comercio" />
+              <div className="absolute right-4 top-1/2 -translate-y-1/2 text-texto-secundario">
+                {acceptedTerms 
+                  ? <LockOpenIcon className="h-5 w-5 text-primario transition-opacity duration-300" /> 
+                  : <LockClosedIcon className="h-5 w-5 transition-opacity duration-300" />
+                }
+              </div>
             </Link>
           </div>
 
           <div className="border-t border-borde-tarjeta pt-4">
-              <div className="flex items-center justify-center space-x-3">
-                  <input
-                      type="checkbox"
-                      id="terms"
-                      checked={acceptedTerms}
-                      onChange={(e) => setAcceptedTerms(e.target.checked)}
-                      className="h-5 w-5 rounded-sm border-borde-tarjeta bg-transparent text-primario focus:ring-2 focus:ring-primario focus:ring-offset-fondo"
-                  />
-                  <label htmlFor="terms" className="text-sm font-light text-texto-secundario">
+              <div className="flex items-center justify-center">
+                <label htmlFor="terms-toggle" className="flex items-center cursor-pointer text-sm font-light text-texto-secundario select-none">
+                  <span className="pr-3">
                       Acepto los{' '}
                       <Link href="/terminos-y-condiciones" className="underline hover:text-primario" target="_blank" rel="noopener noreferrer">
                           Términos
@@ -108,7 +118,19 @@ export default function SeleccionarRegistroPage() {
                       <Link href="/politica-de-privacidad" className="underline hover:text-primario" target="_blank" rel="noopener noreferrer">
                           Política de Privacidad
                       </Link>.
-                  </label>
+                  </span>
+                  <div className="relative">
+                      <input
+                          type="checkbox"
+                          id="terms-toggle"
+                          checked={acceptedTerms}
+                          onChange={(e) => setAcceptedTerms(e.target.checked)}
+                          className="sr-only peer"
+                      />
+                      <div className="w-12 h-7 bg-fondo rounded-full shadow-[inset_1px_1px_4px_rgba(0,0,0,0.6)] peer-checked:bg-primario transition-colors duration-300"></div>
+                      <div className="absolute left-1 top-1 w-5 h-5 bg-texto-secundario rounded-full transition-transform duration-300 ease-in-out peer-checked:translate-x-5 peer-checked:bg-fondo"></div>
+                  </div>
+                </label>
               </div>
           </div>
 

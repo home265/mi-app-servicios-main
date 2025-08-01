@@ -1,11 +1,11 @@
-// src/app/components/auth/LoginForm.tsx
 'use client';
 
 import { useState } from 'react';
 import { signInWithEmailAndPassword, AuthError } from 'firebase/auth';
 import { auth } from '@/lib/firebase/config';
-import Input from '@/app/components/ui/Input';
-import Button from '@/app/components/ui/Button';
+// Se eliminan los imports de los componentes genéricos que vamos a reemplazar
+// import Input from '@/app/components/ui/Input';
+// import Button from '@/app/components/ui/Button';
 
 // --- INICIO: MODIFICACIÓN ---
 // 1. Definimos las props que el componente recibirá.
@@ -75,41 +75,50 @@ export default function LoginForm({ onLoginSuccess }: LoginFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <Input
-        id="email"
-        label="Email"
-        type="email"
-        placeholder="ingrese email válido"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-        autoComplete="email"
-        disabled={isLoading}
-      />
-      <Input
-        id="password"
-        label="Contraseña"
-        type="password"
-        placeholder="ingrese contraseña"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        required
-        autoComplete="current-password"
-        disabled={isLoading}
-      />
+      <div>
+        <label htmlFor="email" className="block text-sm font-medium text-texto-secundario mb-2">
+            Email
+        </label>
+        <input
+            id="email"
+            type="email"
+            placeholder="ingrese email válido"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+            disabled={isLoading}
+            className="block w-full px-4 py-3 bg-tarjeta border-none rounded-xl shadow-[inset_2px_2px_5px_rgba(0,0,0,0.6)] placeholder-texto-secundario focus:outline-none focus:ring-2 focus:ring-primario text-texto-principal transition-shadow"
+        />
+      </div>
+      <div>
+        <label htmlFor="password" className="block text-sm font-medium text-texto-secundario mb-2">
+            Contraseña
+        </label>
+        <input
+            id="password"
+            type="password"
+            placeholder="ingrese contraseña"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="current-password"
+            disabled={isLoading}
+            className="block w-full px-4 py-3 bg-tarjeta border-none rounded-xl shadow-[inset_2px_2px_5px_rgba(0,0,0,0.6)] placeholder-texto-secundario focus:outline-none focus:ring-2 focus:ring-primario text-texto-principal transition-shadow"
+        />
+      </div>
 
       {error && (
         <p className="text-sm text-error text-center">{error}</p>
       )}
 
-      <Button
-  type="submit"
-  isLoading={isLoading}
-  fullWidth
-  className="btn-primary"  // <-- APLICA LA CLASE CORRECTA AQUÍ
->
-  {isLoading ? 'Ingresando...' : 'Ingresar'}
-</Button>
+      <button
+        type="submit"
+        disabled={isLoading}
+        className="btn-primary w-full"
+      >
+        {isLoading ? 'Ingresando...' : 'Ingresar'}
+      </button>
     </form>
   );
 }

@@ -172,7 +172,7 @@ export default function PagoLoaderClient({ anuncioId }: PagoLoaderClientProps) {
           </BotonAyuda>
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold text-[var(--color-primario)]">
-          Confirmar y Pagar Anuncio
+          Pagar Anuncio
         </h1>
       </div>
 

@@ -213,46 +213,68 @@ export default function MisAnunciosPage() {
     <div className="min-h-screen bg-fondo">
       <Navbar hideSettings={true} />
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="relative mb-6 text-center">
-          <div className="absolute left-0 top-1/2 -translate-y-1/2">
+        {/* --- ENCABEZADO CON ESTILO UNIFICADO --- */}
+       <div className="relative mb-6 text-center">
+          {/* El título se centra automáticamente por la clase text-center del div padre */}
+          <h1 className="text-2xl sm:text-3xl font-bold text-texto-principal inline-block">
+            Mis Anuncios
+          </h1>
+
+          {/* El botón de ayuda se posiciona de forma absoluta a la derecha */}
+          <div className="absolute right-0 top-1/2 -translate-y-1/2">
             <BotonAyuda>
               <AyudaMisAnuncios />
             </BotonAyuda>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-texto-principal inline-block">
-            Mis Anuncios
-          </h1>
         </div>
 
-        <div className="text-center">
-          <Link href="/planes" className="inline-block bg-primario text-fondo px-6 py-3 rounded-lg shadow hover:brightness-90 transition-colors font-semibold">
-              Crear Nuevo Anuncio
-          </Link>
-        </div>
+        {/* --- BOTÓN "CREAR NUEVO ANUNCIO" CON ESTILO 3D PRIMARIO --- */}
+        <div className="text-center mb-8">
+  <Link href="/planes">
+    <button
+      className="
+        inline-flex items-center justify-center
+        px-6 py-3 rounded-xl text-base font-semibold text-texto-secundario
+        bg-tarjeta
+        shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+        transition-all duration-150 ease-in-out
+        hover:text-primario hover:brightness-110
+        active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]
+      "
+    >
+      Crear Nuevo Anuncio
+    </button>
+  </Link>
+</div>
 
         {!currentUserUid && !isLoadingAuth && (
-             <div className="text-center py-10 px-6 bg-tarjeta rounded-lg shadow-md max-w-lg mx-auto">
+             <div className="text-center py-10 px-6 bg-tarjeta rounded-2xl shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)] max-w-lg mx-auto">
                 <svg className="w-16 h-16 text-primario mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
                 <h2 className="text-xl font-semibold text-texto-principal mb-2">Acceso Restringido</h2>
                 <p className="text-md text-texto-secundario mb-6">
                 Debes iniciar sesión para ver tus anuncios.
                 </p>
-                <Link href="/login" className="mt-4 inline-block bg-primario text-fondo px-8 py-3 rounded-lg hover:brightness-90 transition-colors font-medium text-sm">
-                    Ir a Iniciar Sesión
+                <Link href="/login">
+                    <button className="btn-primary mt-4">
+                        Ir a Iniciar Sesión
+                    </button>
                 </Link>
             </div>
         )}
 
         {currentUserUid && anunciosConPreview.length === 0 && !isLoadingAnuncios && !error && (
-            <div className="text-center py-10 px-6 bg-tarjeta rounded-lg shadow-md max-w-lg mx-auto">
+            <div className="text-center py-10 px-6 bg-tarjeta rounded-2xl shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)] max-w-lg mx-auto">
                 <h2 className="text-xl font-semibold text-texto-principal mb-2">
                 No has creado anuncios
                 </h2>
                 <p className="text-md text-texto-secundario mb-6">
                 ¡Anímate a crear el primero para empezar a promocionarte!
                 </p>
-                <Link href="/planes" className="mt-4 inline-block bg-primario text-fondo px-8 py-3 rounded-lg hover:brightness-90 transition-colors font-medium text-sm">
-                Crear Nuevo Anuncio
+                {/* Este botón ya estaba estilizado como primario, lo mantenemos */}
+                <Link href="/planes">
+                    <button className="btn-primary mt-4">
+                        Crear Nuevo Anuncio
+                    </button>
                 </Link>
             </div>
         )}

@@ -1,8 +1,7 @@
 // src/app/api/buscar-localidades/route.ts
 
 import { NextResponse } from 'next/server';
-import path from 'path';
-import { promises as fs } from 'fs';
+import data from '@/data/localidades.json'; // <-- CAMBIO CLAVE: Se importa el JSON directamente.
 
 // Definimos los tipos para que coincidan con los del frontend
 interface Provincia {
@@ -20,6 +19,9 @@ interface LocalidadesFile {
   localidades: Localidad[];
 }
 
+// Se "castea" el JSON importado una sola vez para tener el tipado correcto.
+const todasLasLocalidades: Localidad[] = (data as LocalidadesFile).localidades;
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -30,14 +32,13 @@ export async function GET(request: Request) {
       return NextResponse.json({ sugerencias: [] });
     }
 
-    const jsonDirectory = path.join(process.cwd(), 'src', 'data');
-    const fileContents = await fs.readFile(path.join(jsonDirectory, 'localidades.json'), 'utf8');
-    const data: LocalidadesFile = JSON.parse(fileContents);
+    // Ya no es necesario leer el archivo, usamos la variable `todasLasLocalidades`
+    // que ya tiene los datos.
 
-    // Replicamos la misma lógica de filtrado que tenías en el cliente.
+    // Replicamos la misma lógica de filtrado que tenías.
     const busquedaNormalizada = query.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 
-    const filtradas = data.localidades
+    const filtradas = todasLasLocalidades
       .filter(loc => {
         const nombreNormalizado = loc.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         const provinciaNormalizada = loc.provincia.nombre.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");

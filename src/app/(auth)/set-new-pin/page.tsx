@@ -3,13 +3,11 @@
 import { useState } from 'react';
 import { useForm, SubmitHandler } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
-// Se eliminan las importaciones de bcrypt y updateUserPin.
-// import bcrypt from 'bcryptjs';
-// import { updateUserPin } from '@/lib/firebase/firestore';
 
 import { useUserStore } from '@/store/userStore';
-import Input from '@/app/components/ui/Input';
-import Button from '@/app/components/ui/Button';
+// Se eliminan los imports de los componentes UI genéricos
+// import Input from '@/app/components/ui/Input';
+// import Button from '@/app/components/ui/Button';
 
 // La definición de los valores del formulario no cambia.
 type FormValues = {
@@ -36,7 +34,7 @@ export default function SetNewPinPage() {
 
   const pinValue = watch('pin');
 
-  // La función onSubmit ahora llama a la nueva API.
+  // La lógica de envío no se modifica.
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
     setServerError(null);
 
@@ -46,7 +44,6 @@ export default function SetNewPinPage() {
     }
 
     try {
-      // 1. Llamar a la API segura para actualizar el PIN.
       const response = await fetch('/api/auth/update-pin', {
         method: 'POST',
         headers: {
@@ -62,14 +59,10 @@ export default function SetNewPinPage() {
       const result = await response.json();
 
       if (!response.ok) {
-        // Si la API devuelve un error, lo mostramos.
         throw new Error(result.error || 'Ocurrió un error al intentar guardar tu nuevo PIN.');
       }
       
-      // 2. Si todo sale bien, marcamos la sesión como verificada.
       setPinVerified(true);
-      
-      // 3. Redirigimos al usuario a la página de bienvenida.
       router.replace('/bienvenida');
 
     } catch (error) {
@@ -87,11 +80,15 @@ export default function SetNewPinPage() {
     );
   }
 
+  // Estilo base para los inputs 3D
+  const inputClassName = "block w-full px-4 py-3 bg-tarjeta border-none rounded-xl shadow-[inset_2px_2px_5px_rgba(0,0,0,0.6)] placeholder-texto-secundario focus:outline-none focus:ring-2 focus:ring-primario text-texto-principal transition-shadow";
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center bg-fondo text-texto px-4">
+      {/* --- TARJETA PRINCIPAL CON ESTILO 3D --- */}
       <div className="
-        w-full max-w-md space-y-6 rounded-xl border
-        border-borde-tarjeta bg-tarjeta p-6 shadow-xl md:p-8
+        w-full max-w-md space-y-6 rounded-2xl
+        bg-tarjeta p-6 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)] md:p-8
         text-center
       ">
         <h1 className="text-2xl font-bold text-primario">Crea tu nuevo PIN</h1>
@@ -100,41 +97,49 @@ export default function SetNewPinPage() {
         </p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6">
-          <Input
-            id="pin"
-            label="Nuevo PIN de Seguridad (4 dígitos)"
-            type="password"
-            placeholder="Crea un PIN numérico"
-            maxLength={4}
-            inputMode="numeric"
-            {...register('pin', {
-              required: 'El nuevo PIN es obligatorio',
-              minLength: { value: 4, message: 'El PIN debe tener 4 dígitos' },
-              maxLength: { value: 4, message: 'El PIN debe tener 4 dígitos' },
-              pattern: { value: /^\d{4}$/, message: 'El PIN solo debe contener números' },
-            })}
-          />
-          {errors.pin && <p className="text-sm text-error -mt-3 mb-2">{errors.pin.message}</p>}
+          <div>
+            <label htmlFor="pin" className="block text-sm font-medium text-texto-secundario mb-2 text-left">Nuevo PIN de Seguridad (4 dígitos)</label>
+            <input
+              id="pin"
+              type="password"
+              placeholder="Crea un PIN numérico"
+              maxLength={4}
+              inputMode="numeric"
+              className={inputClassName}
+              {...register('pin', {
+                required: 'El nuevo PIN es obligatorio',
+                minLength: { value: 4, message: 'El PIN debe tener 4 dígitos' },
+                maxLength: { value: 4, message: 'El PIN debe tener 4 dígitos' },
+                pattern: { value: /^\d{4}$/, message: 'El PIN solo debe contener números' },
+              })}
+            />
+            {errors.pin && <p className="text-sm text-error mt-1 text-left">{errors.pin.message}</p>}
+          </div>
 
-          <Input
-            id="repetirPin"
-            label="Repetir Nuevo PIN"
-            type="password"
-            placeholder="Confirma tu nuevo PIN"
-            maxLength={4}
-            inputMode="numeric"
-            {...register('repetirPin', {
-              required: 'Debes confirmar el nuevo PIN',
-              validate: (value) => value === pinValue || 'Los PINs no coinciden',
-            })}
-          />
-          {errors.repetirPin && <p className="text-sm text-error -mt-3 mb-2">{errors.repetirPin.message}</p>}
+          <div>
+            <label htmlFor="repetirPin" className="block text-sm font-medium text-texto-secundario mb-2 text-left">Repetir Nuevo PIN</label>
+            <input
+              id="repetirPin"
+              type="password"
+              placeholder="Confirma tu nuevo PIN"
+              maxLength={4}
+              inputMode="numeric"
+              className={inputClassName}
+              {...register('repetirPin', {
+                required: 'Debes confirmar el nuevo PIN',
+                validate: (value) => value === pinValue || 'Los PINs no coinciden',
+              })}
+            />
+            {errors.repetirPin && <p className="text-sm text-error mt-1 text-left">{errors.repetirPin.message}</p>}
+          </div>
           
           {serverError && <p className="text-sm text-error text-center">{serverError}</p>}
 
-          <Button type="submit" isLoading={isSubmitting} fullWidth className="!mt-8">
-            {isSubmitting ? 'Guardando...' : 'Guardar y Continuar'}
-          </Button>
+          <div className="pt-4">
+            <button type="submit" disabled={isSubmitting} className="btn-primary w-full">
+              {isSubmitting ? 'Guardando...' : 'Guardar y Continuar'}
+            </button>
+          </div>
         </form>
       </div>
     </div>

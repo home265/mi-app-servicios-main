@@ -258,56 +258,74 @@ function PreviewClient({ anuncioId }: PreviewClientProps) {
             {reelCompleted ? <RotateCcw size={28} /> : isPlaying ? <Pause size={28} /> : <Play size={28} />}
           </button>
           
-          <div className="w-full max-w-lg mx-auto flex flex-col sm:flex-row items-center gap-3 p-3 bg-gradient-to-t from-black/70 via-black/50 to-transparent">
-            {(() => {
-              const buttonStyle = "w-full h-full flex items-center justify-center text-sm text-center py-2.5 px-3 bg-tarjeta/90 border border-borde-tarjeta hover:bg-tarjeta/100 transition-colors rounded-lg";
-              const linkStyle = "w-full sm:flex-1"; 
+          {/* --- INICIO DEL BLOQUE MODIFICADO --- */}
+          <div className="w-full max-w-lg mx-auto flex flex-col sm:flex-row items-center gap-4 p-3">
+            {/* Botón Secundario: Volver a Editar */}
+            <Link href={`/editor/${anuncioId}`} className="w-full sm:w-auto">
+              <button
+                className="
+                  w-full inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium text-texto-secundario
+                  bg-tarjeta/80 backdrop-blur-sm
+                  shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+                  transition-all duration-150 ease-in-out
+                  hover:text-primario hover:brightness-110
+                  active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]
+                "
+              >
+                <Edit3 size={16} className="mr-2 shrink-0" />
+                <span>Volver a Editar</span>
+              </button>
+            </Link>
 
-              return (
-                <>
-                  <Link href={`/editor/${anuncioId}`} className={linkStyle}>
-                    <Button className={buttonStyle}>
-                      <Edit3 size={16} className="mr-2 shrink-0" />
-                      <span>Volver a Editar</span>
-                    </Button>
-                  </Link>
+            {/* Botón Principal: Continuar y Pagar */}
+            {mostrarBotonPagar ? (
+              <Link href={`/pago/${anuncioId}`} className="w-full sm:w-auto sm:flex-grow">
+                <button className="btn-primary w-full bg-primario/90 backdrop-blur-sm">
+                  <CheckCircle size={16} className="mr-2 shrink-0" />
+                  <span>Continuar y Pagar</span>
+                </button>
+              </Link>
+            ) : (
+              anuncioStatus && (
+                <Link href="/mis-anuncios" className="w-full sm:w-auto sm:flex-grow">
+                  <div className="
+                    w-full inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm
+                    bg-tarjeta/80 backdrop-blur-sm text-texto-principal text-center
+                    shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+                  ">
+                    <div className="flex flex-col">
+                      <span className="font-semibold">
+                        {anuncioStatus === 'active' && 'Anuncio Activo'}
+                        {anuncioStatus === 'expired' && 'Anuncio Expirado'}
+                        {anuncioStatus === 'cancelled' && 'Anuncio Cancelado'}
+                      </span>
+                      <span className="text-xs underline">
+                        Ver mis anuncios
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+              )
+            )}
 
-                  {mostrarBotonPagar ? (
-                    <Link href={`/pago/${anuncioId}`} className={linkStyle}>
-                      <Button className={buttonStyle}>
-                        <CheckCircle size={16} className="mr-2 shrink-0" />
-                        <span>Continuar y Pagar</span>
-                      </Button>
-                    </Link>
-                  ) : (
-                    anuncioStatus && (
-                      <Link href="/mis-anuncios" className={linkStyle}>
-                        <div className={buttonStyle}>
-                          <div className="flex flex-col text-center">
-                            <span className="text-sm font-semibold">
-                              {anuncioStatus === 'active' && 'Anuncio Activo'}
-                              {anuncioStatus === 'expired' && 'Anuncio Expirado'}
-                              {anuncioStatus === 'cancelled' && 'Anuncio Cancelado'}
-                            </span>
-                            <span className="text-xs underline">
-                              Ver mis anuncios
-                            </span>
-                          </div>
-                        </div>
-                      </Link>
-                    )
-                  )}
-
-                  <Link href="/bienvenida" className={linkStyle}>
-                    <Button className={buttonStyle}>
-                      <LogOut size={16} className="mr-2 shrink-0" />
-                      <span>Tocar para Salir</span>
-                    </Button>
-                  </Link>
-                </>
-              );
-            })()}
+            {/* Botón Secundario: Salir */}
+            <Link href="/bienvenida" className="w-full sm:w-auto">
+              <button
+                className="
+                  w-full inline-flex items-center justify-center px-4 py-2 rounded-xl text-sm font-medium text-texto-secundario
+                  bg-tarjeta/80 backdrop-blur-sm
+                  shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+                  transition-all duration-150 ease-in-out
+                  hover:text-primario hover:brightness-110
+                  active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]
+                "
+              >
+                <LogOut size={16} className="mr-2 shrink-0" />
+                <span>Tocar para Salir</span>
+              </button>
+            </Link>
           </div>
+          {/* --- FIN DEL BLOQUE MODIFICADO --- */}
         </div>
       </div>
     </div>

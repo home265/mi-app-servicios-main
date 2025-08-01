@@ -21,13 +21,13 @@ export default function LoginPage() {
       </div>
 
       <div className="flex w-full flex-col items-center">
-        {/* Se eliminaron las clases dark:* del contenedor de la tarjeta */}
+        {/* --- TARJETA PRINCIPAL CON ESTILO 3D --- */}
         <div
           className={`
-            login-card
             w-full max-w-md flex-shrink-0
             space-y-4
-            rounded-xl border border-borde-tarjeta bg-tarjeta p-6 text-texto-principal shadow-card
+            rounded-2xl bg-tarjeta p-6 text-texto-principal 
+            shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]
             md:p-8 mt-40
           `}
         >
@@ -35,7 +35,6 @@ export default function LoginPage() {
           <LoginForm />
           <p className="text-center text-sm">
             ¿No tienes cuenta?{' '}
-            {/* Se eliminó la clase dark:* del enlace */}
             <Link
               href="/seleccionar-registro"
               className="font-medium text-secundario hover:underline"
@@ -46,7 +45,6 @@ export default function LoginPage() {
         </div>
 
         <div className="mt-6 mb-0 flex-shrink-0 text-center">
-          {/* Se unificó el color del texto a text-texto-secundario */}
           <p className="text-xs font-light text-texto-secundario">
             Al iniciar sesión, aceptas nuestros{' '}
             <Link href="/terminos-y-condiciones" className="underline hover:text-texto-principal" target="_blank" rel="noopener noreferrer">

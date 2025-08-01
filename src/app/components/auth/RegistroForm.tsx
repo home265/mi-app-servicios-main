@@ -6,19 +6,20 @@ import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 
 // Componentes UI & Forms
-import Input from '@/app/components/ui/Input';
-import Button from '@/app/components/ui/Button';
+// Se eliminan los imports de los componentes UI genéricos que vamos a reemplazar
+// import Input from '@/app/components/ui/Input';
+// import Button from '@/app/components/ui/Button';
 import Modal from '@/app/components/common/Modal';
 import SelectorLocalidad, { LocalidadSeleccionada } from '@/app/components/forms/SelectorLocalidad';
 import SelectorCategoria, { CategoriaSeleccionada } from '@/app/components/forms/SelectorCategoria';
 import SelectorRubro, { RubroSeleccionado } from '@/app/components/forms/SelectorRubro';
 
-// JSON Data (No se usan aquí directamente pero los selectores sí)
+// JSON Data (sin cambios)
 import categoriasData from '@/data/categorias.json';
 import rubrosData from '@/data/rubro.json';
 
 
-// --- CORRECCIÓN 1: Actualizamos los tipos para que coincidan con la nueva estructura de datos ---
+// --- Tipos (sin cambios) ---
 type CategoriaSeleccionadaConMatricula = CategoriaSeleccionada & {
   requiereMatricula?: boolean;
 };
@@ -98,12 +99,11 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
     ? 'Matrícula / Certificación (*Obligatorio*)'
     : 'Matrícula / Certificación (Opcional)';
   
-  // --- CORRECCIÓN 3: Se combina la ref de react-hook-form con nuestra ref local ---
   const { ref: matriculaRHFRef, ...matriculaRegisterProps } = register('matricula', {
     required: isMatriculaRequired ? 'La matrícula es obligatoria para esta profesión.' : false,
   });
-  // ---
 
+  // Lógica de hooks y handlers (sin cambios)
   useEffect(() => {
     if (isMatriculaRequired) {
       setModalOpen(true);
@@ -126,11 +126,6 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    // --- CORRECCIÓN 2: Se elimina el bloque de validación manual 'formValido' ---
-    // La validación ahora se maneja de forma más robusta y declarativa
-    // en las 'rules' de los Controller y en el 'register' de cada campo.
-    // handleSubmit ya previene el envío si hay errores.
-
     console.log('Datos del formulario VALIDADOS y listos para pasar a selfie:', data);
     console.log('Registrando como:', rol);
 
@@ -162,6 +157,9 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
     ? "Ej: Venta de artículos de ferretería, pinturería y materiales de construcción..."
     : "";
 
+  // Estilo base para todos los inputs 3D
+  const inputClassName = "block w-full px-4 py-3 bg-tarjeta border-none rounded-xl shadow-[inset_2px_2px_5px_rgba(0,0,0,0.6)] placeholder-texto-secundario focus:outline-none focus:ring-2 focus:ring-primario text-texto-principal transition-shadow";
+
   return (
     <>
       <Modal
@@ -173,18 +171,24 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
           Para la profesión/especialidad que seleccionaste, es obligatorio registrar un número de matrícula válido para poder continuar.
         </p>
         <div className="mt-5 flex justify-end">
-          <Button onClick={handleModalContinue}>
+          <button onClick={handleModalContinue} className="btn-primary">
             Entendido
-          </Button>
+          </button>
         </div>
       </Modal>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 md:space-y-6" noValidate>
-        <Input id="nombre" label="Nombre" type="text" placeholder="Tu nombre" {...register('nombre', { required: 'El nombre es obligatorio' })} />
-        {errors.nombre && <p className="text-sm text-error -mt-3 mb-2">{errors.nombre.message}</p>}
+        <div>
+          <label htmlFor="nombre" className="block text-sm font-medium text-texto-secundario mb-2">Nombre</label>
+          <input id="nombre" type="text" placeholder="Tu nombre" className={inputClassName} {...register('nombre', { required: 'El nombre es obligatorio' })} />
+          {errors.nombre && <p className="text-sm text-error mt-1">{errors.nombre.message}</p>}
+        </div>
 
-        <Input id="apellido" label="Apellido" type="text" placeholder="Tu apellido" {...register('apellido', { required: 'El apellido es obligatorio' })} />
-        {errors.apellido && <p className="text-sm text-error -mt-3 mb-2">{errors.apellido.message}</p>}
+        <div>
+          <label htmlFor="apellido" className="block text-sm font-medium text-texto-secundario mb-2">Apellido</label>
+          <input id="apellido" type="text" placeholder="Tu apellido" className={inputClassName} {...register('apellido', { required: 'El apellido es obligatorio' })} />
+          {errors.apellido && <p className="text-sm text-error mt-1">{errors.apellido.message}</p>}
+        </div>
 
         <Controller name="localidad" control={control} rules={{ required: 'La localidad y provincia son obligatorias' }}
           render={({ field, fieldState }) => (
@@ -193,30 +197,48 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
           )}
         />
         {errors.localidad && <p className="text-sm text-error -mt-3 mb-2">{errors.localidad.message}</p>}
+        
+        <div>
+            <label htmlFor="email" className="block text-sm font-medium text-texto-secundario mb-2">Email</label>
+            <input id="email" type="email" placeholder="tu@email.com" autoComplete="email" className={inputClassName}
+            {...register('email', { required: 'El email es obligatorio', pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: 'Email inválido' } })} />
+            {errors.email && <p className="text-sm text-error mt-1">{errors.email.message}</p>}
+        </div>
 
-        <Input id="email" label="Email" type="email" placeholder="tu@email.com" autoComplete="email"
-          {...register('email', { required: 'El email es obligatorio', pattern: { value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i, message: 'Email inválido' } })} />
-        {errors.email && <p className="text-sm text-error -mt-3 mb-2">{errors.email.message}</p>}
+        <div>
+            <label htmlFor="contrasena" className="block text-sm font-medium text-texto-secundario mb-2">Contraseña</label>
+            <input id="contrasena" type="password" placeholder="Crea una contraseña segura" autoComplete="new-password" className={inputClassName}
+            {...register('contrasena', { required: 'La contraseña es obligatoria', minLength: { value: 6, message: 'Mínimo 6 caracteres' } })} />
+            {errors.contrasena && <p className="text-sm text-error mt-1">{errors.contrasena.message}</p>}
+        </div>
+        
+        <div>
+            <label htmlFor="repetirContrasena" className="block text-sm font-medium text-texto-secundario mb-2">Repetir Contraseña</label>
+            <input id="repetirContrasena" type="password" placeholder="Confirma tu contraseña" autoComplete="new-password" className={inputClassName}
+            {...register('repetirContrasena', { required: 'Confirma la contraseña', validate: (value) => value === contrasenaValue || 'Las contraseñas no coinciden' })} />
+            {errors.repetirContrasena && <p className="text-sm text-error mt-1">{errors.repetirContrasena.message}</p>}
+        </div>
 
-        <Input id="contrasena" label="Contraseña" type="password" placeholder="Crea una contraseña segura" autoComplete="new-password"
-          {...register('contrasena', { required: 'La contraseña es obligatoria', minLength: { value: 6, message: 'Mínimo 6 caracteres' } })} />
-        {errors.contrasena && <p className="text-sm text-error -mt-3 mb-2">{errors.contrasena.message}</p>}
+        <div>
+            <label htmlFor="pin" className="block text-sm font-medium text-texto-secundario mb-2">PIN de Seguridad (4 dígitos)</label>
+            <input id="pin" type="password" placeholder="Crea un PIN numérico" maxLength={4} inputMode="numeric" className={inputClassName}
+            {...register('pin', { required: 'El PIN es obligatorio', minLength: { value: 4, message: 'El PIN debe tener 4 dígitos' }, maxLength: { value: 4, message: 'El PIN debe tener 4 dígitos' }, pattern: { value: /^\d{4}$/, message: 'El PIN solo debe contener números' } })} />
+            {errors.pin && <p className="text-sm text-error mt-1">{errors.pin.message}</p>}
+        </div>
 
-        <Input id="repetirContrasena" label="Repetir Contraseña" type="password" placeholder="Confirma tu contraseña" autoComplete="new-password"
-          {...register('repetirContrasena', { required: 'Confirma la contraseña', validate: (value) => value === contrasenaValue || 'Las contraseñas no coinciden' })} />
-        {errors.repetirContrasena && <p className="text-sm text-error -mt-3 mb-2">{errors.repetirContrasena.message}</p>}
+        <div>
+            <label htmlFor="repetirPin" className="block text-sm font-medium text-texto-secundario mb-2">Repetir PIN</label>
+            <input id="repetirPin" type="password" placeholder="Confirma tu PIN" maxLength={4} inputMode="numeric" className={inputClassName}
+            {...register('repetirPin', { required: 'Confirma el PIN', validate: (value) => value === pinValue || 'Los PINs no coinciden' })} />
+            {errors.repetirPin && <p className="text-sm text-error mt-1">{errors.repetirPin.message}</p>}
+        </div>
 
-        <Input id="pin" label="PIN de Seguridad (4 dígitos)" type="password" placeholder="Crea un PIN numérico" maxLength={4} inputMode="numeric"
-          {...register('pin', { required: 'El PIN es obligatorio', minLength: { value: 4, message: 'El PIN debe tener 4 dígitos' }, maxLength: { value: 4, message: 'El PIN debe tener 4 dígitos' }, pattern: { value: /^\d{4}$/, message: 'El PIN solo debe contener números' } })} />
-        {errors.pin && <p className="text-sm text-error -mt-3 mb-2">{errors.pin.message}</p>}
-
-        <Input id="repetirPin" label="Repetir PIN" type="password" placeholder="Confirma tu PIN" maxLength={4} inputMode="numeric"
-          {...register('repetirPin', { required: 'Confirma el PIN', validate: (value) => value === pinValue || 'Los PINs no coinciden' })} />
-        {errors.repetirPin && <p className="text-sm text-error -mt-3 mb-2">{errors.repetirPin.message}</p>}
-
-        <Input id="telefono" label="Teléfono Celular" type="tel" placeholder="Ej: 2622 123456 (sin 0 ni 15)" autoComplete="tel"
-          {...register('telefono', { required: 'El teléfono es obligatorio', pattern: { value: /^\d{7,15}$/, message: 'Número de teléfono inválido' } })} />
-        {errors.telefono && <p className="text-sm text-error -mt-3 mb-2">{errors.telefono.message}</p>}
+        <div>
+            <label htmlFor="telefono" className="block text-sm font-medium text-texto-secundario mb-2">Teléfono Celular</label>
+            <input id="telefono" type="tel" placeholder="Ej: 2622 123456 (sin 0 ni 15)" autoComplete="tel" className={inputClassName}
+            {...register('telefono', { required: 'El teléfono es obligatorio', pattern: { value: /^\d{7,15}$/, message: 'Número de teléfono inválido' } })} />
+            {errors.telefono && <p className="text-sm text-error mt-1">{errors.telefono.message}</p>}
+        </div>
 
         {rol === 'prestador' && (
           <>
@@ -244,32 +266,38 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
             />
             {errors.seleccionCategoria && <p className="text-sm text-error -mt-3 mb-2">{errors.seleccionCategoria.message}</p>}
             
-            <Input 
-              id="matriculaPrestador" 
-              label={labelMatricula} 
-              type="text" 
-              placeholder="Ej: MP-12345"
-              {...matriculaRegisterProps}
-              ref={(e) => {
-                matriculaRHFRef(e);
-                matriculaInputRef.current = e;
-              }}
-            />
-            {errors.matricula && <p className="text-sm text-error -mt-3 mb-2">{errors.matricula.message}</p>}
-
-            <Input id="cuilCuitPrestador" label="CUIL / CUIT" type="text" placeholder="Ej: 20-12345678-9"
-              {...register('cuilCuit', {
-                required: rol === 'prestador' ? 'El CUIL/CUIT es obligatorio' : false,
-              })} />
-            {errors.cuilCuit && <p className="text-sm text-error -mt-3 mb-2">{errors.cuilCuit.message}</p>}
+            <div>
+              <label htmlFor="matriculaPrestador" className="block text-sm font-medium text-texto-secundario mb-2">{labelMatricula}</label>
+              <input 
+                id="matriculaPrestador" 
+                type="text" 
+                placeholder="Ej: MP-12345"
+                className={inputClassName}
+                {...matriculaRegisterProps}
+                ref={(e) => {
+                  matriculaRHFRef(e);
+                  matriculaInputRef.current = e;
+                }}
+              />
+              {errors.matricula && <p className="text-sm text-error mt-1">{errors.matricula.message}</p>}
+            </div>
 
             <div>
-              <label htmlFor="descripcionPrestador" className="block text-sm font-medium text-texto-secundario mb-1">
+              <label htmlFor="cuilCuitPrestador" className="block text-sm font-medium text-texto-secundario mb-2">CUIL / CUIT</label>
+              <input id="cuilCuitPrestador" type="text" placeholder="Ej: 20-12345678-9" className={inputClassName}
+                {...register('cuilCuit', {
+                  required: rol === 'prestador' ? 'El CUIL/CUIT es obligatorio' : false,
+                })} />
+              {errors.cuilCuit && <p className="text-sm text-error mt-1">{errors.cuilCuit.message}</p>}
+            </div>
+
+            <div>
+              <label htmlFor="descripcionPrestador" className="block text-sm font-medium text-texto-secundario mb-2">
                 {labelDescripcion}
               </label>
               <textarea id="descripcionPrestador" rows={4} spellCheck="true"
                 placeholder={placeholderDescripcion}
-                className="block w-full px-3 py-2 bg-fondo border border-borde-tarjeta rounded-md shadow-sm placeholder-texto-secundario focus:outline-none focus:ring-primario focus:border-primario sm:text-sm text-texto-principal"
+                className={inputClassName} // Se aplica el mismo estilo al textarea
                 maxLength={500}
                 {...register('descripcion', {
                   required: rol === 'prestador' ? 'La descripción de tus servicios es obligatoria' : false,
@@ -305,33 +333,39 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
               )}
             />
             {errors.seleccionRubro && <p className="text-sm text-error -mt-3 mb-2">{errors.seleccionRubro.message}</p>}
-
-            <Input 
-              id="matriculaComercio" 
-              label={labelMatricula}
-              type="text" 
-              placeholder="Ej: MP-12345 (para profesionales)"
-              {...matriculaRegisterProps}
-              ref={(e) => {
-                matriculaRHFRef(e);
-                matriculaInputRef.current = e;
-              }}
-            />
-            {errors.matricula && <p className="text-sm text-error -mt-3 mb-2">{errors.matricula.message}</p>}
             
-            <Input id="cuilCuitComercio" label="CUIL / CUIT" type="text" placeholder="Ej: 30-12345678-9"
-              {...register('cuilCuit', {
-                required: rol === 'comercio' ? 'El CUIL/CUIT es obligatorio' : false,
-              })} />
-            {errors.cuilCuit && <p className="text-sm text-error -mt-3 mb-2">{errors.cuilCuit.message}</p>}
+            <div>
+              <label htmlFor="matriculaComercio" className="block text-sm font-medium text-texto-secundario mb-2">{labelMatricula}</label>
+              <input 
+                id="matriculaComercio" 
+                type="text" 
+                placeholder="Ej: MP-12345 (para profesionales)"
+                className={inputClassName}
+                {...matriculaRegisterProps}
+                ref={(e) => {
+                  matriculaRHFRef(e);
+                  matriculaInputRef.current = e;
+                }}
+              />
+              {errors.matricula && <p className="text-sm text-error mt-1">{errors.matricula.message}</p>}
+            </div>
+            
+            <div>
+              <label htmlFor="cuilCuitComercio" className="block text-sm font-medium text-texto-secundario mb-2">CUIL / CUIT</label>
+              <input id="cuilCuitComercio" type="text" placeholder="Ej: 30-12345678-9" className={inputClassName}
+                {...register('cuilCuit', {
+                  required: rol === 'comercio' ? 'El CUIL/CUIT es obligatorio' : false,
+                })} />
+              {errors.cuilCuit && <p className="text-sm text-error mt-1">{errors.cuilCuit.message}</p>}
+            </div>
 
             <div>
-              <label htmlFor="descripcionComercio" className="block text-sm font-medium text-texto-secundario mb-1">
+              <label htmlFor="descripcionComercio" className="block text-sm font-medium text-texto-secundario mb-2">
                 {labelDescripcion}
               </label>
               <textarea id="descripcionComercio" rows={4} spellCheck="true"
                 placeholder={placeholderDescripcion}
-                className="block w-full px-3 py-2 bg-fondo border border-borde-tarjeta rounded-md shadow-sm placeholder-texto-secundario focus:outline-none focus:ring-primario focus:border-primario sm:text-sm text-texto-principal"
+                className={inputClassName} // Se aplica el mismo estilo al textarea
                 maxLength={500}
                 {...register('descripcion', {
                   required: rol === 'comercio' ? 'La descripción es obligatoria' : false,
@@ -344,14 +378,15 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
 
         {errors.root?.storageError && <p className="text-sm text-error text-center mt-4">{errors.root.storageError.message}</p>}
 
-        <Button
-          type="submit"
-          isLoading={isSubmitting}
-          fullWidth
-          className="mt-8 !bg-primario !text-fondo !focus:shadow-none hover:!brightness-90"
-        >
-          {isSubmitting ? 'Procesando...' : 'Continuar a Verificación'}
-        </Button>
+        <div className="pt-4">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="btn-primary w-full"
+          >
+            {isSubmitting ? 'Procesando...' : 'Continuar a Verificación'}
+          </button>
+        </div>
       </form>
     </>
   );

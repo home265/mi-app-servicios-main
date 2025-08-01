@@ -1,8 +1,7 @@
 // src/app/api/provincias/route.ts
 
 import { NextResponse } from 'next/server';
-import path from 'path';
-import { promises as fs } from 'fs';
+import data from '@/data/localidades.json'; // <-- CAMBIO CLAVE: Se importa el JSON directamente.
 
 // 1. Definimos la estructura de nuestros datos con interfaces
 interface Provincia {
@@ -22,17 +21,16 @@ interface LocalidadesFile {
 
 export async function GET() {
   try {
-    const jsonDirectory = path.join(process.cwd(), 'src', 'data');
-    const fileContents = await fs.readFile(path.join(jsonDirectory, 'localidades.json'), 'utf8');
+    // Ya no es necesario leer el archivo con `fs`.
     
-    // 2. Aplicamos nuestro tipo estricto al parsear el JSON
-    const data: LocalidadesFile = JSON.parse(fileContents);
+    // 2. Aplicamos nuestro tipo estricto al JSON importado
+    const dataTyped: LocalidadesFile = data;
 
     // Usamos un Map para obtener provincias únicas de forma eficiente
     const provinciasMap = new Map<string, Provincia>();
     
     // 3. El callback del forEach ahora usa el tipo 'Localidad'
-    data.localidades.forEach((localidad: Localidad) => {
+    dataTyped.localidades.forEach((localidad: Localidad) => {
       if (!provinciasMap.has(localidad.provincia.id)) {
         provinciasMap.set(localidad.provincia.id, localidad.provincia);
       }

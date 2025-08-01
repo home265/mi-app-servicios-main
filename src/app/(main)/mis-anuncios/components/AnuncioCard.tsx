@@ -50,7 +50,8 @@ export default function AnuncioCard({ anuncio }: AnuncioCardProps) {
   const editTitle = anuncio.status === 'draft' ? 'Configurar Plan/Campaña del Borrador' : 'Editar Anuncio';
 
   return (
-    <div className="rounded-lg shadow-lg overflow-hidden bg-tarjeta transition-shadow duration-300 ease-in-out hover:shadow-xl flex flex-col h-full">
+    // --- TARJETA PRINCIPAL CON ESTILO 3D ---
+    <div className="rounded-2xl shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)] overflow-hidden bg-tarjeta flex flex-col h-full">
       <Link href={`/preview/${anuncio.id}`} className="block" aria-label={`Ver vista previa de ${anuncio.nombrePlan || 'anuncio'}`}>
         <div className="relative aspect-[9/16] w-full bg-fondo">
           {anuncio.previewImageUrl ? (
@@ -100,32 +101,29 @@ export default function AnuncioCard({ anuncio }: AnuncioCardProps) {
 
         <div className="flex-grow"></div>
 
-        <div className="mt-auto pt-3 border-t border-borde-tarjeta">
-          <div className="flex justify-between items-center space-x-3">
-            {(() => {
-              const buttonStyle = "flex-1 flex items-center justify-center px-3 py-2 text-xs sm:text-sm text-fondo bg-primario hover:brightness-90 rounded-md transition-colors";
-              
-              return (
-                <>
-                  <Link 
-                    href={`/preview/${anuncio.id}`}
-                    className={buttonStyle}
-                    title="Ver Previa"
-                  >
-                    <Eye size={16} className="mr-1 sm:mr-2"/>
-                    Previa
-                  </Link>
-                  <Link 
-                    href={editHref}
-                    className={buttonStyle}
-                    title={editTitle}
-                  >
-                    <Edit3 size={16} className="mr-1 sm:mr-2" />
-                    {editText}
-                  </Link>
-                </>
-              );
-            })()}
+        <div className="mt-auto pt-4 border-t border-borde-tarjeta">
+          {/* --- BOTONES DE ACCIÓN CON ESTILO 3D SECUNDARIO --- */}
+          <div className="flex justify-between items-center gap-3">
+            <Link 
+              href={`/preview/${anuncio.id}`}
+              className="flex-1"
+              title="Ver Previa"
+            >
+              <button className="w-full inline-flex items-center justify-center px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-texto-secundario bg-tarjeta shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)] transition-all hover:text-primario hover:brightness-110 active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]">
+                <Eye size={16} className="mr-1 sm:mr-2"/>
+                Previa
+              </button>
+            </Link>
+            <Link 
+              href={editHref}
+              className="flex-1"
+              title={editTitle}
+            >
+              <button className="w-full inline-flex items-center justify-center px-3 py-2 rounded-xl text-xs sm:text-sm font-medium text-texto-secundario bg-tarjeta shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)] transition-all hover:text-primario hover:brightness-110 active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]">
+                <Edit3 size={16} className="mr-1 sm:mr-2" />
+                {editText}
+              </button>
+            </Link>
           </div>
         </div>
       </div>

@@ -6,8 +6,9 @@ import Image from 'next/image';
 
 import { useUserStore } from '@/store/userStore';
 import PinInput from '@/app/components/forms/PinInput';
-import Button from '@/app/components/ui/Button';
 import LoginForm from '@/app/components/auth/LoginForm';
+// Se elimina el import de Button, ya que usaremos un <button> estándar.
+// import Button from '@/app/components/ui/Button';
 
 export default function PinEntryPage() {
   const router = useRouter();
@@ -27,6 +28,7 @@ export default function PinEntryPage() {
   const [isLocked, setIsLocked] = useState(false);
   const MAX_ATTEMPTS = 5;
 
+  // Lógica de hooks y handlers (sin cambios)
   useEffect(() => {
     if (isPinVerifiedForSession && currentUser) {
       router.replace('/bienvenida');
@@ -116,12 +118,13 @@ export default function PinEntryPage() {
     );
   }
 
+  // --- VISTA DE BLOQUEO CON TARJETA 3D ---
   if (isLocked) {
     return (
       <div className="flex min-h-screen flex-col items-center justify-center bg-fondo text-texto-principal px-4">
         <div className="
-          w-full max-w-md space-y-6 rounded-xl border
-          border-borde-tarjeta bg-tarjeta p-6 shadow-xl md:p-8
+          w-full max-w-md space-y-6 rounded-2xl
+          bg-tarjeta p-6 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)] md:p-8
         ">
           <h1 className="text-center text-2xl font-bold text-error">Acceso Bloqueado</h1>
           {pageError && <p className="text-center text-sm text-texto-secundario">{pageError}</p>}
@@ -137,7 +140,7 @@ export default function PinEntryPage() {
       
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full flex justify-center">
         <Image
-          src="/logo1.png" // Se usa directamente el logo del tema oscuro.
+          src="/logo1.png"
           alt="Logo CODYS"
           width={360}
           height={204}
@@ -146,18 +149,19 @@ export default function PinEntryPage() {
         />
       </div>
 
+      {/* --- TARJETA PRINCIPAL CON ESTILO 3D --- */}
       <div className="
         w-[90vw] sm:max-w-md md:max-w-lg
-        space-y-6 rounded-xl border border-borde-tarjeta
-        bg-tarjeta p-6 shadow-xl md:p-8
-        text-center mt-30
+        space-y-6 rounded-2xl
+        bg-tarjeta p-6 shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)] md:p-8
+        text-center mt-32
       ">
         <h1 className="text-2xl font-bold text-primario">Ingresa tu PIN</h1>
         <p className="text-texto-secundario">
           Hola {currentUser.nombre || 'Usuario'}, por favor ingresa tu PIN para continuar.
         </p>
 
-        <form onSubmit={handlePinSubmit} className="space-y-4">
+        <form onSubmit={handlePinSubmit} className="space-y-6">
           <PinInput
             id="pin"
             length={4}
@@ -170,14 +174,15 @@ export default function PinEntryPage() {
           {pageError && <p className="text-sm text-error">{pageError}</p>}
           {userError && !pageError && <p className="text-sm text-error">{userError}</p>}
 
-          <Button
-  type="submit"
-  fullWidth
-  disabled={isLoading || pin.length !== 4}
-  className="btn-primary" // <-- APLICAS LA CLASE CORRECTA AQUÍ
->
-  {isLoading ? 'Verificando…' : 'Ingresar'}
-</Button>
+          <div className="pt-2">
+            <button
+              type="submit"
+              disabled={isLoading || pin.length !== 4}
+              className="btn-primary w-full"
+            >
+              {isLoading ? 'Verificando…' : 'Ingresar'}
+            </button>
+          </div>
         </form>
 
         <div className="pt-2 text-center">

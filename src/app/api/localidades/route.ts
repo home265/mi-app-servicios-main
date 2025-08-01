@@ -1,10 +1,9 @@
 // src/app/api/localidades/route.ts
 
 import { NextResponse } from 'next/server';
-import path from 'path';
-import { promises as fs } from 'fs';
+import data from '@/data/localidades.json'; // <-- CAMBIO CLAVE: Se importa el JSON directamente.
 
-// Definimos un tipo básico para las localidades para mejorar el autocompletado
+// Definimos los tipos para que coincidan con la estructura del JSON.
 type Localidad = {
   id: string;
   nombre: string;
@@ -14,31 +13,32 @@ type Localidad = {
   };
 };
 
+interface LocalidadesFile {
+  localidades: Localidad[];
+}
+
+const todasLasLocalidades: Localidad[] = (data as LocalidadesFile).localidades;
+
 export async function GET(request: Request) {
   try {
-    // Obtenemos los parámetros de la URL para filtrar por provincia
+    // Obtenemos los parámetros de la URL para filtrar por provincia.
     const { searchParams } = new URL(request.url);
     const provinciaNombre = searchParams.get('provincia');
 
-    // Construimos la ruta al archivo JSON dentro de la carpeta /src/data
-    const jsonDirectory = path.join(process.cwd(), 'src', 'data');
-    const fileContents = await fs.readFile(path.join(jsonDirectory, 'localidades.json'), 'utf8');
-    const data: { localidades: Localidad[] } = JSON.parse(fileContents);
-
-    // Si se pide una provincia específica, filtramos los resultados
+    // Si se pide una provincia específica, filtramos los resultados.
     if (provinciaNombre) {
-      const localidadesFiltradas = data.localidades.filter(
+      const localidadesFiltradas = todasLasLocalidades.filter(
         (l) => l.provincia.nombre.toLowerCase() === provinciaNombre.toLowerCase()
       );
       return NextResponse.json({ localidades: localidadesFiltradas });
     }
 
-    // Si no, devolvemos todas las localidades
-    return NextResponse.json(data);
+    // Si no, devolvemos todas las localidades.
+    return NextResponse.json({ localidades: todasLasLocalidades });
 
   } catch (error) {
-    console.error("Error al leer o procesar localidades.json:", error);
-    // Devolvemos un error 500 si algo falla en el servidor
+    console.error("Error al procesar localidades.json:", error);
+    // Devolvemos un error 500 si algo falla en el servidor.
     return new NextResponse('Error interno del servidor', { status: 500 });
   }
 }
