@@ -1,14 +1,14 @@
-// src/app/editor/tools/TextTool.tsx
 'use client';
 
 import React, { useState } from 'react';
-import Button from '@/app/components/ui/Button';
+import { HexColorPicker } from 'react-colorful'; // 1. Se importa el nuevo selector
 import type { TextElement } from '../hooks/useEditorStore';
 import DeleteElementButton from '../components/ui/DeleteElementButton';
 import fontsData from '@/data/fonts.json';
-import FontSelector from '../components/ui/FontSelector'; // 1. IMPORTAMOS EL NUEVO COMPONENTE
+import FontSelector from '../components/ui/FontSelector';
+import ToolPanel from '../components/ui/ToolPanel';
 
-// (Opcional pero recomendado) Definir un tipo para los objetos de fuente
+// Los tipos y datos de las fuentes se mantienen intactos.
 interface FontOption {
   name: string;
   categoria?: string;
@@ -16,6 +16,7 @@ interface FontOption {
 }
 const typedFontsData: FontOption[] = fontsData;
 
+// La interfaz de props no se altera.
 interface TextToolProps {
   initial?: TextElement;
   onConfirm: (element: Omit<TextElement, 'id' | 'tipo'> & { tipo: 'texto' }) => void;
@@ -23,6 +24,7 @@ interface TextToolProps {
 }
 
 export default function TextTool({ initial, onConfirm, onClose }: TextToolProps) {
+  // Toda la lógica de estado original se mantiene sin cambios.
   const [text, setText] = useState(initial?.text || '');
   const [color, setColor] = useState(initial?.color || '#ffffff');
   const [fontFamily, setFontFamily] = useState(
@@ -30,6 +32,7 @@ export default function TextTool({ initial, onConfirm, onClose }: TextToolProps)
   );
   const [fontSizePct, setFontSizePct] = useState(initial?.fontSizePct ?? 5);
 
+  // La lógica de confirmación original no se modifica.
   const handleConfirm = () => {
     onConfirm({
       tipo: 'texto',
@@ -42,80 +45,72 @@ export default function TextTool({ initial, onConfirm, onClose }: TextToolProps)
       fontFamily,
       fontSizePct,
     });
-    onClose();
   };
 
+  // El estilo para el input de texto se mantiene.
+  const inputClassName = "block w-full px-4 py-3 bg-tarjeta border-none rounded-xl shadow-[inset_2px_2px_5px_rgba(0,0,0,0.6)] placeholder-texto-secundario focus:outline-none focus:ring-2 focus:ring-primario text-texto-principal transition-shadow";
+
   return (
-    <div
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-      onClick={onClose}
+    // El componente ya usa ToolPanel, lo cual es correcto.
+    <ToolPanel
+      title={initial ? 'Editar Texto' : 'Agregar Texto'}
+      onConfirm={handleConfirm}
+      onClose={onClose}
+      confirmText={initial ? 'Guardar Cambios' : 'Agregar Texto'}
     >
-      <div
-        className="bg-[var(--color-tarjeta)] p-5 rounded-lg shadow-xl w-full max-w-sm text-[var(--color-texto-principal)]"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-semibold">
-            {initial ? 'Editar Texto' : 'Agregar Texto'}
-          </h3>
-          {initial?.id && (
+      {/* Se ajusta el espaciado para mayor consistencia visual. */}
+      <div className="space-y-5">
+        {initial?.id && (
+          <div className="absolute top-4 right-4">
             <DeleteElementButton
               elementId={initial.id}
               onElementDeleted={onClose}
             />
-          )}
+          </div>
+        )}
+
+        {/* El campo de Contenido no se altera. */}
+        <div>
+          <label htmlFor="text-tool-content" className="block text-sm font-medium text-texto-secundario mb-2">
+            Contenido:
+          </label>
+          <input
+            id="text-tool-content"
+            type="text"
+            value={text}
+            onChange={(e) => setText(e.target.value)}
+            className={inputClassName}
+            placeholder="Escribe algo..."
+            spellCheck={true}
+          />
         </div>
 
-        <div className="space-y-4">
-          <div>
-            <label
-              htmlFor="text-tool-content"
-              className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1"
-            >
-              Contenido:
-            </label>
-            <input
-              id="text-tool-content"
-              type="text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              className="w-full p-2 rounded-md bg-[var(--color-input)] border border-[var(--color-borde-input)] focus:ring-primario focus:border-primario placeholder-[var(--color-texto-secundario)] opacity-80"
-              placeholder="Escribe algo..."
-              spellCheck={true}
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="text-tool-color"
-              className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1"
-            >
-              Color:
-            </label>
-            <input
-              id="text-tool-color"
-              type="color"
-              value={color}
-              onChange={(e) => setColor(e.target.value)}
-              className="w-full h-10 p-0.5 rounded-md border border-[var(--color-borde-input)] bg-[var(--color-input)] cursor-pointer"
-            />
-          </div>
-
-          {/* 2. REEMPLAZAMOS EL <select> POR <FontSelector> */}
-          <FontSelector
-            id="text-tool-font"
-            options={typedFontsData}
-            value={fontFamily}
-            onChange={setFontFamily}
+        {/* 2. AQUÍ ESTÁ EL CAMBIO: Se reemplaza el input de color. */}
+        <div className="flex flex-col items-center gap-3">
+          <label className="w-full text-sm font-medium text-texto-secundario">
+            Color: <span className="font-mono font-semibold text-texto-principal">{color}</span>
+          </label>
+          <HexColorPicker
+            color={color}
+            onChange={setColor}
+            className="w-full"
           />
+        </div>
 
-          <div>
-            <label
-              htmlFor="text-tool-size"
-              className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1"
-            >
-              Tamaño (% del alto del canvas):{' '}
-              <span className="font-semibold">{fontSizePct}%</span>
-            </label>
+        {/* El selector de fuentes no se altera. */}
+        <FontSelector
+          id="text-tool-font"
+          options={typedFontsData}
+          value={fontFamily}
+          onChange={setFontFamily}
+        />
+
+        {/* El selector de tamaño no se altera. */}
+        <div>
+          <label htmlFor="text-tool-size" className="block text-sm font-medium text-texto-secundario mb-2">
+            Tamaño (% del alto del canvas): <span className="font-semibold">{fontSizePct}%</span>
+          </label>
+          <div className="relative h-2 w-full rounded-full bg-fondo shadow-[inset_1px_1px_3px_rgba(0,0,0,0.6)]">
             <input
               id="text-tool-size"
               type="range"
@@ -124,19 +119,11 @@ export default function TextTool({ initial, onConfirm, onClose }: TextToolProps)
               step="0.5"
               value={fontSizePct}
               onChange={(e) => setFontSizePct(Number(e.target.value))}
-              className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primario"
+              className="absolute w-full h-full appearance-none bg-transparent cursor-pointer accent-primario"
             />
           </div>
         </div>
-        <div className="mt-6 flex justify-end space-x-3">
-          <Button variant="secondary" onClick={onClose}>
-            Cancelar
-          </Button>
-          <Button variant="primary" onClick={handleConfirm}>
-            {initial ? 'Guardar Cambios' : 'Agregar Texto'}
-          </Button>
-        </div>
       </div>
-    </div>
+    </ToolPanel>
   );
 }

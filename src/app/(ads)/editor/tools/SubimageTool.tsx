@@ -1,12 +1,12 @@
 'use client';
 
 import React, { useState, useRef } from 'react';
-import Button from '@/app/components/ui/Button';
 import type { SubimageElement } from '../hooks/useEditorStore';
 import Image from 'next/image';
 import DeleteElementButton from '../components/ui/DeleteElementButton';
 import { UploadCloud } from 'lucide-react';
-import { toast } from 'react-hot-toast'; // 1. Importar toast
+import { toast } from 'react-hot-toast';
+import ToolPanel from '../components/ui/ToolPanel'; // 1. IMPORTAMOS EL COMPONENTE BASE
 
 interface SubimageToolProps {
   initial?: SubimageElement;
@@ -21,6 +21,7 @@ export default function SubimageTool({ initial, onConfirm, onClose }: SubimageTo
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // --- Lógica de Manejo de Archivos y Confirmación (sin cambios) ---
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -34,7 +35,6 @@ export default function SubimageTool({ initial, onConfirm, onClose }: SubimageTo
 
   const handleConfirm = () => {
     if (!src) {
-      // 2. Reemplazar alert con toast.error
       toast.error("Por favor, selecciona una imagen antes de confirmar.");
       return;
     }
@@ -46,7 +46,6 @@ export default function SubimageTool({ initial, onConfirm, onClose }: SubimageTo
       heightPct,
       src,
     });
-    onClose();
   };
 
   const handleUploadButtonClick = () => {
@@ -54,58 +53,56 @@ export default function SubimageTool({ initial, onConfirm, onClose }: SubimageTo
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 z-50"
-      onClick={onClose}
+    // 2. Usamos ToolPanel como el contenedor principal.
+    <ToolPanel
+      title={initial ? 'Editar Subimagen' : 'Agregar Subimagen'}
+      onConfirm={handleConfirm}
+      onClose={onClose}
+      confirmText={initial ? 'Guardar Cambios' : 'Agregar Subimagen'}
+      isConfirmDisabled={!src}
     >
-      <div
-        className="bg-[var(--color-tarjeta)] p-5 rounded-lg shadow-xl w-full max-w-sm text-[var(--color-texto-principal)]"
-        onClick={e => e.stopPropagation()}
-      >
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-semibold">
-            {initial ? 'Editar Subimagen' : 'Agregar Subimagen'}
-          </h3>
-          {initial?.id && (
-            <DeleteElementButton elementId={initial.id} onElementDeleted={onClose} />
-          )}
+      {/* 3. Dentro, solo ponemos los controles específicos de esta herramienta. */}
+      <div className="space-y-4">
+        {initial?.id && (
+            <div className="absolute top-4 right-4">
+                <DeleteElementButton elementId={initial.id} onElementDeleted={onClose} />
+            </div>
+        )}
+
+        <div>
+          <label htmlFor="subimage-file-input" className="block text-sm font-medium text-texto-secundario mb-2">
+            Imagen:
+          </label>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png, image/jpeg, image/webp, image/gif"
+            onChange={handleFileChange}
+            className="hidden"
+            id="subimage-file-input"
+          />
+          <button
+            type="button"
+            onClick={handleUploadButtonClick}
+            className="
+              w-full inline-flex items-center justify-center
+              px-4 py-3 rounded-xl text-sm font-medium text-texto-secundario
+              bg-tarjeta border border-dashed border-borde-tarjeta
+              shadow-[2px_2px_5px_rgba(0,0,0,0.4),-2px_-2px_5px_rgba(249,243,217,0.08)]
+              transition-all duration-150 ease-in-out
+              hover:text-primario hover:border-primario
+              active:scale-95 active:shadow-[inset_2px_2px_4px_rgba(0,0,0,0.5)]
+            "
+          >
+            <UploadCloud size={18} className="mr-2" />
+            {src ? 'Cambiar Imagen' : 'Seleccionar Imagen'}
+          </button>
         </div>
 
-        <div className="space-y-4">
-          <div>
-            <label
-              htmlFor="subimage-file-input"
-              className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1"
-            >
-              Imagen:
-            </label>
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/png, image/jpeg, image/webp, image/gif"
-              onChange={handleFileChange}
-              className="hidden"
-              id="subimage-file-input"
-            />
-            <Button
-              variant="outline"
-              onClick={handleUploadButtonClick}
-              fullWidth
-              className="border-dashed border-[var(--color-borde-input)] hover:border-primario"
-            >
-              <UploadCloud size={18} className="mr-2 text-[var(--color-texto-secundario)]" />
-              {src ? 'Cambiar Imagen' : 'Seleccionar Imagen'}
-            </Button>
-            {src && (
-              <p className="text-xs text-[var(--color-texto-secundario)] mt-1">
-                Imagen cargada. Puedes cambiarla seleccionando otra.
-              </p>
-            )}
-          </div>
-
-          {src && (
-            <div className="mt-3 mb-3 border border-[var(--color-borde-input)] rounded-md p-2 bg-[var(--color-fondo-sutil)]">
-              <p className="text-xs text-[var(--color-texto-secundario)] mb-1 text-center">Vista previa:</p>
+        {src && (
+          <>
+            <div className="p-2 bg-fondo rounded-lg border border-borde-tarjeta">
+              <p className="text-xs text-texto-secundario mb-1 text-center">Vista previa:</p>
               <div className="w-full h-32 sm:h-40 relative rounded overflow-hidden">
                 <Image
                   src={src}
@@ -116,17 +113,12 @@ export default function SubimageTool({ initial, onConfirm, onClose }: SubimageTo
                 />
               </div>
             </div>
-          )}
 
-          {src && (
-            <>
-              <div>
-                <label
-                  htmlFor="subimage-width"
-                  className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1"
-                >
-                  Ancho (% del canvas): <span className="font-semibold">{widthPct}%</span>
-                </label>
+            <div>
+              <label htmlFor="subimage-width" className="block text-sm font-medium text-texto-secundario mb-2">
+                Ancho (% del canvas): <span className="font-semibold">{widthPct}%</span>
+              </label>
+              <div className="relative h-2 w-full rounded-full bg-fondo shadow-[inset_1px_1px_3px_rgba(0,0,0,0.6)]">
                 <input
                   id="subimage-width"
                   type="range"
@@ -135,16 +127,15 @@ export default function SubimageTool({ initial, onConfirm, onClose }: SubimageTo
                   step={1}
                   value={widthPct}
                   onChange={e => setWidthPct(Number(e.target.value))}
-                  className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primario"
+                  className="absolute w-full h-full appearance-none bg-transparent cursor-pointer accent-primario"
                 />
               </div>
-              <div>
-                <label
-                  htmlFor="subimage-height"
-                  className="block text-sm font-medium text-[var(--color-texto-secundario)] mb-1"
-                >
-                  Alto (% del canvas): <span className="font-semibold">{heightPct}%</span>
-                </label>
+            </div>
+            <div>
+              <label htmlFor="subimage-height" className="block text-sm font-medium text-texto-secundario mb-2">
+                Alto (% del canvas): <span className="font-semibold">{heightPct}%</span>
+              </label>
+              <div className="relative h-2 w-full rounded-full bg-fondo shadow-[inset_1px_1px_3px_rgba(0,0,0,0.6)]">
                 <input
                   id="subimage-height"
                   type="range"
@@ -153,20 +144,13 @@ export default function SubimageTool({ initial, onConfirm, onClose }: SubimageTo
                   step={1}
                   value={heightPct}
                   onChange={e => setHeightPct(Number(e.target.value))}
-                  className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-primario"
+                  className="absolute w-full h-full appearance-none bg-transparent cursor-pointer accent-primario"
                 />
               </div>
-            </>
-          )}
-        </div>
-
-        <div className="mt-6 flex justify-end space-x-3">
-          <Button variant="secondary" onClick={onClose}>Cancelar</Button>
-          <Button variant="primary" onClick={handleConfirm} disabled={!src}>
-            {initial ? 'Guardar Cambios' : 'Agregar Subimagen'}
-          </Button>
-        </div>
+            </div>
+          </>
+        )}
       </div>
-    </div>
+    </ToolPanel>
   );
 }

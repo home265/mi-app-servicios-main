@@ -8,6 +8,7 @@ import {
   TrashIcon,
   ChevronDownIcon,
   ChevronUpIcon,
+  ClockIcon, // <-- CAMBIO: Importado 'ClockIcon' y eliminado 'XCircleIcon'
 } from '@heroicons/react/24/solid';
 import {
   NotificationDoc as Notification,
@@ -72,15 +73,26 @@ const toTitleCase = (s: string) =>
     .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
 
-// --- Props del Componente (sin cambios)---
+// --- Props y Tipos de Botón (sin cambios) ---
+type ButtonStyle = 'primary' | 'secondary' | 'destructive';
+
+interface ButtonConfig {
+  label: string;
+  style: ButtonStyle;
+  action?: () => void | Promise<void>;
+  icon: React.ElementType;
+}
+
 interface Props {
   data: Notification;
   viewerMode: 'user' | 'provider';
   isProcessing?: boolean;
   onPrimary: () => void | Promise<void>;
   onSecondary?: () => void | Promise<void>;
+  onTertiary?: () => void | Promise<void>;
   onAvatarClick?: () => void;
 }
+
 
 // --- Componente Principal ---
 export default function NotificacionCard({
@@ -89,6 +101,7 @@ export default function NotificacionCard({
   isProcessing = false,
   onPrimary,
   onSecondary,
+  onTertiary,
   onAvatarClick,
 }: Props) {
   const { payload, type } = data;
@@ -106,16 +119,44 @@ export default function NotificacionCard({
   const preview = needsTrunc ? full.slice(0, 100) : full;
   const [expanded, setExpanded] = useState(false);
 
-  const buttonConfig = {
-    job_request: { p: viewerMode === 'provider' ? 'Aceptar' : undefined, s: 'Eliminar' },
-    job_accept: { p: viewerMode === 'user' ? 'Contactar' : undefined, s: 'Eliminar' },
-    contact_followup: { p: viewerMode === 'user' ? 'Sí, acordamos' : undefined, s: viewerMode === 'user' ? 'No, aún no' : 'Eliminar' },
-    agreement_confirmed: { p: viewerMode === 'provider' ? 'Calificar usuario' : undefined, s: undefined },
-    rating_request: { p: viewerMode === 'user' ? 'Calificar prestador' : undefined, s: 'Eliminar' },
-  } as const;
+  // --- Lógica de Botones Dinámica ---
+  const getButtonConfig = (): ButtonConfig[] => {
+    switch (type) {
+      case 'contact_followup':
+        return viewerMode === 'user' ? [
+          { label: 'Sí, acordamos', style: 'primary', action: onPrimary, icon: CheckCircleIcon },
+          // CAMBIO: Se usa ClockIcon para "pendiente"
+          { label: 'No, aún no', style: 'primary', action: onSecondary, icon: ClockIcon }, 
+          { label: 'No hubo acuerdo', style: 'destructive', action: onTertiary, icon: TrashIcon }
+        ] : [];
+      
+      case 'job_request':
+        return viewerMode === 'provider' && onSecondary ? [
+          { label: 'Aceptar', style: 'primary', action: onPrimary, icon: CheckCircleIcon },
+          { label: 'Eliminar', style: 'destructive', action: onSecondary, icon: TrashIcon }
+        ] : [];
+      
+      case 'job_accept':
+        return viewerMode === 'user' && onSecondary ? [
+          { label: 'Contactar', style: 'primary', action: onPrimary, icon: CheckCircleIcon },
+          { label: 'Eliminar', style: 'destructive', action: onSecondary, icon: TrashIcon }
+        ] : [];
 
-  const { p: primary, s: secondary } = buttonConfig[type as keyof typeof buttonConfig] ?? { p: undefined, s: undefined };
-  const hasSecondaryAction = !!(secondary && onSecondary);
+      case 'agreement_confirmed':
+        return viewerMode === 'provider' ? 
+          [{ label: 'Calificar usuario', style: 'primary', action: onPrimary, icon: CheckCircleIcon }] : [];
+        
+      case 'rating_request':
+        return viewerMode === 'user' ? 
+          [{ label: 'Calificar prestador', style: 'primary', action: onPrimary, icon: CheckCircleIcon }] : [];
+
+      default:
+        return [];
+    }
+  };
+
+  const buttons = getButtonConfig();
+
   const dateStr = fmtDate(data.timestamp ?? typedPayload.timestamp);
 
  return (
@@ -129,7 +170,7 @@ export default function NotificacionCard({
         </span>
       )}
 
-      {/* --- Avatar Interactivo --- */}
+      {/* --- Avatar Interactivo (sin cambios) --- */}
       <div className="relative h-12 w-12 shrink-0">
         {onAvatarClick ? (
           <button
@@ -159,7 +200,7 @@ export default function NotificacionCard({
         )}
       </div>
 
-      {/* Texto y Acciones (sin cambios en la lógica) */}
+      {/* Texto y Acciones (sin cambios) */}
       <div className="flex-1 min-w-0">
         <p className="text-[15px] font-semibold leading-none mb-[2px] text-texto-principal">
           {senderName}
@@ -185,32 +226,77 @@ export default function NotificacionCard({
           )}
         </span>
 
-        {(primary || hasSecondaryAction) && (
-          <div className={`mt-3 grid gap-2 ${primary && hasSecondaryAction ? 'grid-cols-2' : 'grid-cols-1'}`}>
-            {primary && (
-              <button
-                onClick={onPrimary}
-                disabled={isProcessing}
-                className="btn-primary text-[13px] py-[6px]"
-              >
-                {isProcessing ? <Spinner /> : <CheckCircleIcon className="w-4 h-4" />}
-                {isProcessing ? 'Procesando...' : primary}
-              </button>
-            )}
-            {hasSecondaryAction && (
-              <button
-                onClick={onSecondary}
-                disabled={isProcessing}
-                className="btn-destructive text-[13px] py-[6px]"
-              >
-                <TrashIcon className="w-4 h-4" />
-                {secondary}
-              </button>
+        {/* --- INICIO DEL BLOQUE DE BOTONES MODIFICADO --- */}
+        {buttons.length > 0 && (
+          <div className="mt-3 flex w-full flex-col gap-2">
+            {type === 'contact_followup' ? (
+              <>
+                {/* Fila superior para los primeros dos botones */}
+                <div className="grid grid-cols-2 gap-2">
+                  {buttons.slice(0, 2).map((btn, index) => {
+                    const IconComponent = btn.icon;
+                    if (!btn.action) return null;
+                    return (
+                      <button
+                        key={index}
+                        onClick={btn.action}
+                        disabled={isProcessing}
+                        // CAMBIO: Añadido h-full para alinear alturas y px-3 para espaciado.
+                        className={`btn-${btn.style} flex h-full items-center justify-center gap-1.5 px-3 text-[13px] py-[6px]`}
+                      >
+                        {isProcessing ? <Spinner /> : <IconComponent className="h-4 w-4" />}
+                        {/* CAMBIO: Eliminada la clase 'truncate' */}
+                        <span>{isProcessing ? 'Procesando...' : btn.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+                {/* Fila inferior para el tercer botón */}
+                {buttons.length > 2 && (() => {
+                  const btn = buttons[2];
+                  const IconComponent = btn.icon;
+                  if (!btn.action) return null;
+                  return (
+                    <button
+                      key={2}
+                      onClick={btn.action}
+                      disabled={isProcessing}
+                       // CAMBIO: Añadido px-3 para consistencia de espaciado.
+                      className={`btn-${btn.style} w-full flex items-center justify-center gap-1.5 px-3 text-[13px] py-[6px]`}
+                    >
+                      {isProcessing ? <Spinner /> : <IconComponent className="h-4 w-4" />}
+                      {/* CAMBIO: Eliminada la clase 'truncate' */}
+                      <span>{isProcessing ? 'Procesando...' : btn.label}</span>
+                    </button>
+                  );
+                })()}
+              </>
+            ) : (
+              // Lógica para todas las demás notificaciones (1 o 2 botones)
+              <div className={`grid gap-2 ${buttons.length === 2 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                {buttons.map((btn, index) => {
+                  const IconComponent = btn.icon;
+                  if (!btn.action) return null;
+                  return (
+                    <button
+                      key={index}
+                      onClick={btn.action}
+                      disabled={isProcessing}
+                       // CAMBIO: Añadido h-full para alinear alturas y px-3 para espaciado.
+                      className={`btn-${btn.style} flex h-full items-center justify-center gap-1.5 px-3 text-[13px] py-[6px] ${buttons.length === 1 ? 'w-full' : ''}`}
+                    >
+                      {isProcessing ? <Spinner /> : <IconComponent className="h-4 w-4" />}
+                      {/* CAMBIO: Eliminada la clase 'truncate' */}
+                      <span>{isProcessing ? 'Procesando...' : btn.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
             )}
           </div>
         )}
+        {/* --- FIN DEL BLOQUE DE BOTONES MODIFICADO --- */}
       </div>
     </article>
   );
-
 }

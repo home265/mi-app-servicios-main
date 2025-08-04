@@ -53,6 +53,21 @@ export interface ConfirmAgreementResult {
 }
 /* -------------------------------------------------------------- */
 
+/* ---------- INICIO DE CÓDIGO AÑADIDO: Tipos para nuevas funciones ---------- */
+// Datos para las nuevas acciones de seguimiento (reprogramar y cancelar)
+export interface FollowupActionData {
+  user: Recipient;
+  provider: Recipient;
+  notificationId: string;
+}
+
+// Respuesta esperada para las nuevas acciones de seguimiento
+export interface FollowupActionResult {
+  success: boolean;
+  message?: string;
+}
+/* ---------- FIN DE CÓDIGO AÑADIDO ---------- */
+
 
 /* ---------- Documento recibido en el listener ---------- */
 export interface NotificationDoc extends NotificationInput {
@@ -97,6 +112,20 @@ export const confirmAgreementAndCleanup = httpsCallable<ConfirmAgreementData, Co
   'confirmAgreementAndCleanup'
 );
 /* -------------------------------------------------------------- */
+
+/* ---------- INICIO DE CÓDIGO AÑADIDO: Helpers para nuevas funciones ---------- */
+// Helper para reprogramar el seguimiento ("No, aún no")
+export const rescheduleFollowup = httpsCallable<FollowupActionData, FollowupActionResult>(
+  functions,
+  'rescheduleFollowup'
+);
+
+// Helper para cancelar el seguimiento ("No hubo acuerdo")
+export const cancelAgreement = httpsCallable<FollowupActionData, FollowupActionResult>(
+  functions,
+  'cancelAgreement'
+);
+/* ---------- FIN DE CÓDIGO AÑADIDO ---------- */
 
 
 /* ------------------------------------------------------------------ */

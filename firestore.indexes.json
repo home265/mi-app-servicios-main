@@ -15,10 +15,6 @@
         {
           "fieldPath": "updatedAt",
           "order": "DESCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "DESCENDING"
         }
       ]
     },
@@ -75,10 +71,6 @@
         {
           "fieldPath": "fechaExpiracion",
           "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "ASCENDING"
         }
       ]
     },
@@ -113,10 +105,6 @@
         {
           "fieldPath": "fechaExpiracion",
           "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "__name__",
-          "order": "ASCENDING"
         }
       ]
     },
@@ -138,10 +126,6 @@
         },
         {
           "fieldPath": "fechaExpiracion",
-          "order": "ASCENDING"
-        },
-        {
-          "fieldPath": "__name__",
           "order": "ASCENDING"
         }
       ]

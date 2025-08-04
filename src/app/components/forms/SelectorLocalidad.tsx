@@ -1,7 +1,7 @@
 'use client';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import React, { useState, useEffect, useCallback } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import BotonDeSeleccion from '@/app/components/common/BotonDeSeleccion';
 
 // Las interfaces permanecen intactas.
@@ -26,6 +26,8 @@ interface SelectorLocalidadProps {
   placeholder?: string;
   error?: string;
   onLocalidadSeleccionada: (localidad: LocalidadSeleccionada | null) => void;
+  /** Si es false, no limpia el input al perder foco */
+  strict?: boolean;
 }
 
 const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
@@ -34,11 +36,12 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
   placeholder = "Empieza a escribir...",
   error,
   onLocalidadSeleccionada,
+  strict = true,
 }) => {
   const [estadoCarga, setEstadoCarga] = useState<'idle' | 'loading' | 'error'>('idle');
   const [terminoBusqueda, setTerminoBusqueda] = useState('');
   const [sugerencias, setSugerencias] = useState<Localidad[]>([]);
-  const [seleccionActual, setSeleccionActual] = useState<string>('');
+  const [seleccionActual, setSeleccionActual] = useState('');
   const [mostrarSugerencias, setMostrarSugerencias] = useState(false);
 
   // La lógica de búsqueda y el resto de los hooks se mantienen sin cambios.
@@ -110,8 +113,8 @@ const SelectorLocalidad: React.FC<SelectorLocalidadProps> = ({
       if (matchExacto) {
         // Si hay una coincidencia exacta (ej. por autocompletado), la seleccionamos automáticamente.
         handleSeleccion(matchExacto);
-      } else if (seleccionActual.length > 0) {
-        // Si no hay coincidencia y el campo no está vacío, lo limpiamos para forzar una selección válida.
+      } else if (strict && seleccionActual.length > 0) {
+        // Si no hay coincidencia y strict===true, limpiamos para forzar una selección válida.
         setSeleccionActual('');
         setTerminoBusqueda('');
         onLocalidadSeleccionada(null);

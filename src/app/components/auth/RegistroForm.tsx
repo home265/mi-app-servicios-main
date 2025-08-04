@@ -190,13 +190,27 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
           {errors.apellido && <p className="text-sm text-error mt-1">{errors.apellido.message}</p>}
         </div>
 
-        <Controller name="localidad" control={control} rules={{ required: 'La localidad y provincia son obligatorias' }}
-          render={({ field, fieldState }) => (
-            <SelectorLocalidad id="localidad-selector" label="Localidad y Provincia" placeholder="Ingresa letras y selecciona..."
-              onLocalidadSeleccionada={field.onChange} error={fieldState.error?.message} />
-          )}
-        />
-        {errors.localidad && <p className="text-sm text-error -mt-3 mb-2">{errors.localidad.message}</p>}
+        <Controller
+  name="localidad"
+  control={control}
+  rules={{ required: 'La localidad y provincia son obligatorias' }}
+  render={({ field, fieldState }) => (
+    <SelectorLocalidad
+      id="localidad-selector"
+      label="Localidad y Provincia"
+      placeholder="Ingresa letras y selecciona..."
+      onLocalidadSeleccionada={field.onChange}
+      error={fieldState.error?.message}
+      strict={true}
+    />
+  )}
+/>
+{errors.localidad && (
+  <p className="text-sm text-error -mt-3 mb-2">
+    {errors.localidad.message}
+  </p>
+)}
+
         
         <div>
             <label htmlFor="email" className="block text-sm font-medium text-texto-secundario mb-2">Email</label>

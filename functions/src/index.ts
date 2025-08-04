@@ -16,6 +16,8 @@ if (!admin.apps.length) {
 export {
   // --- Función nueva y corregida ---
   confirmAgreementAndCleanup, // <-- AÑADIDA: Ahora sí se desplegará
+  rescheduleFollowup,         // <-- NUEVA
+  cancelAgreement,            // <-- NUEVA
 
   // --- Funciones existentes que se mantienen ---
   sendJobRequest,

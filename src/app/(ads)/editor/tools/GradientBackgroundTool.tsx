@@ -1,14 +1,23 @@
 'use client';
 
 import React, { useState } from 'react';
-import Button from '@/app/components/ui/Button';
+import { HexColorPicker } from 'react-colorful';
 import type { GradientBackgroundElement } from '../hooks/useEditorStore';
+import ToolPanel from '../components/ui/ToolPanel';
+import BotonDeSeleccion from '@/app/components/common/BotonDeSeleccion';
 
 interface GradientBackgroundToolProps {
   initial?: Partial<Omit<GradientBackgroundElement, 'id'>>;
   onConfirm: (element: Omit<GradientBackgroundElement, 'id'>) => void;
   onClose: () => void;
 }
+
+const orientationOptions: { id: GradientBackgroundElement['orientation']; label: string }[] = [
+    { id: 'horizontal', label: 'Horizontal' },
+    { id: 'vertical', label: 'Vertical' },
+    { id: 'diagonal', label: 'Diagonal' },
+    { id: 'radial', label: 'Radial' },
+];
 
 export default function GradientBackgroundTool({ initial, onConfirm, onClose }: GradientBackgroundToolProps) {
   const [color1, setColor1] = useState<string>(initial?.color1 ?? '#ffffff');
@@ -28,49 +37,57 @@ export default function GradientBackgroundTool({ initial, onConfirm, onClose }: 
       color2,
       orientation,
     });
-    onClose();
   };
 
   return (
-    <div className="absolute bottom-4 left-4 z-50 bg-black text-white p-4 rounded-lg shadow-lg w-full max-w-xs max-h-[80vh] overflow-auto">
-      <h2 className="text-lg font-semibold mb-4">Fondo degradado</h2>
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm mb-1">Color 1:</label>
-          <input
-            type="color"
-            value={color1}
-            onChange={e => setColor1(e.target.value)}
-            className="w-full h-10 p-0 border-0 bg-black"
+    <ToolPanel
+      title="Fondo degradado"
+      onConfirm={handleConfirm}
+      onClose={onClose}
+      confirmText="Aplicar Degradado"
+    >
+      {/* Se ajusta el espaciado para que se vea bien en el contenedor con scroll */}
+      <div className="space-y-5">
+
+        {/* Sección para el Color 1 */}
+        <div className="flex flex-col items-center gap-3">
+          <label className="w-full text-sm text-texto-secundario">
+            Color 1: <span className="font-mono font-semibold text-texto-principal">{color1}</span>
+          </label>
+          <HexColorPicker
+            color={color1}
+            onChange={setColor1}
+            className="w-full"
           />
         </div>
-        <div>
-          <label className="block text-sm mb-1">Color 2:</label>
-          <input
-            type="color"
-            value={color2}
-            onChange={e => setColor2(e.target.value)}
-            className="w-full h-10 p-0 border-0 bg-black"
+
+        {/* Sección para el Color 2 */}
+        <div className="flex flex-col items-center gap-3">
+          <label className="w-full text-sm text-texto-secundario">
+            Color 2: <span className="font-mono font-semibold text-texto-principal">{color2}</span>
+          </label>
+          <HexColorPicker
+            color={color2}
+            onChange={setColor2}
+            className="w-full"
           />
         </div>
+
+        {/* La sección de Orientación se mantiene intacta. */}
         <div>
-          <label className="block text-sm mb-1">Orientación:</label>
-          <select
-            value={orientation}
-            onChange={e => setOrientation(e.target.value as GradientBackgroundElement['orientation'])}
-            className="w-full p-2 rounded bg-gray-800 border border-gray-700 text-white"
-          >
-            <option value="horizontal">Horizontal</option>
-            <option value="vertical">Vertical</option>
-            <option value="diagonal">Diagonal</option>
-            <option value="radial">Radial</option>
-          </select>
+          <label className="block text-sm mb-2 text-texto-secundario">Orientación:</label>
+          <div className="flex flex-col gap-2">
+            {orientationOptions.map((option) => (
+              <BotonDeSeleccion
+                key={option.id}
+                label={option.label}
+                onClick={() => setOrientation(option.id)}
+                isSelected={orientation === option.id}
+              />
+            ))}
+          </div>
         </div>
       </div>
-      <div className="mt-6 flex justify-end space-x-2">
-        <Button variant="secondary" onClick={onClose}>Cancelar</Button>
-        <Button variant="primary" onClick={handleConfirm}>Confirmar</Button>
-      </div>
-    </div>
+    </ToolPanel>
   );
 }

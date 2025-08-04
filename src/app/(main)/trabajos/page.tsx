@@ -210,15 +210,18 @@ export default function TrabajosPage() {
 
         {/*────────── header ──────────*/}
         <header className="relative flex items-center justify-center py-8">
-          <div className="absolute left-0 top-1/2 -translate-y-1/2">
-            <BotonAyuda>
-              <AyudaTrabajos />
-            </BotonAyuda>
-          </div>
-          <h1 className="text-lg md:text-xl font-medium tracking-wide">
-            Solicitudes y acuerdos
-          </h1>
-        </header>
+  {/* El título se mantiene centrado por el 'justify-center' del header */}
+  <h1 className="text-lg md:text-xl font-medium tracking-wide">
+    Solicitudes y acuerdos
+  </h1>
+
+  {/* Este div ahora se posiciona a la derecha */}
+  <div className="absolute right-0 top-1/2 -translate-y-1/2">
+    <BotonAyuda>
+      <AyudaTrabajos />
+    </BotonAyuda>
+  </div>
+</header>
 
         <hr className="border-borde-tarjeta" />
 
@@ -232,20 +235,25 @@ export default function TrabajosPage() {
             )}
 
             {notifications.map((n) => (
-              <NotificacionCard
-                key={n.id}
-                data={n}
-                viewerMode="provider"
-                isProcessing={processingNotifId === n.id}
-                onPrimary={() =>
-                  n.type === 'job_request'
-                    ? handleAccept(n)
-                    : openResenaFormForClient(n)
-                }
-                onSecondary={() => handleDelete(n)}
-                onAvatarClick={() => handleAvatarClick(n)}
-              />
-            ))}
+    <NotificacionCard
+    key={n.id}
+    data={n}
+    viewerMode="provider"
+    isProcessing={processingNotifId === n.id}
+    onPrimary={() =>
+        n.type === 'job_request'
+        ? handleAccept(n)
+        : openResenaFormForClient(n)
+    }
+    onSecondary={() => handleDelete(n)}
+    // ▼▼▼ AQUÍ ESTÁ EL ÚNICO CAMBIO ▼▼▼
+    onAvatarClick={
+        n.type === 'agreement_confirmed' 
+        ? undefined 
+        : () => handleAvatarClick(n)
+    }
+    />
+))}
           </div>
 
           {showPerfilModal && perfilModalTarget && (

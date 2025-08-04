@@ -153,6 +153,7 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
           id="busqLoc"
           label="Selecciona una Localidad*"
           onLocalidadSeleccionada={setLocalidadSel}
+          strict={false}
         />
 
         <div>

@@ -1,137 +1,89 @@
 'use client';
-import BotonAyuda from '@/app/components/common/BotonAyuda';
-import AyudaBusqueda from '@/app/components/ayuda-contenido/AyudaBusqueda';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { ChevronLeftIcon } from '@heroicons/react/24/outline';
 import { toast } from 'react-hot-toast';
-
 import { useUserStore, UserProfile } from '@/store/userStore';
+import useNotificationHandler from '@/hooks/useNotificationHandler'; // <-- PASO 1: IMPORTAR EL HOOK
+
+// Importaciones de servicios y componentes específicos de esta página
 import SelectorCategoria, { CategoriaSeleccionada } from '@/app/components/forms/SelectorCategoria';
 import { getProvidersByFilter } from '@/lib/services/providersService';
-import {
-  sendJobRequest,
-  subscribeToNotifications,
-  removeNotification,
-  confirmAgreementAndCleanup,
-  NotificationDoc as Notification,
-  Sender as NotificationSender,
-  Payload as NotificationPayload,
-} from '@/lib/services/notificationsService';
+import { sendJobRequest, Payload as NotificationPayload } from '@/lib/services/notificationsService';
+import BotonAyuda from '@/app/components/common/BotonAyuda';
+import AyudaBusqueda from '@/app/components/ayuda-contenido/AyudaBusqueda';
 import NotificacionCard from '@/app/components/notificaciones/NotificacionCard';
 import ContactoPopup from '@/app/components/notificaciones/ContactoPopup';
 import BotonVolver from '@/app/components/common/BotonVolver';
 import PerfilModal from '@/app/components/notificaciones/PerfilModal';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '@/lib/firebase/config';
+import AlertPopup from '@/app/components/common/AlertPopup'; // <-- Importar AlertPopup
 
-/*────────── Tipos mejorados ──────────*/
-interface PrestadorData {
-  uid: string;
-  collection: string;
-  nombre: string;
-  selfieUrl: string;
-  telefono: string;
-}
+// Tipos mejorados que se mantienen en la página
 interface UserProfileWithLocalidad extends UserProfile {
-  localidad?: { nombre: string; provinciaNombre: string };
+  localidad: { nombre: string; provinciaNombre: string };
   selfieURL?: string;
   nombre: string;
 }
-type PerfilTarget = { uid: string; collection: string };
-
-type ProviderDocData = {
-  nombre?: unknown;
-  selfieURL?: unknown;
-  selfieUrl?: unknown;
-  telefono?: unknown;
-};
-
-type NotificationWithLegacyFrom = Notification & {
-  fromId?: string;
-  fromCollection?: string;
-};
-
 
 export default function BusquedaPage() {
-  const currentUser = useUserStore(s => s.currentUser as UserProfileWithLocalidad | null);
-  const originalRole = useUserStore(s => s.originalRole);
   const router = useRouter();
 
-  /*────────── Estado Local ──────────*/
+  // --- PASO 2: LLAMAR AL HOOK PARA OBTENER LA LÓGICA DE NOTIFICACIONES ---
+  const {
+    notifications,
+    processingNotifId,
+    showContacto,
+    selectedPrestador,
+    showPerfilModal,
+    perfilModalTarget,
+    showAlert,
+    alertMessage,
+    onPrimaryAction,
+    onSecondaryAction,
+    onTertiaryAction,
+    onAvatarClick,
+    closeContactoPopup,
+    closePerfilModal,
+    closeAlertPopup,
+    currentUser, // Obtenido del hook para usar en la búsqueda
+    userUid,
+    userCollection,
+  } = useNotificationHandler();
+
+  // --- ESTADO LOCAL (solo lo específico de esta página) ---
   const [categorySel, setCategorySel] = useState<CategoriaSeleccionada | null>(null);
   const [description, setDescription] = useState('');
-  const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [showContacto, setShowContacto] = useState(false);
-  const [selectedPrestador, setSelectedPrestador] = useState<PrestadorData | null>(null);
-  const [showPerfil, setShowPerfil] = useState(false);
-  const [perfilTarget, setPerfilTarget] = useState<PerfilTarget | null>(null);
-
   const [isSearching, setIsSearching] = useState(false);
-  const [processingNotifId, setProcessingNotifId] = useState<string | null>(null);
-
-
-  const userCollection =
-    originalRole === 'prestador' ? 'prestadores' :
-    originalRole === 'comercio'   ? 'comercios' :
-    'usuarios_generales';
+  
+  // Se mantiene el `useUserStore` solo si se necesita para algo que el hook no provea
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const originalRole = useUserStore(s => s.originalRole);
 
   const handleCategoriaChange = useCallback((sel: CategoriaSeleccionada | null) => {
     setCategorySel(sel);
   }, []);
 
-  /*────────── Helpers ──────────*/
-  function getSender(n: Notification): NotificationSender | null {
-    if (n.from?.uid && n.from?.collection) {
-      return n.from;
-    }
-    const legacyNotif = n as NotificationWithLegacyFrom;
-    const fromId = legacyNotif.fromId ?? (legacyNotif.payload as { fromId?: string }).fromId;
-    const fromCollection = legacyNotif.fromCollection ?? (legacyNotif.payload as { fromCollection?: string }).fromCollection;
-
-    if (typeof fromId === 'string' && typeof fromCollection === 'string') {
-      return { uid: fromId, collection: fromCollection };
-    }
-    console.warn('Could not determine sender from notification:', n);
-    return null;
-  }
-
-  /*────────── Suscripción a Notificaciones ──────────*/
-  useEffect(() => {
-    if (currentUser && originalRole) {
-      const unsub = subscribeToNotifications(
-        { uid: currentUser.uid, collection: userCollection },
-        list => {
-          const filt = list.filter(n =>
-            ['job_accept', 'contact_followup', 'rating_request'].includes(n.type)
-          );
-          setNotifications(filt);
-        }
-      );
-      return unsub;
-    }
-    return () => {};
-  }, [currentUser, originalRole, userCollection]);
-
-
-  if (!currentUser || !currentUser.localidad) {
+  // La guarda de seguridad se simplifica usando el `currentUser` del hook
+  if (!currentUser || !(currentUser as UserProfileWithLocalidad).localidad) {
     if (typeof window !== 'undefined') router.replace('/login');
     return null;
   }
-
+  
   const {
-    uid: userUid,
     nombre: userName,
     selfieURL: userAvatar,
     localidad: { provinciaNombre: province, nombre: locality },
-  } = currentUser;
+  } = currentUser as UserProfileWithLocalidad;
 
-  /*────────── Acciones ──────────*/
+  // --- ACCIONES (solo las específicas de esta página) ---
   async function handleSearch() {
     if (!categorySel || !description.trim() || isSearching) {
       if (!categorySel) toast.error('Debes elegir una categoría.');
       if (!description.trim()) toast.error('La descripción no puede estar vacía.');
+      return;
+    }
+
+    if (!userUid) {
+      toast.error('Error de autenticación, por favor recarga la página.');
       return;
     }
 
@@ -168,112 +120,33 @@ export default function BusquedaPage() {
     }
   }
 
-  async function handlePrimaryAction(n: Notification) {
-    if (processingNotifId) return;
-
-    const sender = getSender(n);
-    if (!sender) {
-        toast.error("No se pudo identificar al remitente de la notificación.");
-        return;
-    }
-
-    setProcessingNotifId(n.id);
-    try {
-        if (n.type === 'job_accept') {
-            const snap = await getDoc(doc(db, sender.collection, sender.uid));
-            const data = snap.data() as ProviderDocData | undefined;
-            if (!data) {
-                toast.error('No se pudieron cargar los datos del prestador.');
-                return;
-            }
-            setSelectedPrestador({
-                uid: sender.uid,
-                collection: sender.collection,
-                nombre: typeof data.nombre === 'string' ? data.nombre : 'Prestador',
-                selfieUrl: typeof data.selfieURL === 'string' ? data.selfieURL : (typeof data.selfieUrl === 'string' ? data.selfieUrl : '/avatar-placeholder.png'),
-                telefono: typeof data.telefono === 'string' ? data.telefono : '',
-            });
-            setShowContacto(true);
-        } else if (n.type === 'contact_followup') {
-            const originalNotifId = n.payload?.originalNotifId as string | undefined;
-            if (!originalNotifId) {
-                console.error("Error crítico: No se encontró la 'originalNotifId' en el payload de la notificación de seguimiento.");
-                toast.error("Error: No se pudo procesar la solicitud por falta de un identificador clave.");
-                return;
-            }
-
-            await confirmAgreementAndCleanup({
-                user: { uid: userUid, collection: userCollection },
-                provider: { uid: sender.uid, collection: sender.collection },
-                followupNotifId: n.id,
-                originalNotifId: originalNotifId,
-                userName: userName || 'Usuario',
-            });
-            
-            toast.success('Acuerdo confirmado. ¡Gracias por usar nuestros servicios!');
-       } else { // rating_request
-        router.push(`/calificar/${sender.uid}?notifId=${n.id}`);
-       }
-    } catch (error) {
-        console.error("Error en la acción principal:", error);
-        toast.error("Hubo un error al procesar tu solicitud.");
-    } finally {
-        setProcessingNotifId(null);
-    }
-  }
-
- async function handleSecondaryAction(n: Notification) {
-    if (processingNotifId) return;
-    setProcessingNotifId(n.id);
-    try {
-        await removeNotification({ uid: userUid, collection: userCollection }, n.id);
-    } catch (error) {
-        console.error("Error al eliminar notificación:", error);
-        toast.error("No se pudo eliminar la notificación.");
-    } finally {
-        setProcessingNotifId(null);
-    }
-  }
-
-  function handleAvatarClick(n: Notification) {
-    if (processingNotifId) return;
-    const sender = getSender(n); 
-    if (sender) {
-        setPerfilTarget(sender);
-        setShowPerfil(true);
-    }
-  }
-
-
+  // --- PASO 3: EL JSX AHORA ES MUCHO MÁS LIMPIO ---
   return (
     <div className="min-h-screen flex flex-col bg-fondo text-texto-principal">
       <div className="w-full max-w-4xl mx-auto px-5 flex flex-col flex-grow">
         <header className="relative flex items-center justify-center py-8">
-          <div className="absolute left-0">
-              <BotonAyuda>
-              <AyudaBusqueda />
-              </BotonAyuda>
-          </div>
           <h1 className="text-lg font-medium">
               Búsqueda de servicios
           </h1>
+          <div className="absolute right-4">
+              <BotonAyuda>
+                <AyudaBusqueda />
+              </BotonAyuda>
+          </div>
         </header>
 
         <hr className="border-borde-tarjeta" />
 
         <main className="flex flex-col items-center flex-grow pt-6 pb-8">
+          {/* El formulario de búsqueda no cambia */}
           <div className="w-full max-w-lg space-y-6 p-6 rounded-2xl shadow-lg bg-tarjeta border border-borde-tarjeta text-texto-principal">
             <SelectorCategoria
               idCategoria="busq-cat"
               idSubcategoria="busq-sub"
               onCategoriaChange={handleCategoriaChange}
             />
-
             <div>
-              <label
-                htmlFor="descripcion"
-                className="block text-sm font-medium text-texto-principal mb-1"
-              >
+              <label htmlFor="descripcion" className="block text-sm font-medium text-texto-principal mb-1">
                 Descripción (breve)
               </label>
               <textarea
@@ -285,7 +158,6 @@ export default function BusquedaPage() {
                 className="w-full px-4 py-2 rounded-lg focus:outline-none bg-white/10 text-texto-principal border border-borde-tarjeta resize-none placeholder:text-texto-secundario placeholder:opacity-70"
               />
             </div>
-
             <button
               onClick={handleSearch}
               disabled={!categorySel || !description.trim() || isSearching}
@@ -295,6 +167,7 @@ export default function BusquedaPage() {
             </button>
           </div>
 
+          {/* La sección de notificaciones ahora usa la lógica del hook */}
           {notifications.length > 0 && (
             <h3 className="text-xl font-semibold mt-10 mb-4 text-texto-principal">
               Notificaciones recibidas
@@ -306,38 +179,53 @@ export default function BusquedaPage() {
                 Aquí aparecerán las respuestas de los prestadores.
               </p>
             )}
+            
             {notifications.map(n => (
               <NotificacionCard
                 key={n.id}
                 data={n}
                 viewerMode="user"
                 isProcessing={processingNotifId === n.id}
-                onPrimary={() => handlePrimaryAction(n)}
-                onSecondary={() => handleSecondaryAction(n)}
-                onAvatarClick={() => handleAvatarClick(n)}
+                onPrimary={() => onPrimaryAction(n)}
+                onSecondary={() => onSecondaryAction(n)}
+                onTertiary={() => onTertiaryAction(n)}
+                onAvatarClick={n.type === 'contact_followup' ? undefined : () => onAvatarClick(n)}
               />
             ))}
           </div>
         </main>
       </div>
 
-      {showContacto && selectedPrestador && (
+      {/* Los popups ahora usan los estados y funciones del hook */}
+      {showContacto && selectedPrestador && userUid && (
         <ContactoPopup
           userUid={userUid}
           userCollection={userCollection}
           providerUid={selectedPrestador.uid}
           providerCollection={selectedPrestador.collection}
           providerName={selectedPrestador.nombre}
-          notifId={notifications.find(x => x.type === 'job_accept' && getSender(x)?.uid === selectedPrestador.uid)?.id || ''}
-          onClose={() => setShowContacto(false)}
+          notifId={notifications.find(x => x.type === 'job_accept' && x.from?.uid === selectedPrestador.uid)?.id || ''}
+          onClose={closeContactoPopup}
         />
       )}
-      {showPerfil && perfilTarget && (
-        <PerfilModal target={perfilTarget} viewerMode="user" onClose={() => setShowPerfil(false)} />
+      {showPerfilModal && perfilModalTarget && (
+        <PerfilModal 
+          target={perfilModalTarget} 
+          viewerMode="user" 
+          onClose={closePerfilModal} 
+        />
+      )}
+      {showAlert && (
+        <AlertPopup
+          isOpen={showAlert}
+          title="Proceso Cancelado"
+          message={alertMessage}
+          buttonText="Entendido"
+          onClose={closeAlertPopup}
+        />
       )}
 
-      {/*────────── FAB volver ──────────*/}
-        <BotonVolver />
+      <BotonVolver />
     </div>
   );
 }

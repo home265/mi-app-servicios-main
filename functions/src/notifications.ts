@@ -2,7 +2,8 @@
 
 import 'dotenv/config';
 import { onCall, onRequest, HttpsError } from 'firebase-functions/v2/https';
-import { onDocumentCreated } from 'firebase-functions/v2/firestore';
+// Arriba, donde importas los triggers
+import { onDocumentWritten } from 'firebase-functions/v2/firestore';
 import * as admin from 'firebase-admin';
 import { CloudTasksClient } from '@google-cloud/tasks';
 
@@ -40,6 +41,14 @@ export interface NotificationData {
   payload: Payload;
 }
 
+// Interfaz para los datos de las nuevas funciones de seguimiento
+interface FollowupActionData {
+  user: Recipient;
+  provider: Recipient;
+  notificationId: string;
+}
+
+
 export const NOTIFICATION_TYPE = {
   JOB_REQUEST: 'job_request',
   JOB_ACCEPT: 'job_accept',
@@ -69,6 +78,18 @@ function isNotificationData(data: unknown): data is NotificationData {
     typeof d.payload === 'object' &&
     d.payload !== null
   );
+}
+
+// Validador para los datos de las nuevas funciones
+function isFollowupActionData(data: unknown): data is FollowupActionData {
+    if (typeof data !== 'object' || data === null) return false;
+    const d = data as Partial<FollowupActionData>;
+
+    return (
+        !!d.user && typeof d.user.uid === 'string' && typeof d.user.collection === 'string' &&
+        !!d.provider && typeof d.provider.uid === 'string' && typeof d.provider.collection === 'string' &&
+        typeof d.notificationId === 'string' && d.notificationId.length > 0
+    );
 }
 
 
@@ -320,17 +341,26 @@ interface ContactPending {
 
 const ALLOWED_USER_COLLECTIONS = ['usuarios_generales', 'prestadores', 'comercios'];
 
-export const contactPendingsOnCreate = onDocumentCreated(
+// Reemplaza tu función contactPendingsOnCreate con esta versión corregida
+
+export const contactPendingsOnCreate = onDocumentWritten( // <-- CAMBIO 1: El tipo de trigger
   '{collection}/{uid}/contactPendings/{docId}',
   async (event) => {
+    // CAMBIO 2: Añadimos una guarda para ignorar eliminaciones
+    if (!event.data?.after.exists) {
+      console.log(`[contactPendingsOnCreate] Documento eliminado, se ignora el trigger.`);
+      return;
+    }
+
     const { collection, uid, docId } = event.params;
-    
+
     if (!ALLOWED_USER_COLLECTIONS.includes(collection)) {
         console.log(`[contactPendingsOnCreate] Activador ignorado para colección no permitida: ${collection}`);
         return;
     }
 
-    const pending = event.data?.data() as ContactPending | undefined;
+    // CAMBIO 3: Los datos ahora se leen de "event.data.after"
+    const pending = event.data.after.data() as ContactPending | undefined;
 
     if (!pending || typeof pending.firstClickTs !== 'number') {
       console.error(`[contactPendingsOnCreate] Documento 'pending' o 'firstClickTs' inválido. Path: ${collection}/${uid}/contactPendings/${docId}.`, pending);
@@ -339,7 +369,7 @@ export const contactPendingsOnCreate = onDocumentCreated(
 
     const delayInSeconds = 5 * 60; // 5 minutos
     const executeAt = Math.floor(pending.firstClickTs / 1000) + delayInSeconds;
-    
+
     console.log(`[contactPendingsOnCreate] Programando tarea (${delayInSeconds / 60} min) para user: ${collection}/${uid}, provider: ${docId}.`);
 
     try {
@@ -478,6 +508,102 @@ export const confirmAgreementAndCleanup = onCall(async (req) => {
     throw new HttpsError('internal', 'Ocurrió un error al procesar la solicitud de confirmación.');
   }
 });
+
+// ===================================================================
+// ▼▼▼ INICIO DEL CÓDIGO AÑADIDO ▼▼▼
+// ===================================================================
+
+// NUEVA FUNCIÓN para "No, aún no" (Reprogramar el seguimiento)
+export const rescheduleFollowup = onCall(async (req) => {
+  const { auth, data } = req;
+  if (!auth?.uid) {
+    throw new HttpsError('unauthenticated', 'Se requiere autenticación.');
+  }
+
+  // Usamos el validador para asegurar que los datos son correctos
+  if (!isFollowupActionData(data)) {
+    throw new HttpsError('invalid-argument', 'Los datos proporcionados son inválidos o están incompletos.');
+  }
+  const { user, provider, notificationId } = data;
+
+  try {
+    const batch = db.batch();
+
+    const pendingDocRef = db.collection(user.collection).doc(user.uid).collection('contactPendings').doc(provider.uid);
+    const notificationRef = db.collection(user.collection).doc(user.uid).collection('notifications').doc(notificationId);
+
+    // Para reprogramar, primero leemos los datos del pendiente actual para no perderlos.
+    const pendingDocSnap = await pendingDocRef.get();
+    if (!pendingDocSnap.exists) {
+        // Si el documento ya no existe, significa que el proceso ya fue resuelto (ej. por otra acción).
+        // En este caso, simplemente limpiamos la notificación de la UI para evitar confusión.
+        await notificationRef.delete();
+        console.log(`[rescheduleFollowup] Documento 'pending' no encontrado. Solo se eliminó la notificación UI.`);
+        return { success: true, message: 'El seguimiento ya había sido procesado.' };
+    }
+    const oldPendingData = pendingDocSnap.data();
+
+    // 1. Eliminar la notificación de seguimiento actual de la pantalla del usuario.
+    batch.delete(notificationRef);
+    
+    // 2. Eliminar el documento de "contactPendings" actual.
+    batch.delete(pendingDocRef);
+    
+    // 3. Recrear el documento 'contactPendings' con una nueva marca de tiempo.
+    //    Esto reactivará el trigger `contactPendingsOnCreate` para programar una nueva tarea.
+    batch.set(pendingDocRef, {
+      ...oldPendingData, // Conservamos los datos originales (providerName, etc.)
+      firstClickTs: Date.now(), // Actualizamos a la hora actual para reiniciar el contador.
+    });
+
+    await batch.commit();
+    console.log(`[rescheduleFollowup] Seguimiento reprogramado para usuario: ${user.uid} con proveedor: ${provider.uid}`);
+    return { success: true };
+
+  } catch (error) {
+    console.error(`[rescheduleFollowup] Error detallado:`, error);
+    throw new HttpsError('internal', 'No se pudo reprogramar el seguimiento.');
+  }
+});
+
+
+// NUEVA FUNCIÓN para "No hubo acuerdo" (Cancelar el proceso)
+export const cancelAgreement = onCall(async (req) => {
+  const { auth, data } = req;
+  if (!auth?.uid) {
+    throw new HttpsError('unauthenticated', 'Se requiere autenticación.');
+  }
+
+  // Usamos el validador para asegurar que los datos son correctos
+  if (!isFollowupActionData(data)) {
+    throw new HttpsError('invalid-argument', 'Los datos proporcionados son inválidos o están incompletos.');
+  }
+  const { user, provider, notificationId } = data;
+
+  try {
+    const batch = db.batch();
+
+    // 1. Eliminar la notificación de seguimiento (`contact_followup`) de la pantalla del usuario.
+    const notificationRef = db.collection(user.collection).doc(user.uid).collection('notifications').doc(notificationId);
+    batch.delete(notificationRef);
+
+    // 2. Eliminar el documento `contactPendings` para detener cualquier seguimiento futuro.
+    const pendingDocRef = db.collection(user.collection).doc(user.uid).collection('contactPendings').doc(provider.uid);
+    batch.delete(pendingDocRef);
+
+    await batch.commit();
+    console.log(`[cancelAgreement] Proceso de acuerdo cancelado para usuario: ${user.uid} con proveedor: ${provider.uid}`);
+    return { success: true };
+    
+  } catch (error) {
+    console.error(`[cancelAgreement] Error detallado:`, error);
+    throw new HttpsError('internal', 'No se pudo cancelar el proceso de acuerdo.');
+  }
+});
+
+// ===================================================================
+// ▲▲▲ FIN DEL CÓDIGO AÑADIDO ▲▲▲
+// ===================================================================
 
 // --- MODIFICADO: `sendContactFollowupTask` ya no enviará PUSH ---
 export const sendContactFollowupTask = onRequest(async (req, res) => {

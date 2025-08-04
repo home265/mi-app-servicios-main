@@ -101,8 +101,8 @@ const PerfilModal: React.FC<PerfilModalProps> = ({
     : '';
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 anim-fadeIn">
-      <Card className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto space-y-4 p-5 anim-zoomIn">
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 pt-20 anim-fadeIn">
+      <Card className="relative w-full  max-w-lg max-h-[90vh] overflow-y-auto space-y-4 p-5 anim-zoomIn">
         <button
           onClick={onClose}
           className="absolute top-2 right-2 p-1 rounded-full text-texto-secundario hover:bg-white/10 hover:text-texto-principal transition-colors"
