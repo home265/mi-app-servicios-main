@@ -1,14 +1,20 @@
 // src/types/paginaAmarilla.ts
+
 import { Timestamp } from 'firebase/firestore';
 import { HorariosDeAtencion } from './horarios';
 
 /* -------------------------------------------------------------------------- */
-/*                                   ROLES                                    */
+/* ROLES                                    */
 /* -------------------------------------------------------------------------- */
 export type RolPaginaAmarilla = 'prestador' | 'comercio';
 
+// --- INICIO: NUEVOS TIPOS PARA PLANES Y CAMPAÑAS ---
+export type PlanId = 'bronce' | 'plata' | 'oro' | 'titanio' | 'platino';
+export type CampaignId = 'mensual' | 'trimestral' | 'semestral' | 'anual';
+// --- FIN: NUEVOS TIPOS ---
+
 /* -------------------------------------------------------------------------- */
-/*                     ESTRUCTURA COMPLETA DEL DOCUMENTO                      */
+/* ESTRUCTURA COMPLETA DEL DOCUMENTO                      */
 /* -------------------------------------------------------------------------- */
 export interface PaginaAmarillaData {
   creatorId: string;
@@ -43,10 +49,22 @@ export interface PaginaAmarillaData {
 
   horarios?: HorariosDeAtencion | null;
   realizaEnvios?: boolean | null;
+
+  // --------------------------------------------------------------------------
+  // --- INICIO: CAMPOS DE SUSCRIPCIÓN ACTUALIZADOS ---
+  // --------------------------------------------------------------------------
+  planId?: PlanId; // El tipo de plan (ej: 'bronce', 'oro')
+  campaignId?: CampaignId; // La duración de la campaña (ej: 'mensual', 'anual')
+  subscriptionStartDate?: Timestamp; // Se vuelve opcional por si solo se guarda el contenido
+  subscriptionEndDate?: Timestamp; // Se vuelve opcional
+  isActive: boolean;
+  updatedAt?: Timestamp;
+  paymentConfirmedAt?: Timestamp;
+  // --- FIN: CAMPOS DE SUSCRIPCIÓN ACTUALIZADOS ---
 }
 
 /* -------------------------------------------------------------------------- */
-/*              TIPO SERIALIZABLE PARA PASAR A LOS CLIENT COMPONENTS          */
+/* TIPO SERIALIZABLE PARA PASAR A LOS CLIENT COMPONENTS          */
 /* -------------------------------------------------------------------------- */
 export interface SerializablePaginaAmarillaData
   extends Omit<
@@ -55,20 +73,27 @@ export interface SerializablePaginaAmarillaData
     | 'fechaExpiracion'
     | 'ultimaModificacion'
     | 'inicioCicloEdiciones'
+    | 'subscriptionStartDate'
+    | 'subscriptionEndDate'
+    | 'updatedAt'
+    | 'paymentConfirmedAt'
   > {
   fechaCreacion: string;
   fechaExpiracion: string;
-  ultimaModificacion: string;
+  ultimaModificacion: string | null;
   inicioCicloEdiciones: string;
+  subscriptionStartDate: string | null; // Se permite que sea null
+  subscriptionEndDate: string | null; // Se permite que sea null
+  updatedAt: string | null;
+  paymentConfirmedAt: string | null;
 }
 
 /* -------------------------------------------------------------------------- */
-/*                DTO PARA CREAR UNA NUEVA PUBLICACIÓN DESDE EL FORM          */
+/* DTO PARA CREAR UNA NUEVA PUBLICACIÓN DESDE EL FORM          */
 /* -------------------------------------------------------------------------- */
 /** Campos requeridos en la creación de una página amarilla.
- *  Se omiten los timestamps y contadores que el backend inicializa.
- *  `activa` se crea como `true`; se marca opcional para no romper llamadas
- *  anteriores y para permitir asignarlo internamente si fuese necesario. */
+ * Se omiten los timestamps, contadores y campos de suscripción que el backend inicializa.
+ * `activa` se crea como `true`; `isActive` se crea como `false`. */
 export interface CreatePaginaAmarillaDTO
   extends Omit<
     PaginaAmarillaData,
@@ -78,12 +103,19 @@ export interface CreatePaginaAmarillaDTO
     | 'contadorEdicionesAnual'
     | 'inicioCicloEdiciones'
     | 'activa'
+    | 'planId' // Se omite el planId
+    | 'campaignId' // Se omite el campaignId
+    | 'subscriptionStartDate'
+    | 'subscriptionEndDate'
+    | 'isActive'
+    | 'updatedAt'
+    | 'paymentConfirmedAt'
   > {
   activa?: boolean;
 }
 
 /* -------------------------------------------------------------------------- */
-/*                                 FILTROS                                   */
+/* FILTROS                                    */
 /* -------------------------------------------------------------------------- */
 export interface PaginaAmarillaFiltros {
   provincia?: string;
@@ -94,6 +126,8 @@ export interface PaginaAmarillaFiltros {
   subCategoria?: string;
   rol?: RolPaginaAmarilla;
   activa?: boolean;
+  isActive?: boolean;
   realizaEnvios?: boolean;
   terminoBusqueda?: string;
+  planId?: PlanId; // <-- Campo añadido para poder filtrar por plan
 }

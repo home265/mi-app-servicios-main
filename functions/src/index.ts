@@ -11,28 +11,26 @@ if (!admin.apps.length) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Funciones de notificaciones (nuevo flujo)                                 */
+/* Funciones de notificaciones (se mantienen sin cambios)                     */
 /* -------------------------------------------------------------------------- */
 export {
-  // --- Función nueva y corregida ---
-  confirmAgreementAndCleanup, // <-- AÑADIDA: Ahora sí se desplegará
-  rescheduleFollowup,         // <-- NUEVA
-  cancelAgreement,            // <-- NUEVA
-
-  // --- Funciones existentes que se mantienen ---
+  confirmAgreementAndCleanup,
+  rescheduleFollowup,
+  cancelAgreement,
   sendJobRequest,
   sendJobAccept,
   sendAgreementConfirmed,
   sendRatingRequest,
   sendContactFollowupTask,
   contactPendingsOnCreate,
-
-  // --- Función fantasma desactivada (opcional pero recomendado quitarla de aquí) ---
-  // sendContactRequest, 
 } from './notifications';
 
 /* -------------------------------------------------------------------------- */
-/* Otras funciones de tu proyecto                                            */
+/* Funciones de Páginas Amarillas y Pagos                                     */
 /* -------------------------------------------------------------------------- */
-export { onPaymentSuccess } from './onPaymentSuccess';
-export { scheduledmanagepaginasamarillas } from './managePaginasAmarillas';
+
+// Exporta la función que se activa al confirmar un pago.
+export { onSubscriptionPayment } from './onSubscriptionPayment';
+
+// Exporta la función programada que desactiva suscripciones expiradas.
+export { expireSubscriptions } from './expireAnuncios';

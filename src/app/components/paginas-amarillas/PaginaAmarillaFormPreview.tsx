@@ -1,8 +1,7 @@
-// src/app/components/paginas-amarillas/PaginaAmarillaFormPreview.tsx
 'use client';
 
 import React from 'react';
-import { PaginaAmarillaData, RolPaginaAmarilla } from '@/types/paginaAmarilla';
+import { PaginaAmarillaData, RolPaginaAmarilla, SerializablePaginaAmarillaData } from '@/types/paginaAmarilla';
 import { HorariosDeAtencion } from '@/types/horarios';
 import PaginaAmarillaDisplayCard from './PaginaAmarillaDisplayCard';
 import { Timestamp } from 'firebase/firestore';
@@ -44,6 +43,7 @@ const PaginaAmarillaFormPreview: React.FC<PaginaAmarillaFormPreviewProps> = ({
   formData,
   className = '',
 }) => {
+  // 1. Creamos un objeto de datos base con el formato original de Firestore
   const publicacionPreviewData: PaginaAmarillaData = {
     creatorId: 'preview-user-id',
     creatorRole: formData.creatorRole || 'comercio',
@@ -56,6 +56,7 @@ const PaginaAmarillaFormPreview: React.FC<PaginaAmarillaFormPreviewProps> = ({
     contadorEdicionesAnual: 0,
     inicioCicloEdiciones: Timestamp.now(),
     activa: true,
+    isActive: false, // <-- CAMBIO 1: Se añade el campo 'isActive' que faltaba
 
     tituloCard: formData.tituloCard,
     subtituloCard: formData.subtituloCard,
@@ -75,6 +76,21 @@ const PaginaAmarillaFormPreview: React.FC<PaginaAmarillaFormPreviewProps> = ({
     realizaEnvios: formData.realizaEnvios,
   };
 
+  // 2. Creamos una versión "serializada" de los datos para pasarla al componente hijo
+  const serializablePreviewData: SerializablePaginaAmarillaData = {
+    ...publicacionPreviewData,
+    fechaCreacion: publicacionPreviewData.fechaCreacion.toDate().toISOString(),
+    fechaExpiracion: publicacionPreviewData.fechaExpiracion.toDate().toISOString(),
+    ultimaModificacion: publicacionPreviewData.ultimaModificacion.toDate().toISOString(),
+    inicioCicloEdiciones: publicacionPreviewData.inicioCicloEdiciones.toDate().toISOString(),
+    // Añadimos valores por defecto para los campos opcionales que el tipo espera
+    subscriptionStartDate: null,
+    subscriptionEndDate: null,
+    updatedAt: null,
+    paymentConfirmedAt: null,
+  };
+
+
   return (
     <div className={`sticky top-4 p-4 bg-tarjeta rounded-2xl 
                    shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)] ${className}`}>
@@ -82,7 +98,8 @@ const PaginaAmarillaFormPreview: React.FC<PaginaAmarillaFormPreviewProps> = ({
         Vista Previa de la Tarjeta
       </h3>
       <div className="flex justify-center items-start">
-        <PaginaAmarillaDisplayCard publicacion={publicacionPreviewData} />
+        {/* 3. Pasamos la versión serializada de los datos */}
+        <PaginaAmarillaDisplayCard publicacion={serializablePreviewData} />
       </div>
       <p className="text-xs text-texto-secundario mt-3 text-center">
         Así se verá tu publicación. El contenido se actualiza en tiempo real.

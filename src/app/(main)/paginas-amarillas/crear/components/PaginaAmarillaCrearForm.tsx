@@ -1,12 +1,11 @@
-// src/app/(main)/paginas-amarillas/crear/components/PaginaAmarillaCrearForm.tsx
 'use client';
 
 import React, { useState, useEffect, forwardRef, InputHTMLAttributes } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useForm, Controller, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import type { RolPaginaAmarilla } from '@/types/paginaAmarilla';
+import { CampaignId, PlanId, RolPaginaAmarilla } from '@/types/paginaAmarilla';
 import { DIAS_SEMANA_CONFIG_INICIAL } from '@/types/horarios';
 import {
   CreatePaginaAmarillaDTO,
@@ -31,9 +30,9 @@ import PaginaAmarillaFormPreview, {
 } from '@/app/components/paginas-amarillas/PaginaAmarillaFormPreview';
 import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaCrearPublicacionPA from '@/app/components/ayuda-contenido/AyudaCrearPublicacionPA';
-import BotonVolver from '@/app/components/common/BotonVolver'; // Se importa el botón de volver
+import BotonVolver from '@/app/components/common/BotonVolver';
 
-// --- Componente Input con Prefijo Refactorizado ---
+// --- Componente Input con Prefijo Refactorizado (sin cambios) ---
 interface InputConPrefijoProps extends InputHTMLAttributes<HTMLInputElement> {
   id: string;
   label: string;
@@ -43,6 +42,7 @@ interface InputConPrefijoProps extends InputHTMLAttributes<HTMLInputElement> {
 
 const InputConPrefijo = forwardRef<HTMLInputElement, InputConPrefijoProps>(
   ({ id, label, prefijo, error, ...props }, ref) => {
+    // ... (código sin cambios)
     return (
       <div className="mb-4">
         <label htmlFor={id} className="block text-sm font-medium text-texto-secundario mb-1">
@@ -65,10 +65,8 @@ const InputConPrefijo = forwardRef<HTMLInputElement, InputConPrefijoProps>(
   }
 );
 InputConPrefijo.displayName = 'InputConPrefijo';
-// --- FIN ---
 
-
-// Esquemas Zod y Tipos (sin cambios)
+// --- Esquemas Zod y Tipos (sin cambios) ---
 const rangoHorarioSchema = z.object({
   de: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Formato de hora inválido (HH:MM)'),
   a: z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)$/, 'Formato de hora inválido (HH:MM)'),
@@ -84,7 +82,6 @@ const configuracionDiaSchema = z.object({
   diaIndice: z.number(),
   estado: estadoHorarioDiaSchema,
 });
-
 const paginaAmarillaSchema = z.object({
   nombrePublico: z.string().min(3, 'El nombre público es requerido (mín. 3 caracteres)').max(100),
   tituloCard: z.string().max(100).optional().nullable(),
@@ -106,7 +103,6 @@ const paginaAmarillaSchema = z.object({
   realizaEnvios: z.boolean().optional().nullable(),
 });
 type FormValues = z.infer<typeof paginaAmarillaSchema>;
-
 interface ProvinciaEnLocalidad { id: string; nombre: string; }
 interface LocalidadPerfil { id: string; nombre: string; provincia?: ProvinciaEnLocalidad; provinciaNombre?: string; }
 interface RubroPerfil { rubro: string; subrubro?: string; }
@@ -121,6 +117,12 @@ const PaginaAmarillaCrearForm: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | undefined>();
   const [apiError, setApiError] = useState<string | null>(null);
+
+  // --- INICIO: LECTURA DE PLAN Y CAMPAÑA ---
+  const searchParams = useSearchParams();
+  const planId = searchParams.get('planId') as PlanId | null;
+  const campaignId = searchParams.get('campaignId') as CampaignId | null;
+  // --- FIN: LECTURA DE PLAN Y CAMPAÑA ---
 
   const { control, handleSubmit, watch, formState: { errors }, setValue } = useForm<FormValues>({
     resolver: zodResolver(paginaAmarillaSchema),
@@ -145,35 +147,41 @@ const PaginaAmarillaCrearForm: React.FC = () => {
 
   const formDataForPreview = watch();
 
-  // Lógica de hooks y envío (sin cambios)
   useEffect(() => {
     if (currentUser && originalRole === 'prestador') {
       setValue('nombrePublico', currentUser.nombre || '');
       setPreviewImage(currentUser.selfieURL);
     }
   }, [currentUser, originalRole, setValue]);
-
+  
+  // --- INICIO: LÓGICA ONSUBMIT ACTUALIZADA ---
   const onSubmit: SubmitHandler<FormValues> = async data => {
     setIsLoading(true);
     setApiError(null);
 
     if (!currentUser || (originalRole !== 'prestador' && originalRole !== 'comercio')) {
-      setApiError('Usuario no autorizado o rol incorrecto para crear una publicación.');
+      setApiError('Usuario no autorizado para crear una publicación.');
+      setIsLoading(false);
+      return;
+    }
+    
+    // Si el usuario llegó a este punto, debería haber un plan y campaña seleccionados.
+    if (!planId || !campaignId) {
+      setApiError('No se ha seleccionado un plan o campaña. Por favor, vuelve a empezar.');
       setIsLoading(false);
       return;
     }
 
     const creatorRole = originalRole as RolPaginaAmarilla;
     let finalImageUrl: string | null = null;
-
     if (creatorRole === 'comercio' && data.imagenFile) {
       try {
         const timestamp = Date.now();
         const fileExt = data.imagenFile.name.split('.').pop() ?? 'jpg';
         const filePath = `paginas_amarillas_portadas/${currentUser.uid}/logo-${timestamp}.${fileExt}`;
         finalImageUrl = await uploadFileAndGetURL(data.imagenFile, filePath);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
-        console.error('Error subiendo imagen:', err);
         setApiError('Error al subir la imagen. Intenta nuevamente.');
         setIsLoading(false);
         return;
@@ -184,10 +192,6 @@ const PaginaAmarillaCrearForm: React.FC = () => {
 
     const provinciaNombre = currentUser.localidad?.provinciaNombre || 'No especificada';
     const localidadNombre = currentUser.localidad?.nombre ?? 'Desconocida';
-    const rubroPayload = creatorRole === 'comercio' ? currentUser.rubro?.rubro : undefined;
-    const subRubroPayload = creatorRole === 'comercio' ? currentUser.rubro?.subrubro : undefined;
-    const categoriaPayload = creatorRole === 'prestador' ? currentUser.categoria?.categoria : undefined;
-    const subCategoriaPayload = creatorRole === 'prestador' ? currentUser.categoria?.subcategoria : undefined;
     
     const payload: CreatePaginaAmarillaDTO = {
       nombrePublico: data.nombrePublico,
@@ -206,24 +210,32 @@ const PaginaAmarillaCrearForm: React.FC = () => {
       direccionVisible: data.direccionVisible || null,
       horarios: data.horarios ?? null,
       realizaEnvios: creatorRole === 'comercio' ? (data.realizaEnvios ?? false) : null,
-      rubro: rubroPayload || null,
-      subRubro: subRubroPayload || null,
-      categoria: categoriaPayload || null,
-      subCategoria: subCategoriaPayload || null,
+      rubro: creatorRole === 'comercio' ? currentUser.rubro?.rubro || null : null,
+      subRubro: creatorRole === 'comercio' ? currentUser.rubro?.subrubro || null : null,
+      categoria: creatorRole === 'prestador' ? currentUser.categoria?.categoria || null : null,
+      subCategoria: creatorRole === 'prestador' ? currentUser.categoria?.subcategoria || null : null,
       activa: true,
+      // Guardamos el plan y la campaña seleccionados
+      planId: planId,
+      campaignId: campaignId,
     };
 
     try {
+      // 1. Guardamos el contenido de la publicación en la base de datos.
       await createPaginaAmarilla(currentUser.uid, payload);
-      const destino = creatorRole === 'comercio' ? '/bienvenida?rol=comercio' : '/bienvenida?rol=prestador';
-      router.push(destino);
+
+      // 2. Redirigimos a la página de resumen para previsualizar y pagar.
+      router.push(`/paginas-amarillas/resumen/${currentUser.uid}`);
+      
     } catch (err) {
-      console.error('Error al crear la publicación:', err);
-      setApiError('No se pudo crear la publicación. Intenta nuevamente.');
+      const error = err as Error;
+      console.error('Error al crear la publicación:', error);
+      setApiError(error.message || 'No se pudo guardar la publicación.');
     } finally {
       setIsLoading(false);
     }
   };
+  // --- FIN: LÓGICA ONSUBMIT ACTUALIZADA ---
 
   if (!currentUser || !originalRole) {
     return <p className="p-4 text-center text-texto-secundario animate-pulse">Cargando datos del usuario...</p>;
@@ -233,7 +245,7 @@ const PaginaAmarillaCrearForm: React.FC = () => {
     return (
       <div className="p-4 text-center">
         <p className="text-error">
-          Tu rol de usuario ({originalRole}) no te permite crear publicaciones en Páginas Amarillas.
+          Tu rol de usuario ({originalRole}) no te permite crear publicaciones.
         </p>
       </div>
     );
@@ -261,7 +273,7 @@ const PaginaAmarillaCrearForm: React.FC = () => {
   
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-bold text-texto-principal">
-            Crea tu Publicación en Guía Local
+            Crea tu Publicación
           </h1>
           <div>
             <BotonAyuda>
@@ -271,6 +283,7 @@ const PaginaAmarillaCrearForm: React.FC = () => {
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 mt-4">
+          {/* ... (Todo el contenido del formulario <section>...</section> se mantiene igual) ... */}
           <section className="p-4 rounded-2xl bg-tarjeta shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]">
             <h2 className="text-lg font-semibold text-texto-principal mb-3 pb-3 border-b border-borde-tarjeta">
               {rolValido === 'comercio' ? 'Logo del Negocio' : 'Foto de Perfil'}
@@ -375,8 +388,7 @@ const PaginaAmarillaCrearForm: React.FC = () => {
               </div>
             </div>
           </section>
-
-          {/* El componente SelectorHorariosAtencion ya tiene su propio estilo de tarjeta 3D, por lo que no se envuelve */}
+          
           <Controller name="horarios" control={control} render={({ field }) => (<SelectorHorariosAtencion horariosIniciales={field.value || undefined} onChange={field.onChange}/>)}/>
           {errors.horarios && (<p className="text-sm text-error mt-1 mb-3">{typeof errors.horarios.message === 'string' ? errors.horarios.message : 'Error en horarios.'}</p>)}
 
@@ -391,15 +403,17 @@ const PaginaAmarillaCrearForm: React.FC = () => {
 
           {apiError && (<p className="text-sm text-error bg-error/10 p-3 rounded-md">{apiError}</p>)}
 
+          {/* --- INICIO: BOTÓN ACTUALIZADO --- */}
           <div className="flex justify-center pt-4">
             <button
               type="submit"
               disabled={isLoading}
               className="btn-primary"
             >
-              {isLoading ? 'Creando Publicación...' : 'Crear Publicación'}
+              {isLoading ? 'Guardando...' : 'Guardar y Previsualizar'}
             </button>
           </div>
+          {/* --- FIN: BOTÓN ACTUALIZADO --- */}
         </form>
       </div>
 

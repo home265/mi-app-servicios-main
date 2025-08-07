@@ -17,25 +17,26 @@ import {
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import {
-  PaginaAmarillaData, // Ya tiene horarios como HorariosDeAtencion
+  CampaignId,
+  PaginaAmarillaData,
   PaginaAmarillaFiltros,
+  PlanId,
 } from '@/types/paginaAmarilla';
-// Importamos el nuevo tipo para los horarios que se guardarán/leerán
-import { HorariosDeAtencion } from '@/types/horarios'; // Eliminamos la importación del antiguo HorarioDia
-import { listAnunciosByFilter } from './anunciosService';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { HorariosDeAtencion } from '@/types/horarios';
 
 const PAGINAS_AMARILLAS_COLLECTION = 'paginas_amarillas';
-const MILISEGUNDOS_EN_UN_ANO = 365 * 24 * 60 * 60 * 1000;
 
-/* util: elimina undefined para evitar errores de Firestore */
+/** Elimina propiedades `undefined` para Firestore */
 const cleanUndefined = <T extends object>(obj: T): T => {
   const filtered = Object.fromEntries(
-    Object.entries(obj as Record<string, unknown>).filter(([, v]) => v !== undefined),
+    Object.entries(obj as Record<string, unknown>).filter(([, v]) => v !== undefined)
   );
   return filtered as T;
 };
 
-/* ───────── tipos DTO (Data Transfer Object) ───────── */
+// --- INICIO: TIPO DTO CORREGIDO ---
+
 export type CreatePaginaAmarillaDTO = Omit<
   PaginaAmarillaData,
   | 'creatorId'
@@ -44,20 +45,20 @@ export type CreatePaginaAmarillaDTO = Omit<
   | 'ultimaModificacion'
   | 'contadorEdicionesAnual'
   | 'inicioCicloEdiciones'
-  | 'activa'              // ← seguimos omitiendo la versión “completa”
+  | 'activa' // Se omite del tipo base
+  | 'subscriptionStartDate'
+  | 'subscriptionEndDate'
+  | 'isActive'
+  | 'updatedAt'
+  | 'paymentConfirmedAt'
 > & {
-  /** Opcional: horarios serializados o nulos. */
-  horarios?: HorariosDeAtencion | null;
-
-  /** URL de la portada (null si el usuario no subió imagen). */
-  imagenPortadaUrl?: string | null;
-
-  /** Bandera que indica si la tarjeta está visible en búsquedas.
-   *  Se crea como `true`; la Cloud Function la pondrá `false`
-   *  cuando corresponda (caducidad, pérdida de anuncio activo, etc.). */
-  activa?: boolean;       // ← nuevo campo opcional
+  // Se permite pasar planId y campaignId durante la creación.
+  planId?: PlanId;
+  campaignId?: CampaignId;
+  activa?: boolean; // <-- LÍNEA CORREGIDA: Se vuelve a añadir como opcional.
 };
 
+// --- FIN: TIPO DTO CORREGIDO ---
 
 export type UpdatePaginaAmarillaDTO = Partial<
   Omit<
@@ -70,61 +71,45 @@ export type UpdatePaginaAmarillaDTO = Partial<
     | 'inicioCicloEdiciones'
     | 'activa'
     | 'ultimaModificacion'
+    | 'subscriptionStartDate'
+    | 'subscriptionEndDate'
+    | 'isActive'
+    | 'updatedAt'
+    | 'paymentConfirmedAt'
   >
-> & {
-  // 'horarios' ya está definido en PaginaAmarillaData como HorariosDeAtencion | null | undefined
-  horarios?: HorariosDeAtencion | null;
-  imagenPortadaUrl?: string | null;
-};
+>;
 
-/* ───────── helpers ───────── */
-export const tieneAnuncioActivo = async (userId: string): Promise<boolean> => {
-  try {
-    const anuncios = await listAnunciosByFilter({
-      creatorId: userId,
-      status: 'active',
-    });
-    return anuncios.length > 0;
-  } catch (e) {
-    console.error('Error verificando anuncios activos:', e);
-    return false;
-  }
-};
-
-/* ───────── create ───────── */
+/** CREATE: crea la página amarilla con plan y campaña, pero sin suscripción activa */
 export const createPaginaAmarilla = async (
   creatorId: string,
-  data: CreatePaginaAmarillaDTO, // data.horarios ya debería ser HorariosDeAtencion | null | undefined
+  data: CreatePaginaAmarillaDTO
 ): Promise<void> => {
-  if (!(await tieneAnuncioActivo(creatorId))) {
-    throw new Error('Para crear una publicación en Páginas Amarillas, primero necesitas tener al menos un anuncio activo.');
-  }
-
   const docRef = doc(db, PAGINAS_AMARILLAS_COLLECTION, creatorId);
   if ((await getDoc(docRef)).exists()) {
-    throw new Error('Ya existe una publicación en Páginas Amarillas para este usuario.');
+    throw new Error('Ya existe una publicación para este usuario.');
   }
 
   const now = Timestamp.now();
-  const fechaExpiracion = new Timestamp(
-    now.seconds + MILISEGUNDOS_EN_UN_ANO / 1000,
-    now.nanoseconds,
-  );
+  const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+  const fechaExpiracion = new Timestamp(now.seconds + ONE_YEAR_MS / 1000, now.nanoseconds);
 
-  const nuevaPublicacion: PaginaAmarillaData = {
+  const newPage: PaginaAmarillaData = {
+    // Datos básicos
     creatorId,
-    fechaCreacion: now,
-    fechaExpiracion,
-    ultimaModificacion: now,
-    contadorEdicionesAnual: 0,
-    inicioCicloEdiciones: now,
-    activa: true, // Se activa al crear si tiene anuncio activo
-
     creatorRole: data.creatorRole,
     nombrePublico: data.nombrePublico,
     provincia: data.provincia,
     localidad: data.localidad,
 
+    // Timestamps y contadores
+    fechaCreacion: now,
+    fechaExpiracion,
+    ultimaModificacion: now,
+    contadorEdicionesAnual: 0,
+    inicioCicloEdiciones: now,
+
+    // Datos de contenido del formulario
+    activa: data.activa ?? true, // Esta línea ahora funcionará sin error.
     tituloCard: data.tituloCard ?? null,
     subtituloCard: data.subtituloCard ?? null,
     descripcion: data.descripcion ?? null,
@@ -139,123 +124,106 @@ export const createPaginaAmarilla = async (
     subRubro: data.subRubro ?? null,
     categoria: data.categoria ?? null,
     subCategoria: data.subCategoria ?? null,
-    // El campo horarios aquí ya viene con la nueva estructura HorariosDeAtencion desde el formulario
-    // o es null/undefined. Se guarda tal cual o como null.
     horarios: data.horarios ?? null,
     realizaEnvios: data.realizaEnvios ?? null,
+
+    // Suscripción inicial: inactiva y con los planes seleccionados
+    isActive: false,
+    planId: data.planId,
+    campaignId: data.campaignId,
   };
 
-  await setDoc(docRef, cleanUndefined(nuevaPublicacion));
+  await setDoc(docRef, cleanUndefined(newPage));
 };
 
-/* ───────── get ───────── */
+/** GET por creatorId */
 export const getPaginaAmarilla = async (
-  creatorId: string,
+  creatorId: string
 ): Promise<PaginaAmarillaData | null> => {
   const snap = await getDoc(doc(db, PAGINAS_AMARILLAS_COLLECTION, creatorId));
-  if (!snap.exists()) {
-    return null;
-  }
-  // PaginaAmarillaData ya espera 'horarios' como HorariosDeAtencion | null | undefined.
-  // La función de adaptación está en el formulario de edición si los datos son antiguos.
-  // Aquí simplemente casteamos al tipo esperado.
+  if (!snap.exists()) return null;
   return snap.data() as PaginaAmarillaData;
 };
 
-/* ───────── update ───────── */
-// La función de update es llamada por tu API Route en:
-// src/app/api/paginas-amarillas/[creatorId]/route.ts
-// Esa API Route recibe el payload del PaginaAmarillaEditarForm.
-// El payload ya debería tener dataToUpdate.horarios como HorariosDeAtencion | null.
+/** UPDATE: actualiza datos de la página amarilla */
 export const updatePaginaAmarilla = async (
   creatorId: string,
-  dataToUpdate: UpdatePaginaAmarillaDTO,
+  dataToUpdate: UpdatePaginaAmarillaDTO
 ): Promise<void> => {
   const docRef = doc(db, PAGINAS_AMARILLAS_COLLECTION, creatorId);
-  const docSnap = await getDoc(docRef);
-
-  if (!docSnap.exists()) {
-    throw new Error('La publicación que intentas actualizar no existe.');
+  const snap = await getDoc(docRef);
+  if (!snap.exists()) {
+    throw new Error('La publicación no existe.');
   }
 
-  // No es necesario re-chequear tieneAnuncioActivo aquí para update,
-  // a menos que sea una regla de negocio (ej. si deja de tener anuncios activos, se desactiva la PA).
-  // Esa lógica está en la Cloud Function 'managePaginasAmarillas'.
-
   const now = Timestamp.now();
-  const datosConcretos: DocumentData = { // Usamos DocumentData para ser explícitos con Firestore
+  const updates: DocumentData = {
     ...dataToUpdate,
     ultimaModificacion: now,
   };
 
-  // Si 'horarios' está explícitamente en dataToUpdate, lo usamos.
-  // Si no está, no se toca el campo 'horarios' en Firestore.
-  // Si se quiere borrar los horarios, dataToUpdate.horarios debería ser null.
   if ('horarios' in dataToUpdate) {
-    datosConcretos.horarios = dataToUpdate.horarios ?? null;
+    updates.horarios = dataToUpdate.horarios ?? null;
   }
   if ('imagenPortadaUrl' in dataToUpdate && dataToUpdate.imagenPortadaUrl === undefined) {
-    // Si se pasó undefined explícitamente para imagenPortadaUrl (ej. desde el formulario para borrarla sin subir nueva),
-    // se guarda como null. El payload del form ya debería enviar null.
-    datosConcretos.imagenPortadaUrl = null;
+    updates.imagenPortadaUrl = null;
   }
 
-
-  // Limpiamos los undefined ANTES de enviar a Firestore
-  await updateDoc(docRef, cleanUndefined(datosConcretos));
+  await updateDoc(docRef, cleanUndefined(updates));
 };
 
-/* ───────── delete ───────── */
-export const deletePaginaAmarilla = async (
-  creatorId: string,
-): Promise<void> => {
+/** DELETE */
+export const deletePaginaAmarilla = async (creatorId: string): Promise<void> => {
   await deleteDoc(doc(db, PAGINAS_AMARILLAS_COLLECTION, creatorId));
 };
 
-/* ───────── list ───────── */
+
+/** Opciones para la función de listar páginas amarillas. */
+export interface ListPaginasAmarillasOptions {
+  /** Si es `true`, devuelve solo publicaciones con suscripción activa. */
+  soloSuscritos?: boolean;
+}
+
+/**
+ * LISTA publicaciones con filtros. Puede devolver todas las publicaciones de la guía
+ * o solo las que tienen una suscripción activa, según las opciones.
+ */
 export const listPaginasAmarillasByFilter = async (
   filtros: PaginaAmarillaFiltros,
+  options: ListPaginasAmarillasOptions = {}
 ): Promise<PaginaAmarillaData[]> => {
   const qc: QueryConstraint[] = [];
 
-  if (filtros.provincia)   qc.push(where('provincia',   '==', filtros.provincia));
-  if (filtros.localidad)   qc.push(where('localidad',   '==', filtros.localidad));
-  if (filtros.rol)         qc.push(where('creatorRole', '==', filtros.rol));
-
-  // Búsqueda por rubro/categoría
-  if (filtros.rubro)        qc.push(where('rubro',        '==', filtros.rubro));
-  if (filtros.subRubro)     qc.push(where('subRubro',     '==', filtros.subRubro));
-  if (filtros.categoria)    qc.push(where('categoria',    '==', filtros.categoria));
+  // Filtros de búsqueda estándar
+  if (filtros.provincia) qc.push(where('provincia', '==', filtros.provincia));
+  if (filtros.localidad) qc.push(where('localidad', '==', filtros.localidad));
+  if (filtros.rol) qc.push(where('creatorRole', '==', filtros.rol));
+  if (filtros.rubro) qc.push(where('rubro', '==', filtros.rubro));
+  if (filtros.subRubro) qc.push(where('subRubro', '==', filtros.subRubro));
+  if (filtros.categoria) qc.push(where('categoria', '==', filtros.categoria));
   if (filtros.subCategoria) qc.push(where('subCategoria', '==', filtros.subCategoria));
-
   if (typeof filtros.realizaEnvios === 'boolean') {
     qc.push(where('realizaEnvios', '==', filtros.realizaEnvios));
   }
+  
+  if (filtros.planId) qc.push(where('planId', '==', filtros.planId));
 
-  /* ---------------------------------------------------------------
-     Siempre filtramos por 'activa'; si no se pasa, asumimos true.
-  --------------------------------------------------------------- */
+  // Filtro base: la publicación debe estar visible en la guía
   qc.push(where('activa', '==', filtros.activa ?? true));
 
-  /* ---------------------------------------------------------------
-     Si la consulta es por activas (o no se especifica), añadimos la
-     condición de vigencia en fechaExpiracion.
-  --------------------------------------------------------------- */
-  if (filtros.activa === undefined || filtros.activa === true) {
-    qc.push(where('fechaExpiracion', '>', Timestamp.now()));
+  // Filtro condicional para suscripciones activas
+  if (options.soloSuscritos) {
+    qc.push(where('isActive', '==', true));
+    qc.push(where('subscriptionEndDate', '>', Timestamp.now()));
+    // Ordenar por fecha de expiración solo tiene sentido si filtramos por suscriptores
+    qc.push(orderBy('subscriptionEndDate', 'asc'));
   }
-
-  /* ---------------------------------------------------------------
-     orderBy garantiza que Firestore use SIEMPRE el mismo índice
-     (provincia, localidad, activa, fechaExpiracion ASC).
-  --------------------------------------------------------------- */
-  qc.push(orderBy('fechaExpiracion', 'asc'));
 
   const q: Query<DocumentData> = query(
     collection(db, PAGINAS_AMARILLAS_COLLECTION),
-    ...qc,
+    ...qc
   );
-
+  
   const snap = await getDocs(q);
   return snap.docs.map((d) => d.data() as PaginaAmarillaData);
 };

@@ -141,3 +141,23 @@ backdrop-filter: blur(8px);
 .anim-zoomIn          { animation: zoomInAnimation         0.7s ease-out forwards; }
 .anim-slideInFromLeft { animation: slideInFromLeftAnimation 0.7s ease-out forwards; }
 .anim-pulse           { animation: pulseAnimation          0.8s ease-in-out; }
+
+/* ---------- ANIMACIONES ---------- */
+/* ... tu keyframes y anim-classes ... */
+
+/* —————— UTILIDADES PARA TARJETA 3D —————— */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.backface-hidden {
+  backface-visibility: hidden;
+}
+
+.rotate-y-180 {
+  transform: rotateY(180deg);
+}

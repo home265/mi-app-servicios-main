@@ -1,4 +1,3 @@
-// src/app/components/paginas-amarillas/PaginaAmarillaContactoPopup.tsx
 'use client';
 
 import React from 'react';
@@ -14,22 +13,24 @@ import Card from '@/app/components/ui/Card';
 import Avatar from '@/app/components/common/Avatar';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Button from '@/app/components/ui/Button';
-import { PaginaAmarillaData } from '@/types/paginaAmarilla';
+// --- CAMBIO 1: Se importa el tipo de dato serializado ---
+import { SerializablePaginaAmarillaData } from '@/types/paginaAmarilla';
 
-// --- Helper para generar enlaces ---
+// --- Helper para generar enlaces (sin cambios) ---
 const generarEnlaceWhatsApp = (telefono: string | null | undefined): string | undefined => {
   if (!telefono) return undefined;
   const numeroLimpio = telefono.replace(/[^\d+]/g, '');
   return `https://wa.me/${numeroLimpio}`;
 };
 
-// --- Props del Componente ---
+// --- Props del Componente (actualizadas) ---
 interface PaginaAmarillaContactoPopupProps {
-  publicacion: PaginaAmarillaData;
+  // --- CAMBIO 2: Se usa el tipo de dato serializado ---
+  publicacion: SerializablePaginaAmarillaData;
   onClose: () => void;
 }
 
-// --- Componente Interno para cada Botón de Contacto ---
+// --- Componente Interno para cada Botón de Contacto (sin cambios) ---
 interface ContactoBotonProps {
   href: string | undefined;
   label: string;
@@ -64,11 +65,10 @@ const PaginaAmarillaContactoPopup: React.FC<PaginaAmarillaContactoPopupProps> = 
     imagenPortadaUrl,
     telefonoContacto,
     emailContacto,
+    enlaceWeb,
+    enlaceInstagram,
+    enlaceFacebook,
   } = publicacion;
-
-  const enlaceWeb = (publicacion as PaginaAmarillaData & { enlaceWeb?: string }).enlaceWeb;
-  const enlaceInstagram = (publicacion as PaginaAmarillaData & { enlaceInstagram?: string }).enlaceInstagram;
-  const enlaceFacebook = (publicacion as PaginaAmarillaData & { enlaceFacebook?: string }).enlaceFacebook;
 
   return (
     // Overlay semitransparente para el modal
@@ -126,21 +126,21 @@ const PaginaAmarillaContactoPopup: React.FC<PaginaAmarillaContactoPopupProps> = 
             />
             
             <ContactoBoton
-              href={enlaceWeb}
+              href={enlaceWeb || undefined}
               label="Sitio Web"
               ariaLabel={`Visitar sitio web de ${nombrePublico}`}
               icon={<GlobeAltIcon className="h-7 w-7" />}
             />
 
             <ContactoBoton
-              href={enlaceInstagram}
+              href={enlaceInstagram || undefined}
               label="Instagram"
               ariaLabel={`Visitar Instagram de ${nombrePublico}`}
               icon={<LinkIcon className="h-7 w-7" />}
             />
 
             <ContactoBoton
-              href={enlaceFacebook}
+              href={enlaceFacebook || undefined}
               label="Facebook"
               ariaLabel={`Visitar Facebook de ${nombrePublico}`}
               icon={<LinkIcon className="h-7 w-7" />}

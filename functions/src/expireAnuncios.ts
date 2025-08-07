@@ -8,91 +8,83 @@ if (!admin.apps.length) {
 }
 
 /**
- * Opciones de configuración para la función programada expireAnuncios.
- * Nota: La configuración de 'retry' para la ejecución de la función de 2ª gen
- * gatillada por scheduler/pubsub se maneja a nivel de GCP, no directamente aquí.
+ * Opciones de configuración para la función programada expireSubscriptions.
  */
-const expireAnunciosOptions: ScheduleOptions = {
-  schedule: '0 0 * * *', // Todos los días a las 00:00
+const expireSubscriptionsOptions: ScheduleOptions = {
+  schedule: '0 0 * * *',                 // Todos los días a las 00:00
   timeZone: 'America/Argentina/Mendoza',
-  region: 'southamerica-west1', // Especifica la región o regiones
-  // memory: '512MiB', // Opcional: configura memoria
-  // timeoutSeconds: 300, // Opcional: configura timeout (numérico)
+  region: 'southamerica-west1',
 };
 
 /**
  * Función programada: cada día a medianoche (según timeZone especificada).
- * Marca como 'expired' los anuncios cuyo 'status' es 'active' y cuya 'endDate' ya pasó.
+ * Desactiva (“isActive = false”) las cards cuya suscripción ha expirado.
  */
-export const expireAnuncios = onSchedule(
-  expireAnunciosOptions,
+export const expireSubscriptions = onSchedule(
+  expireSubscriptionsOptions,
   async (event: ScheduledEvent) => {
     const db = admin.firestore();
     const now = Timestamp.now();
 
     console.log(
-      `Función expireAnuncios (v2.2 corregida) ejecutada a las: ${now.toDate().toISOString()} para el job: ${event.jobName}`
+      `expireSubscriptions ejecutada a: ${now.toDate().toISOString()} (job=${event.jobName})`
     );
-    console.log(`Hora programada de ejecución (UTC): ${event.scheduleTime}`);
+    console.log(`Programada para: ${event.scheduleTime}`);
 
     try {
-      const anunciosAExpirarQuery = db
-        .collection('anuncios')
-        .where('status', '==', 'active')
-        .where('endDate', '<=', now);
+      // Busca cards activas cuya subscriptionEndDate ya pasó
+      const toExpireQuery = db
+        .collection('paginas_amarillas')
+        .where('isActive', '==', true)
+        .where('subscriptionEndDate', '<=', now);
 
-      const snapshot = await anunciosAExpirarQuery.get();
+      const snapshot = await toExpireQuery.get();
 
       if (snapshot.empty) {
-        console.log('No hay anuncios activos para expirar en esta ejecución.');
+        console.log('No hay suscripciones expiradas para procesar.');
         return;
       }
 
-      console.log(`Se encontraron ${snapshot.size} anuncios para expirar.`);
+      console.log(`Encontradas ${snapshot.size} suscripción(es) para expirar.`);
 
       const MAX_WRITES_PER_BATCH = 490;
       const batches: admin.firestore.WriteBatch[] = [];
-      let currentBatch = db.batch();
-      let operationsInCurrentBatch = 0;
+      let batch = db.batch();
+      let opsInBatch = 0;
 
       for (const doc of snapshot.docs) {
-        const docData = doc.data();
         console.log(
-          `Preparando para expirar anuncio: ${doc.id}. ` +
-          `endDate: ${docData.endDate?.toDate()?.toISOString() || 'Fecha inválida en doc'}, ` +
-          `now: ${now.toDate().toISOString()}`
+          `Expirando card ${doc.id}: end=${doc.data().subscriptionEndDate.toDate().toISOString()}`
         );
-        currentBatch.update(doc.ref, { status: 'expired', updatedAt: now });
-        operationsInCurrentBatch++;
+        batch.update(doc.ref, {
+          isActive: false,
+          updatedAt: now,
+        });
+        opsInBatch++;
 
-        if (operationsInCurrentBatch === MAX_WRITES_PER_BATCH) {
-          batches.push(currentBatch);
-          currentBatch = db.batch();
-          operationsInCurrentBatch = 0;
+        if (opsInBatch >= MAX_WRITES_PER_BATCH) {
+          batches.push(batch);
+          batch = db.batch();
+          opsInBatch = 0;
         }
       }
 
-      if (operationsInCurrentBatch > 0) {
-        batches.push(currentBatch);
+      if (opsInBatch > 0) {
+        batches.push(batch);
       }
 
-      if (batches.length > 0) {
-        console.log(`Se procesarán ${snapshot.size} anuncios en ${batches.length} lote(s).`);
-        await Promise.all(batches.map((batch, index) => {
-          console.log(`Comprometiendo lote #${index + 1}...`);
-          return batch.commit();
-        }));
-        console.log(
-          `Todos los lotes comprometidos. Se marcaron como expirados un total de ${snapshot.size} anuncios.`
-        );
-      } else if (snapshot.size > 0) {
-          console.warn("Se encontraron anuncios para expirar, pero no se generaron lotes. Revisar lógica de creación de lotes.");
-      }
+      console.log(`Comprometiendo ${batches.length} lote(s) de expiración...`);
+      await Promise.all(
+        batches.map((b, i) => {
+          console.log(`  - Lote ${i + 1}`);
+          return b.commit();
+        })
+      );
+      console.log(`Todas las suscripciones expiradas han sido marcadas como inactivas.`);
 
     } catch (error) {
-      console.error('Error severo al expirar anuncios:', error);
-      // Relanzar el error es importante para que la plataforma de Cloud Functions
-      // sepa que la ejecución falló y aplique políticas de reintento configuradas en GCP.
+      console.error('Error al expirar suscripciones:', error);
+      // Relanza para que GCP aplique lógica de reintento
       throw error;
     }
   }

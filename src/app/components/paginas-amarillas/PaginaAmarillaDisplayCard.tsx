@@ -1,6 +1,6 @@
 // src/app/components/paginas-amarillas/PaginaAmarillaDisplayCard.tsx
 'use client';
-
+import { SerializablePaginaAmarillaData } from '@/types/paginaAmarilla';
 import React, { useState } from 'react';
 import {
   MapPinIcon,
@@ -11,12 +11,13 @@ import Card from '@/app/components/ui/Card';
 import Avatar from '@/app/components/common/Avatar';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import Button from '@/app/components/ui/Button';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { PaginaAmarillaData } from '@/types/paginaAmarilla';
 import { HorariosDeAtencion, RangoHorario } from '@/types/horarios';
 import PaginaAmarillaContactoPopup from './PaginaAmarillaContactoPopup';
 
 interface PaginaAmarillaDisplayCardProps {
-  publicacion: PaginaAmarillaData;
+  publicacion: SerializablePaginaAmarillaData; // <-- ASÍ DEBE QUEDAR
   className?: string;
 }
 

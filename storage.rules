@@ -17,8 +17,8 @@ service firebase.storage {
     match /selfies/{userId}/{fileName} {
       allow read: if isOwner(userId);
       allow write: if isOwner(userId) &&
-                      request.resource.size < 2 * 1024 * 1024 &&
-                      request.resource.contentType.matches('image/.*');
+                       request.resource.size < 2 * 1024 * 1024 &&
+                       request.resource.contentType.matches('image/.*');
       allow delete: if isOwner(userId);
     }
 
@@ -26,41 +26,13 @@ service firebase.storage {
     match /paginas_amarillas/{creatorId}/{allPaths=**} {
       allow read: if true;
       allow write: if request.auth != null &&
-                      request.auth.uid == creatorId;
+                       request.auth.uid == creatorId;
     }
 
     // Portadas de Páginas Amarillas
     match /paginas_amarillas_portadas/{creatorId}/{fileName} {
       allow read: if true;
       allow write, delete: if isAuthenticated() && request.auth.uid == creatorId;
-    }
-
-    // Elementos de Anuncios: {anuncioId} es el ID del anuncio.
-    match /anuncios_elementos/{anuncioId}/fondos/{fileName} {
-      allow read: if true;
-      allow write: if isAuthenticated() &&
-                      request.resource.metadata.creatorId == request.auth.uid &&
-                      request.resource.size < 3 * 1024 * 1024 &&
-                      request.resource.contentType.matches('image/.*');
-      allow delete: if isAuthenticated() &&
-                       resource.metadata.creatorId == request.auth.uid;
-    }
-
-    match /anuncios_elementos/{anuncioId}/{screenIndex}/{fileName} {
-      allow read: if true;
-      allow write: if isAuthenticated() &&
-                      request.resource.metadata.creatorId == request.auth.uid &&
-                      request.resource.size < 2 * 1024 * 1024 &&
-                      request.resource.contentType.matches('image/.*');
-      allow delete: if isAuthenticated() &&
-                       resource.metadata.creatorId == request.auth.uid;
-    }
-
-    // Capturas de pantalla de Anuncios
-    match /capturas_anuncios/{anuncioId}/{fileName} {
-      allow read: if true;
-      allow write: if isAuthenticated() && request.resource.metadata.creatorId == request.auth.uid;
-      allow delete: if isAuthenticated() && resource.metadata.creatorId == request.auth.uid;
     }
 
     // CVs como archivos PDF

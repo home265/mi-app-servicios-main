@@ -1,5 +1,6 @@
 // src/app/api/paginas-amarillas/[creatorId]/route.ts
 
+
 import { NextResponse, type NextRequest } from 'next/server';
 import type { UpdatePaginaAmarillaDTO } from '@/lib/services/paginasAmarillasService';
 import type { PaginaAmarillaData, RolPaginaAmarilla } from '@/types/paginaAmarilla';
@@ -19,11 +20,6 @@ interface AuthenticatedUserProfile {
   role: RolPaginaAmarilla | 'perfil_incompleto_o_no_encontrado';
 }
 
-/* ⬇️  En Next 15, `params` es una Promesa */
-interface RouteContext {
-  params: Promise<{ creatorId: string }>;
-}
-
 async function verifyIdToken(idToken: string): Promise<DecodedIdToken | null> {
   const apiKey = process.env.NEXT_PUBLIC_FIREBASE_API_KEY;
   if (!apiKey) return null;
@@ -39,112 +35,123 @@ async function verifyIdToken(idToken: string): Promise<DecodedIdToken | null> {
     if (!res.ok) return null;
     const data = (await res.json()) as GoogleIdTokenLookupResponse;
     const uid = data.users?.[0]?.localId;
-    return uid ? { sub: uid, aud: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID || '' } : null;
+    return uid ? { sub: uid, aud: '' } : null;
   } catch {
     return null;
   }
 }
 
-async function getAuthenticatedUser(request: NextRequest): Promise<AuthenticatedUserProfile | null> {
+async function getAuthenticatedUser(
+  request: NextRequest
+): Promise<AuthenticatedUserProfile | null> {
   const authHeader = request.headers.get('Authorization');
   if (!authHeader?.startsWith('Bearer ')) return null;
   const idToken = authHeader.split('Bearer ')[1];
-  const decodedToken = await verifyIdToken(idToken);
-  if (!decodedToken?.sub) return null;
-  try {
-    const userProfileData = await getUserData(decodedToken.sub);
-    if (!userProfileData?.data?.role) {
-      return { uid: decodedToken.sub, role: 'perfil_incompleto_o_no_encontrado' };
-    }
-    return { uid: decodedToken.sub, role: userProfileData.data.role as RolPaginaAmarilla };
-  } catch {
-    return null;
+  const decoded = await verifyIdToken(idToken);
+  if (!decoded?.sub) return null;
+  const profile = await getUserData(decoded.sub);
+  if (!profile?.data?.role) {
+    return { uid: decoded.sub, role: 'perfil_incompleto_o_no_encontrado' };
   }
+  return {
+    uid: decoded.sub,
+    role: profile.data.role as RolPaginaAmarilla,
+  };
 }
 
-/* ------------------------------   PUT   ---------------------------------- */
 export async function PUT(request: NextRequest): Promise<NextResponse> {
   const url = new URL(request.url);
-  const pathParts = url.pathname.split('/');
-  const creatorId = pathParts[pathParts.length - 1];
-
+  const creatorId = url.pathname.split('/').pop() ?? '';
   const authUser = await getAuthenticatedUser(request);
-  if (!authUser) return NextResponse.json({ error: 'No autenticado.' }, { status: 401 });
-  if (authUser.uid !== creatorId) return NextResponse.json({ error: 'No autorizado.' }, { status: 403 });
+
+  if (!authUser) {
+    return NextResponse.json({ error: 'No autenticado.' }, { status: 401 });
+  }
+  if (authUser.uid !== creatorId) {
+    return NextResponse.json({ error: 'No autorizado.' }, { status: 403 });
+  }
 
   try {
     const body = (await request.json()) as UpdatePaginaAmarillaDTO;
-    if (Object.keys(body).length === 0) {
-      return NextResponse.json({ error: 'Nada que actualizar (cuerpo vacío).' }, { status: 400 });
+    const keys = Object.keys(body) as Array<keyof UpdatePaginaAmarillaDTO>;
+    if (keys.length === 0) {
+      return NextResponse.json(
+        { error: 'Nada que actualizar (cuerpo vacío).' },
+        { status: 400 }
+      );
     }
 
-    const dataToUpdate: {
-      [K in keyof UpdatePaginaAmarillaDTO]?: UpdatePaginaAmarillaDTO[K] | null;
-    } = {};
-    let hasChanges = false;
-
-    for (const key of Object.keys(body) as Array<keyof UpdatePaginaAmarillaDTO>) {
+    // Usamos un Record<string, unknown> para poder asignar null, string, boolean, etc.
+    const updates: Record<string, unknown> = {};
+    for (const key of keys) {
       const value = body[key];
       if (value !== undefined) {
-        (dataToUpdate as Record<string, unknown>)[key] = value;
-        hasChanges = true;
+        updates[key] = value;
       }
     }
 
-    if (!hasChanges) {
-      return NextResponse.json({ message: 'No se detectaron cambios para actualizar.' }, { status: 200 });
+    if (Object.keys(updates).length === 0) {
+      return NextResponse.json(
+        { message: 'No se detectaron cambios para actualizar.' },
+        { status: 200 }
+      );
     }
 
     const docRef = doc(db, 'paginas_amarillas', creatorId);
-    await updateDoc(docRef, dataToUpdate);
-    return NextResponse.json({ message: 'Publicación actualizada.' }, { status: 200 });
-  } catch (error: unknown) {
-    const errMsg = error instanceof Error ? error.message : 'Error desconocido.';
-    return NextResponse.json({ error: `Error interno: ${errMsg}` }, { status: 500 });
+    // Casteamos a UpdatePaginaAmarillaDTO para que updateDoc acepte sólo esos campos
+    await updateDoc(docRef, updates as UpdatePaginaAmarillaDTO);
+    return NextResponse.json(
+      { message: 'Publicación actualizada.' },
+      { status: 200 }
+    );
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Error interno.';
+    return NextResponse.json(
+      { error: `Error interno: ${msg}` },
+      { status: 500 }
+    );
   }
 }
 
-/* ------------------------------   GET   ---------------------------------- */
+// ... el GET y DELETE quedan igual que antes ...
+
+
+/** GET /api/paginas-amarillas/[creatorId] */
 export async function GET(
   _request: NextRequest,
-  { params }: RouteContext
+  { params }: { params: Promise<{ creatorId: string }> }
 ): Promise<NextResponse> {
   const { creatorId } = await params;
-  const logPrefix = `[API GET /paginas-amarillas/${creatorId}]`;
-
-  if (!db) {
-    console.error(`${logPrefix} Firestore no inicializado.`);
-    return NextResponse.json({ error: 'Firestore no inicializado.' }, { status: 500 });
-  }
-
   try {
     const docSnap = await getDoc(doc(db, 'paginas_amarillas', creatorId));
     if (!docSnap.exists()) {
       return NextResponse.json({ error: 'No encontrado.' }, { status: 404 });
     }
-
-    return NextResponse.json(docSnap.data() as PaginaAmarillaData);
-  } catch (error) {
-    console.error(`${logPrefix} Error:`, error);
+    return NextResponse.json(docSnap.data() as PaginaAmarillaData, { status: 200 });
+  } catch (err) {
+    console.error('GET /paginas-amarillas/[creatorId] error:', err);
     return NextResponse.json({ error: 'Error interno.' }, { status: 500 });
   }
 }
 
-/* -----------------------------   DELETE  --------------------------------- */
+/** DELETE /api/paginas-amarillas/[creatorId] */
 export async function DELETE(
   request: NextRequest,
-  { params }: RouteContext
+  { params }: { params: Promise<{ creatorId: string }> }
 ): Promise<NextResponse> {
   const { creatorId } = await params;
   const authUser = await getAuthenticatedUser(request);
-  if (!authUser || authUser.uid !== creatorId) {
-    return NextResponse.json({ error: 'No autorizado.' }, { status: authUser ? 403 : 401 });
+  if (!authUser) {
+    return NextResponse.json({ error: 'No autenticado.' }, { status: 401 });
+  }
+  if (authUser.uid !== creatorId) {
+    return NextResponse.json({ error: 'No autorizado.' }, { status: 403 });
   }
   try {
-    const docRef = doc(db, 'paginas_amarillas', creatorId);
-    await deleteDoc(docRef);
-    return NextResponse.json({ message: 'Eliminado correctamente.' });
-  } catch {
-    return NextResponse.json({ error: 'Error interno al borrar.' }, { status: 500 });
+    await deleteDoc(doc(db, 'paginas_amarillas', creatorId));
+    return NextResponse.json({ message: 'Eliminado correctamente.' }, { status: 200 });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Error interno.';
+    return NextResponse.json({ error: `Error interno: ${msg}` }, { status: 500 });
   }
 }
