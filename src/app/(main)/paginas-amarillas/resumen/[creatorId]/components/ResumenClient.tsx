@@ -17,11 +17,9 @@ export default function ResumenClient({ publicacion }: ResumenClientProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
-  // Encontramos los detalles del plan y la campaña a partir de los IDs guardados
   const planDetails = publicacion.planId ? PLANES.find(p => p.id === publicacion.planId) : null;
   const campanaDetails = publicacion.campaignId ? CAMPANAS.find(c => c.id === publicacion.campaignId) : null;
 
-  // Si no se encuentra el plan o la campaña, mostramos un error.
   if (!planDetails || !campanaDetails) {
     return (
       <div className="text-center text-error">
@@ -30,10 +28,10 @@ export default function ResumenClient({ publicacion }: ResumenClientProps) {
     );
   }
 
-  // Calculamos el precio final
   const finalPrice = planDetails.priceARS * campanaDetails.months * (1 - campanaDetails.discount);
 
   const handleEdit = () => {
+    // Al volver a editar, no pasamos plan ni campaña para que no se considere una nueva selección
     router.push(`/paginas-amarillas/editar/${publicacion.creatorId}`);
   };
 
@@ -45,7 +43,12 @@ export default function ResumenClient({ publicacion }: ResumenClientProps) {
       const res = await fetch('/api/onSubscriptionPayment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ cardId: publicacion.creatorId, plan: campanaDetails.id }),
+        // --- CORRECCIÓN DEFINITIVA ---
+        // Se envía 'campaignId' en lugar de 'plan' para que coincida con el backend.
+        body: JSON.stringify({ 
+          cardId: publicacion.creatorId, 
+          campaignId: campanaDetails.id 
+        }),
       });
 
       if (!res.ok) {
@@ -53,7 +56,6 @@ export default function ResumenClient({ publicacion }: ResumenClientProps) {
         throw new Error(errorData.error || 'No se pudo activar la suscripción.');
       }
       
-      // Si todo sale bien, redirigimos a la bienvenida con un mensaje de éxito.
       router.push('/bienvenida?status=success');
 
     } catch (err) {
@@ -67,7 +69,6 @@ export default function ResumenClient({ publicacion }: ResumenClientProps) {
     <div className="space-y-12">
       <h1 className="text-3xl font-bold text-texto-principal text-center">Resumen y Previsualización</h1>
 
-      {/* Bloque de Resumen de Compra */}
       <section className="max-w-md mx-auto p-6 bg-tarjeta rounded-2xl shadow-lg">
         <h2 className="text-xl font-semibold text-primario mb-4 border-b border-borde-tarjeta pb-3">Tu Selección</h2>
         <div className="space-y-2">
@@ -79,7 +80,6 @@ export default function ResumenClient({ publicacion }: ResumenClientProps) {
         </div>
       </section>
 
-      {/* Bloque de Previsualizaciones */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
         <div className="flex flex-col items-center">
           <h2 className="text-xl font-semibold text-texto-principal mb-4">Así se verá en la Guía Local</h2>
@@ -95,7 +95,6 @@ export default function ResumenClient({ publicacion }: ResumenClientProps) {
         </div>
       </div>
 
-      {/* Bloque de Acciones Finales */}
       <section className="max-w-md mx-auto w-full pt-6 border-t border-borde-tarjeta">
         {apiError && <p className="text-sm text-center text-error mb-4">{apiError}</p>}
         <div className="flex flex-col sm:flex-row gap-4">

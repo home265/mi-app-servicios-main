@@ -26,9 +26,9 @@ import SelectorHorariosAtencion from '@/app/components/paginas-amarillas/Selecto
 import PaginaAmarillaFormPreview, {
   PaginaAmarillaFormValues,
 } from '@/app/components/paginas-amarillas/PaginaAmarillaFormPreview';
-import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaEditarPublicacionPA from '@/app/components/ayuda-contenido/AyudaEditarPublicacionPA';
 import BotonVolver from '@/app/components/common/BotonVolver';
+import useHelpContent from '@/lib/hooks/useHelpContent';
 
 
 // --- Componente Input con Prefijo Refactorizado (sin cambios) ---
@@ -142,7 +142,7 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
   const [isLoading, setIsLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | null | undefined>(publicacionInicial.imagenPortadaUrl);
   const [apiError, setApiError] = useState<string | null>(null);
-
+  useHelpContent(<AyudaEditarPublicacionPA />);
   // --- INICIO: LECTURA DE PLAN Y CAMPAÑA ---
   const searchParams = useSearchParams();
   const planId = searchParams.get('planId') as PlanId | null;
@@ -278,11 +278,6 @@ const PaginaAmarillaEditarForm: React.FC<PaginaAmarillaEditarFormProps> = ({ pub
           <h1 className="text-2xl font-bold text-texto-principal text-center">
             Editar Publicación
           </h1>
-          <div>
-            <BotonAyuda>
-              <AyudaEditarPublicacionPA />
-            </BotonAyuda>
-          </div>
         </div>
         
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 mt-4">

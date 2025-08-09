@@ -13,14 +13,14 @@ import Input from '@/app/components/ui/Input'; // Se importa el componente Input
 import Textarea from '@/app/components/ui/Textarea'; // Se importa el componente Textarea estandarizado
 import SelectorCategoriasEmpleo from '@/app/components/forms/SelectorCategoriasEmpleo';
 import Avatar from '@/app/components/common/Avatar';
-import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaCrearEditarCV from '@/app/components/ayuda-contenido/AyudaCrearEditarCV';
 import BotonVolver from '@/app/components/common/BotonVolver'; // Se importa el botón de volver
+import useHelpContent from '@/lib/hooks/useHelpContent';
 
 export default function CvPage() {
   const { currentUser } = useUserStore();
   const router = useRouter();
-
+  useHelpContent(<AyudaCrearEditarCV />);
   const [descripcion, setDescripcion] = useState('');
   const [telefonoAlt, setTelefonoAlt] = useState('');
   const [rubros, setRubros] = useState<string[]>([]);
@@ -110,9 +110,6 @@ export default function CvPage() {
               {currentUser.nombre} {currentUser.apellido}
             </p>
           </div>
-          <BotonAyuda>
-            <AyudaCrearEditarCV />
-          </BotonAyuda>
         </div>
     
         <div>

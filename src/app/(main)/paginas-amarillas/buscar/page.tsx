@@ -18,9 +18,9 @@ import {
 
 import PaginasAmarillasFiltros from './components/PaginasAmarillasFiltros';
 import PaginasAmarillasResultados from './components/PaginasAmarillasResultados';
-import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaPaginasAmarillas from '@/app/components/ayuda-contenido/AyudaPaginasAmarillas';
 import BotonVolver from '@/app/components/common/BotonVolver';
+import useHelpContent from '@/lib/hooks/useHelpContent';
 
 type EstadoCarga = 'idle' | 'loading' | 'success' | 'error';
 
@@ -83,7 +83,7 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const router       = useRouter();
   const searchParams = useSearchParams();
-
+  useHelpContent(<AyudaPaginasAmarillas />);
   const [filtrosActivos, setFiltrosActivos] = useState<PaginaAmarillaFiltros>(
     () => parseQueryParamsToFiltros(searchParams),
   );
@@ -137,9 +137,6 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
           <h2 className="text-2xl font-semibold text-texto-principal">
             Buscar en Guía Local
           </h2>
-          <BotonAyuda>
-            <AyudaPaginasAmarillas />
-          </BotonAyuda>
         </div>
 
         <div className="max-w-md mx-auto bg-tarjeta rounded-2xl p-6 sm:p-8 

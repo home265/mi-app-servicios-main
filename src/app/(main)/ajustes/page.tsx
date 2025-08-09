@@ -20,6 +20,8 @@ import {
 
 import Avatar from '@/app/components/common/Avatar';
 import Modal from '@/app/components/common/Modal';
+import useHelpContent from '@/lib/hooks/useHelpContent';
+import AyudaAjustes from '@/app/components/ayuda-contenido/AyudaAjustes';
 
 // --- Nuevo Componente de Botón para Ajustes ---
 // Este componente encapsula el estilo visual de "relieve" solicitado.
@@ -80,7 +82,7 @@ const BotonDeAjuste: React.FC<BotonDeAjusteProps> = ({
 
 export default function AjustesPage() {
   const router = useRouter();
-
+  useHelpContent(<AyudaAjustes />);
   const {
     currentUser,
     fcmToken,

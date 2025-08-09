@@ -23,7 +23,7 @@ import { db } from '@/lib/firebase/config';
 import { getCvByUid } from '@/lib/services/cvService';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import BotonAyuda from '@/app/components/common/BotonAyuda';
-import AyudaAjustes from '@/app/components/ayuda-contenido/AyudaAjustes';
+import AyudaAjustes from '@/app/components/ayuda-contenido/AyudaBienvenida';
 import { getPaginaAmarilla } from '@/lib/services/paginasAmarillasService';
 import BotonDeAccion from '@/app/components/bienvenida/BotonDeAccion';
 import { Timestamp } from 'firebase/firestore';

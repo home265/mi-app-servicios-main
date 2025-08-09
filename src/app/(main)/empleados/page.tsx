@@ -10,14 +10,14 @@ import { searchCvs, type CvDocument } from '@/lib/services/cvService';
 import SelectorCategoriasEmpleo from '@/app/components/forms/SelectorCategoriasEmpleo';
 import CvCard from '@/app/components/cv/CvCard';
 import Card from '@/app/components/ui/Card';
-import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaEmpleados from '@/app/components/ayuda-contenido/AyudaEmpleados';
 import BotonVolver from '@/app/components/common/BotonVolver'; // Se importa el botón de volver
+import useHelpContent from '@/lib/hooks/useHelpContent';
 
 export default function EmpleadosPage() {
   const router = useRouter();
   const { currentUser } = useUserStore();
-
+  useHelpContent(<AyudaEmpleados />);
   const [rubroSel, setRubroSel] = useState<string[]>([]);
   const [cargando, setCargando] = useState(false);
   const [resultados, setResultados] = useState<CvDocument[]>([]);
@@ -61,9 +61,6 @@ export default function EmpleadosPage() {
       <Card className="max-w-md w-full space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold text-texto-principal">Buscar Empleados</h2>
-          <BotonAyuda>
-            <AyudaEmpleados />
-          </BotonAyuda>
         </div>
 
         <div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { useUserStore } from '@/store/userStore';
 
 /**
@@ -9,21 +9,23 @@ import { useUserStore } from '@/store/userStore';
  * @param helpContent El componente React que se mostrará en el modal de ayuda.
  */
 const useHelpContent = (helpContent: ReactNode | null) => {
-  // Obtenemos la función para actualizar el contenido de ayuda desde nuestro store.
   const setHelpContent = useUserStore((state) => state.setHelpContent);
 
   useEffect(() => {
-    // 1. Cuando el componente que usa este hook se monta (aparece en pantalla),
-    //    establecemos su contenido de ayuda específico en el store.
+    // 1. Cuando el componente se monta, establecemos su contenido de ayuda.
     setHelpContent(helpContent);
 
-    // 2. Cuando el componente se desmonta (el usuario navega a otra página),
-    //    la función de limpieza se ejecuta y borra el contenido de ayuda.
-    //    Esto evita que se muestre la ayuda incorrecta en la siguiente pantalla.
+    // 2. Cuando el componente se desmonta, limpiamos el contenido de ayuda.
     return () => {
       setHelpContent(null);
     };
-  }, [helpContent, setHelpContent]); // Se ejecuta solo si el contenido o la función cambian.
+    // --- INICIO DE LA CORRECCIÓN ---
+    // Al quitar 'helpContent' de las dependencias, evitamos el bucle infinito.
+    // Le decimos a React: "Ejecuta este efecto solo una vez al montar el componente".
+    // El comentario de abajo es para decirle a ESLint que confiamos en esta decisión.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setHelpContent]);
+  // --- FIN DE LA CORRECCIÓN ---
 };
 
 export default useHelpContent;

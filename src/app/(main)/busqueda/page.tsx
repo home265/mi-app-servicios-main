@@ -10,7 +10,6 @@ import useNotificationHandler from '@/hooks/useNotificationHandler';
 import SelectorCategoria, { CategoriaSeleccionada } from '@/app/components/forms/SelectorCategoria';
 import { getProvidersByFilter } from '@/lib/services/providersService';
 import { sendJobRequest, Payload as NotificationPayload } from '@/lib/services/notificationsService';
-import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaBusqueda from '@/app/components/ayuda-contenido/AyudaBusqueda';
 import NotificacionCard from '@/app/components/notificaciones/NotificacionCard';
 import ContactoPopup from '@/app/components/notificaciones/ContactoPopup';
@@ -22,6 +21,7 @@ import AlertPopup from '@/app/components/common/AlertPopup';
 import AnuncioAnimadoCard from '@/app/components/anuncios/AnuncioAnimadoCard';
 import { PLANES } from '@/lib/constants/planes';
 import { SerializablePaginaAmarillaData } from '@/types/paginaAmarilla';
+import useHelpContent from '@/lib/hooks/useHelpContent';
 // --- FIN: IMPORTS PARA EL MODAL DE ANUNCIOS ---
 
 
@@ -106,7 +106,7 @@ const AnuncioModal = ({ ad, onClose }: { ad: SerializablePaginaAmarillaData; onC
 
 export default function BusquedaPage() {
   const router = useRouter();
-
+  useHelpContent(<AyudaBusqueda />);
   const {
     notifications,
     processingNotifId,
@@ -233,9 +233,6 @@ export default function BusquedaPage() {
       <div className="w-full max-w-4xl mx-auto px-5 flex flex-col flex-grow">
         <header className="relative flex items-center justify-center py-8">
           <h1 className="text-lg font-medium">Búsqueda de servicios</h1>
-          <div className="absolute right-4">
-              <BotonAyuda><AyudaBusqueda /></BotonAyuda>
-          </div>
         </header>
 
         <hr className="border-borde-tarjeta" />

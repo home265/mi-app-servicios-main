@@ -19,8 +19,8 @@ import {
 
 import NotificacionCard from '@/app/components/notificaciones/NotificacionCard'
 import PerfilModal from '@/app/components/notificaciones/PerfilModal'
-import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaTrabajos from '@/app/components/ayuda-contenido/AyudaTrabajos';
+import useHelpContent from '@/lib/hooks/useHelpContent';
 
 /*────────── Tipos mejorados ──────────*/
 interface ProviderUserProfile extends UserProfile {
@@ -46,7 +46,7 @@ export default function TrabajosPage() {
   const originalRole = useUserStore((s) => s.originalRole)
   const actingAs = useUserStore((s) => s.actingAs)
   const router = useRouter()
-
+  useHelpContent(<AyudaTrabajos />);
   /*────────── estado local ──────────*/
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [showPerfilModal, setShowPerfilModal] = useState(false)
@@ -215,12 +215,6 @@ export default function TrabajosPage() {
     Solicitudes y acuerdos
   </h1>
 
-  {/* Este div ahora se posiciona a la derecha */}
-  <div className="absolute right-0 top-1/2 -translate-y-1/2">
-    <BotonAyuda>
-      <AyudaTrabajos />
-    </BotonAyuda>
-  </div>
 </header>
 
         <hr className="border-borde-tarjeta" />

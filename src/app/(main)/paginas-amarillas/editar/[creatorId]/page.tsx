@@ -37,21 +37,21 @@ export default async function EditarPaginaAmarillaPage({ params }: PageProps) {
   }
 
   // Serializa los Timestamps de Firebase a strings ISO para que el componente sea compatible con Server Components.
-  // Serializa TODOS los Timestamps a strings ISO para compatibilidad.
-const serializablePublicacion: SerializablePaginaAmarillaData = {
-  ...publicacionDb,
-  // Campos que ya se convertían
-  fechaCreacion: (publicacionDb.fechaCreacion as Timestamp).toDate().toISOString(),
-  fechaExpiracion: (publicacionDb.fechaExpiracion as Timestamp).toDate().toISOString(),
-  inicioCicloEdiciones: (publicacionDb.inicioCicloEdiciones as Timestamp).toDate().toISOString(),
+  const serializablePublicacion: SerializablePaginaAmarillaData = {
+    ...publicacionDb,
+    // Campos que ya se convertían
+    fechaCreacion: (publicacionDb.fechaCreacion as Timestamp).toDate().toISOString(),
+    fechaExpiracion: (publicacionDb.fechaExpiracion as Timestamp).toDate().toISOString(),
+    inicioCicloEdiciones: (publicacionDb.inicioCicloEdiciones as Timestamp).toDate().toISOString(),
 
-  // --- NUEVOS CAMPOS A CONVERTIR ---
-  ultimaModificacion: publicacionDb.ultimaModificacion ? (publicacionDb.ultimaModificacion as Timestamp).toDate().toISOString() : null,
-  subscriptionStartDate: (publicacionDb.subscriptionStartDate as Timestamp).toDate().toISOString(),
-  subscriptionEndDate: (publicacionDb.subscriptionEndDate as Timestamp).toDate().toISOString(),
-  updatedAt: publicacionDb.updatedAt ? (publicacionDb.updatedAt as Timestamp).toDate().toISOString() : null,
-  paymentConfirmedAt: publicacionDb.paymentConfirmedAt ? (publicacionDb.paymentConfirmedAt as Timestamp).toDate().toISOString() : null,
-};
+    // --- CORRECCIÓN APLICADA AQUÍ ---
+    // Se añade una comprobación para manejar de forma segura los campos de fecha opcionales.
+    ultimaModificacion: publicacionDb.ultimaModificacion ? (publicacionDb.ultimaModificacion as Timestamp).toDate().toISOString() : null,
+    subscriptionStartDate: publicacionDb.subscriptionStartDate ? (publicacionDb.subscriptionStartDate as Timestamp).toDate().toISOString() : null,
+    subscriptionEndDate: publicacionDb.subscriptionEndDate ? (publicacionDb.subscriptionEndDate as Timestamp).toDate().toISOString() : null,
+    updatedAt: publicacionDb.updatedAt ? (publicacionDb.updatedAt as Timestamp).toDate().toISOString() : null,
+    paymentConfirmedAt: publicacionDb.paymentConfirmedAt ? (publicacionDb.paymentConfirmedAt as Timestamp).toDate().toISOString() : null,
+  };
 
   return (
     <div className="container mx-auto px-2 sm:px-4 py-6 sm:py-8 bg-fondo">

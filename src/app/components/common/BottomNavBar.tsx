@@ -10,7 +10,7 @@ import {
 import { useUserStore } from '@/store/userStore';
 import BotonNavegacion from './BotonNavegacion';
 import Avatar from './Avatar';
-import Image from 'next/image'; // ✅ usar next/image
+import Image from 'next/image';
 
 export default function BottomNavBar() {
   const router = useRouter();
@@ -19,8 +19,8 @@ export default function BottomNavBar() {
 
   return (
     <footer 
-      className="fixed bottom-0 left-0 right-0 z-40 h-20 bg-tarjeta/80 backdrop-blur-sm"
-      style={{ boxShadow: '0 -2px 10px rgba(0, 0, 0, 0.1)' }}
+      className="fixed bottom-0 left-0 right-0 z-40 h-20 bg-tarjeta
+                 shadow-[0px_-4px_8px_rgba(0,0,0,0.4),0px_-2px_4px_rgba(255,255,255,0.05)]"
     >
       <div className="w-full h-full max-w-md mx-auto flex items-center justify-around px-2">
         {/* ---- Botón 1: Inicio ---- */}
@@ -45,13 +45,24 @@ export default function BottomNavBar() {
 
         {/* ---- Botón 3: Ayuda (Central y Prominente) ---- */}
         <div className="relative w-16 h-full flex justify-center">
-          {/* Este div se posiciona con 'bottom' para que sobresalga */}
+          {/* --- INICIO DE LA CORRECCIÓN --- */}
           <div 
-            className="absolute bottom-2 left-1/2 -translate-x-1/2 w-16 h-16 bg-primario rounded-full flex items-center justify-center shadow-lg transition-transform active:scale-90 cursor-pointer"
+            className="
+              absolute bottom-2 left-1/2 -translate-x-1/2 
+              w-16 h-16 bg-primario flex items-center justify-center 
+              cursor-pointer
+              transition-all duration-150 ease-in-out
+              rounded-2xl
+              shadow-[3px_3px_6px_rgba(0,0,0,0.4),-3px_-3px_6px_rgba(255,255,255,0.05)]
+              hover:brightness-110
+              active:scale-95 active:brightness-90
+              active:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.4)]
+            "
             onClick={toggleHelpModal}
             role="button"
             aria-label="Mostrar ayuda"
           >
+          {/* --- FIN DE LA CORRECCIÓN --- */}
             <Image
               src="/icons/foco-claro.jpg"
               alt="Botón de ayuda"

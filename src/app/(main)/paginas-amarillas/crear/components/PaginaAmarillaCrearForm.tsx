@@ -28,9 +28,9 @@ import SelectorHorariosAtencion from '@/app/components/paginas-amarillas/Selecto
 import PaginaAmarillaFormPreview, {
   PaginaAmarillaFormValues,
 } from '@/app/components/paginas-amarillas/PaginaAmarillaFormPreview';
-import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaCrearPublicacionPA from '@/app/components/ayuda-contenido/AyudaCrearPublicacionPA';
 import BotonVolver from '@/app/components/common/BotonVolver';
+import useHelpContent from '@/lib/hooks/useHelpContent';
 
 // --- Componente Input con Prefijo Refactorizado (sin cambios) ---
 interface InputConPrefijoProps extends InputHTMLAttributes<HTMLInputElement> {
@@ -117,7 +117,7 @@ const PaginaAmarillaCrearForm: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState<string | undefined>();
   const [apiError, setApiError] = useState<string | null>(null);
-
+  useHelpContent(<AyudaCrearPublicacionPA />);
   // --- INICIO: LECTURA DE PLAN Y CAMPAÑA ---
   const searchParams = useSearchParams();
   const planId = searchParams.get('planId') as PlanId | null;
@@ -275,11 +275,6 @@ const PaginaAmarillaCrearForm: React.FC = () => {
           <h1 className="text-2xl font-bold text-texto-principal">
             Crea tu Publicación
           </h1>
-          <div>
-            <BotonAyuda>
-              <AyudaCrearPublicacionPA />
-            </BotonAyuda>
-          </div>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-8 mt-4">
