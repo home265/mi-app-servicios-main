@@ -54,7 +54,7 @@ const createNotification = async (
 const scheduleOptions: ScheduleOptions = {
   schedule: '0 0 * * *', // Todos los días a las 00:00
   timeZone: 'America/Argentina/Mendoza',
-  region: 'southamerica-west1',
+  region: 'us-central1',
 };
 
 /**
@@ -145,7 +145,7 @@ export const manageSubscriptionsLifecycle = onSchedule(
 const cleanupInactivePublicationsOptions: ScheduleOptions = {
   schedule: '0 2 1 * *', // El primer día de cada mes a las 02:00
   timeZone: 'America/Argentina/Mendoza',
-  region: 'southamerica-west1',
+  region: 'us-central1',
 };
 
 /**
