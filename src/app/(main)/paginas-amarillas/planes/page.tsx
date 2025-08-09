@@ -4,17 +4,17 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useUserStore } from '@/store/userStore';
 import { getPaginaAmarilla } from '@/lib/services/paginasAmarillasService';
-import BotonAyuda from '@/app/components/common/BotonAyuda';
-import AyudaCrearEditarAnuncio from '@/app/components/ayuda-contenido/AyudaCrearEditarAnuncio';
 // --- IMPORTS ACTUALIZADOS ---
 import { PLANES, type Plan } from '@/lib/constants/planes';
 import { PlanId } from '@/types/paginaAmarilla';
+import AyudaPlanes from '@/app/components/ayuda-contenido/AyudaPlanes';
+import useHelpContent from '@/lib/hooks/useHelpContent';
 
 export default function PlanesPage() {
   const router = useRouter();
   const currentUser = useUserStore((s) => s.currentUser);
   const isLoadingAuth = useUserStore((s) => s.isLoadingAuth);
-
+  useHelpContent(<AyudaPlanes />);
   const [existingPage, setExistingPage] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedPlanId, setSelectedPlanId] = useState<PlanId | null>(null);
@@ -59,11 +59,6 @@ export default function PlanesPage() {
           <h1 className="text-3xl font-bold text-primario mb-8 text-center">
             {existingPage ? 'Selecciona un Nuevo Plan' : 'Elige tu Plan'}
           </h1>
-          <div className="absolute top-0 right-0">
-            <BotonAyuda>
-              <AyudaCrearEditarAnuncio fase="fase1a" />
-            </BotonAyuda>
-          </div>
         </div>
 
         {/* --- RENDERIZADO ACTUALIZADO PARA MOSTRAR LOS NUEVOS PLANES --- */}

@@ -4,17 +4,17 @@ import React, { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useUserStore } from '@/store/userStore';
 import { getPaginaAmarilla } from '@/lib/services/paginasAmarillasService';
-import BotonAyuda from '@/app/components/common/BotonAyuda';
-import AyudaCrearEditarAnuncio from '@/app/components/ayuda-contenido/AyudaCrearEditarAnuncio';
 import { PLANES, Plan } from '@/lib/constants/planes';
 import { CAMPANAS, Campana } from '@/lib/constants/campanas';
 import { CampaignId, PlanId } from '@/types/paginaAmarilla';
+import AyudaCampanas from '@/app/components/ayuda-contenido/AyudaCampanas';
+import useHelpContent from '@/lib/hooks/useHelpContent';
 
 export default function CampanasPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentUser = useUserStore((s) => s.currentUser);
-
+  useHelpContent(<AyudaCampanas />);
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null);
   const [existingPage, setExistingPage] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,11 +79,6 @@ export default function CampanasPage() {
           <p className="text-center text-texto-secundario mb-8">
             Estás configurando el <span className="font-semibold text-texto-principal">{selectedPlan.name}</span>.
           </p>
-          <div className="absolute top-0 right-0">
-            <BotonAyuda>
-              <AyudaCrearEditarAnuncio fase="fase1a" />
-            </BotonAyuda>
-          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
