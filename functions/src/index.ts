@@ -32,5 +32,10 @@ export {
 // Exporta la función que se activa al confirmar un pago.
 export { onSubscriptionPayment } from './onSubscriptionPayment';
 
-// Exporta la función programada que desactiva suscripciones expiradas.
-export { expireSubscriptions } from './expireAnuncios';
+// --- INICIO: EXPORTS ACTUALIZADOS PARA SUSCRIPCIONES ---
+// Se exportan las dos funciones programadas desde el mismo archivo.
+export {
+  manageSubscriptionsLifecycle, // Nombre actualizado
+  cleanupInactivePublications,  // Nueva función de limpieza
+} from './expireAnuncios';
+// --- FIN: EXPORTS ACTUALIZADOS ---

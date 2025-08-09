@@ -11,7 +11,9 @@ import {
   UserCircleIcon,
   UserGroupIcon,
   PlusCircleIcon,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   PencilIcon,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   Bars3BottomRightIcon,
 } from '@heroicons/react/24/outline';
 import Avatar from '@/app/components/common/Avatar';
@@ -19,13 +21,14 @@ import BotonCrearEditarAnuncio from './components/BotonCrearEditarAnuncio';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { db } from '@/lib/firebase/config';
 import { getCvByUid } from '@/lib/services/cvService';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaAjustes from '@/app/components/ayuda-contenido/AyudaAjustes';
 import { getPaginaAmarilla } from '@/lib/services/paginasAmarillasService';
 import BotonDeAccion from '@/app/components/bienvenida/BotonDeAccion';
 import { Timestamp } from 'firebase/firestore';
 import { useUserStore } from '@/store/userStore';
-
+import useHelpContent from '@/lib/hooks/useHelpContent';
 const toTitleCase = (s: string) =>
   s
     .toLowerCase()
@@ -112,6 +115,7 @@ const base: Record<'prestador' | 'comercio', Action[]> = {
 
 export default function BienvenidaPage() {
   const router = useRouter();
+   useHelpContent(<AyudaAjustes />);
   const user = useUserStore((s) => s.currentUser);
   const pinOk = useUserStore((s) => s.isPinVerifiedForSession);
   const toggleMode = useUserStore((s) => s.toggleActingMode);
@@ -121,7 +125,7 @@ export default function BienvenidaPage() {
   const [hasCv, setCv] = useState<boolean | null>(null);
   const [hasSubscription, setHasSubscription] = useState<boolean | null>(null);
   const [hasPublication, setHasPublication] = useState<boolean | null>(null);
-
+  
   // Verifica CV
   useEffect(() => {
     if (user?.rol !== 'usuario') return;
@@ -135,7 +139,6 @@ export default function BienvenidaPage() {
       }
     })();
   }, [user]);
-
   // Verifica suscripción (reemplaza anuncios)
   useEffect(() => {
     if (!user || !['prestador', 'comercio'].includes(user.rol)) return;
@@ -222,7 +225,7 @@ export default function BienvenidaPage() {
       router.push(path);
     }, 150);
   };
-
+  
   return (
     <div className="min-h-screen flex flex-col bg-fondo text-texto-principal">
       <div className="w-full max-w-4xl mx-auto px-5 flex flex-col flex-grow">
@@ -238,19 +241,6 @@ export default function BienvenidaPage() {
               <span className="text-xs uppercase opacity-70">{user.rol}</span>
             </div>
           </button>
-
-          <div className="flex flex-col md:flex-row items-center gap-3 md:gap-4">
-            <BotonAyuda>
-              <AyudaAjustes />
-            </BotonAyuda>
-            <button
-              onClick={() => delayedNavigate('/ajustes')}
-              aria-label="Abrir ajustes"
-              className="w-12 h-12 rounded-full flex items-center justify-center bg-tarjeta transition-all duration-150 ease-in-out shadow-[4px_4px_8px_rgba(0,0,0,0.3),-2px_-2px_6px_rgba(255,255,255,0.05)] hover:brightness-110 active:scale-95 active:brightness-90"
-            >
-              <Bars3BottomRightIcon className="w-7 h-7 text-primario" />
-            </button>
-          </div>
         </header>
 
         <main className="flex-grow flex justify-center items-start pt-16 pb-6">

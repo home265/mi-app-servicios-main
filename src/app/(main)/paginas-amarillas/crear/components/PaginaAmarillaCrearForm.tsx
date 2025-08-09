@@ -286,7 +286,7 @@ const PaginaAmarillaCrearForm: React.FC = () => {
           {/* ... (Todo el contenido del formulario <section>...</section> se mantiene igual) ... */}
           <section className="p-4 rounded-2xl bg-tarjeta shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]">
             <h2 className="text-lg font-semibold text-texto-principal mb-3 pb-3 border-b border-borde-tarjeta">
-              {rolValido === 'comercio' ? 'Logo del Negocio' : 'Foto de Perfil'}
+              Foto de Perfil o Logo
             </h2>
             <div className="flex flex-col sm:flex-row items-center gap-4 pt-2">
               <Avatar selfieUrl={previewImage} nombre={watch('nombrePublico')} size={100} />

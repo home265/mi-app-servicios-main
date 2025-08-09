@@ -45,6 +45,96 @@
       "queryScope": "COLLECTION",
       "fields": [
         {
+          "fieldPath": "activa",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isActive",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "localidad",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "planId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "provincia",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "fechaCreacion",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "subscriptionEndDate",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "paginas_amarillas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "activa",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isActive",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "localidad",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "planId",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "provincia",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "subscriptionEndDate",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "paginas_amarillas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "activa",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "isActive",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "localidad",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "provincia",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "subscriptionEndDate",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "paginas_amarillas",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
           "fieldPath": "creatorRole",
           "order": "ASCENDING"
         },

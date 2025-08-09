@@ -1,103 +1,121 @@
-// src/app/(main)/anuncios/page.tsx
-import React from 'react';
+'use client';
 
-import { PaginaAmarillaData } from '@/types/paginaAmarilla';
-import { PlanSuscripcionId } from '@/lib/constants/planes';
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useUserStore } from '@/store/userStore';
+
+import { SerializablePaginaAmarillaData } from '@/types/paginaAmarilla';
+import { PLANES } from '@/lib/constants/planes';
 import AnuncioAnimadoCard from '@/app/components/anuncios/AnuncioAnimadoCard';
 
-// ======================================================================
-// --- INICIO: LÓGICA MODIFICADA ---
-// ======================================================================
+export default function AnunciosPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const currentUser = useUserStore((s) => s.currentUser);
 
-// --- 1. Definición de las duraciones para cada plan (en milisegundos) ---
-interface PlanDuracion {
-  frente: number;
-  dorso: number;
-}
+  // Estados para manejar la carga y el resultado
+  const [adToShow, setAdToShow] = useState<SerializablePaginaAmarillaData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-// Mapea los IDs de los planes a sus respectivas duraciones de animación.
-const DURACIONES_POR_PLAN: Record<PlanSuscripcionId, PlanDuracion> = {
-  mensual:    { frente: 1500, dorso: 2500 }, // Total: 4s
-  trimestral: { frente: 2000, dorso: 3000 }, // Total: 5s
-  semestral:  { frente: 2500, dorso: 3500 }, // Total: 6s
-  anual:      { frente: 3000, dorso: 4000 }, // Total: 7s
-};
+  useEffect(() => {
+    // Esta función se ejecutará solo una vez cuando el componente esté listo
+    const fetchAd = async () => {
+      // 1. Obtenemos el contexto y la ubicación
+      const context = searchParams.get('context');
+      const provincia = currentUser?.localidad?.provinciaNombre;
+      const localidad = currentUser?.localidad?.nombre;
 
-// Duración por defecto en caso de que un plan no se encuentre.
-const DEFAULT_DURACION: PlanDuracion = DURACIONES_POR_PLAN.mensual;
+      // Si falta información esencial, no podemos continuar
+      if (!context || !provincia || !localidad) {
+        setError('No se pudo determinar el contexto o la ubicación para mostrar el anuncio.');
+        setIsLoading(false);
+        // Opcional: redirigir después de un momento
+        setTimeout(() => router.replace('/bienvenida'), 3000);
+        return;
+      }
 
+      try {
+        // 2. Construimos la URL para llamar a nuestra API inteligente
+        const apiUrl = `/api/anuncios?context=${context}&provincia=${provincia}&localidad=${localidad}`;
+        
+        const res = await fetch(apiUrl);
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || `Error del servidor: ${res.status}`);
+        }
 
-// --- 2. Función para obtener los datos reales desde la API ---
-async function fetchPublicacionesDestacadas(): Promise<PaginaAmarillaData[]> {
-  // Construye la URL base. En producción, esto debería venir de una variable de entorno.
-  const baseURL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-  const url = new URL('/api/paginas-amarillas', baseURL);
-  
-  // Añadimos el parámetro clave para pedir solo los anuncios con suscripción.
-  url.searchParams.append('tipo', 'anuncios');
+        const adData = await res.json();
+        
+        // 3. Guardamos el anuncio que nos devolvió el "cerebro"
+        setAdToShow(adData);
 
-  try {
-    const res = await fetch(url.toString(), {
-      // Evitamos que la lista de anuncios se guarde en caché para que siempre esté actualizada.
-      cache: 'no-store', 
-    });
+      } catch (err) {
+        const fetchError = err as Error;
+        console.error("Error al obtener el anuncio:", fetchError);
+        setError(fetchError.message);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
-    if (!res.ok) {
-      const errorData = await res.json();
-      throw new Error(errorData.error || 'Error al obtener los anuncios desde la API.');
+    // Solo ejecutamos la búsqueda si tenemos la información del usuario
+    if (currentUser) {
+      fetchAd();
     }
+  }, [currentUser, searchParams, router]);
 
-    return res.json();
+  // --- Renderizado del componente ---
 
-  } catch (error) {
-    console.error("Error en fetchPublicacionesDestacadas:", error);
-    // Devuelve un array vacío si hay un error para no romper la página.
-    return []; 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-fondo">
+        <p className="animate-pulse text-lg text-texto-secundario">Buscando anuncio...</p>
+      </div>
+    );
   }
-}
 
-// --- Componente de Página ---
-const AnunciosPage = async () => {
-  const publicaciones = await fetchPublicacionesDestacadas();
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-fondo text-center p-4">
+        <div>
+            <p className="text-xl font-semibold text-error">No se pudo cargar el anuncio</p>
+            <p className="text-texto-secundario mt-2">{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!adToShow) {
+    // Esto ocurre si la API devuelve null (no encontró anuncios aplicables)
+    // Opcional: podrías redirigir al usuario a la bienvenida inmediatamente
+    // router.replace('/bienvenida');
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-fondo text-center p-4">
+         <p className="text-lg text-texto-secundario">No hay anuncios disponibles para tu zona en este momento.</p>
+      </div>
+    );
+  }
+
+  // Si tenemos un anuncio para mostrar, buscamos los detalles de su plan
+  const planDetails = adToShow.planId ? PLANES.find(p => p.id === adToShow.planId) : null;
+  if (!planDetails) {
+    // Esto es un fallback por si el anuncio no tiene un planId válido
+    return (
+        <div className="min-h-screen flex items-center justify-center bg-fondo text-center p-4">
+           <p className="text-lg text-error">Error: El anuncio tiene un plan no reconocido.</p>
+        </div>
+      );
+  }
+
 
   return (
-    <div className="container mx-auto px-4 py-12">
-      <h1 className="text-4xl font-bold text-center text-amber-300 mb-4">
-        Anuncios Destacados
-      </h1>
-      <p className="text-center text-texto-secundario mb-12">
-        Nuestros miembros premium. ¡Apoya el comercio local!
-      </p>
-
-      {/* Grid para mostrar los anuncios */}
-      {publicaciones.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
-          {publicaciones.map((pub) => {
-            // --- 3. Lógica para asignar la duración dinámicamente ---
-            const planId = pub.subscriptionPlan; // 'mensual', 'trimestral', etc.
-            const duracion = DURACIONES_POR_PLAN[planId] || DEFAULT_DURACION;
-
-            return (
-              <AnuncioAnimadoCard
-                key={pub.creatorId}
-                publicacion={pub}
-                duracionFrente={duracion.frente}
-                duracionDorso={duracion.dorso}
-              />
-            );
-          })}
-        </div>
-      ) : (
-        <div className="text-center py-16 text-texto-secundario">
-          <p>No hay anuncios destacados para mostrar en este momento.</p>
-        </div>
-      )}
+    <div className="min-h-screen flex items-center justify-center bg-fondo p-4">
+      <AnuncioAnimadoCard
+        publicacion={adToShow}
+        duracionFrente={planDetails.durationFrontMs}
+        duracionDorso={planDetails.durationBackMs}
+      />
     </div>
   );
-};
-
-export default AnunciosPage;
-
-// ======================================================================
-// --- FIN: LÓGICA MODIFICADA ---
-// ======================================================================
+}

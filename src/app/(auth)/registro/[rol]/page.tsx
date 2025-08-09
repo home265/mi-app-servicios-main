@@ -10,6 +10,13 @@ type RolValido = 'usuario' | 'prestador' | 'comercio';
 const rolesValidos: RolValido[] = ['usuario', 'prestador', 'comercio'];
 const esRolValido = (r: string): r is RolValido =>
   rolesValidos.includes(r as RolValido);
+
+// --- 1. SE CREA EL MAPA DE TÍTULOS ---
+const tituloPorRol = {
+  usuario: 'Usuario',
+  prestador: 'Prestador',
+  comercio: 'Profesionales y Comercios',
+};
 /* ─────────────── */
 
 export default function RegistroRolPage() {
@@ -21,7 +28,7 @@ export default function RegistroRolPage() {
       {/* ──────────── Marca de agua ──────────── */}
       <div className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center">
         <Image
-          src="/logo3.png" // Se usa directamente el logo del tema oscuro
+          src="/logo3.png"
           alt=""
           width={300}
           height={300}
@@ -42,8 +49,9 @@ export default function RegistroRolPage() {
       >
         {esRolValido(rol) ? (
           <>
+            {/* --- 2. SE USA EL TÍTULO DEL MAPA --- */}
             <h1 className="text-center text-3xl font-bold">
-              Registro como <span className="capitalize">{rol}</span>
+              Registro como {tituloPorRol[rol]}
             </h1>
 
             <RegistroForm rol={rol} />
@@ -57,7 +65,6 @@ export default function RegistroRolPage() {
             <p className="text-center text-base">
               El tipo de registro “{rol}” no es válido.
               <br />
-              {/* Se eliminó la clase dark:* del enlace */}
               <Link
                 href="/seleccionar-registro"
                 className="mt-4 inline-block font-semibold text-secundario hover:underline"

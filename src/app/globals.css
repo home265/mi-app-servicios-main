@@ -161,3 +161,23 @@ backdrop-filter: blur(8px);
 .rotate-y-180 {
   transform: rotateY(180deg);
 }
+
+/* Estilos personalizados para el carrusel de Swiper */
+.mySwiper .swiper-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-top: 1rem;
+  padding-bottom: 3rem; /* Espacio para la paginación */
+}
+
+/* Color de las flechas de navegación */
+.mySwiper .swiper-button-next,
+.mySwiper .swiper-button-prev {
+  color: #FACC15; /* Amarillo primario (ajusta si tu color es otro) */
+}
+
+/* Color de los puntos de paginación */
+.mySwiper .swiper-pagination-bullet-active {
+  background-color: #FACC15; /* Amarillo primario */
+}

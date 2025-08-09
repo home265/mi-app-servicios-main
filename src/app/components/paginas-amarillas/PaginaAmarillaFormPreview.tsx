@@ -56,8 +56,12 @@ const PaginaAmarillaFormPreview: React.FC<PaginaAmarillaFormPreviewProps> = ({
     contadorEdicionesAnual: 0,
     inicioCicloEdiciones: Timestamp.now(),
     activa: true,
-    isActive: false, // <-- CAMBIO 1: Se añade el campo 'isActive' que faltaba
+    isActive: false,
 
+    // --- CORRECCIÓN ---
+    // Añadimos el campo obligatorio 'subscriptionEndDate' con un valor por defecto.
+    subscriptionEndDate: Timestamp.fromMillis(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    
     tituloCard: formData.tituloCard,
     subtituloCard: formData.subtituloCard,
     descripcion: formData.descripcion,
@@ -83,9 +87,13 @@ const PaginaAmarillaFormPreview: React.FC<PaginaAmarillaFormPreviewProps> = ({
     fechaExpiracion: publicacionPreviewData.fechaExpiracion.toDate().toISOString(),
     ultimaModificacion: publicacionPreviewData.ultimaModificacion.toDate().toISOString(),
     inicioCicloEdiciones: publicacionPreviewData.inicioCicloEdiciones.toDate().toISOString(),
-    // Añadimos valores por defecto para los campos opcionales que el tipo espera
+    
+    // --- CORRECCIÓN ---
+    // Aseguramos que el campo serializable también tenga un valor
+    subscriptionEndDate: publicacionPreviewData.subscriptionEndDate.toDate().toISOString(),
+    
+    // Añadimos valores por defecto para los otros campos opcionales que el tipo espera
     subscriptionStartDate: null,
-    subscriptionEndDate: null,
     updatedAt: null,
     paymentConfirmedAt: null,
   };

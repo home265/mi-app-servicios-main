@@ -7,85 +7,190 @@ if (!admin.apps.length) {
   admin.initializeApp();
 }
 
+const db = admin.firestore();
+
 /**
- * Opciones de configuración para la función programada expireSubscriptions.
+ * Crea una notificación en la subcolección de un usuario.
+ * Busca al usuario en las colecciones de perfiles conocidas.
+ * @param userId El UID del usuario a notificar.
+ * @param type El tipo de notificación ('warning-5-days' o 'warning-final-day').
+ * @param message El mensaje de la notificación.
  */
-const expireSubscriptionsOptions: ScheduleOptions = {
-  schedule: '0 0 * * *',                 // Todos los días a las 00:00
+const createNotification = async (
+  userId: string,
+  type: 'warning-5-days' | 'warning-final-day',
+  message: string
+): Promise<void> => {
+  const userCollections = ['prestadores', 'comercios', 'usuarios_generales'];
+  let userProfileRef: admin.firestore.DocumentReference | null = null;
+
+  // Intenta encontrar el documento del usuario en las posibles colecciones
+  for (const collectionName of userCollections) {
+    const ref = db.collection(collectionName).doc(userId);
+    const doc = await ref.get();
+    if (doc.exists) {
+      userProfileRef = ref;
+      break;
+    }
+  }
+
+  if (userProfileRef) {
+    // Si encontramos al usuario, creamos la notificación en su subcolección
+    await userProfileRef.collection('notifications').add({
+      type,
+      message,
+      createdAt: Timestamp.now(),
+      read: false, // Se marca como no leída
+    });
+    console.log(`Notificación '${type}' creada para el usuario ${userId}.`);
+  } else {
+    console.warn(`No se pudo encontrar el perfil del usuario ${userId} para crear la notificación.`);
+  }
+};
+
+/**
+ * Opciones de configuración para la función programada.
+ */
+const scheduleOptions: ScheduleOptions = {
+  schedule: '0 0 * * *', // Todos los días a las 00:00
   timeZone: 'America/Argentina/Mendoza',
   region: 'southamerica-west1',
 };
 
 /**
- * Función programada: cada día a medianoche (según timeZone especificada).
- * Desactiva (“isActive = false”) las cards cuya suscripción ha expirado.
+ * Función programada que se ejecuta diariamente para gestionar suscripciones.
+ * 1. Envía avisos a suscripciones que vencen en 5 días.
+ * 2. Envía avisos a suscripciones que vencen en las próximas 24 horas.
+ * 3. Desactiva las suscripciones que ya han expirado.
  */
-export const expireSubscriptions = onSchedule(
-  expireSubscriptionsOptions,
+export const manageSubscriptionsLifecycle = onSchedule(
+  scheduleOptions,
   async (event: ScheduledEvent) => {
-    const db = admin.firestore();
     const now = Timestamp.now();
-
-    console.log(
-      `expireSubscriptions ejecutada a: ${now.toDate().toISOString()} (job=${event.jobName})`
-    );
-    console.log(`Programada para: ${event.scheduleTime}`);
+    console.log(`Función manageSubscriptionsLifecycle ejecutada a: ${now.toDate().toISOString()}`);
 
     try {
-      // Busca cards activas cuya subscriptionEndDate ya pasó
-      const toExpireQuery = db
-        .collection('paginas_amarillas')
+      // --- TAREA 1: AVISO DE 5 DÍAS ---
+      const fiveDaysInMillis = 5 * 24 * 60 * 60 * 1000;
+      const warningStartDate = Timestamp.fromMillis(now.toMillis() + fiveDaysInMillis);
+      const warningEndDate = Timestamp.fromMillis(warningStartDate.toMillis() + 24 * 60 * 60 * 1000);
+
+      const warning5DaysQuery = db.collection('paginas_amarillas')
+        .where('isActive', '==', true)
+        .where('subscriptionEndDate', '>=', warningStartDate)
+        .where('subscriptionEndDate', '<', warningEndDate);
+      
+      const warningSnapshot = await warning5DaysQuery.get();
+      if (!warningSnapshot.empty) {
+        console.log(`Encontradas ${warningSnapshot.size} suscripciones que vencen en 5 días.`);
+        for (const doc of warningSnapshot.docs) {
+          await createNotification(
+            doc.id,
+            'warning-5-days',
+            'Tu suscripción a la Guía Local expirará en 5 días. ¡No pierdas tu visibilidad!'
+          );
+        }
+      }
+
+      // --- TAREA 2: AVISO DEL ÚLTIMO DÍA ---
+      const finalDayEndDate = Timestamp.fromMillis(now.toMillis() + 24 * 60 * 60 * 1000);
+      const finalDayQuery = db.collection('paginas_amarillas')
+        .where('isActive', '==', true)
+        .where('subscriptionEndDate', '>', now)
+        .where('subscriptionEndDate', '<=', finalDayEndDate);
+      
+      const finalDaySnapshot = await finalDayQuery.get();
+      if (!finalDaySnapshot.empty) {
+        console.log(`Encontradas ${finalDaySnapshot.size} suscripciones que vencen hoy.`);
+        for (const doc of finalDaySnapshot.docs) {
+          await createNotification(
+            doc.id,
+            'warning-final-day',
+            'Tu suscripción expira hoy. ¡Renuévala ahora para no perder los beneficios!'
+          );
+        }
+      }
+
+      // --- TAREA 3: DESACTIVAR SUSCRIPCIONES VENCIDAS ---
+      const toExpireQuery = db.collection('paginas_amarillas')
         .where('isActive', '==', true)
         .where('subscriptionEndDate', '<=', now);
 
-      const snapshot = await toExpireQuery.get();
-
-      if (snapshot.empty) {
+      const expiredSnapshot = await toExpireQuery.get();
+      if (expiredSnapshot.empty) {
         console.log('No hay suscripciones expiradas para procesar.');
         return;
       }
 
-      console.log(`Encontradas ${snapshot.size} suscripción(es) para expirar.`);
-
-      const MAX_WRITES_PER_BATCH = 490;
-      const batches: admin.firestore.WriteBatch[] = [];
-      let batch = db.batch();
-      let opsInBatch = 0;
-
-      for (const doc of snapshot.docs) {
-        console.log(
-          `Expirando card ${doc.id}: end=${doc.data().subscriptionEndDate.toDate().toISOString()}`
-        );
-        batch.update(doc.ref, {
-          isActive: false,
-          updatedAt: now,
-        });
-        opsInBatch++;
-
-        if (opsInBatch >= MAX_WRITES_PER_BATCH) {
-          batches.push(batch);
-          batch = db.batch();
-          opsInBatch = 0;
-        }
-      }
-
-      if (opsInBatch > 0) {
-        batches.push(batch);
-      }
-
-      console.log(`Comprometiendo ${batches.length} lote(s) de expiración...`);
-      await Promise.all(
-        batches.map((b, i) => {
-          console.log(`  - Lote ${i + 1}`);
-          return b.commit();
-        })
-      );
+      console.log(`Encontradas ${expiredSnapshot.size} suscripción(es) para expirar.`);
+      const batch = db.batch();
+      expiredSnapshot.docs.forEach(doc => {
+        console.log(`Expirando card ${doc.id}`);
+        batch.update(doc.ref, { isActive: false, updatedAt: now });
+      });
+      await batch.commit();
       console.log(`Todas las suscripciones expiradas han sido marcadas como inactivas.`);
 
     } catch (error) {
-      console.error('Error al expirar suscripciones:', error);
-      // Relanza para que GCP aplique lógica de reintento
-      throw error;
+      console.error('Error al gestionar el ciclo de vida de las suscripciones:', error);
+      throw error; // Relanza para que GCP aplique la lógica de reintento
     }
   }
 );
+// --- INICIO: NUEVA FUNCIÓN DE LIMPIEZA ---
+
+/**
+ * Opciones de configuración para la función de limpieza mensual.
+ */
+const cleanupInactivePublicationsOptions: ScheduleOptions = {
+  schedule: '0 2 1 * *', // El primer día de cada mes a las 02:00
+  timeZone: 'America/Argentina/Mendoza',
+  region: 'southamerica-west1',
+};
+
+/**
+ * Función programada que se ejecuta mensualmente para borrar publicaciones inactivas antiguas.
+ * Elimina las publicaciones que han estado inactivas por más de 90 días.
+ */
+export const cleanupInactivePublications = onSchedule(
+  cleanupInactivePublicationsOptions,
+  async (event: ScheduledEvent) => {
+    const now = Timestamp.now();
+    console.log(`Función cleanupInactivePublications ejecutada a: ${now.toDate().toISOString()}`);
+
+    // 1. Calcula la fecha de hace 90 días
+    const ninetyDaysInMillis = 90 * 24 * 60 * 60 * 1000;
+    const cutoffDate = Timestamp.fromMillis(now.toMillis() - ninetyDaysInMillis);
+
+    try {
+      // 2. Busca publicaciones inactivas cuya fecha de vencimiento sea anterior al límite
+      const toDeleteQuery = db.collection('paginas_amarillas')
+        .where('isActive', '==', false)
+        .where('subscriptionEndDate', '<=', cutoffDate);
+
+      const snapshot = await toDeleteQuery.get();
+
+      if (snapshot.empty) {
+        console.log('No hay publicaciones inactivas antiguas para eliminar.');
+        return;
+      }
+
+      console.log(`Encontradas ${snapshot.size} publicación(es) para eliminar permanentemente.`);
+
+      // 3. Borra los documentos encontrados en un lote
+      const batch = db.batch();
+      snapshot.docs.forEach(doc => {
+        console.log(`Programando borrado para la publicación ${doc.id}`);
+        batch.delete(doc.ref);
+      });
+
+      await batch.commit();
+      console.log('Limpieza completada. Todas las publicaciones inactivas antiguas han sido eliminadas.');
+
+    } catch (error) {
+      console.error('Error durante la limpieza de publicaciones inactivas:', error);
+      throw error; // Relanza para reintentos
+    }
+  }
+);
+// --- FIN: NUEVA FUNCIÓN DE LIMPIEZA ---

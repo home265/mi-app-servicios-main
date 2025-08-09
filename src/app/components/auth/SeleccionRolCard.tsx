@@ -19,7 +19,7 @@ const iconMap = {
 const labelMap = {
   usuario: 'Usuario',
   prestador: 'Prestador',
-  comercio: 'Comercio',
+  comercio: 'Profesionales y Comercios',
 } as const;
 
 export default function SeleccionRolCard({ rol }: SeleccionRolCardProps) {

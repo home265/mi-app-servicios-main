@@ -21,6 +21,7 @@ import {
   PaginaAmarillaData,
   PaginaAmarillaFiltros,
   PlanId,
+  SerializablePaginaAmarillaData,
 } from '@/types/paginaAmarilla';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { HorariosDeAtencion } from '@/types/horarios';
@@ -35,47 +36,23 @@ const cleanUndefined = <T extends object>(obj: T): T => {
   return filtered as T;
 };
 
-// --- INICIO: TIPO DTO CORREGIDO ---
-
 export type CreatePaginaAmarillaDTO = Omit<
   PaginaAmarillaData,
-  | 'creatorId'
-  | 'fechaCreacion'
-  | 'fechaExpiracion'
-  | 'ultimaModificacion'
-  | 'contadorEdicionesAnual'
-  | 'inicioCicloEdiciones'
-  | 'activa' // Se omite del tipo base
-  | 'subscriptionStartDate'
-  | 'subscriptionEndDate'
-  | 'isActive'
-  | 'updatedAt'
-  | 'paymentConfirmedAt'
+  | 'creatorId' | 'fechaCreacion' | 'fechaExpiracion' | 'ultimaModificacion' | 'contadorEdicionesAnual'
+  | 'inicioCicloEdiciones' | 'activa' | 'subscriptionStartDate' | 'subscriptionEndDate' | 'isActive'
+  | 'updatedAt' | 'paymentConfirmedAt'
 > & {
-  // Se permite pasar planId y campaignId durante la creación.
   planId?: PlanId;
   campaignId?: CampaignId;
-  activa?: boolean; // <-- LÍNEA CORREGIDA: Se vuelve a añadir como opcional.
+  activa?: boolean;
 };
-
-// --- FIN: TIPO DTO CORREGIDO ---
 
 export type UpdatePaginaAmarillaDTO = Partial<
   Omit<
     PaginaAmarillaData,
-    | 'creatorId'
-    | 'creatorRole'
-    | 'fechaCreacion'
-    | 'fechaExpiracion'
-    | 'contadorEdicionesAnual'
-    | 'inicioCicloEdiciones'
-    | 'activa'
-    | 'ultimaModificacion'
-    | 'subscriptionStartDate'
-    | 'subscriptionEndDate'
-    | 'isActive'
-    | 'updatedAt'
-    | 'paymentConfirmedAt'
+    | 'creatorId' | 'creatorRole' | 'fechaCreacion' | 'fechaExpiracion' | 'contadorEdicionesAnual'
+    | 'inicioCicloEdiciones' | 'activa' | 'ultimaModificacion' | 'subscriptionStartDate'
+    | 'subscriptionEndDate' | 'isActive' | 'updatedAt' | 'paymentConfirmedAt'
   >
 >;
 
@@ -94,22 +71,17 @@ export const createPaginaAmarilla = async (
   const fechaExpiracion = new Timestamp(now.seconds + ONE_YEAR_MS / 1000, now.nanoseconds);
 
   const newPage: PaginaAmarillaData = {
-    // Datos básicos
     creatorId,
     creatorRole: data.creatorRole,
     nombrePublico: data.nombrePublico,
     provincia: data.provincia,
     localidad: data.localidad,
-
-    // Timestamps y contadores
     fechaCreacion: now,
     fechaExpiracion,
     ultimaModificacion: now,
     contadorEdicionesAnual: 0,
     inicioCicloEdiciones: now,
-
-    // Datos de contenido del formulario
-    activa: data.activa ?? true, // Esta línea ahora funcionará sin error.
+    activa: data.activa ?? true,
     tituloCard: data.tituloCard ?? null,
     subtituloCard: data.subtituloCard ?? null,
     descripcion: data.descripcion ?? null,
@@ -126,8 +98,6 @@ export const createPaginaAmarilla = async (
     subCategoria: data.subCategoria ?? null,
     horarios: data.horarios ?? null,
     realizaEnvios: data.realizaEnvios ?? null,
-
-    // Suscripción inicial: inactiva y con los planes seleccionados
     isActive: false,
     planId: data.planId,
     campaignId: data.campaignId,
@@ -177,21 +147,21 @@ export const deletePaginaAmarilla = async (creatorId: string): Promise<void> => 
   await deleteDoc(doc(db, PAGINAS_AMARILLAS_COLLECTION, creatorId));
 };
 
+// --- INICIO: SECCIÓN ACTUALIZADA ---
 
 /** Opciones para la función de listar páginas amarillas. */
 export interface ListPaginasAmarillasOptions {
-  /** Si es `true`, devuelve solo publicaciones con suscripción activa. */
   soloSuscritos?: boolean;
+  orderBy?: 'subscriptionEndDate' | 'fechaCreacion'; // <-- Opción de ordenamiento
 }
 
 /**
- * LISTA publicaciones con filtros. Puede devolver todas las publicaciones de la guía
- * o solo las que tienen una suscripción activa, según las opciones.
+ * LISTA publicaciones con filtros.
  */
 export const listPaginasAmarillasByFilter = async (
   filtros: PaginaAmarillaFiltros,
   options: ListPaginasAmarillasOptions = {}
-): Promise<PaginaAmarillaData[]> => {
+): Promise<SerializablePaginaAmarillaData[]> => {
   const qc: QueryConstraint[] = [];
 
   // Filtros de búsqueda estándar
@@ -205,8 +175,12 @@ export const listPaginasAmarillasByFilter = async (
   if (typeof filtros.realizaEnvios === 'boolean') {
     qc.push(where('realizaEnvios', '==', filtros.realizaEnvios));
   }
-  
   if (filtros.planId) qc.push(where('planId', '==', filtros.planId));
+  
+  // Lógica añadida para filtrar por VARIOS planes a la vez
+  if (filtros.planIds && filtros.planIds.length > 0) {
+    qc.push(where('planId', 'in', filtros.planIds));
+  }
 
   // Filtro base: la publicación debe estar visible en la guía
   qc.push(where('activa', '==', filtros.activa ?? true));
@@ -215,6 +189,12 @@ export const listPaginasAmarillasByFilter = async (
   if (options.soloSuscritos) {
     qc.push(where('isActive', '==', true));
     qc.push(where('subscriptionEndDate', '>', Timestamp.now()));
+  }
+
+  // Lógica de ordenamiento dinámico
+  if (options.orderBy === 'fechaCreacion') {
+    qc.push(orderBy('fechaCreacion', 'asc'));
+  } else if (options.orderBy === 'subscriptionEndDate' && options.soloSuscritos) {
     // Ordenar por fecha de expiración solo tiene sentido si filtramos por suscriptores
     qc.push(orderBy('subscriptionEndDate', 'asc'));
   }
@@ -225,5 +205,23 @@ export const listPaginasAmarillasByFilter = async (
   );
   
   const snap = await getDocs(q);
-  return snap.docs.map((d) => d.data() as PaginaAmarillaData);
+  // El tipo de dato que viene de la API ya está serializado.
+  // Realizamos una conversión manual aquí para asegurar la compatibilidad de tipos.
+  return snap.docs.map((d) => {
+    const data = d.data();
+    // Creamos un objeto serializable a partir de los datos de Firestore
+    const serializableData: SerializablePaginaAmarillaData = {
+      ...(data as PaginaAmarillaData), // Hacemos un cast inicial para el autocompletado
+      fechaCreacion: (data.fechaCreacion as Timestamp).toDate().toISOString(),
+      fechaExpiracion: (data.fechaExpiracion as Timestamp).toDate().toISOString(),
+      ultimaModificacion: (data.ultimaModificacion as Timestamp)?.toDate().toISOString() || null,
+      inicioCicloEdiciones: (data.inicioCicloEdiciones as Timestamp).toDate().toISOString(),
+      subscriptionStartDate: (data.subscriptionStartDate as Timestamp)?.toDate().toISOString() || null,
+      subscriptionEndDate: (data.subscriptionEndDate as Timestamp)?.toDate().toISOString() || null,
+      updatedAt: (data.updatedAt as Timestamp)?.toDate().toISOString() || null,
+      paymentConfirmedAt: (data.paymentConfirmedAt as Timestamp)?.toDate().toISOString() || null,
+    };
+    return serializableData;
+  });
 };
+// --- FIN: SECCIÓN ACTUALIZADA ---

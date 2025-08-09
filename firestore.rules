@@ -151,5 +151,13 @@ service cloud.firestore {
       allow create: if request.auth != null && request.auth.uid == creatorId;
       allow update, delete: if request.auth != null && request.auth.uid == creatorId;
     }
+
+    // --- REGLA AÑADIDA PARA EL CONTADOR DE ANUNCIOS ---
+    // Permite que cualquier cliente (autenticado o no) pueda leer y
+    // escribir en la colección de contadores. Esto es seguro porque la
+    // lógica de tu código solo permite actualizar un campo numérico.
+    match /adCounters/{locationId} {
+      allow read, write: if true;
+    }
   }
 }

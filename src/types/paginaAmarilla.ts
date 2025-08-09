@@ -8,10 +8,8 @@ import { HorariosDeAtencion } from './horarios';
 /* -------------------------------------------------------------------------- */
 export type RolPaginaAmarilla = 'prestador' | 'comercio';
 
-// --- INICIO: NUEVOS TIPOS PARA PLANES Y CAMPAÑAS ---
 export type PlanId = 'bronce' | 'plata' | 'oro' | 'titanio' | 'platino';
 export type CampaignId = 'mensual' | 'trimestral' | 'semestral' | 'anual';
-// --- FIN: NUEVOS TIPOS ---
 
 /* -------------------------------------------------------------------------- */
 /* ESTRUCTURA COMPLETA DEL DOCUMENTO                      */
@@ -22,15 +20,12 @@ export interface PaginaAmarillaData {
   nombrePublico: string;
   provincia: string;
   localidad: string;
-
   fechaCreacion: Timestamp;
   fechaExpiracion: Timestamp;
   ultimaModificacion: Timestamp;
   contadorEdicionesAnual: number;
   inicioCicloEdiciones: Timestamp;
-
   activa: boolean;
-
   tituloCard?: string | null;
   subtituloCard?: string | null;
   descripcion?: string | null;
@@ -41,26 +36,20 @@ export interface PaginaAmarillaData {
   enlaceInstagram?: string | null;
   enlaceFacebook?: string | null;
   direccionVisible?: string | null;
-
   rubro?: string | null;
   subRubro?: string | null;
   categoria?: string | null;
   subCategoria?: string | null;
-
   horarios?: HorariosDeAtencion | null;
   realizaEnvios?: boolean | null;
-
-  // --------------------------------------------------------------------------
-  // --- INICIO: CAMPOS DE SUSCRIPCIÓN ACTUALIZADOS ---
-  // --------------------------------------------------------------------------
-  planId?: PlanId; // El tipo de plan (ej: 'bronce', 'oro')
-  campaignId?: CampaignId; // La duración de la campaña (ej: 'mensual', 'anual')
-  subscriptionStartDate?: Timestamp; // Se vuelve opcional por si solo se guarda el contenido
-  subscriptionEndDate?: Timestamp; // Se vuelve opcional
+  matriculaProfesional?: string | null;
+  planId?: PlanId;
+  campaignId?: CampaignId;
+  subscriptionStartDate?: Timestamp;
+  subscriptionEndDate: Timestamp;
   isActive: boolean;
   updatedAt?: Timestamp;
   paymentConfirmedAt?: Timestamp;
-  // --- FIN: CAMPOS DE SUSCRIPCIÓN ACTUALIZADOS ---
 }
 
 /* -------------------------------------------------------------------------- */
@@ -69,21 +58,15 @@ export interface PaginaAmarillaData {
 export interface SerializablePaginaAmarillaData
   extends Omit<
     PaginaAmarillaData,
-    | 'fechaCreacion'
-    | 'fechaExpiracion'
-    | 'ultimaModificacion'
-    | 'inicioCicloEdiciones'
-    | 'subscriptionStartDate'
-    | 'subscriptionEndDate'
-    | 'updatedAt'
-    | 'paymentConfirmedAt'
+    | 'fechaCreacion' | 'fechaExpiracion' | 'ultimaModificacion' | 'inicioCicloEdiciones'
+    | 'subscriptionStartDate' | 'subscriptionEndDate' | 'updatedAt' | 'paymentConfirmedAt'
   > {
   fechaCreacion: string;
   fechaExpiracion: string;
   ultimaModificacion: string | null;
   inicioCicloEdiciones: string;
-  subscriptionStartDate: string | null; // Se permite que sea null
-  subscriptionEndDate: string | null; // Se permite que sea null
+  subscriptionStartDate: string | null;
+  subscriptionEndDate: string | null;
   updatedAt: string | null;
   paymentConfirmedAt: string | null;
 }
@@ -91,26 +74,16 @@ export interface SerializablePaginaAmarillaData
 /* -------------------------------------------------------------------------- */
 /* DTO PARA CREAR UNA NUEVA PUBLICACIÓN DESDE EL FORM          */
 /* -------------------------------------------------------------------------- */
-/** Campos requeridos en la creación de una página amarilla.
- * Se omiten los timestamps, contadores y campos de suscripción que el backend inicializa.
- * `activa` se crea como `true`; `isActive` se crea como `false`. */
 export interface CreatePaginaAmarillaDTO
   extends Omit<
     PaginaAmarillaData,
-    | 'fechaCreacion'
-    | 'fechaExpiracion'
-    | 'ultimaModificacion'
-    | 'contadorEdicionesAnual'
-    | 'inicioCicloEdiciones'
-    | 'activa'
-    | 'planId' // Se omite el planId
-    | 'campaignId' // Se omite el campaignId
-    | 'subscriptionStartDate'
-    | 'subscriptionEndDate'
-    | 'isActive'
-    | 'updatedAt'
-    | 'paymentConfirmedAt'
+    | 'fechaCreacion' | 'fechaExpiracion' | 'ultimaModificacion' | 'contadorEdicionesAnual'
+    | 'inicioCicloEdiciones' | 'activa' | 'subscriptionStartDate' | 'subscriptionEndDate'
+    | 'isActive' | 'updatedAt' | 'paymentConfirmedAt'
   > {
+  // Se omiten los campos de arriba, pero SÍ permitimos que se pasen estos:
+  planId?: PlanId;
+  campaignId?: CampaignId;
   activa?: boolean;
 }
 
@@ -129,5 +102,6 @@ export interface PaginaAmarillaFiltros {
   isActive?: boolean;
   realizaEnvios?: boolean;
   terminoBusqueda?: string;
-  planId?: PlanId; // <-- Campo añadido para poder filtrar por plan
+  planId?: PlanId; // Para filtrar por un plan específico
+  planIds?: PlanId[]; // Para filtrar por una LISTA de planes (ej: 'titanio', 'oro', etc.)
 }

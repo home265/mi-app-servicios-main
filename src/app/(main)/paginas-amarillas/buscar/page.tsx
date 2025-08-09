@@ -1,5 +1,3 @@
-// src/app/(main)/paginas-amarillas/buscar/page.tsx
-
 'use client';
 
 import React, { useState, Suspense } from 'react';
@@ -10,16 +8,19 @@ import {
   usePathname,
 } from 'next/navigation';
 
+// --- INICIO: CAMBIOS DE TIPO ---
 import {
-  PaginaAmarillaData,
+  SerializablePaginaAmarillaData, // Se importa el tipo serializado
   PaginaAmarillaFiltros,
   RolPaginaAmarilla,
 } from '@/types/paginaAmarilla';
+// --- FIN: CAMBIOS DE TIPO ---
+
 import PaginasAmarillasFiltros from './components/PaginasAmarillasFiltros';
 import PaginasAmarillasResultados from './components/PaginasAmarillasResultados';
 import BotonAyuda from '@/app/components/common/BotonAyuda';
 import AyudaPaginasAmarillas from '@/app/components/ayuda-contenido/AyudaPaginasAmarillas';
-import BotonVolver from '@/app/components/common/BotonVolver'; // Se importa el botón de volver
+import BotonVolver from '@/app/components/common/BotonVolver';
 
 type EstadoCarga = 'idle' | 'loading' | 'success' | 'error';
 
@@ -76,7 +77,7 @@ const parseQueryParamsToFiltros = (
 };
 
 /* -------------------------------------------------------------------- */
-/* Client-side logic (sin cambios en la lógica)                         */
+/* Lógica del Componente Cliente                                        */
 /* -------------------------------------------------------------------- */
 const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -87,7 +88,8 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
     () => parseQueryParamsToFiltros(searchParams),
   );
 
-  const [publicaciones, setPublicaciones] = useState<PaginaAmarillaData[]>([]);
+  // --- CAMBIO: El estado ahora usa el tipo de dato serializado ---
+  const [publicaciones, setPublicaciones] = useState<SerializablePaginaAmarillaData[]>([]);
   const [estadoCarga,   setEstadoCarga]   = useState<EstadoCarga>('idle');
   const [mensajeError,  setMensajeError]  = useState<string | null>(null);
   const [hasSearched,   setHasSearched]   = useState(false);
@@ -112,7 +114,8 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
         throw new Error(error || `Error del servidor: ${res.status}`);
       }
 
-      const data: PaginaAmarillaData[] = await res.json();
+      // --- CAMBIO: La respuesta JSON se interpreta como el tipo serializado ---
+      const data: SerializablePaginaAmarillaData[] = await res.json();
       setPublicaciones(data);
       setEstadoCarga('success');
     } catch (err: unknown) {
@@ -139,8 +142,6 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
           </BotonAyuda>
         </div>
 
-        {/* --- INICIO DEL CAMBIO --- */}
-        {/* Este nuevo 'div' es la tarjeta 3D que envuelve los filtros */}
         <div className="max-w-md mx-auto bg-tarjeta rounded-2xl p-6 sm:p-8 
                        shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)]">
           <PaginasAmarillasFiltros
@@ -149,7 +150,6 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
             initialFiltros={filtrosActivos}
           />
         </div>
-        {/* --- FIN DEL CAMBIO --- */}
 
         <PaginasAmarillasResultados
           publicaciones={publicaciones}
@@ -165,7 +165,7 @@ const BusquedaPaginasAmarillasClientLogic: React.FC = () => {
 };
 
 /* -------------------------------------------------------------------- */
-/* Page wrapper (Estilos actualizados)                                  */
+/* Componente de Página Principal                                       */
 /* -------------------------------------------------------------------- */
 const BuscarPaginaAmarillaPage: React.FC = () => (
   <div className="min-h-screen flex flex-col bg-fondo">

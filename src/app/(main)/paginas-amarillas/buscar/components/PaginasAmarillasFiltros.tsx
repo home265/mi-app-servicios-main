@@ -117,10 +117,10 @@ const PaginasAmarillasFiltros: React.FC<Props> = ({
     onBuscar(filtros);
   };
 
-  const rolOptions = [
-    { value: '', label: 'Todos (Profesionales,Prestadores y Comercios)' },
-    { value: 'prestador', label: 'Prestadores / Profesionales' },
-    { value: 'comercio', label: 'Comercios' },
+   const rolOptions = [
+    { value: '', label: 'Buscar en todo' },
+    { value: 'prestador', label: 'Prestadores de Oficios' }, // Más específico y claro
+    { value: 'comercio', label: 'Profesionales y Comercios' }, // Congruente con el registro
   ];
   const selectedRolLabel =
     rolOptions.find((opt) => opt.value === rolSel)?.label ||
