@@ -6,7 +6,7 @@ import {
   HomeIcon,
   Cog6ToothIcon,
   ArrowUturnLeftIcon,
-} from '@heroicons/react/24/solid';
+} from '@heroicons/react/24/outline';
 import { useUserStore } from '@/store/userStore';
 import BotonNavegacion from './BotonNavegacion';
 import Avatar from './Avatar';
@@ -19,18 +19,17 @@ export default function BottomNavBar() {
 
   return (
     <footer 
-      className="fixed bottom-0 left-0 right-0 z-40 h-20 bg-tarjeta
-                 shadow-[0px_-4px_8px_rgba(0,0,0,0.4),0px_-2px_4px_rgba(255,255,255,0.05)]"
+      className="fixed bottom-0 left-0 right-0 z-40 h-24 bg-tarjeta pb-3
+                 border-t border-black/20"
     >
       <div className="w-full h-full max-w-md mx-auto flex items-center justify-around px-2">
-        {/* ---- Botón 1: Inicio ---- */}
+        
         <BotonNavegacion
           label="Inicio"
           icon={<HomeIcon />}
           onClick={() => router.push('/bienvenida')}
         />
 
-        {/* ---- Botón 2: Perfil (con Avatar) ---- */}
         <BotonNavegacion
           label="Perfil"
           icon={
@@ -43,45 +42,40 @@ export default function BottomNavBar() {
           onClick={() => router.push('/perfil')}
         />
 
-        {/* ---- Botón 3: Ayuda (Central y Prominente) ---- */}
-        <div className="relative w-16 h-full flex justify-center">
-          {/* --- INICIO DE LA CORRECCIÓN --- */}
+        {/* --- INICIO DE LA CORRECCIÓN --- */}
+        {/* Este div sigue sirviendo para mantener el espaciado correcto en la barra */}
+        <div className="relative w-16 h-16 flex justify-center">
+          {/* Se eliminan las clases de fondo, borde y sombra del div interior */}
           <div 
             className="
-              absolute bottom-2 left-1/2 -translate-x-1/2 
-              w-16 h-16 bg-primario flex items-center justify-center 
+              flex items-center justify-center 
               cursor-pointer
-              transition-all duration-150 ease-in-out
-              rounded-2xl
-              shadow-[3px_3px_6px_rgba(0,0,0,0.4),-3px_-3px_6px_rgba(255,255,255,0.05)]
-              hover:brightness-110
-              active:scale-95 active:brightness-90
-              active:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.4)]
+              transition-transform duration-150 ease-in-out
+              active:scale-90
+              hover:opacity-80
             "
             onClick={toggleHelpModal}
             role="button"
             aria-label="Mostrar ayuda"
           >
-          {/* --- FIN DE LA CORRECCIÓN --- */}
             <Image
               src="/icons/foco-claro.jpg"
               alt="Botón de ayuda"
-              width={36}
-              height={36}
+              width={50}
+              height={50}
               className="object-contain"
               priority
             />
           </div>
         </div>
+        {/* --- FIN DE LA CORRECCIÓN --- */}
 
-        {/* ---- Botón 4: Ajustes ---- */}
         <BotonNavegacion
           label="Ajustes"
           icon={<Cog6ToothIcon />}
           onClick={() => router.push('/ajustes')}
         />
 
-        {/* ---- Botón 5: Volver ---- */}
         <BotonNavegacion
           label="Volver"
           icon={<ArrowUturnLeftIcon />}

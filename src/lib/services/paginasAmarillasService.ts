@@ -101,6 +101,7 @@ export const createPaginaAmarilla = async (
     isActive: false,
     planId: data.planId,
     campaignId: data.campaignId,
+    subscriptionEndDate: now,
   };
 
   await setDoc(docRef, cleanUndefined(newPage));

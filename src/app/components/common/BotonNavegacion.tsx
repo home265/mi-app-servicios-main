@@ -18,27 +18,17 @@ const BotonNavegacion: React.FC<BotonNavegacionProps> = ({
   return (
     <button
       onClick={onClick}
-      // --- INICIO DE LA CORRECCIÓN ---
-      // Se aplican estilos similares a los de 'BotonDeAccion' para un look 3D
+      // --- INICIO DE LA CORRECCIÓN: ESTILO "PLANO" ---
+      // Se eliminan todos los estilos de fondo (bg-tarjeta) y sombras (shadow-...).
+      // El feedback visual se da ahora solo con el color del texto/icono y la escala.
       className={`
         flex flex-col items-center justify-center
         w-16 h-16 p-1
-        rounded-2xl text-texto-principal
-        bg-tarjeta
         transition-all duration-150 ease-in-out
         focus:outline-none
+        active:scale-95
 
-        /* Efecto de Relieve (Outset) */
-        shadow-[3px_3px_6px_rgba(0,0,0,0.4),-3px_-3px_6px_rgba(255,255,255,0.05)]
-
-        /* Efecto al pasar el mouse (Hover) */
-        hover:brightness-110
-
-        /* Efecto al Presionar (Active) para dar la sensación de pulsación */
-        active:scale-95 active:brightness-90
-        active:shadow-[inset_3px_3px_6px_rgba(0,0,0,0.4)]
-
-        ${isActive ? 'text-primario' : 'text-texto-secundario'}
+        ${isActive ? 'text-primario' : 'text-texto-secundario hover:text-texto-principal'}
       `}
       // --- FIN DE LA CORRECCIÓN ---
     >

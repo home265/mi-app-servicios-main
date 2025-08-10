@@ -11,6 +11,13 @@ import {
   FilesetResolver,
   FaceDetectorResult
 } from '@mediapipe/tasks-vision';
+// --- INICIO: LÍNEAS A AÑADIR/ASEGURAR QUE EXISTEN ---
+import { auth, db, storage } from '@/lib/firebase/config';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { ref, getDownloadURL, uploadBytes } from 'firebase/storage';
+import { doc, setDoc } from 'firebase/firestore';
+import bcrypt from 'bcryptjs';
+// --- FIN: LÍNEAS A AÑADIR ---
 
 interface StoredFormData {
   nombre?: string;
@@ -385,49 +392,108 @@ export default function SelfiePage() {
   }, [livenessStatus]);
 
   // Lógica de registro ahora llama a la API (SIN CAMBIOS)
-  const handleFinalizarRegistro = async (selfieData: string | null) => {
-    console.log("SelfiePage: handleFinalizarRegistro - Iniciado.");
-    if (!formData || !rol || !selfieData) {
-      setError("Faltan datos esenciales para finalizar el registro.");
-      setIsProcessingAction(false);
-      setUiMessage("Error de datos al finalizar.");
-      return;
-    }
-    
-    setIsProcessingAction(true);
-    setUiMessage("Procesando tu registro de forma segura...");
+  // Reemplaza tu función handleFinalizarRegistro actual con esta:
 
-    try {
-      const response = await fetch('/api/auth/register', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          formData: formData,
-          rol: rol,
-          selfieData: selfieData,
-        }),
-      });
+const handleFinalizarRegistro = async (selfieData: string | null) => {
+  console.log("SelfiePage: handleFinalizarRegistro - Iniciado.");
+  if (!formData || !rol || !selfieData) {
+    setError("Faltan datos esenciales para finalizar el registro.");
+    setIsProcessingAction(false);
+    setUiMessage("Error de datos al finalizar.");
+    return;
+  }
+  if (!formData.email || !formData.contrasena || !formData.pin) {
+    setError("Email, contraseña o PIN no encontrados en los datos del formulario.");
+    setIsProcessingAction(false);
+    setUiMessage("Error de credenciales al finalizar.");
+    return;
+  }
 
-      const result = await response.json();
+  setIsProcessingAction(true);
+  setUiMessage("Creando tu cuenta y guardando datos de forma segura...");
 
-      if (!response.ok) {
-        throw new Error(result.error || `Error del servidor: ${response.status}`);
+  try {
+    // 1. Crear el usuario en Firebase Authentication
+    const userCredential = await createUserWithEmailAndPassword(auth, formData.email, formData.contrasena);
+    const user = userCredential.user;
+    console.log("SelfiePage: Usuario creado en Auth. UID:", user.uid);
+
+    // 2. Convertir la imagen dataURL a un Blob (formato de archivo)
+    const response = await fetch(selfieData);
+    const selfieBlob = await response.blob();
+
+    // 3. Subir el Blob directamente a Firebase Storage
+    const selfieStorageRef = ref(storage, `selfies/${user.uid}/profile.jpg`);
+    await uploadBytes(selfieStorageRef, selfieBlob);
+    const selfieURL = await getDownloadURL(selfieStorageRef);
+    console.log("SelfiePage: Selfie subida a Storage. URL:", selfieURL);
+
+    // 4. Hashear el PIN
+    const salt = await bcrypt.genSalt(10);
+    const hashedPin = await bcrypt.hash(formData.pin, salt);
+
+    // 5. Preparar el documento para guardar en Firestore
+    const userDataToSave = {
+      uid: user.uid,
+      email: formData.email,
+      nombre: formData.nombre || null,
+      apellido: formData.apellido || null,
+      rol: rol,
+      telefono: formData.telefono || null,
+      localidad: formData.localidad || null,
+      selfieURL: selfieURL,
+      hashedPin: hashedPin,
+      fechaRegistro: new Date().toISOString(),
+      activo: true,
+      ...(rol === 'prestador' && {
+        categoria: formData.seleccionCategoria || null,
+        matricula: formData.matricula || null,
+        cuilCuit: formData.cuilCuit || null,
+        descripcion: formData.descripcion || null,
+      }),
+      ...(rol === 'comercio' && {
+        rubro: formData.seleccionRubro || null,
+        matricula: formData.matricula || null,
+        cuilCuit: formData.cuilCuit || null,
+        descripcion: formData.descripcion || null,
+      }),
+    };
+
+    let collectionName = 'usuarios_generales';
+    if (rol === 'prestador') collectionName = 'prestadores';
+    else if (rol === 'comercio') collectionName = 'comercios';
+
+    // 6. Guardar el documento del usuario en Firestore
+    await setDoc(doc(db, collectionName, user.uid), userDataToSave);
+    console.log(`SelfiePage: Datos guardados en Firestore en la colección: ${collectionName}`);
+
+    setUiMessage("¡Registro exitoso! Redirigiendo...");
+    setIsProcessingAction(false);
+    setTimeout(() => router.push('/bienvenida'), 2000);
+
+  } catch (err) {
+    let friendlyErrorMsg = "Ocurrió un error al finalizar tu registro.";
+    if (err && typeof err === 'object' && 'code' in err) {
+      const firebaseError = err as { code: string; message: string };
+      switch (firebaseError.code) {
+        case 'auth/email-already-in-use':
+          friendlyErrorMsg = "Este correo electrónico ya está en uso.";
+          break;
+        case 'auth/weak-password':
+          friendlyErrorMsg = "La contraseña es muy débil (mín. 6 caracteres).";
+          break;
+        default:
+          friendlyErrorMsg = `Error de Firebase: ${firebaseError.message}`;
       }
-      
-      setUiMessage("¡Registro exitoso! Redirigiendo...");
-      setIsProcessingAction(false);
-      setTimeout(() => router.push('/bienvenida'), 2000);
-
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : "Ocurrió un error inesperado.";
-      console.error("SelfiePage: handleFinalizarRegistro - Error:", errorMessage);
-      setError(errorMessage);
-      setUiMessage("Error en el registro.");
-      setIsProcessingAction(false);
+    } else if (err instanceof Error) {
+      friendlyErrorMsg = err.message;
     }
-  };
+    console.error("SelfiePage: Error en finalización de registro:", err);
+    setError(friendlyErrorMsg);
+    setUiMessage("Error en el registro.");
+    setIsProcessingAction(false);
+  }
+};
 
   const handleCapturarSelfie = () => {
     console.log("SelfiePage: handleCapturarSelfie - Iniciado. Status:", livenessStatus);

@@ -5,6 +5,11 @@ import NotificationWatcher from '@/app/components/notificaciones/NotificationWat
 import type { Metadata, Viewport } from 'next';
 import { Barlow } from 'next/font/google';
 
+export const viewport: Viewport = {
+  themeColor: '#0F2623',
+  viewportFit: 'cover', // <-- AÑADE ESTA LÍNEA
+};
+
 // --- ÚNICA FUENTE NECESARIA PARA LA APP ---
 const barlow = Barlow({
   subsets: ['latin'],
@@ -23,9 +28,6 @@ export const metadata: Metadata = {
   },
 };
 
-export const viewport: Viewport = {
-  themeColor: '#0F2623', // Corresponde a --color-fondo oscuro
-};
 
 export default function RootLayout({
   children,
