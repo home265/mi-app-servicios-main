@@ -57,7 +57,9 @@ a:hover { text-decoration: underline; }
 .bg-tarjeta {
   background-color: var(--color-tarjeta);
 }
-
+.bg-menu {
+  background-color: var(--color-borde-tarjeta);
+}
 /* ---------- BOTONES ---------- */
 /* Estas son las nuevas definiciones centralizadas para los botones. */
 

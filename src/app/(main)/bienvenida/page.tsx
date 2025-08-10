@@ -10,23 +10,18 @@ import {
   BriefcaseIcon,
   UserCircleIcon,
   UserGroupIcon,
-  PlusCircleIcon,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  PencilIcon,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  Bars3BottomRightIcon,
 } from '@heroicons/react/24/outline';
 import Avatar from '@/app/components/common/Avatar';
-import BotonCrearEditarAnuncio from './components/BotonCrearEditarAnuncio';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { db } from '@/lib/firebase/config';
+// --- INICIO: CAMBIO DE NOMBRE DEL COMPONENTE ---
+// Se asume que has renombrado el archivo como conversamos
+import BotonGestionSuscripcion from './components/BotonGestionSuscripcion';
+// --- FIN: CAMBIO DE NOMBRE DEL COMPONENTE ---
 import { getCvByUid } from '@/lib/services/cvService';
-import AyudaAjustes from '@/app/components/ayuda-contenido/AyudaBienvenida';
-import { getPaginaAmarilla } from '@/lib/services/paginasAmarillasService';
+import AyudaBienvenida from '@/app/components/ayuda-contenido/AyudaBienvenida';
 import BotonDeAccion from '@/app/components/bienvenida/BotonDeAccion';
-import { Timestamp } from 'firebase/firestore';
 import { useUserStore } from '@/store/userStore';
 import useHelpContent from '@/lib/hooks/useHelpContent';
+
 const toTitleCase = (s: string) =>
   s
     .toLowerCase()
@@ -41,34 +36,19 @@ interface Action {
   label: string;
   Icon?: IconSvg;
   path?: string;
-  requiresSubscription?: boolean;
   component?: React.ReactNode;
 }
 
+// --- INICIO: LÓGICA DE BOTONES SIMPLIFICADA ---
+// Se eliminan los botones 'crearPub' y 'editarPub' que eran redundantes.
 const base: Record<'prestador' | 'comercio', Action[]> = {
   prestador: [
     { id: 'trabajos', label: 'Trabajos', Icon: BriefcaseIcon, path: '/trabajos' },
     { id: 'empleados', label: 'Empleados', Icon: UserGroupIcon, path: '/empleados' },
-    
     {
-      id: 'crearAnuncioBtn',
-      label: 'Crear / Editar Anuncio',
-      Icon: PlusCircleIcon,
-      component: <BotonCrearEditarAnuncio />,
-    },
-    {
-      id: 'crearPub',
-      label: 'Crear Publicación',
-      Icon: DocumentPlusIcon,
-      path: '/paginas-amarillas/crear',
-      requiresSubscription: true,
-    },
-    {
-      id: 'editarPub',
-      label: 'Editar Publicación',
-      Icon: PencilSquareIcon,
-      path: '/paginas-amarillas/editar',
-      requiresSubscription: true,
+      id: 'gestionSuscripcion',
+      label: 'Configurar Suscripción',
+      component: <BotonGestionSuscripcion />,
     },
     {
       id: 'paginas',
@@ -80,26 +60,10 @@ const base: Record<'prestador' | 'comercio', Action[]> = {
   ],
   comercio: [
     { id: 'empleados', label: 'Empleados', Icon: UserGroupIcon, path: '/empleados' },
-    
     {
-      id: 'crearAnuncioBtn',
-      label: 'Crear / Editar Anuncio',
-      Icon: PlusCircleIcon,
-      component: <BotonCrearEditarAnuncio />,
-    },
-    {
-      id: 'crearPub',
-      label: 'Crear Publicación',
-      Icon: DocumentPlusIcon,
-      path: '/paginas-amarillas/crear',
-      requiresSubscription: true,
-    },
-    {
-      id: 'editarPub',
-      label: 'Editar Publicación',
-      Icon: PencilSquareIcon,
-      path: '/paginas-amarillas/editar',
-      requiresSubscription: true,
+      id: 'gestionSuscripcion',
+      label: 'Configurar Suscripción',
+      component: <BotonGestionSuscripcion />,
     },
     {
       id: 'paginas',
@@ -110,10 +74,11 @@ const base: Record<'prestador' | 'comercio', Action[]> = {
     { id: 'modo', label: 'Modo Usuario', Icon: UserCircleIcon, path: '#' },
   ],
 };
+// --- FIN: LÓGICA DE BOTONES SIMPLIFICADA ---
 
 export default function BienvenidaPage() {
   const router = useRouter();
-   useHelpContent(<AyudaAjustes />);
+  useHelpContent(<AyudaBienvenida />); // Corregido para usar la ayuda correcta
   const user = useUserStore((s) => s.currentUser);
   const pinOk = useUserStore((s) => s.isPinVerifiedForSession);
   const toggleMode = useUserStore((s) => s.toggleActingMode);
@@ -121,10 +86,9 @@ export default function BienvenidaPage() {
   const { jobRequests, jobResponses } = useUserStore((s) => s.unread);
 
   const [hasCv, setCv] = useState<boolean | null>(null);
-  const [hasSubscription, setHasSubscription] = useState<boolean | null>(null);
-  const [hasPublication, setHasPublication] = useState<boolean | null>(null);
   
-  // Verifica CV
+  // Se eliminan los estados 'hasSubscription' y 'hasPublication' que ya no son necesarios aquí.
+
   useEffect(() => {
     if (user?.rol !== 'usuario') return;
     (async () => {
@@ -137,39 +101,10 @@ export default function BienvenidaPage() {
       }
     })();
   }, [user]);
-  // Verifica suscripción (reemplaza anuncios)
-  useEffect(() => {
-    if (!user || !['prestador', 'comercio'].includes(user.rol)) return;
-    (async () => {
-      if (!user.uid) return;
-      try {
-        const page = await getPaginaAmarilla(user.uid);
-        const now = Timestamp.now().toDate();
-        const active =
-          page?.isActive === true &&
-          page.subscriptionEndDate.toDate() > now;
-        setHasSubscription(active);
-      } catch {
-        setHasSubscription(false);
-      }
-    })();
-  }, [user]);
+  
+  // La lógica de verificación de suscripción ya no es necesaria aquí.
+  // La lógica de verificación de publicación tampoco.
 
-  // Verifica existencia de publicación
-  useEffect(() => {
-    if (!user || !['prestador', 'comercio'].includes(user.rol)) return;
-    (async () => {
-      if (!user.uid) return;
-      try {
-        const page = await getPaginaAmarilla(user.uid);
-        setHasPublication(page !== null);
-      } catch {
-        setHasPublication(false);
-      }
-    })();
-  }, [user]);
-
-  // Redirecciones auth/pin
   useEffect(() => {
     if (!user) router.replace('/login');
     else if (!pinOk) router.replace('/pin-entry');
@@ -178,9 +113,7 @@ export default function BienvenidaPage() {
   const loading =
     !user ||
     !pinOk ||
-    (user.rol === 'usuario' && hasCv === null) ||
-    (['prestador', 'comercio'].includes(user.rol) &&
-      (hasSubscription === null || hasPublication === null));
+    (user.rol === 'usuario' && hasCv === null);
 
   if (loading) {
     return (
@@ -205,15 +138,8 @@ export default function BienvenidaPage() {
       },
     ];
   } else {
-    actions = base[user.rol as 'prestador' | 'comercio'].filter((a) =>
-      a.requiresSubscription ? hasSubscription === true : true
-    );
-
-    if (hasPublication) {
-      actions = actions.filter((a) => a.id !== 'crearPub');
-    } else {
-      actions = actions.filter((a) => a.id !== 'editarPub');
-    }
+    // La lógica de filtrado de botones ya no es necesaria, es más simple.
+    actions = base[user.rol as 'prestador' | 'comercio'];
   }
 
   const fullName = user.nombre ? toTitleCase(user.nombre) : '';
@@ -227,21 +153,24 @@ export default function BienvenidaPage() {
   return (
     <div className="min-h-screen flex flex-col bg-fondo text-texto-principal">
       <div className="w-full max-w-4xl mx-auto px-5 flex flex-col flex-grow">
-        <header className="flex items-center justify-between py-4 mt-6">
+        {/* --- INICIO: CORRECCIÓN DEL HEADER --- */}
+        {/* Se cambia 'justify-between' por 'justify-center' para centrar el contenido */}
+        <header className="flex items-center justify-center py-4 mt-6">
           <button
             onClick={() => delayedNavigate('/perfil')}
             aria-label="Ver mi perfil"
-            className="flex items-center gap-4 p-3 rounded-xl bg-tarjeta text-texto-principal transition-all duration-150 ease-in-out shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.05)] hover:brightness-110 active:scale-[0.98] active:brightness-90"
+            // Se ajusta el padding para hacerlo más alto que ancho (px-4 py-5)
+            className="flex items-center gap-8 px-10 py-5 rounded-xl bg-tarjeta text-texto-principal transition-all duration-150 ease-in-out shadow-[4px_4px_8px_rgba(0,0,0,0.4),-4px_-4px_8px_rgba(255,255,255,0.02)] hover:brightness-110 active:scale-[0.98] active:brightness-90"
           >
             <Avatar selfieUrl={user.selfieURL ?? undefined} nombre={fullName} size={64} />
             <div className="text-left">
               <p className="text-lg font-semibold">{`Hola, ${fullName}`}</p>
-              <span className="text-xs uppercase opacity-70">{user.rol}</span>
             </div>
           </button>
         </header>
+        {/* --- FIN: CORRECCIÓN DEL HEADER --- */}
 
-        <main className="flex-grow flex justify-center items-start pt-16 pb-6">
+        <main className="flex-grow flex justify-center items-start pt-10 pb-6">
           <div className="w-full grid gap-5 sm:gap-6 [grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr))]">
             {actions.map((a) => {
               if (a.component) return <React.Fragment key={a.id}>{a.component}</React.Fragment>;
@@ -259,10 +188,7 @@ export default function BienvenidaPage() {
                   delayedNavigate('/busqueda');
                   return;
                 }
-                if (a.id === 'editarPub') {
-                  delayedNavigate(`/paginas-amarillas/editar/${user.uid}`);
-                  return;
-                }
+                // La lógica para 'editarPub' ya no es necesaria aquí
                 if (a.path && a.path !== '#') delayedNavigate(a.path);
               };
 

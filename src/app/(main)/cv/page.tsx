@@ -92,16 +92,23 @@ export default function CvPage() {
 
   return (
     // Se añade padding inferior para que el botón flotante no tape el contenido
-    <div className="pb-24">
+    <div className="flex flex-col items-center p-4 space-y-6 min-h-screen bg-fondo">
       <Card className="max-w-md mx-auto space-y-4 my-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-semibold text-texto-principal">Mi Curriculum</h2>
-          <Avatar
-            selfieUrl={currentUser.selfieURL}
-            nombre={currentUser.nombre}
-            size={64}
-          />
-        </div>
+       <div className="relative flex items-center justify-center p-4 pl-15">
+  {/* El Avatar se posiciona de forma absoluta a la izquierda */}
+  <div className="absolute left-2">
+    <Avatar
+      selfieUrl={currentUser.selfieURL}
+      nombre={currentUser.nombre}
+      size={64}
+    />
+  </div>
+
+  {/* El título se centra automáticamente por el flexbox del padre */}
+  <h2 className="text-xl font-semibold text-texto-principal">
+    Mi Curriculum
+  </h2>
+</div>
     
         <div className="flex items-start justify-between">
           <div>
@@ -122,7 +129,7 @@ export default function CvPage() {
         {/* --- FORMULARIOS REFACTORIZADOS --- */}
         <Textarea
           id="descripcion"
-          label="Descripción / Habilidades"
+          label="Descripción / Habilidades / Trabajos Anteriores"
           rows={4}
           value={descripcion}
           onChange={(e) => setDescripcion(e.target.value)}
@@ -156,14 +163,16 @@ export default function CvPage() {
             />
           )
         )}
-    
+        <div className="flex justify-center pt-2">
         <Button
           onClick={handleSave}
           fullWidth
-          className="!mt-6 !bg-primario !text-fondo border-none !focus:shadow-none hover:!brightness-90"
+          className="btn-primary"
         >
+          
           Guardar CV
         </Button>
+        </div>
       </Card>
       
       {/* Se reemplaza el botón fijo por el componente reutilizable */}

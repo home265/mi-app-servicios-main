@@ -59,7 +59,7 @@ export default function EmpleadosPage() {
   return (
     <div className="flex flex-col items-center p-4 space-y-6 min-h-screen bg-fondo">
       <Card className="max-w-md w-full space-y-4">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-center">
           <h2 className="text-lg font-semibold text-texto-principal">Buscar Empleados</h2>
         </div>
 

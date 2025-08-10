@@ -19,8 +19,7 @@ export default function BottomNavBar() {
 
   return (
     <footer 
-      className="fixed bottom-0 left-0 right-0 z-40 h-24 bg-tarjeta pb-3
-                 border-t border-black/20"
+      className="fixed bottom-0 left-0 right-0 z-40 h-24 bg-tarjeta pb-3 border-t border-black/30"
     >
       <div className="w-full h-full max-w-md mx-auto flex items-center justify-around px-2">
         
@@ -53,6 +52,7 @@ export default function BottomNavBar() {
               transition-transform duration-150 ease-in-out
               active:scale-90
               hover:opacity-80
+              pb-5
             "
             onClick={toggleHelpModal}
             role="button"
@@ -61,8 +61,8 @@ export default function BottomNavBar() {
             <Image
               src="/icons/foco-claro.jpg"
               alt="Botón de ayuda"
-              width={50}
-              height={50}
+              width={60}
+              height={60}
               className="object-contain"
               priority
             />
