@@ -18,18 +18,18 @@ import {
 } from '@/store/userStore';
 
 // UI Components
-import Input from '@/app/components/ui/Input';
-import Textarea from '@/app/components/ui/Textarea';
+import Input from '@/components/ui/Input';
+import Textarea from '@/components/ui/Textarea';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import Button from '@/app/components/ui/Button';
-import Checkbox from '@/app/components/ui/Checkbox';
-import Avatar from '@/app/components/common/Avatar';
-import SelectorHorariosAtencion from '@/app/components/paginas-amarillas/SelectorHorariosAtencion';
+import Button from '@/components/ui/Button';
+import Checkbox from '@/components/ui/Checkbox';
+import Avatar from '@/components/common/Avatar';
+import SelectorHorariosAtencion from '@/components/paginas-amarillas/SelectorHorariosAtencion';
 import PaginaAmarillaFormPreview, {
   PaginaAmarillaFormValues,
-} from '@/app/components/paginas-amarillas/PaginaAmarillaFormPreview';
-import AyudaCrearPublicacionPA from '@/app/components/ayuda-contenido/AyudaCrearPublicacionPA';
-import BotonVolver from '@/app/components/common/BotonVolver';
+} from '@/components/paginas-amarillas/PaginaAmarillaFormPreview';
+import AyudaCrearPublicacionPA from '@/components/ayuda-contenido/AyudaCrearPublicacionPA';
+import BotonVolver from '@/components/common/BotonVolver';
 import useHelpContent from '@/lib/hooks/useHelpContent';
 
 // --- Componente Input con Prefijo Refactorizado (sin cambios) ---

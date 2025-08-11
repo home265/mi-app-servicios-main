@@ -7,14 +7,14 @@ import { createOrUpdateCv, getCvByUid } from '@/lib/services/cvService';
 import { toast } from 'react-hot-toast';
 
 // --- IMPORTS ACTUALIZADOS ---
-import Card from '@/app/components/ui/Card';
-import Button from '@/app/components/ui/Button';
-import Input from '@/app/components/ui/Input'; // Se importa el componente Input estandarizado
-import Textarea from '@/app/components/ui/Textarea'; // Se importa el componente Textarea estandarizado
-import SelectorCategoriasEmpleo from '@/app/components/forms/SelectorCategoriasEmpleo';
-import Avatar from '@/app/components/common/Avatar';
-import AyudaCrearEditarCV from '@/app/components/ayuda-contenido/AyudaCrearEditarCV';
-import BotonVolver from '@/app/components/common/BotonVolver'; // Se importa el botón de volver
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
+import Input from '@/components/ui/Input'; // Se importa el componente Input estandarizado
+import Textarea from '@/components/ui/Textarea'; // Se importa el componente Textarea estandarizado
+import SelectorCategoriasEmpleo from '@/components/forms/SelectorCategoriasEmpleo';
+import Avatar from '@/components/common/Avatar';
+import AyudaCrearEditarCV from '@/components/ayuda-contenido/AyudaCrearEditarCV';
+import BotonVolver from '@/components/common/BotonVolver'; // Se importa el botón de volver
 import useHelpContent from '@/lib/hooks/useHelpContent';
 
 export default function CvPage() {

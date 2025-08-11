@@ -11,12 +11,12 @@ import { auth, db } from '@/lib/firebase/config';
 import { useUserStore, UserProfile } from '@/store/userStore';
 
 import { useOnboarding } from '@/lib/hooks/useOnboarding';
-import OnboardingInstructions from '@/app/components/onboarding/OnboardingInstructions';
-import Modal from '@/app/components/common/Modal';
-import DesktopOnboardingToast from '@/app/components/onboarding/DesktopOnboardingToast';
+import OnboardingInstructions from '@/components/onboarding/OnboardingInstructions';
+import Modal from '@/components/common/Modal';
+import DesktopOnboardingToast from '@/components/onboarding/DesktopOnboardingToast';
 
-import BottomNavBar from '@/app/components/common/BottomNavBar';
-import SubscriptionStatusModal from '@/app/components/suscripciones/SubscriptionStatusModal';
+import BottomNavBar from '@/components/common/BottomNavBar';
+import SubscriptionStatusModal from '@/components/suscripciones/SubscriptionStatusModal';
 import { getPaginaAmarilla } from '@/lib/services/paginasAmarillasService';
 
 const USER_COLLECTIONS = ['usuarios_generales', 'prestadores', 'comercios'];

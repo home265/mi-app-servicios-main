@@ -7,18 +7,18 @@ import { useUserStore, UserProfile } from '@/store/userStore';
 import useNotificationHandler from '@/hooks/useNotificationHandler';
 
 // Importaciones de servicios y componentes específicos
-import SelectorCategoria, { CategoriaSeleccionada } from '@/app/components/forms/SelectorCategoria';
+import SelectorCategoria, { CategoriaSeleccionada } from '@/components/forms/SelectorCategoria';
 import { getProvidersByFilter } from '@/lib/services/providersService';
 import { sendJobRequest, Payload as NotificationPayload } from '@/lib/services/notificationsService';
-import AyudaBusqueda from '@/app/components/ayuda-contenido/AyudaBusqueda';
-import NotificacionCard from '@/app/components/notificaciones/NotificacionCard';
-import ContactoPopup from '@/app/components/notificaciones/ContactoPopup';
-import BotonVolver from '@/app/components/common/BotonVolver';
-import PerfilModal from '@/app/components/notificaciones/PerfilModal';
-import AlertPopup from '@/app/components/common/AlertPopup';
+import AyudaBusqueda from '@/components/ayuda-contenido/AyudaBusqueda';
+import NotificacionCard from '@/components/notificaciones/NotificacionCard';
+import ContactoPopup from '@/components/notificaciones/ContactoPopup';
+import BotonVolver from '@/components/common/BotonVolver';
+import PerfilModal from '@/components/notificaciones/PerfilModal';
+import AlertPopup from '@/components/common/AlertPopup';
 
 // --- INICIO: IMPORTS PARA EL MODAL DE ANUNCIOS ---
-import AnuncioAnimadoCard from '@/app/components/anuncios/AnuncioAnimadoCard';
+import AnuncioAnimadoCard from '@/components/anuncios/AnuncioAnimadoCard';
 import { PLANES } from '@/lib/constants/planes';
 import { SerializablePaginaAmarillaData } from '@/types/paginaAmarilla';
 import useHelpContent from '@/lib/hooks/useHelpContent';

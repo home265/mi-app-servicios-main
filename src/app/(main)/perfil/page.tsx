@@ -6,14 +6,14 @@ import { useUserStore } from '@/store/userStore';
 import { toast } from 'react-hot-toast';
 
 // Importamos tus componentes de UI reutilizables
-import Avatar from '@/app/components/common/Avatar';
-import Card from '@/app/components/ui/Card';
-import Button from '@/app/components/ui/Button';
+import Avatar from '@/components/common/Avatar';
+import Card from '@/components/ui/Card';
+import Button from '@/components/ui/Button';
 
 // Importamos iconos
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { User, Mail, Phone, MapPin, Building, Wrench, ChevronLeft } from 'lucide-react';
-import BotonVolver from '@/app/components/common/BotonVolver';
+import BotonVolver from '@/components/common/BotonVolver';
 
 // Componente para mostrar una fila de datos
 const InfoRow = ({ icon, label, value }: { icon: React.ReactNode; label: string; value?: string | null }) => {

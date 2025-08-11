@@ -18,10 +18,10 @@ import {
   type LucideProps,
 } from 'lucide-react';
 
-import Avatar from '@/app/components/common/Avatar';
-import Modal from '@/app/components/common/Modal';
+import Avatar from '@/components/common/Avatar';
+import Modal from '@/components/common/Modal';
 import useHelpContent from '@/lib/hooks/useHelpContent';
-import AyudaAjustes from '@/app/components/ayuda-contenido/AyudaAjustes';
+import AyudaAjustes from '@/components/ayuda-contenido/AyudaAjustes';
 
 // --- Nuevo Componente de Botón para Ajustes ---
 // Este componente encapsula el estilo visual de "relieve" solicitado.

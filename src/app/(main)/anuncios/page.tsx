@@ -6,7 +6,7 @@ import { useUserStore } from '@/store/userStore';
 
 import { SerializablePaginaAmarillaData } from '@/types/paginaAmarilla';
 import { PLANES } from '@/lib/constants/planes';
-import AnuncioAnimadoCard from '@/app/components/anuncios/AnuncioAnimadoCard';
+import AnuncioAnimadoCard from '@/components/anuncios/AnuncioAnimadoCard';
 
 export default function AnunciosPage() {
   const router = useRouter();

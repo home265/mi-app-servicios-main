@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'react-hot-toast';
-import BotonVolver from '@/app/components/common/BotonVolver';
+import BotonVolver from '@/components/common/BotonVolver';
 import {
   useUserStore,
   UserProfile,
@@ -17,9 +17,9 @@ import {
   Payload as NotificationPayload,
 } from '@/lib/services/notificationsService'
 
-import NotificacionCard from '@/app/components/notificaciones/NotificacionCard'
-import PerfilModal from '@/app/components/notificaciones/PerfilModal'
-import AyudaTrabajos from '@/app/components/ayuda-contenido/AyudaTrabajos';
+import NotificacionCard from '@/components/notificaciones/NotificacionCard'
+import PerfilModal from '@/components/notificaciones/PerfilModal'
+import AyudaTrabajos from '@/components/ayuda-contenido/AyudaTrabajos';
 import useHelpContent from '@/lib/hooks/useHelpContent';
 
 /*────────── Tipos mejorados ──────────*/

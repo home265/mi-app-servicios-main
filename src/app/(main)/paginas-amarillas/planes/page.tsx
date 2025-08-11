@@ -7,7 +7,7 @@ import { getPaginaAmarilla } from '@/lib/services/paginasAmarillasService';
 // --- IMPORTS ACTUALIZADOS ---
 import { PLANES, type Plan } from '@/lib/constants/planes';
 import { PlanId } from '@/types/paginaAmarilla';
-import AyudaPlanes from '@/app/components/ayuda-contenido/AyudaPlanes';
+import AyudaPlanes from '@/components/ayuda-contenido/AyudaPlanes';
 import useHelpContent from '@/lib/hooks/useHelpContent';
 
 export default function PlanesPage() {

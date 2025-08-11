@@ -1,44 +1,40 @@
 // src/app/api/localidades/route.ts
 
 import { NextResponse } from 'next/server';
-import data from '@/data/localidades.json'; // <-- CAMBIO CLAVE: Se importa el JSON directamente.
+import data from '@/data/localidades.json';
 
-// Definimos los tipos para que coincidan con la estructura del JSON.
+// 1. Se simplifican los tipos para que coincidan con la nueva estructura del JSON.
 type Localidad = {
-  id: string;
   nombre: string;
-  provincia: {
-    id: string;
-    nombre: string;
-  };
+  provincia: string;
 };
 
 interface LocalidadesFile {
   localidades: Localidad[];
 }
 
+// Esta parte no cambia, ya que la estructura principal { "localidades": [...] } se mantuvo.
 const todasLasLocalidades: Localidad[] = (data as LocalidadesFile).localidades;
 
 export async function GET(request: Request) {
   try {
-    // Obtenemos los parámetros de la URL para filtrar por provincia.
     const { searchParams } = new URL(request.url);
     const provinciaNombre = searchParams.get('provincia');
 
-    // Si se pide una provincia específica, filtramos los resultados.
     if (provinciaNombre) {
+      // 2. Se ajusta la lógica de filtrado.
+      // Ahora se compara directamente con `l.provincia` porque ya no es un objeto.
       const localidadesFiltradas = todasLasLocalidades.filter(
-        (l) => l.provincia.nombre.toLowerCase() === provinciaNombre.toLowerCase()
+        (l) => l.provincia.toLowerCase() === provinciaNombre.toLowerCase()
       );
       return NextResponse.json({ localidades: localidadesFiltradas });
     }
 
-    // Si no, devolvemos todas las localidades.
+    // Si no, devolvemos todas las localidades (ahora en su formato simple).
     return NextResponse.json({ localidades: todasLasLocalidades });
 
   } catch (error) {
     console.error("Error al procesar localidades.json:", error);
-    // Devolvemos un error 500 si algo falla en el servidor.
     return new NextResponse('Error interno del servidor', { status: 500 });
   }
 }

@@ -7,11 +7,11 @@ import { toast } from 'react-hot-toast';
 
 import { searchCvs, type CvDocument } from '@/lib/services/cvService';
 
-import SelectorCategoriasEmpleo from '@/app/components/forms/SelectorCategoriasEmpleo';
-import CvCard from '@/app/components/cv/CvCard';
-import Card from '@/app/components/ui/Card';
-import AyudaEmpleados from '@/app/components/ayuda-contenido/AyudaEmpleados';
-import BotonVolver from '@/app/components/common/BotonVolver'; // Se importa el botón de volver
+import SelectorCategoriasEmpleo from '@/components/forms/SelectorCategoriasEmpleo';
+import CvCard from '@/components/cv/CvCard';
+import Card from '@/components/ui/Card';
+import AyudaEmpleados from '@/components/ayuda-contenido/AyudaEmpleados';
+import BotonVolver from '@/components/common/BotonVolver'; // Se importa el botón de volver
 import useHelpContent from '@/lib/hooks/useHelpContent';
 
 export default function EmpleadosPage() {

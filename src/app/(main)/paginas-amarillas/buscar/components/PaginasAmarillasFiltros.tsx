@@ -7,19 +7,19 @@ import {
 } from '@/types/paginaAmarilla';
 import SelectorLocalidad, {
   LocalidadSeleccionada,
-} from '@/app/components/forms/SelectorLocalidad';
+} from '@/components/forms/SelectorLocalidad';
 import SelectorCategoria, {
   CategoriaSeleccionada,
-} from '@/app/components/forms/SelectorCategoria';
+} from '@/components/forms/SelectorCategoria';
 import SelectorRubro, {
   RubroSeleccionado,
-} from '@/app/components/forms/SelectorRubro';
+} from '@/components/forms/SelectorRubro';
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import Button from '@/app/components/ui/Button';
-import Checkbox from '@/app/components/ui/Checkbox';
+import Button from '@/components/ui/Button';
+import Checkbox from '@/components/ui/Checkbox';
 import categoriasData from '@/data/categorias.json';
 import rubrosData from '@/data/rubro.json';
-import BotonDeSeleccion from '@/app/components/common/BotonDeSeleccion';
+import BotonDeSeleccion from '@/components/common/BotonDeSeleccion';
 
 
 interface Props {

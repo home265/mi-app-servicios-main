@@ -3,7 +3,7 @@
 import React from 'react';
 // --- INICIO: CAMBIOS DE TIPO E IMPORTS ---
 import { SerializablePaginaAmarillaData } from '@/types/paginaAmarilla';
-import PaginaAmarillaDisplayCard from '@/app/components/paginas-amarillas/PaginaAmarillaDisplayCard';
+import PaginaAmarillaDisplayCard from '@/components/paginas-amarillas/PaginaAmarillaDisplayCard';
 
 // 1. Importar Swiper y sus componentes/módulos
 import { Swiper, SwiperSlide } from 'swiper/react';

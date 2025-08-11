@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import { SerializablePaginaAmarillaData } from '@/types/paginaAmarilla';
 import { PLANES } from '@/lib/constants/planes';
 import { CAMPANAS } from '@/lib/constants/campanas';
-import PaginaAmarillaDisplayCard from '@/app/components/paginas-amarillas/PaginaAmarillaDisplayCard';
-import AnuncioAnimadoCard from '@/app/components/anuncios/AnuncioAnimadoCard';
+import PaginaAmarillaDisplayCard from '@/components/paginas-amarillas/PaginaAmarillaDisplayCard';
+import AnuncioAnimadoCard from '@/components/anuncios/AnuncioAnimadoCard';
 
 interface ResumenClientProps {
   publicacion: SerializablePaginaAmarillaData;

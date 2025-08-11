@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import RegistroForm from '@/app/components/auth/RegistroForm';
+import RegistroForm from '@/components/auth/RegistroForm';
 
 /* ─ utilidades ─ */
 type RolValido = 'usuario' | 'prestador' | 'comercio';

@@ -18,8 +18,8 @@ import {
 
 import PaginasAmarillasFiltros from './components/PaginasAmarillasFiltros';
 import PaginasAmarillasResultados from './components/PaginasAmarillasResultados';
-import AyudaPaginasAmarillas from '@/app/components/ayuda-contenido/AyudaPaginasAmarillas';
-import BotonVolver from '@/app/components/common/BotonVolver';
+import AyudaPaginasAmarillas from '@/components/ayuda-contenido/AyudaPaginasAmarillas';
+import BotonVolver from '@/components/common/BotonVolver';
 import useHelpContent from '@/lib/hooks/useHelpContent';
 
 type EstadoCarga = 'idle' | 'loading' | 'success' | 'error';

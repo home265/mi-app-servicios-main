@@ -1,7 +1,7 @@
 // src/app/layout.tsx
 import './globals.css';
 import { Providers } from './providers';
-import NotificationWatcher from '@/app/components/notificaciones/NotificationWatcher';
+import NotificationWatcher from '@/components/notificaciones/NotificationWatcher';
 import type { Metadata, Viewport } from 'next';
 import { Barlow } from 'next/font/google';
 

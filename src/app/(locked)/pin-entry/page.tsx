@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 import { useUserStore } from '@/store/userStore';
-import PinInput from '@/app/components/forms/PinInput';
-import LoginForm from '@/app/components/auth/LoginForm';
+import PinInput from '@/components/forms/PinInput';
+import LoginForm from '@/components/auth/LoginForm';
 // Se elimina el import de Button, ya que usaremos un <button> estándar.
 // import Button from '@/app/components/ui/Button';
 

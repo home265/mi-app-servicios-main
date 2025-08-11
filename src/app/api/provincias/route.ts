@@ -1,18 +1,13 @@
 // src/app/api/provincias/route.ts
 
 import { NextResponse } from 'next/server';
-import data from '@/data/localidades.json'; // <-- CAMBIO CLAVE: Se importa el JSON directamente.
+import data from '@/data/localidades.json';
 
-// 1. Definimos la estructura de nuestros datos con interfaces
-interface Provincia {
-  id: string;
-  nombre: string;
-}
-
+// 1. Los tipos se simplifican drásticamente.
+// Ya no necesitamos una interfaz 'Provincia', y 'Localidad' se ajusta al nuevo formato.
 interface Localidad {
-  id: string;
   nombre: string;
-  provincia: Provincia;
+  provincia: string;
 }
 
 interface LocalidadesFile {
@@ -21,23 +16,21 @@ interface LocalidadesFile {
 
 export async function GET() {
   try {
-    // Ya no es necesario leer el archivo con `fs`.
-    
-    // 2. Aplicamos nuestro tipo estricto al JSON importado
     const dataTyped: LocalidadesFile = data;
 
-    // Usamos un Map para obtener provincias únicas de forma eficiente
-    const provinciasMap = new Map<string, Provincia>();
+    // 2. La lógica se reescribe para ser más eficiente.
+    // Usamos un 'Set' para obtener automáticamente los nombres de provincia únicos.
+    // Un 'Set' solo permite valores únicos, por lo que no tenemos que verificar si ya existe.
+    const provinciasSet = new Set<string>();
     
-    // 3. El callback del forEach ahora usa el tipo 'Localidad'
     dataTyped.localidades.forEach((localidad: Localidad) => {
-      if (!provinciasMap.has(localidad.provincia.id)) {
-        provinciasMap.set(localidad.provincia.id, localidad.provincia);
-      }
+      provinciasSet.add(localidad.provincia);
     });
 
-    const provinciasUnicas = Array.from(provinciasMap.values());
+    // 3. Convertimos el Set de nuevo a un arreglo.
+    const provinciasUnicas = Array.from(provinciasSet);
 
+    // La API ahora devolverá un arreglo de strings.
     return NextResponse.json({ provincias: provinciasUnicas });
 
   } catch (error) {

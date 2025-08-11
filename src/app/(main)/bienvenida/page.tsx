@@ -11,14 +11,14 @@ import {
   UserCircleIcon,
   UserGroupIcon,
 } from '@heroicons/react/24/outline';
-import Avatar from '@/app/components/common/Avatar';
+import Avatar from '@/components/common/Avatar';
 // --- INICIO: CAMBIO DE NOMBRE DEL COMPONENTE ---
 // Se asume que has renombrado el archivo como conversamos
 import BotonGestionSuscripcion from './components/BotonGestionSuscripcion';
 // --- FIN: CAMBIO DE NOMBRE DEL COMPONENTE ---
 import { getCvByUid } from '@/lib/services/cvService';
-import AyudaBienvenida from '@/app/components/ayuda-contenido/AyudaBienvenida';
-import BotonDeAccion from '@/app/components/bienvenida/BotonDeAccion';
+import AyudaBienvenida from '@/components/ayuda-contenido/AyudaBienvenida';
+import BotonDeAccion from '@/components/bienvenida/BotonDeAccion';
 import { useUserStore } from '@/store/userStore';
 import useHelpContent from '@/lib/hooks/useHelpContent';
 

@@ -7,11 +7,11 @@ import { useRouter } from 'next/navigation';
 import useNotificationHandler from '@/hooks/useNotificationHandler'; // <-- PASO 1: IMPORTAR EL HOOK
 
 // Importar los componentes UI necesarios
-import NotificacionCard from '@/app/components/notificaciones/NotificacionCard';
-import ContactoPopup from '@/app/components/notificaciones/ContactoPopup';
-import AlertPopup from '@/app/components/common/AlertPopup';
-import Logo from '@/app/components/ui/Logo';
-import PerfilModal from '@/app/components/notificaciones/PerfilModal';
+import NotificacionCard from '@/components/notificaciones/NotificacionCard';
+import ContactoPopup from '@/components/notificaciones/ContactoPopup';
+import AlertPopup from '@/components/common/AlertPopup';
+import Logo from '@/components/ui/Logo';
+import PerfilModal from '@/components/notificaciones/PerfilModal';
 import { useUserStore } from '@/store/userStore';
 
 export default function RespuestasPage() {

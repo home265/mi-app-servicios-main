@@ -7,7 +7,7 @@ import { getPaginaAmarilla } from '@/lib/services/paginasAmarillasService';
 import { PLANES, Plan } from '@/lib/constants/planes';
 import { CAMPANAS, Campana } from '@/lib/constants/campanas';
 import { CampaignId, PlanId } from '@/types/paginaAmarilla';
-import AyudaCampanas from '@/app/components/ayuda-contenido/AyudaCampanas';
+import AyudaCampanas from '@/components/ayuda-contenido/AyudaCampanas';
 import useHelpContent from '@/lib/hooks/useHelpContent';
 
 export default function CampanasPage() {

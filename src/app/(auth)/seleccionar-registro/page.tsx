@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import SeleccionRolCard from '@/app/components/auth/SeleccionRolCard';
-import Modal from '@/app/components/common/Modal';
+import SeleccionRolCard from '@/components/auth/SeleccionRolCard';
+import Modal from '@/components/common/Modal';
 // --- 1. IMPORTAR LOS ÍCONOS DE CANDADO ---
 import { LockClosedIcon, LockOpenIcon } from '@heroicons/react/24/solid';
 

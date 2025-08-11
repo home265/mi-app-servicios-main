@@ -10,8 +10,8 @@ import { toast } from 'react-hot-toast';
 import { db } from '@/lib/firebase/config';
 import { useUserStore } from '@/store/userStore';
 
-import Avatar from '@/app/components/common/Avatar';
-import FormularioResenaDetallado from '@/app/components/resenas/FormularioResenaDetallado';
+import Avatar from '@/components/common/Avatar';
+import FormularioResenaDetallado from '@/components/resenas/FormularioResenaDetallado';
 
 /**
  * Tipos para los datos del usuario a calificar. (sin cambios)
