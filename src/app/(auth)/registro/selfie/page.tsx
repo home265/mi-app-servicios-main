@@ -7,18 +7,18 @@ import dynamic from 'next/dynamic';
 import { auth, db, storage } from '@/lib/firebase/config';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { ref, getDownloadURL, uploadBytes } from 'firebase/storage';
-import { doc, setDoc } from 'firebase/firestore';
+// --- INICIO DE CAMBIOS ---
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { InformacionFiscal } from '@/types/informacionFiscal';
+// --- FIN DE CAMBIOS ---
 import bcrypt from 'bcryptjs';
 import Button from '@/components/ui/Button';
 import Logo from '@/components/ui/Logo';
 
-// Importamos el componente de forma dinámica
 const SelfieLiveness = dynamic(
   () => import('@/components/auth/SelfieLiveness'),
   {
-    // Deshabilitamos el renderizado en servidor, la cámara solo funciona en el cliente
     ssr: false,
-    // Mostramos un estado de carga mientras se descarga el componente pesado
     loading: () => (
       <div className="text-center p-8">
         <p className="animate-pulse text-lg">Cargando componentes de verificación...</p>
@@ -27,7 +27,7 @@ const SelfieLiveness = dynamic(
   }
 );
 
-// Tipos para los datos del formulario que vienen de sessionStorage
+// --- INICIO DE CAMBIOS ---
 interface StoredFormData {
   nombre?: string;
   apellido?: string;
@@ -41,7 +41,9 @@ interface StoredFormData {
   cuilCuit?: string;
   descripcion?: string;
   telefono?: string;
+  informacionFiscal?: InformacionFiscal;
 }
+// --- FIN DE CAMBIOS ---
 
 export default function SelfiePage() {
   const router = useRouter();
@@ -52,7 +54,6 @@ export default function SelfiePage() {
   const [isProcessingAction, setIsProcessingAction] = useState<boolean>(false);
   const [isDataLoaded, setIsDataLoaded] = useState<boolean>(false);
 
-  // Carga inicial de datos desde sessionStorage
   useEffect(() => {
     const storedDataString = sessionStorage.getItem('registroFormData');
     const storedRol = sessionStorage.getItem('registroFormRol');
@@ -68,7 +69,6 @@ export default function SelfiePage() {
     setIsDataLoaded(true);
   }, []);
   
-  // Función para manejar el registro final, se llama cuando la selfie es capturada
   const handleFinalizarRegistro = async (selfieDataUrl: string) => {
     if (!formData || !rol) {
       setError('Faltan datos para finalizar el registro.'); return;
@@ -105,6 +105,23 @@ export default function SelfiePage() {
 
       const collectionName = rol === 'prestador' ? 'prestadores' : rol === 'comercio' ? 'comercios' : 'usuarios_generales';
       await setDoc(doc(db, collectionName, user.uid), userDataToSave);
+
+      // --- INICIO DE CAMBIOS ---
+      // Guardar/actualizar perfil fiscal en documento fijo `informacionFiscal/current`
+      if (formData.informacionFiscal) {
+        const { id: _omitId, ...restoFiscal } = formData.informacionFiscal;
+        await setDoc(
+          doc(db, collectionName, user.uid, 'informacionFiscal', 'current'),
+          {
+            ...restoFiscal,
+            fechaVerificacion: serverTimestamp(),
+            verifiedAt: serverTimestamp(),
+          },
+          { merge: true }
+        );
+        console.log('informacionFiscal/current guardado correctamente.');
+      }
+      // --- FIN DE CAMBIOS ---
 
       setUiMessage('¡Registro exitoso! Redirigiendo...');
       setTimeout(() => router.push('/bienvenida'), 2000);
@@ -155,17 +172,14 @@ export default function SelfiePage() {
   };
   
   return (
-  <div className="flex min-h-screen flex-col items-center justify-center bg-fondo text-texto-principal px-2 py-6">
-    
-    {/* Se reemplaza <img> por el componente <Logo /> */}
-    <Logo />
-
-    <div className="w-[90vw] sm:max-w-md md:max-w-xl space-y-4 rounded-xl border border-borde-tarjeta bg-tarjeta p-5 shadow-xl md:p-8">
-      <h1 className="text-center text-lg font-bold text-primario md:text-xl">
-        Verificación de Identidad
-      </h1>
-      {renderContent()}
+    <div className="flex min-h-screen flex-col items-center justify-center bg-fondo text-texto-principal px-2 py-6">
+      <Logo />
+      <div className="w-[90vw] sm:max-w-md md:max-w-xl space-y-4 rounded-xl border border-borde-tarjeta bg-tarjeta p-5 shadow-xl md:p-8">
+        <h1 className="text-center text-lg font-bold text-primario md:text-xl">
+          Verificación de Identidad
+        </h1>
+        {renderContent()}
+      </div>
     </div>
-  </div>
-);
+  );
 }

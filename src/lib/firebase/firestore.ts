@@ -1,7 +1,8 @@
 // src/lib/firebase/firestore.ts
-import { doc, deleteDoc, getDoc, DocumentSnapshot, updateDoc } from 'firebase/firestore';
+import { doc, deleteDoc, getDoc, DocumentSnapshot, updateDoc, setDoc } from 'firebase/firestore';
 import { db } from './config'; // Tu instancia exportada de firestore (db)
 import { deleteField } from 'firebase/firestore'; 
+
 // Lista de posibles colecciones de usuarios (mantener consistente con Providers.tsx)
 const USER_COLLECTIONS = ['usuarios_generales', 'prestadores', 'comercios'];
 
@@ -118,5 +119,103 @@ export const deleteUserFCMToken = async (uid: string, rol: string): Promise<void
   } catch (error) {
     console.error(`Error al eliminar el token FCM en Firestore (${collectionName}/${uid}):`, error);
     throw new Error("No se pudo desactivar las notificaciones.");
+  }
+};
+
+/* ========================================================================== */
+/* ====================== NUEVO: PERFIL FISCAL (helpers) ==================== */
+/* ========================================================================== */
+
+import type { InformacionFiscal } from '@/types/informacionFiscal';
+
+function isObject(x: unknown): x is Record<string, unknown> {
+  return typeof x === 'object' && x !== null;
+}
+
+function isInformacionFiscal(x: unknown): x is InformacionFiscal {
+  return (
+    isObject(x) &&
+    typeof (x as { razonSocial?: unknown }).razonSocial === 'string' &&
+    ((x as { estado?: unknown }).estado === 'ACTIVO' || (x as { estado?: unknown }).estado === 'INACTIVO')
+  );
+}
+
+/**
+ * Crea o actualiza el perfil fiscal en la subcolección:
+ *   <colección>/<uid>/informacionFiscal/current
+ */
+export const upsertUserInformacionFiscal = async (
+  uid: string,
+  rol: string,
+  info: InformacionFiscal
+): Promise<void> => {
+  const collectionName = await findUserCollection(uid, rol);
+  if (!collectionName) {
+    throw new Error(`No se encontró la colección del usuario ${uid} para guardar informacionFiscal.`);
+  }
+
+  const fiscalRef = doc(db, collectionName, uid, 'informacionFiscal', 'current');
+
+  try {
+    await setDoc(fiscalRef, info, { merge: true });
+    console.log(`informacionFiscal/current actualizada para ${collectionName}/${uid}.`);
+  } catch (error) {
+    console.error(`Error al guardar informacionFiscal (${collectionName}/${uid}):`, error);
+    throw new Error('No se pudo guardar la información fiscal.');
+  }
+};
+
+/**
+ * Lee el perfil fiscal desde la subcolección:
+ *   <colección>/<uid>/informacionFiscal/current
+ * Devuelve null si no existe.
+ */
+export const getUserInformacionFiscal = async (
+  uid: string,
+  rol?: string
+): Promise<InformacionFiscal | null> => {
+  const collectionName = await findUserCollection(uid, rol);
+  if (!collectionName) {
+    console.warn(`No se encontró la colección del usuario ${uid} para leer informacionFiscal.`);
+    return null;
+  }
+
+  const fiscalRef = doc(db, collectionName, uid, 'informacionFiscal', 'current');
+  try {
+    const snap = await getDoc(fiscalRef);
+    if (!snap.exists()) return null;
+    const data = snap.data();
+    return isInformacionFiscal(data) ? (data as InformacionFiscal) : null;
+  } catch (error) {
+    console.error(`Error al leer informacionFiscal (${collectionName}/${uid}):`, error);
+    return null;
+  }
+};
+
+/**
+ * Actualiza las preferencias de envío del comprobante fiscal sin tocar otros campos.
+ */
+export const updateUserPreferenciasEnvio = async (
+  uid: string,
+  rol: string,
+  prefs: { email?: boolean; whatsapp?: boolean }
+): Promise<void> => {
+  const collectionName = await findUserCollection(uid, rol);
+  if (!collectionName) {
+    throw new Error(`No se encontró la colección del usuario ${uid} para actualizar preferenciasEnvio.`);
+  }
+
+  const fiscalRef = doc(db, collectionName, uid, 'informacionFiscal', 'current');
+
+  const payload: Record<string, boolean> = {};
+  if (typeof prefs.email === 'boolean') payload['preferenciasEnvio.email'] = prefs.email;
+  if (typeof prefs.whatsapp === 'boolean') payload['preferenciasEnvio.whatsapp'] = prefs.whatsapp;
+
+  try {
+    await updateDoc(fiscalRef, payload);
+    console.log(`preferenciasEnvio actualizadas para ${collectionName}/${uid}.`);
+  } catch (error) {
+    console.error(`Error al actualizar preferenciasEnvio (${collectionName}/${uid}):`, error);
+    throw new Error('No se pudieron actualizar las preferencias de envío.');
   }
 };

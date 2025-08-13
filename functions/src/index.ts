@@ -29,13 +29,15 @@ export {
 /* Funciones de Páginas Amarillas y Pagos                                     */
 /* -------------------------------------------------------------------------- */
 
-// Exporta la función que se activa al confirmar un pago.
+// Exporta la función que se activa al confirmar un pago (desde Next o CF).
 export { onSubscriptionPayment } from './onSubscriptionPayment';
 
+// ✅ NUEVO: Webhook de Mercado Pago como Cloud Function
+export { mercadoPagoWebhook } from './mercadoPagoWebhook';
+
 // --- INICIO: EXPORTS ACTUALIZADOS PARA SUSCRIPCIONES ---
-// Se exportan las dos funciones programadas desde el mismo archivo.
 export {
-  manageSubscriptionsLifecycle, // Nombre actualizado
-  cleanupInactivePublications,  // Nueva función de limpieza
+  manageSubscriptionsLifecycle,
+  cleanupInactivePublications,
 } from './expireAnuncios';
 // --- FIN: EXPORTS ACTUALIZADOS ---

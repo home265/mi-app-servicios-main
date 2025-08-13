@@ -1,118 +1,149 @@
-import * as functions from 'firebase-functions';
+import { onRequest } from 'firebase-functions/v2/https';
+import * as logger from 'firebase-functions/logger';
 import * as admin from 'firebase-admin';
-import { Timestamp } from 'firebase-admin/firestore';
-import { CampaignId } from './types/paginaAmarilla';
-
 
 if (!admin.apps.length) {
   admin.initializeApp();
 }
+const db = admin.firestore();
 
-// --- CAMBIO: La interfaz ahora usa 'campaignId' para mayor claridad ---
-interface PaymentSuccessRequestBody {
-  cardId: string;
-  campaignId: CampaignId;
+// --- Tipos del payload que envía tu webhook de Next.js ---
+type SubscriptionPaymentBody = {
+  paymentId?: string | number;
+  external_reference?: string; // esperado: "creatorId|campaignId"
+  mp_status?: string;
+  mp_payer_email?: string;
+  tf_comprobante?: unknown;
+};
+
+// Guardas admitidas para campañas
+type CampaignId = 'mensual' | 'trimestral' | 'semestral' | 'anual';
+
+// Meses por campaña
+const CAMPAIGN_MONTHS: Record<CampaignId, number> = {
+  mensual: 1,
+  trimestral: 3,
+  semestral: 6,
+  anual: 12,
+};
+
+// Documento del anuncio (modelo mínimo que tocamos)
+type PaginaAmarillaDoc = {
+  paymentId?: string | number;
+  status?: 'draft' | 'awaiting_payment' | 'active' | 'expired' | 'canceled';
+  campaignId?: CampaignId;
+  subscriptionStartDate?: admin.firestore.Timestamp;
+  subscriptionEndDate?: admin.firestore.Timestamp;
+  updatedAt?: admin.firestore.Timestamp;
+  paymentConfirmedAt?: admin.firestore.Timestamp;
+};
+
+function isObject(x: unknown): x is Record<string, unknown> {
+  return typeof x === 'object' && x !== null;
 }
 
-interface HttpError extends Error {
-  status?: number;
+function parseBody(x: unknown): SubscriptionPaymentBody {
+  if (!isObject(x)) return {};
+  const obj = x as Record<string, unknown>;
+  const out: SubscriptionPaymentBody = {};
+  if (typeof obj.paymentId === 'string' || typeof obj.paymentId === 'number') out.paymentId = obj.paymentId;
+  if (typeof obj.external_reference === 'string') out.external_reference = obj.external_reference;
+  if (typeof obj.mp_status === 'string') out.mp_status = obj.mp_status;
+  if (typeof obj.mp_payer_email === 'string') out.mp_payer_email = obj.mp_payer_email;
+  if ('tf_comprobante' in obj) out.tf_comprobante = obj.tf_comprobante as unknown;
+  return out;
 }
 
-const allowedOrigins = [
-  'http://localhost:3000',
-  'https://mi-app-servicios-3326e.web.app',
-];
+function parseExternalRef(ext?: string): { creatorId: string | null; campaignId: CampaignId | null } {
+  if (!ext || typeof ext !== 'string') return { creatorId: null, campaignId: null };
+  const [creatorIdRaw, campaignIdRaw] = ext.split('|');
+  const creatorId = typeof creatorIdRaw === 'string' && creatorIdRaw.length > 0 ? creatorIdRaw : null;
 
-export const onSubscriptionPayment = functions.https.onRequest(
+  const isCampaign = (v: string): v is CampaignId =>
+    v === 'mensual' || v === 'trimestral' || v === 'semestral' || v === 'anual';
+
+  const campaignId = typeof campaignIdRaw === 'string' && isCampaign(campaignIdRaw) ? campaignIdRaw : null;
+  return { creatorId, campaignId };
+}
+
+export const onSubscriptionPayment = onRequest(
+  { region: 'us-central1' },
   async (req, res): Promise<void> => {
-    const origin = req.headers.origin as string | undefined;
-    if (origin && allowedOrigins.includes(origin)) {
-      res.set('Access-Control-Allow-Origin', origin);
-    }
-    if (req.method === 'OPTIONS') {
-      res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-      res.set(
-        'Access-Control-Allow-Headers',
-        'Content-Type, Authorization'
-      );
-      res.set('Access-Control-Max-Age', '3600');
-      res.status(204).send('');
-      return;
-    }
-    if (req.method !== 'POST') {
-      res.setHeader('Allow', 'POST, OPTIONS');
-      res.status(405).send({ error: 'Método no permitido. Use POST.' });
-      return;
-    }
-
     try {
-      // --- CAMBIO: Se lee 'campaignId' en lugar de 'plan' ---
-      const { cardId, campaignId } = req.body as PaymentSuccessRequestBody;
-      if (
-        !cardId ||
-        typeof cardId !== 'string' ||
-        !['mensual', 'trimestral', 'semestral', 'anual'].includes(campaignId)
-      ) {
-        res
-          .status(400)
-          .send({
-            error:
-              'Los campos "cardId" (string) y "campaignId" (mensual|trimestral|semestral|anual) son requeridos.',
-          });
+      if (req.method !== 'POST') {
+        res.status(405).send('Method not allowed');
         return;
       }
 
-      const db = admin.firestore();
-      const docRef = db.collection('paginas_amarillas').doc(cardId);
-      const now = Timestamp.now();
+      const body = parseBody(req.body);
+      const { paymentId, external_reference, mp_status, mp_payer_email } = body;
+
+      // Solo activamos con pagos aprobados
+      if (mp_status !== 'approved') {
+        logger.info('Pago no aprobado; se ignora activación', { paymentId, mp_status, external_reference });
+        res.status(200).json({ ok: true, skipped: true });
+        return;
+      }
+
+      const { creatorId, campaignId } = parseExternalRef(external_reference);
+      if (!creatorId) {
+        logger.error('external_reference inválido o sin creatorId', { external_reference, paymentId });
+        res.status(200).json({ ok: true, error: 'external_reference inválido' });
+        return;
+      }
+
+      const docRef = db.collection('paginas_amarillas').doc(creatorId);
 
       await db.runTransaction(async (tx) => {
         const snap = await tx.get(docRef);
+
         if (!snap.exists) {
-          const notFound = new Error(
-            `Card con ID "${cardId}" no encontrada.`
-          ) as HttpError;
-          notFound.status = 404;
-          throw notFound;
+          logger.error('Documento de anuncio inexistente', { creatorId });
+          return;
         }
 
-        // --- CAMBIO: Se usa 'campaignId' ---
-        const monthsMap: Record<CampaignId, number> = {
-          mensual: 1,
-          trimestral: 3,
-          semestral: 6,
-          anual: 12,
-        };
+        const data = snap.data() as PaginaAmarillaDoc;
 
-        const addMonths = monthsMap[campaignId];
-        const startDate = now;
-        // Aproximación de meses. Para mayor precisión se podrían usar librerías de fechas.
-        const endDate = new Date(now.toMillis());
-        endDate.setMonth(endDate.getMonth() + addMonths);
-        
-        // --- CAMBIO: Se guarda 'campaignId' en lugar de 'subscriptionPlan' ---
+        // Idempotencia: si ya procesamos este paymentId, no repetir
+        if (data.paymentId && paymentId && String(data.paymentId) === String(paymentId)) {
+          logger.info('Pago ya procesado, se omite', { creatorId, paymentId });
+          return;
+        }
+
+        // Determinar campaña: del external_reference si vino; si no, del doc actual
+        const effectiveCampaign: CampaignId | null = campaignId ?? (data.campaignId ?? null);
+        if (!effectiveCampaign) {
+          logger.error('No hay campaignId para activar suscripción', { creatorId, paymentId });
+          return;
+        }
+
+        const months = CAMPAIGN_MONTHS[effectiveCampaign];
+        const now = admin.firestore.Timestamp.now();
+        const endDateJs = new Date(now.toMillis());
+        endDateJs.setMonth(endDateJs.getMonth() + months);
+        const endTs = admin.firestore.Timestamp.fromDate(endDateJs);
+
         tx.update(docRef, {
-          campaignId: campaignId,
-          subscriptionStartDate: Timestamp.fromDate(startDate.toDate()),
-          subscriptionEndDate: Timestamp.fromDate(endDate),
-          isActive: true,
-          updatedAt: now,
+          status: 'active',
+          campaignId: effectiveCampaign,
+          subscriptionStartDate: now,
+          subscriptionEndDate: endTs,
+          paymentId: paymentId ?? snap.get('paymentId') ?? null,
           paymentConfirmedAt: now,
-        });
+          updatedAt: now,
+          payerEmail: mp_payer_email ?? snap.get('payerEmail') ?? null,
+        } as Partial<PaginaAmarillaDoc> & Record<string, unknown>); // tipos parciales permitidos en update
       });
 
-      res
-        .status(200)
-        .send({
-          message: `Card "${cardId}" suscripción activada/renovada (${campaignId}).`,
-        });
-    } catch (err: unknown) {
-      const error = err as HttpError;
-      const status = error.status ?? 500;
-      const msg =
-        error.message ||
-        'Error interno al procesar el pago de suscripción.';
-      res.status(status).send({ error: msg });
+      logger.info('Suscripción activada', { creatorId, campaignId, paymentId });
+      res.status(200).json({ ok: true });
+      return;
+    } catch (e: unknown) {
+      const err = e instanceof Error ? e : new Error(String(e));
+      logger.error('onSubscriptionPayment error', err);
+      // 200 para evitar reintentos agresivos del emisor
+      res.status(200).json({ ok: true, error: err.message ?? 'internal' });
+      return;
     }
   }
 );

@@ -4,20 +4,14 @@
 import { useForm, SubmitHandler, Controller } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
-
-// Componentes UI & Forms
-// Se eliminan los imports de los componentes UI genéricos que vamos a reemplazar
-// import Input from '@/app/components/ui/Input';
-// import Button from '@/app/components/ui/Button';
+import VerificadorCuitCuil from '@/components/auth/VerificadorCuit';
+import { InformacionFiscal } from '@/types/informacionFiscal';
 import Modal from '@/components/common/Modal';
 import SelectorLocalidad, { LocalidadSeleccionada } from '@/components/forms/SelectorLocalidad';
 import SelectorCategoria, { CategoriaSeleccionada } from '@/components/forms/SelectorCategoria';
 import SelectorRubro, { RubroSeleccionado } from '@/components/forms/SelectorRubro';
-
-// JSON Data (sin cambios)
 import categoriasData from '@/data/categorias.json';
 import rubrosData from '@/data/rubro.json';
-
 
 // --- Tipos (sin cambios) ---
 type CategoriaSeleccionadaConMatricula = CategoriaSeleccionada & {
@@ -56,6 +50,7 @@ interface RegistroFormProps {
 export default function RegistroForm({ rol }: RegistroFormProps) {
   const router = useRouter();
 
+  const [datosFiscales, setDatosFiscales] = useState<InformacionFiscal | null>(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const matriculaInputRef = useRef<HTMLInputElement>(null);
 
@@ -90,6 +85,8 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
   const pinValue = watch('pin');
   const seleccionCategoriaValue = watch('seleccionCategoria');
   const seleccionRubroValue = watch('seleccionRubro');
+  const nombreValue = watch('nombre');
+  const apellidoValue = watch('apellido');
 
   const isMatriculaRequired =
     (rol === 'prestador' && !!seleccionCategoriaValue?.requiereMatricula) ||
@@ -103,7 +100,6 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
     required: isMatriculaRequired ? 'La matrícula es obligatoria para esta profesión.' : false,
   });
 
-  // Lógica de hooks y handlers (sin cambios)
   useEffect(() => {
     if (isMatriculaRequired) {
       setModalOpen(true);
@@ -126,11 +122,20 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    console.log('Datos del formulario VALIDADOS y listos para pasar a selfie:', data);
+    if (!datosFiscales) {
+      setError("root.storageError", {
+        type: "manual",
+        message: "Por favor, verifica tu CUIL/CUIT antes de continuar."
+      });
+      return;
+    }
+
+    const dataToStore = { ...data, informacionFiscal: datosFiscales };
+    console.log('Datos del formulario VALIDADOS y listos para pasar a selfie:', dataToStore);
     console.log('Registrando como:', rol);
 
     try {
-      sessionStorage.setItem('registroFormData', JSON.stringify(data));
+      sessionStorage.setItem('registroFormData', JSON.stringify(dataToStore));
       sessionStorage.setItem('registroFormRol', rol);
       console.log('Datos guardados en sessionStorage.');
     } catch (e) {
@@ -157,7 +162,6 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
     ? "Ej: Venta de artículos de ferretería, pinturería y materiales de construcción..."
     : "";
 
-  // Estilo base para todos los inputs 3D
   const inputClassName = "block w-full px-4 py-3 bg-tarjeta border-none rounded-xl shadow-[inset_2px_2px_5px_rgba(0,0,0,0.6)] placeholder-texto-secundario focus:outline-none focus:ring-2 focus:ring-primario text-texto-principal transition-shadow";
 
   return (
@@ -191,26 +195,25 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
         </div>
 
         <Controller
-  name="localidad"
-  control={control}
-  rules={{ required: 'La localidad y provincia son obligatorias' }}
-  render={({ field, fieldState }) => (
-    <SelectorLocalidad
-      id="localidad-selector"
-      label="Localidad y Provincia"
-      placeholder="Ingresa letras y selecciona..."
-      onLocalidadSeleccionada={field.onChange}
-      error={fieldState.error?.message}
-      strict={true}
-    />
-  )}
-/>
-{errors.localidad && (
-  <p className="text-sm text-error -mt-3 mb-2">
-    {errors.localidad.message}
-  </p>
-)}
-
+          name="localidad"
+          control={control}
+          rules={{ required: 'La localidad y provincia son obligatorias' }}
+          render={({ field, fieldState }) => (
+            <SelectorLocalidad
+              id="localidad-selector"
+              label="Localidad y Provincia"
+              placeholder="Ingresa letras y selecciona..."
+              onLocalidadSeleccionada={field.onChange}
+              error={fieldState.error?.message}
+              strict={true}
+            />
+          )}
+        />
+        {errors.localidad && (
+          <p className="text-sm text-error -mt-3 mb-2">
+            {errors.localidad.message}
+          </p>
+        )}
         
         <div>
             <label htmlFor="email" className="block text-sm font-medium text-texto-secundario mb-2">Email</label>
@@ -229,7 +232,7 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
         <div>
             <label htmlFor="repetirContrasena" className="block text-sm font-medium text-texto-secundario mb-2">Repetir Contraseña</label>
             <input id="repetirContrasena" type="password" placeholder="Confirma tu contraseña" autoComplete="new-password" className={inputClassName}
-            {...register('repetirContrasena', { required: 'Confirma la contraseña', validate: (value) => value === contrasenaValue || 'Las contraseñas no coinciden' })} />
+            {...register('repetirContrasena', { required: 'Confirma la contraseña', validate: (value) => value === contrasenaValue || 'Las contrasenás no coinciden' })} />
             {errors.repetirContrasena && <p className="text-sm text-error mt-1">{errors.repetirContrasena.message}</p>}
         </div>
 
@@ -253,6 +256,15 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
             {...register('telefono', { required: 'El teléfono es obligatorio', pattern: { value: /^\d{7,15}$/, message: 'Número de teléfono inválido' } })} />
             {errors.telefono && <p className="text-sm text-error mt-1">{errors.telefono.message}</p>}
         </div>
+
+        <VerificadorCuitCuil
+          control={control}
+          name="cuilCuit"
+          rules={{ required: 'El CUIL/CUIT es obligatorio' }}
+          nombre={nombreValue}
+          apellido={apellidoValue}
+          onVerificationSuccess={setDatosFiscales}
+        />
 
         {rol === 'prestador' && (
           <>
@@ -297,21 +309,12 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
             </div>
 
             <div>
-              <label htmlFor="cuilCuitPrestador" className="block text-sm font-medium text-texto-secundario mb-2">CUIL / CUIT</label>
-              <input id="cuilCuitPrestador" type="text" placeholder="Ej: 20-12345678-9" className={inputClassName}
-                {...register('cuilCuit', {
-                  required: rol === 'prestador' ? 'El CUIL/CUIT es obligatorio' : false,
-                })} />
-              {errors.cuilCuit && <p className="text-sm text-error mt-1">{errors.cuilCuit.message}</p>}
-            </div>
-
-            <div>
               <label htmlFor="descripcionPrestador" className="block text-sm font-medium text-texto-secundario mb-2">
                 {labelDescripcion}
               </label>
               <textarea id="descripcionPrestador" rows={4} spellCheck="true"
                 placeholder={placeholderDescripcion}
-                className={inputClassName} // Se aplica el mismo estilo al textarea
+                className={inputClassName}
                 maxLength={500}
                 {...register('descripcion', {
                   required: rol === 'prestador' ? 'La descripción de tus servicios es obligatoria' : false,
@@ -363,15 +366,6 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
               />
               {errors.matricula && <p className="text-sm text-error mt-1">{errors.matricula.message}</p>}
             </div>
-            
-            <div>
-              <label htmlFor="cuilCuitComercio" className="block text-sm font-medium text-texto-secundario mb-2">CUIL / CUIT</label>
-              <input id="cuilCuitComercio" type="text" placeholder="Ej: 30-12345678-9" className={inputClassName}
-                {...register('cuilCuit', {
-                  required: rol === 'comercio' ? 'El CUIL/CUIT es obligatorio' : false,
-                })} />
-              {errors.cuilCuit && <p className="text-sm text-error mt-1">{errors.cuilCuit.message}</p>}
-            </div>
 
             <div>
               <label htmlFor="descripcionComercio" className="block text-sm font-medium text-texto-secundario mb-2">
@@ -379,7 +373,7 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
               </label>
               <textarea id="descripcionComercio" rows={4} spellCheck="true"
                 placeholder={placeholderDescripcion}
-                className={inputClassName} // Se aplica el mismo estilo al textarea
+                className={inputClassName}
                 maxLength={500}
                 {...register('descripcion', {
                   required: rol === 'comercio' ? 'La descripción es obligatoria' : false,
@@ -395,7 +389,7 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
         <div className="pt-4">
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !datosFiscales}
             className="btn-primary w-full"
           >
             {isSubmitting ? 'Procesando...' : 'Continuar a Verificación'}

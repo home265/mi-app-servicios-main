@@ -6,6 +6,9 @@ import { doc, updateDoc, serverTimestamp, Timestamp } from 'firebase/firestore';
 import { getToken as getFCMToken } from 'firebase/messaging';
 import { deleteUserFCMToken } from '@/lib/firebase/firestore';
 import { ReactNode } from 'react'; // Importación necesaria
+// ── NUEVOS IMPORTS (no reemplazan nada) ───────────────────────
+import type { InformacionFiscal } from '@/types/informacionFiscal';
+import { getUserInformacionFiscal } from '@/lib/firebase/firestore';
 
 // ──────────────────────────────────────────────────────────────
 // Tipos básicos (sin cambios)
@@ -60,6 +63,11 @@ interface UserStoreState {
   ) => void;
   // --- FIN: CAMPOS AÑADIDOS ---
 
+  // ── NUEVOS CAMPOS/ACCIONES PARA PERFIL FISCAL ───────────────
+  informacionFiscal: InformacionFiscal | null;
+  setInformacionFiscal: (info: InformacionFiscal | null) => void;
+  loadInformacionFiscal: () => Promise<void>;
+
   // acciones
   loadUser: () => Promise<void>;
   toggleActingMode: () => void;
@@ -100,6 +108,9 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
     status: null,
   },
 
+  // --- NUEVO ESTADO: PERFIL FISCAL EN MEMORIA ---
+  informacionFiscal: null,
+
   // ── acciones ────────────────────────────────────────────
   loadUser: async () => {
     // ... esta función se mantiene exactamente como la tienes ...
@@ -107,13 +118,13 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
     try {
       const firebaseUser = auth.currentUser;
       if (!firebaseUser) {
-        set({ currentUser: null, originalRole: null, isPinVerifiedForSession: false, isLoadingAuth: false });
+        set({ currentUser: null, originalRole: null, isPinVerifiedForSession: false, isLoadingAuth: false, informacionFiscal: null });
         if (typeof window !== 'undefined') sessionStorage.removeItem('pinVerified');
         return;
       }
       const result = await getUserData(firebaseUser.uid);
       if (!result) {
-        set({ currentUser: null, originalRole: null, isPinVerifiedForSession: false, userError: 'No se encontraron datos del perfil del usuario.', isLoadingAuth: false });
+        set({ currentUser: null, originalRole: null, isPinVerifiedForSession: false, userError: 'No se encontraron datos del perfil del usuario.', isLoadingAuth: false, informacionFiscal: null });
         if (typeof window !== 'undefined') sessionStorage.removeItem('pinVerified');
         return;
       }
@@ -122,8 +133,16 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
       const actingAs: ActingAs = role === 'prestador' || role === 'comercio' ? 'provider' : 'user';
       const userProfile: UserProfile = { uid: firebaseUser.uid, email: firebaseUser.email, rol: role, ...data };
       set({ currentUser: userProfile, originalRole: role, actingAs, fcmToken: userProfile.fcmToken || null, isLoadingAuth: false });
+
+      // ── NUEVO: cargar perfil fiscal luego de cargar el usuario ──
+      try {
+        const info = await getUserInformacionFiscal(userProfile.uid, userProfile.rol);
+        set({ informacionFiscal: info ?? null });
+      } catch {
+        set({ informacionFiscal: null });
+      }
     } catch (error: unknown) {
-      set({ userError: error instanceof Error ? error.message : String(error), isLoadingAuth: false, currentUser: null, originalRole: null, fcmToken: null });
+      set({ userError: error instanceof Error ? error.message : String(error), isLoadingAuth: false, currentUser: null, originalRole: null, fcmToken: null, informacionFiscal: null });
     }
   },
   
@@ -220,6 +239,23 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
   setLoadingAuth: (loading) => set({ isLoadingAuth: loading }),
   setUnread: (key, n) => set((s) => ({ unread: { ...s.unread, [key]: n } })),
 
+  // ── NUEVAS ACCIONES: PERFIL FISCAL ─────────────────────
+  setInformacionFiscal: (info) => set({ informacionFiscal: info }),
+
+  loadInformacionFiscal: async () => {
+    try {
+      const { currentUser } = get();
+      if (!currentUser) {
+        set({ informacionFiscal: null });
+        return;
+      }
+      const info = await getUserInformacionFiscal(currentUser.uid, currentUser.rol);
+      set({ informacionFiscal: info ?? null });
+    } catch {
+      set({ informacionFiscal: null });
+    }
+  },
+
   resetStore: () => {
     if (typeof window !== 'undefined') sessionStorage.removeItem('pinVerified');
     set({
@@ -236,6 +272,8 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
       currentHelpContent: null,
       // --- Limpiar estado de suscripción al resetear ---
       subscriptionModal: { isOpen: false, status: null },
+      // --- Limpiar perfil fiscal ---
+      informacionFiscal: null,
     });
   },
 
@@ -255,6 +293,8 @@ export const useUserStore = create<UserStoreState>((set, get) => ({
       currentHelpContent: null,
       // --- Limpiar estado de suscripción al cerrar sesión ---
       subscriptionModal: { isOpen: false, status: null },
+      // --- Limpiar perfil fiscal ---
+      informacionFiscal: null,
     });
   },
 }));

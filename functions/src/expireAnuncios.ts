@@ -9,6 +9,8 @@ if (!admin.apps.length) {
 
 const db = admin.firestore();
 
+type NotificationType = 'warning-5-days' | 'warning-final-day';
+
 /**
  * Crea una notificación en la subcolección de un usuario.
  * Busca al usuario en las colecciones de perfiles conocidas.
@@ -18,7 +20,7 @@ const db = admin.firestore();
  */
 const createNotification = async (
   userId: string,
-  type: 'warning-5-days' | 'warning-final-day',
+  type: NotificationType,
   message: string
 ): Promise<void> => {
   const userCollections = ['prestadores', 'comercios', 'usuarios_generales'];
@@ -56,6 +58,23 @@ const scheduleOptions: ScheduleOptions = {
   timeZone: 'America/Argentina/Mendoza',
   region: 'us-central1',
 };
+
+/**
+ * Helper: realiza updates en lotes de hasta 500 escrituras.
+ */
+async function commitInBatches(
+  updates: Array<{ ref: admin.firestore.DocumentReference; data: Record<string, unknown> }>
+): Promise<void> {
+  const BATCH_LIMIT = 500;
+  for (let i = 0; i < updates.length; i += BATCH_LIMIT) {
+    const slice = updates.slice(i, i + BATCH_LIMIT);
+    const batch = db.batch();
+    for (const u of slice) {
+      batch.update(u.ref, u.data);
+    }
+    await batch.commit();
+  }
+}
 
 /**
  * Función programada que se ejecuta diariamente para gestionar suscripciones.
@@ -123,12 +142,22 @@ export const manageSubscriptionsLifecycle = onSchedule(
       }
 
       console.log(`Encontradas ${expiredSnapshot.size} suscripción(es) para expirar.`);
-      const batch = db.batch();
-      expiredSnapshot.docs.forEach(doc => {
-        console.log(`Expirando card ${doc.id}`);
-        batch.update(doc.ref, { isActive: false, updatedAt: now });
+      const updates: Array<{ ref: admin.firestore.DocumentReference; data: Record<string, unknown> }> = [];
+
+      expiredSnapshot.docs.forEach((docSnap) => {
+        console.log(`Expirando card ${docSnap.id}`);
+        updates.push({
+          ref: docSnap.ref,
+          data: {
+            isActive: false,
+            status: 'expired',              // ← NUEVO estado
+            subscriptionExpiredAt: now,     // ← NUEVO timestamp de expiración
+            updatedAt: now,
+          },
+        });
       });
-      await batch.commit();
+
+      await commitInBatches(updates);
       console.log(`Todas las suscripciones expiradas han sido marcadas como inactivas.`);
 
     } catch (error) {
@@ -137,6 +166,7 @@ export const manageSubscriptionsLifecycle = onSchedule(
     }
   }
 );
+
 // --- INICIO: NUEVA FUNCIÓN DE LIMPIEZA ---
 
 /**
@@ -177,14 +207,18 @@ export const cleanupInactivePublications = onSchedule(
 
       console.log(`Encontradas ${snapshot.size} publicación(es) para eliminar permanentemente.`);
 
-      // 3. Borra los documentos encontrados en un lote
-      const batch = db.batch();
-      snapshot.docs.forEach(doc => {
-        console.log(`Programando borrado para la publicación ${doc.id}`);
-        batch.delete(doc.ref);
-      });
+      // 3. Borra los documentos encontrados en lotes seguros
+      const BATCH_LIMIT = 500;
+      for (let i = 0; i < snapshot.docs.length; i += BATCH_LIMIT) {
+        const slice = snapshot.docs.slice(i, i + BATCH_LIMIT);
+        const batch = db.batch();
+        slice.forEach((docSnap) => {
+          console.log(`Programando borrado para la publicación ${docSnap.id}`);
+          batch.delete(docSnap.ref);
+        });
+        await batch.commit();
+      }
 
-      await batch.commit();
       console.log('Limpieza completada. Todas las publicaciones inactivas antiguas han sido eliminadas.');
 
     } catch (error) {
