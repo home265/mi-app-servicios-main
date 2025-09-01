@@ -2,17 +2,11 @@
 import * as functions from 'firebase-functions';
 import * as admin from 'firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
-import { MercadoPagoConfig, Payment } from 'mercadopago';
-import { CampaignId } from './types/paginaAmarilla';
 
 if (!admin.apps.length) {
   admin.initializeApp();
 }
 const db = admin.firestore();
-
-const mpClient = new MercadoPagoConfig({
-  accessToken: process.env.MP_ACCESS_TOKEN!,
-});
 
 /* ===========================
  * Tipos y constantes locales
@@ -22,6 +16,8 @@ export interface Campana {
   id: CampaignId;
   months: number;
 }
+type CampaignId = 'mensual' | 'trimestral' | 'semestral' | 'anual';
+
 const CAMPANAS: Campana[] = [
   { id: 'mensual', months: 1 },
   { id: 'trimestral', months: 3 },
@@ -100,6 +96,48 @@ interface TFBody {
   };
 }
 
+/* ===== Reemplazo del SDK de MP por REST ===== */
+
+interface MPPayer { email?: string }
+interface MPPayment {
+  id?: string | number;
+  status?: string;
+  external_reference?: string;
+  transaction_amount?: number;
+  payer?: MPPayer;
+}
+
+async function getPaymentById(id: string): Promise<MPPayment | null> {
+  const token = process.env.MP_ACCESS_TOKEN;
+  if (!token) {
+    console.error('[MP] Falta MP_ACCESS_TOKEN en funciones.');
+    return null;
+  }
+  const url = `https://api.mercadopago.com/v1/payments/${encodeURIComponent(id)}`;
+  const res = await fetch(url, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!res.ok) {
+    const t = await res.text();
+    console.error(`[MP] Error ${res.status} al leer pago ${id}: ${t}`);
+    return null;
+  }
+  const data: unknown = await res.json();
+  if (typeof data !== 'object' || data === null) return null;
+
+  const o = data as Record<string, unknown>;
+  const payerObj = (typeof o.payer === 'object' && o.payer !== null) ? (o.payer as Record<string, unknown>) : undefined;
+
+  const payment: MPPayment = {
+    id: typeof o.id === 'number' || typeof o.id === 'string' ? o.id : undefined,
+    status: typeof o.status === 'string' ? o.status : undefined,
+    external_reference: typeof o.external_reference === 'string' ? o.external_reference : undefined,
+    transaction_amount: typeof o.transaction_amount === 'number' ? o.transaction_amount : undefined,
+    payer: payerObj ? { email: typeof payerObj.email === 'string' ? payerObj.email : undefined } : undefined,
+  };
+  return payment;
+}
+
 /* ===========================
  * Helpers locales
  * =========================== */
@@ -124,7 +162,7 @@ async function findUserCollection(uid: string): Promise<string | null> {
 function mapCondicionImpositivaToIVA(ci: InformacionFiscalDoc['condicionImpositiva']): CondicionIVA {
   switch (ci) {
     case 'RESPONSABLE_INSCRIPTO': return 'RI';
-    case 'MONOTRIBUTO': return 'MT'; // si preferís 'CF', cambiá aquí
+    case 'MONOTRIBUTO': return 'MT';
     case 'EXENTO': return 'EX';
     case 'CONSUMIDOR_FINAL': return 'CF';
     case 'NO_CATEGORIZADO':
@@ -146,76 +184,6 @@ function isInformacionFiscalDoc(x: unknown): x is InformacionFiscalDoc {
     typeof o.condicionImpositiva === 'string'
   );
 }
-
-// ---- Nuevo: lector del PERFIL FISCAL ligero (sin números sensibles) ----
-type ViaVerificacion = 'cuit_padron' | 'cuil_nombre';
-type ReceptorParaFactura = 'CUIT' | 'CONSUMIDOR_FINAL';
-type CondicionImpositivaMin =
-  | 'RESPONSABLE_INSCRIPTO'
-  | 'MONOTRIBUTO'
-  | 'EXENTO'
-  | 'CONSUMIDOR_FINAL'
-  | 'NO_CATEGORIZADO';
-
-interface PerfilFiscalLigero {
-  viaVerificacion: ViaVerificacion;
-  receptorParaFactura: ReceptorParaFactura;
-  razonSocial?: string | null;
-  condicionImpositiva?: CondicionImpositivaMin | null;
-  domicilio?: string | null;
-  localidad?: string | null;
-  provincia?: string | null;
-  codigopostal?: string | null;
-  emailReceptor: string;
-  verifiedAt: string;
-  proveedor?: { tusFacturasClienteId?: string };
-  cuitGuardado: 'none';
-}
-
-function isPerfilFiscalLigero(x: unknown): x is PerfilFiscalLigero {
-  if (!x || typeof x !== 'object') return false;
-  const o = x as Record<string, unknown>;
-
-  if (o.viaVerificacion !== 'cuit_padron' && o.viaVerificacion !== 'cuil_nombre') return false;
-  if (o.receptorParaFactura !== 'CUIT' && o.receptorParaFactura !== 'CONSUMIDOR_FINAL') return false;
-  if (typeof o.emailReceptor !== 'string') return false;
-  if (typeof o.verifiedAt !== 'string') return false;
-  if (o.cuitGuardado !== 'none') return false;
-
-  // opcionales coherentes: strings o null o undefined
-  const opt = (v: unknown) => typeof v === 'string' || v === null || typeof v === 'undefined';
-  if (!opt(o.razonSocial)) return false;
-  if (!(typeof o.condicionImpositiva === 'undefined'
-    || o.condicionImpositiva === null
-    || ['RESPONSABLE_INSCRIPTO','MONOTRIBUTO','EXENTO','CONSUMIDOR_FINAL','NO_CATEGORIZADO'].includes(String(o.condicionImpositiva))
-  )) return false;
-  if (!opt(o.domicilio)) return false;
-  if (!opt(o.localidad)) return false;
-  if (!opt(o.provincia)) return false;
-  if (!opt(o.codigopostal)) return false;
-
-  if (typeof o.proveedor !== 'undefined') {
-    if (!o.proveedor || typeof o.proveedor !== 'object') return false;
-    const p = o.proveedor as Record<string, unknown>;
-    if (typeof p.tusFacturasClienteId !== 'undefined' && typeof p.tusFacturasClienteId !== 'string') {
-      return false;
-    }
-  }
-  return true;
-}
-
-/** Lee el campo 'perfil' en .../informacionFiscal/current (si existe). */
-async function readPerfilLigero(uid: string): Promise<PerfilFiscalLigero | null> {
-  const col = await findUserCollection(uid);
-  if (!col) return null;
-  const ref = db.collection(col).doc(uid).collection('informacionFiscal').doc('current');
-  const snap = await ref.get();
-  if (!snap.exists) return null;
-  const data = snap.data() as Record<string, unknown>;
-  const perfil = data?.perfil;
-  return isPerfilFiscalLigero(perfil) ? (perfil as PerfilFiscalLigero) : null;
-}
-
 
 async function readFiscalProfile(uid: string): Promise<InformacionFiscalDoc | null> {
   const col = await findUserCollection(uid);
@@ -328,14 +296,12 @@ export const mercadoPagoWebhook = functions.https.onRequest(
         return;
       }
 
-      // Obtener el pago desde MP
-      const payment = await new Payment(mpClient).get({ id: notification.data.id });
+      // Obtener el pago desde MP (vía REST, sin SDK)
+      const payment = await getPaymentById(notification.data.id);
 
       if (!payment || payment.status !== 'approved' || !payment.external_reference) {
         console.log(
-          `Pago ${String(payment?.id ?? notification.data.id)} no aprobado (estado: ${String(
-            payment?.status ?? 'desconocido'
-          )}) o sin external_reference. Omitiendo.`
+          `Pago ${String(notification.data.id)} no aprobado o sin external_reference. Omitiendo.`
         );
         res.status(200).send('Webhook processed (ignored).');
         return;
@@ -357,7 +323,7 @@ export const mercadoPagoWebhook = functions.https.onRequest(
         const data = snap.data() as PaginaAmarillaDoc;
 
         // Evitar reprocesar el mismo pago
-        if (data.paymentId && String(data.paymentId) === String(payment.id)) {
+        if (data.paymentId && payment.id && String(data.paymentId) === String(payment.id)) {
           return;
         }
 
@@ -374,70 +340,35 @@ export const mercadoPagoWebhook = functions.https.onRequest(
           return;
         }
 
-        // (OPCIONAL) Leer PERFIL (nuevo) y, si no está, caer al esquema legacy
-try {
-  const perfil = await readPerfilLigero(creatorId);
-  const legacy = await readFiscalProfile(creatorId); // fallback
+        // (OPCIONAL) Leer perfil fiscal y emitir factura si hay credenciales
+        try {
+          const fiscal = await readFiscalProfile(creatorId);
+          if (!fiscal) {
+            console.log(`[TF] Perfil fiscal ausente para ${creatorId}. Se omite emisión.`);
+          } else {
+            // Determinar email destino según preferencias (si el usuario desactiva email, no se envía)
+            const enviaPorMail = fiscal.preferenciasEnvio?.email !== false;
+            const emailFactura =
+              enviaPorMail ? (fiscal.emailFactura ?? payment.payer?.email) : undefined;
 
-  if (!perfil && !legacy) {
-    console.log(`[TF] Perfil fiscal ausente para ${creatorId}. Se omite emisión.`);
-  } else {
-    // ¿A quién facturamos?
-    const receptor: ReceptorParaFactura =
-      (perfil?.receptorParaFactura ?? 'CONSUMIDOR_FINAL');
+            const condicionIVA = fiscal.condicionIVA ?? mapCondicionImpositivaToIVA(fiscal.condicionImpositiva);
 
-    // Mail: desde perfil.emailReceptor si está; si no, desde MP payer.email si existe.
-    const enviaPorMail = true; // si luego agregás preferencias, respetalas acá
-    const emailFactura =
-      perfil?.emailReceptor ?? (payment.payer?.email ?? undefined);
+            const amount = typeof payment.transaction_amount === 'number' ? payment.transaction_amount : 0;
 
-    // Condición IVA: preferir la del PERFIL; si no, mapear legacy
-    const condIVA: CondicionIVA = perfil?.condicionImpositiva
-      ? mapCondicionImpositivaToIVA(perfil.condicionImpositiva)
-      : (legacy ? mapCondicionImpositivaToIVA(legacy.condicionImpositiva) : 'NR');
-
-    // Razón social: preferir la del PERFIL; si no, la legacy
-    const razonSocial = perfil?.razonSocial ?? legacy?.razonSocial ?? 'Consumidor Final';
-
-    // Monto (SDK no tipa bien transaction_amount)
-    const amount =
-      typeof (payment as unknown as { transaction_amount?: number }).transaction_amount === 'number'
-        ? (payment as unknown as { transaction_amount: number }).transaction_amount
-        : 0;
-
-    if (receptor === 'CUIT') {
-      // Emisión a CUIT: si no guardás el número, el proveedor lo resuelve por clienteId (si lo usás)
-      await tryEmitTFInvoice({
-        external_reference: externalRefRaw,
-        amount,
-        razonSocial,
-        emailFactura,
-        // cuit/cuil opcional: si no los guardás, dejalos undefined
-        cuit: legacy?.cuit,
-        cuil: legacy?.cuil,
-        condicionIVA: condIVA,
-        enviaPorMail,
-        // tipo: facturaTipoFromCondicionIVA(condIVA),
-      });
-    } else {
-      // Consumidor Final
-      await tryEmitTFInvoice({
-        external_reference: externalRefRaw,
-        amount,
-        razonSocial: 'Consumidor Final',
-        emailFactura,
-        cuit: undefined,
-        cuil: undefined,
-        condicionIVA: 'CF',
-        enviaPorMail,
-        // tipo: 'FACTURA B', // opcional
-      });
-    }
-  }
-} catch (err) {
-  console.error('[TF] Error al preparar/emisión de factura (no bloquea activación):', err);
-}
-
+            await tryEmitTFInvoice({
+              external_reference: externalRefRaw,
+              amount,
+              razonSocial: fiscal.razonSocial,
+              emailFactura,
+              cuit: fiscal.cuit,
+              cuil: fiscal.cuil,
+              condicionIVA,
+              enviaPorMail,
+            });
+          }
+        } catch (err) {
+          console.error('[TF] Error al preparar/emisión de factura (no bloquea activación):', err);
+        }
 
         // Activar la suscripción
         const now = Timestamp.now();
@@ -461,8 +392,8 @@ try {
     } catch (e) {
       const error = e instanceof Error ? e : new Error('unknown');
       console.error('Error en el webhook de Mercado Pago:', error);
-      // Si preferís evitar reintentos de MP aún con errores internos, devolvé 200.
-      res.status(500).send('Internal Server Error');
+      // 200 para evitar reintentos agresivos del emisor
+      res.status(200).send('Internal processing error (ignored).');
     }
   }
 );

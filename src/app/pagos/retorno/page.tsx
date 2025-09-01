@@ -2,7 +2,6 @@
 import { TF_ENABLED } from "@/lib/flags";
 import Link from "next/link";
 
-
 type SearchParams = Record<string, string | string[] | undefined>;
 
 function pickParam(sp: SearchParams, key: string): string | undefined {
@@ -10,7 +9,10 @@ function pickParam(sp: SearchParams, key: string): string | undefined {
   return typeof v === "string" ? v : Array.isArray(v) ? v[0] : undefined;
 }
 
-function normalizeStatus(status?: string, collectionStatus?: string): "approved" | "pending" | "rejected" | "unknown" {
+function normalizeStatus(
+  status?: string,
+  collectionStatus?: string
+): "approved" | "pending" | "rejected" | "unknown" {
   const raw = (status ?? collectionStatus ?? "").toLowerCase();
   if (raw === "success" || raw === "approved") return "approved";
   if (raw === "pending" || raw === "in_process") return "pending";
@@ -18,19 +20,21 @@ function normalizeStatus(status?: string, collectionStatus?: string): "approved"
   return "unknown";
 }
 
-export default function PagoRetornoPage({
+export default async function PagoRetornoPage({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>; // ← cambio: ahora es Promise
 }) {
-  const statusParam = pickParam(searchParams, "status");
-  const collectionStatus = pickParam(searchParams, "collection_status");
+  const resolved = await searchParams; // ← resolvemos los params
+
+  const statusParam = pickParam(resolved, "status");
+  const collectionStatus = pickParam(resolved, "collection_status");
   const status = normalizeStatus(statusParam, collectionStatus);
 
   // IDs útiles para auditoría (pueden o no venir, según el flujo)
-  const preferenceId = pickParam(searchParams, "preference_id");
-  const paymentId = pickParam(searchParams, "payment_id");
-  const merchantOrderId = pickParam(searchParams, "merchant_order_id");
+  const preferenceId = pickParam(resolved, "preference_id");
+  const paymentId = pickParam(resolved, "payment_id");
+  const merchantOrderId = pickParam(resolved, "merchant_order_id");
 
   const statusInfo: Record<
     "approved" | "pending" | "rejected" | "unknown",

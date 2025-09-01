@@ -96,7 +96,8 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
       pending: `${appUrl}/pagos/retorno?status=pending`,
     },
     auto_return: 'approved' as const,
-    notification_url: 'https://us-central1-mi-app-servicios-3326e.cloudfunctions.net/mercadoPagoWebhook',
+    notification_url: 'https://mercadopagowebhook-b7pe6eykpa-uc.a.run.app',
+
     statement_descriptor: 'MI-APP',
     // NUEVO: metadata útil para conciliaciones
     metadata: { uid: creatorId, campaignId, planId },

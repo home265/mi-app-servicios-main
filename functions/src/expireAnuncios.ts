@@ -63,8 +63,11 @@ const scheduleOptions: ScheduleOptions = {
  * Helper: realiza updates en lotes de hasta 500 escrituras.
  */
 async function commitInBatches(
-  updates: Array<{ ref: admin.firestore.DocumentReference; data: Record<string, unknown> }>
-): Promise<void> {
+  updates: Array<{
+    ref: admin.firestore.DocumentReference;
+    data: admin.firestore.UpdateData<admin.firestore.DocumentData>;
+  }>
+): Promise<void>  {
   const BATCH_LIMIT = 500;
   for (let i = 0; i < updates.length; i += BATCH_LIMIT) {
     const slice = updates.slice(i, i + BATCH_LIMIT);
@@ -142,7 +145,10 @@ export const manageSubscriptionsLifecycle = onSchedule(
       }
 
       console.log(`Encontradas ${expiredSnapshot.size} suscripción(es) para expirar.`);
-      const updates: Array<{ ref: admin.firestore.DocumentReference; data: Record<string, unknown> }> = [];
+      const updates: Array<{
+  ref: admin.firestore.DocumentReference;
+  data: admin.firestore.UpdateData<admin.firestore.DocumentData>;
+}> = [];
 
       expiredSnapshot.docs.forEach((docSnap) => {
         console.log(`Expirando card ${docSnap.id}`);
