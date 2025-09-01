@@ -12,6 +12,8 @@ import SelectorCategoria, { CategoriaSeleccionada } from '@/components/forms/Sel
 import SelectorRubro, { RubroSeleccionado } from '@/components/forms/SelectorRubro';
 import categoriasData from '@/data/categorias.json';
 import rubrosData from '@/data/rubro.json';
+import type { ParsedNombre } from '@/lib/parseNombreFromTusFacturasError';
+import { normalizarNombreParaComparar } from '@/lib/parseNombreFromTusFacturasError';
 
 // --- Tipos (sin cambios) ---
 type CategoriaSeleccionadaConMatricula = CategoriaSeleccionada & {
@@ -53,7 +55,7 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
   const [datosFiscales, setDatosFiscales] = useState<InformacionFiscal | null>(null);
   const [isModalOpen, setModalOpen] = useState(false);
   const matriculaInputRef = useRef<HTMLInputElement>(null);
-
+  const [nombreCuilExtraido, setNombreCuilExtraido] = useState<ParsedNombre | null>(null);
   const {
     register,
     handleSubmit,
@@ -87,7 +89,16 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
   const seleccionRubroValue = watch('seleccionRubro');
   const nombreValue = watch('nombre');
   const apellidoValue = watch('apellido');
-
+  const nombreIngresadoNormalizado = normalizarNombreParaComparar(`${apellidoValue} ${nombreValue}`);
+  const nombreExtraidoNormalizado = normalizarNombreParaComparar(
+    [nombreCuilExtraido?.apellido, nombreCuilExtraido?.apellido2, nombreCuilExtraido?.nombres]
+      .filter(Boolean)
+      .join(' ')
+  );
+  const cuilNombreCoincide =
+    !!nombreCuilExtraido &&
+    (nombreIngresadoNormalizado === nombreExtraidoNormalizado ||
+     nombreExtraidoNormalizado.includes(normalizarNombreParaComparar(apellidoValue)));
   const isMatriculaRequired =
     (rol === 'prestador' && !!seleccionCategoriaValue?.requiereMatricula) ||
     (rol === 'comercio' && !!seleccionRubroValue?.subrubro?.requiereMatricula);
@@ -122,7 +133,7 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
   };
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    if (!datosFiscales) {
+    if (!datosFiscales && !cuilNombreCoincide) {
       setError("root.storageError", {
         type: "manual",
         message: "Por favor, verifica tu CUIL/CUIT antes de continuar."
@@ -258,13 +269,15 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
         </div>
 
         <VerificadorCuitCuil
-          control={control}
-          name="cuilCuit"
-          rules={{ required: 'El CUIL/CUIT es obligatorio' }}
-          nombre={nombreValue}
-          apellido={apellidoValue}
-          onVerificationSuccess={setDatosFiscales}
-        />
+  control={control}
+  name="cuilCuit"
+  rules={{ required: 'El CUIL/CUIT es obligatorio' }}
+  nombre={nombreValue}
+  apellido={apellidoValue}
+  onVerificationSuccess={setDatosFiscales}
+  // NUEVO: recibe coincidencia por CUIL (nombre extraído)
+  onCuilNombreExtraido={(p: ParsedNombre | null) => setNombreCuilExtraido(p)}
+/>
 
         {rol === 'prestador' && (
           <>
@@ -389,7 +402,7 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
         <div className="pt-4">
           <button
             type="submit"
-            disabled={isSubmitting || !datosFiscales}
+            disabled={isSubmitting || (!datosFiscales && !cuilNombreCoincide)}
             className="btn-primary w-full"
           >
             {isSubmitting ? 'Procesando...' : 'Continuar a Verificación'}

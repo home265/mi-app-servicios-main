@@ -10,10 +10,11 @@ import {
   type RegisterOptions,
 } from 'react-hook-form';
 import type { InformacionFiscal } from '@/types/informacionFiscal';
+import type { ParsedNombre } from '@/lib/parseNombreFromTusFacturasError';
 
 /** Respuesta esperada del endpoint /api/verificar-cuit */
 type ApiOk = { error?: false; data: InformacionFiscal };
-type ApiErr = { error: true; message: string };
+type ApiErr = { error: true; message: string; extractedNombre?: ParsedNombre };
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 type ApiResponse = ApiOk | ApiErr;
 
@@ -45,6 +46,7 @@ interface VerificadorCuitProps<T extends FieldValues> {
   nombre: string;
   apellido: string;
   onVerificationSuccess: (datos: InformacionFiscal) => void;
+  onCuilNombreExtraido?: (p: ParsedNombre | null) => void; // ← NUEVO (opcional)
 }
 
 export default function VerificadorCuit<T extends FieldValues>({
@@ -54,6 +56,7 @@ export default function VerificadorCuit<T extends FieldValues>({
   nombre,
   apellido,
   onVerificationSuccess,
+  onCuilNombreExtraido, // ← NUEVO
 }: VerificadorCuitProps<T>) {
   const { field, fieldState } = useController({ name, control, rules });
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
@@ -88,13 +91,30 @@ export default function VerificadorCuit<T extends FieldValues>({
         throw new Error(msg);
       }
 
-      if (!isApiOk(json)) {
-        throw new Error('Respuesta inesperada del verificador.');
+      // Éxito normal (CUIT con padrón)
+      if (isApiOk(json)) {
+        setStatus('success');
+        setMessage(`✔️ Verificado: ${json.data.razonSocial}`);
+        onVerificationSuccess(json.data); // Notifica al formulario padre
+        onCuilNombreExtraido?.(null); // ← NUEVO: limpiar valor previo de CUIL
+        return;
       }
 
-      setStatus('success');
-      setMessage(`✔️ Verificado: ${json.data.razonSocial}`);
-      onVerificationSuccess(json.data); // Notifica al formulario padre
+      // Caso CUIL: 200 + error:true + extractedNombre
+      if (isApiErr(json) && json.extractedNombre) {
+        setStatus('success');
+        setMessage(`✔️ Coincidencia por CUIL: ${json.extractedNombre.nombreCompleto}`);
+        onCuilNombreExtraido?.(json.extractedNombre); // ← NUEVO: emitir al padre
+        return;
+      }
+
+      // Error “real” con mensaje
+      if (isApiErr(json)) {
+        throw new Error(json.message);
+      }
+
+      // Cualquier otra cosa es inesperada
+      throw new Error('Respuesta inesperada del verificador.');
     } catch (error: unknown) {
       setStatus('error');
       setMessage(error instanceof Error ? `❌ ${error.message}` : '❌ Ocurrió un error inesperado.');
