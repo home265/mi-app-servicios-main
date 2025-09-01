@@ -48,7 +48,7 @@ export const deleteUserProfile = async (uid: string, rol?: string): Promise<void
   
   if (!collectionName) {
       console.error(`No se pudo determinar la colección para el usuario con UID: ${uid}`);
-      // Podríamos no lanzar un error si el documento ya no existe, pero sí si no sabemos dónde buscar.
+      // Podríamos no lanzar un error si el documento ya no existe, pero deleteDoc no falla si no existe.
       // Depende de cómo quieras manejarlo. Por ahora, lanzaremos un error si no se sabe la colección.
       throw new Error("No se pudo encontrar la colección del perfil de usuario.");
   }
@@ -217,5 +217,125 @@ export const updateUserPreferenciasEnvio = async (
   } catch (error) {
     console.error(`Error al actualizar preferenciasEnvio (${collectionName}/${uid}):`, error);
     throw new Error('No se pudieron actualizar las preferencias de envío.');
+  }
+};
+
+/* ========================================================================== */
+/* ============ NUEVO: PERFIL FISCAL (documento 'perfil' anidado) =========== */
+/* ========================================================================== */
+
+import type { PerfilFiscal } from '@/types/perfilFiscal';
+
+function isViaVerificacion(x: unknown): x is 'cuit_padron' | 'cuil_nombre' {
+  return x === 'cuit_padron' || x === 'cuil_nombre';
+}
+
+function isReceptorParaFactura(x: unknown): x is 'CUIT' | 'CONSUMIDOR_FINAL' {
+  return x === 'CUIT' || x === 'CONSUMIDOR_FINAL';
+}
+
+function isCondicionImpositivaMin(x: unknown): x is
+  | 'RESPONSABLE_INSCRIPTO'
+  | 'MONOTRIBUTO'
+  | 'EXENTO'
+  | 'CONSUMIDOR_FINAL'
+  | 'NO_CATEGORIZADO' {
+  return (
+    x === 'RESPONSABLE_INSCRIPTO' ||
+    x === 'MONOTRIBUTO' ||
+    x === 'EXENTO' ||
+    x === 'CONSUMIDOR_FINAL' ||
+    x === 'NO_CATEGORIZADO'
+  );
+}
+
+function isOptionalStringOrNull(x: unknown): x is string | null | undefined {
+  return typeof x === 'string' || x === null || typeof x === 'undefined';
+}
+
+function isProveedorPerfil(x: unknown): x is NonNullable<PerfilFiscal['proveedor']> {
+  if (!isObject(x)) return false;
+  const o = x as Record<string, unknown>;
+  if (typeof o.tusFacturasClienteId === 'undefined') return true;
+  return typeof o.tusFacturasClienteId === 'string';
+}
+
+function isPerfilFiscal(x: unknown): x is PerfilFiscal {
+  if (!isObject(x)) return false;
+  const o = x as Record<string, unknown>;
+
+  if (!isViaVerificacion(o.viaVerificacion)) return false;
+  if (!isReceptorParaFactura(o.receptorParaFactura)) return false;
+
+  if (typeof o.emailReceptor !== 'string') return false;
+  if (typeof o.verifiedAt !== 'string') return false;
+  if (o.cuitGuardado !== 'none') return false;
+
+  if (!isOptionalStringOrNull(o.razonSocial)) return false;
+  if (!(typeof o.condicionImpositiva === 'undefined' || o.condicionImpositiva === null || isCondicionImpositivaMin(o.condicionImpositiva))) {
+    return false;
+  }
+  if (!isOptionalStringOrNull(o.domicilio)) return false;
+  if (!isOptionalStringOrNull(o.localidad)) return false;
+  if (!isOptionalStringOrNull(o.provincia)) return false;
+  if (!isOptionalStringOrNull(o.codigopostal)) return false;
+
+  if (!(typeof o.proveedor === 'undefined' || isProveedorPerfil(o.proveedor))) return false;
+
+  return true;
+}
+
+/**
+ * Escribe el documento PERFIL (no sensible) en:
+ *   <colección>/<uid>/informacionFiscal/current  bajo el campo 'perfil'
+ * No afecta los campos raíz usados por InformacionFiscal.
+ */
+export const upsertUserPerfilFiscal = async (
+  uid: string,
+  rol: string,
+  perfil: PerfilFiscal
+): Promise<void> => {
+  const collectionName = await findUserCollection(uid, rol);
+  if (!collectionName) {
+    throw new Error(`No se encontró la colección del usuario ${uid} para guardar el perfil fiscal.`);
+  }
+
+  const ref = doc(db, collectionName, uid, 'informacionFiscal', 'current');
+
+  try {
+    // Guardamos bajo el campo 'perfil' para no interferir con la estructura previa.
+    await setDoc(ref, { perfil }, { merge: true });
+    console.log(`Perfil fiscal (perfil) actualizado para ${collectionName}/${uid}.`);
+  } catch (error) {
+    console.error(`Error al guardar perfil fiscal (${collectionName}/${uid}):`, error);
+    throw new Error('No se pudo guardar el perfil fiscal.');
+  }
+};
+
+/**
+ * Lee el PERFIL (campo 'perfil') desde:
+ *   <colección>/<uid>/informacionFiscal/current
+ * Devuelve null si no existe o si el formato no es válido.
+ */
+export const getUserPerfilFiscal = async (
+  uid: string,
+  rol?: string
+): Promise<PerfilFiscal | null> => {
+  const collectionName = await findUserCollection(uid, rol);
+  if (!collectionName) {
+    console.warn(`No se encontró la colección del usuario ${uid} para leer el perfil fiscal.`);
+    return null;
+  }
+
+  const ref = doc(db, collectionName, uid, 'informacionFiscal', 'current');
+  try {
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return null;
+    const data = snap.data() as Record<string, unknown>;
+    const perfil = data.perfil;
+    return isPerfilFiscal(perfil) ? (perfil as PerfilFiscal) : null;
+  } catch (error) {
+    console.error(`Error al leer perfil fiscal (${collectionName}/${uid}):`, error);
+    return null;
   }
 };

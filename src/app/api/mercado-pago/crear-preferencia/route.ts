@@ -6,6 +6,7 @@ type CreatePrefRequest = {
   planId: string;
   campaignId: string;
   creatorId: string;
+  payerEmail?: string; // opcional: precargar email del pagador
 };
 
 type PreferenceResponse = {
@@ -18,11 +19,15 @@ function isObject(x: unknown): x is Record<string, unknown> {
 
 function isCreatePrefRequest(x: unknown): x is CreatePrefRequest {
   if (!isObject(x)) return false;
-  return (
+  const hasBase =
     typeof x.planId === 'string' &&
     typeof x.campaignId === 'string' &&
-    typeof x.creatorId === 'string'
-  );
+    typeof x.creatorId === 'string';
+  if (!hasBase) return false;
+  if ('payerEmail' in x && typeof (x as { payerEmail?: unknown }).payerEmail !== 'string') {
+    return false;
+  }
+  return true;
 }
 
 function isPreferenceResponse(x: unknown): x is PreferenceResponse {
@@ -57,7 +62,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     );
   }
 
-  const { planId, campaignId, creatorId } = bodyUnknown;
+  const { planId, campaignId, creatorId, payerEmail } = bodyUnknown;
 
   const plan = PLANES.find((p) => p.id === planId);
   const camp = CAMPANAS.find((c) => c.id === campaignId);
@@ -74,7 +79,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
   // Incluye creatorId y campaignId para poder resolver campaña en el webhook
   const external_reference = `${creatorId}|${campaignId}`;
 
-  const payload = {
+  const payload: Record<string, unknown> = {
     items: [
       {
         id: external_reference, // requerido por tipos del SDK/REST moderno
@@ -92,9 +97,15 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     },
     auto_return: 'approved' as const,
     notification_url: 'https://us-central1-mi-app-servicios-3326e.cloudfunctions.net/mercadoPagoWebhook',
-
     statement_descriptor: 'MI-APP',
+    // NUEVO: metadata útil para conciliaciones
+    metadata: { uid: creatorId, campaignId, planId },
   };
+
+  // NUEVO: si hay payerEmail, lo enviamos
+  if (payerEmail) {
+    (payload as { payer: { email: string } }).payer = { email: payerEmail };
+  }
 
   const mpRes = await fetch('https://api.mercadopago.com/checkout/preferences', {
     method: 'POST',

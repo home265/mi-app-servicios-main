@@ -130,3 +130,117 @@ export async function emitirFacturaTF({
   }
   return res.json(); // datos del comprobante (CAE, nro, PDF, etc.)
 }
+
+/* ============================================================================
+ * NUEVO: soporte para PERFIL FISCAL ligero (sin guardar CUIT/CUIL)
+ * ========================================================================== */
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type { PerfilFiscal, ReceptorParaFactura, CondicionImpositivaMin } from '@/types/perfilFiscal';
+
+type CondicionIVA = 'CF' | 'RI' | 'MT' | 'EX' | 'NR';
+
+export function mapCondicionImpositivaMinToIVA(ci?: CondicionImpositivaMin | null): CondicionIVA {
+  switch (ci) {
+    case 'RESPONSABLE_INSCRIPTO': return 'RI';
+    case 'MONOTRIBUTO': return 'MT';
+    case 'EXENTO': return 'EX';
+    case 'CONSUMIDOR_FINAL': return 'CF';
+    case 'NO_CATEGORIZADO':
+    default: return 'NR';
+  }
+}
+
+/**
+ * Construye el `Cliente` desde el PERFIL (sin números sensibles).
+ * Si pasás `legacy` (InformacionFiscal), puede usar su cuit/cuil para documento.
+ */
+export function buildClienteFromPerfil(
+  perfil: PerfilFiscal,
+  legacy?: Pick<InformacionFiscal, 'cuit' | 'cuil' | 'razonSocial' | 'condicionIVA' | 'emailFactura' | 'domicilio' | 'provincia'> | null
+): Cliente {
+  const documento_nro = legacy?.cuit ?? legacy?.cuil ?? '00000000';
+  const documento_tipo: 'CUIT' | 'DNI' | 'EXT' = legacy?.cuit ? 'CUIT' : 'DNI';
+
+  const condicionIVA: CondicionIVA =
+    perfil.condicionImpositiva
+      ? mapCondicionImpositivaMinToIVA(perfil.condicionImpositiva)
+      : (legacy?.condicionIVA ?? 'CF');
+
+  return {
+    documento_tipo,
+    documento_nro,
+    razon_social: perfil.razonSocial ?? legacy?.razonSocial ?? 'Consumidor Final',
+    email: perfil.emailReceptor, // preferimos el email declarado en el perfil
+    domicilio: legacy?.domicilio || undefined,
+    provincia: legacy?.provincia || undefined,
+    condicion_iva: condicionIVA,
+  };
+}
+
+/** Regla simple: RI → A ; resto → B (misma lógica que venías usando) */
+export function tipoFacturaDesdeIVA(cond: CondicionIVA): 'FACTURA A' | 'FACTURA B' {
+  return cond === 'RI' ? 'FACTURA A' : 'FACTURA B';
+}
+
+/**
+ * Emite la factura en TF a partir del PERFIL (y opcionalmente `legacy`).
+ * Respeta un modo "stub" si seteás TUSFACTURAS_MODE=stub para no emitir real.
+ */
+export async function emitirFacturaDesdePerfil(args: {
+  external_reference: string;
+  monto: number;
+  perfil: PerfilFiscal;
+  descripcion?: string;
+  punto_venta?: string;
+  leyenda_gral?: string;
+  enviaPorMail?: boolean;
+  legacyInfo?: InformacionFiscal | null; // si lo tenés, ayuda con doc_nro
+}): Promise<{ ok: boolean; stub?: boolean }> {
+  const {
+    external_reference,
+    monto,
+    perfil,
+    descripcion = `Orden ${external_reference}`,
+    punto_venta = '0001',
+    leyenda_gral = '',
+    enviaPorMail = true,
+    legacyInfo = null,
+  } = args;
+
+  // Modo protegido para pruebas
+  const mode = (process.env.TUSFACTURAS_MODE ?? 'live') as 'live' | 'stub';
+  if (mode === 'stub') {
+    // Simulación sin emitir real
+    return { ok: true, stub: true };
+  }
+
+  const cliente = buildClienteFromPerfil(perfil, legacyInfo);
+
+  // Tipo de factura según receptor/IVA
+  const cond = cliente.condicion_iva;
+  const tipo: 'FACTURA A' | 'FACTURA B' =
+    perfil.receptorParaFactura === 'CUIT' ? tipoFacturaDesdeIVA(cond) : 'FACTURA B';
+
+  const items: Item[] = [
+    {
+      descripcion,
+      cantidad: 1,
+      precio_unitario_sin_iva: monto,
+      alicuota: 21,
+    },
+  ];
+
+  await emitirFacturaTF({
+    tipo,
+    punto_venta,
+    external_reference,
+    cliente,
+    items,
+    leyenda_gral,
+    enviaPorMail,
+    pagos: [{ descripcion: 'MercadoPago', importe: monto }],
+  });
+
+  return { ok: true };
+}

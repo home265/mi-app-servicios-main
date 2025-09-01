@@ -14,6 +14,7 @@ import categoriasData from '@/data/categorias.json';
 import rubrosData from '@/data/rubro.json';
 import type { ParsedNombre } from '@/lib/parseNombreFromTusFacturasError';
 import { normalizarNombreParaComparar } from '@/lib/parseNombreFromTusFacturasError';
+import type { PerfilFiscal } from '@/types/perfilFiscal';
 
 // --- Tipos (sin cambios) ---
 type CategoriaSeleccionadaConMatricula = CategoriaSeleccionada & {
@@ -141,9 +142,27 @@ export default function RegistroForm({ rol }: RegistroFormProps) {
       return;
     }
 
-    const dataToStore = { ...data, informacionFiscal: datosFiscales };
-    console.log('Datos del formulario VALIDADOS y listos para pasar a selfie:', dataToStore);
-    console.log('Registrando como:', rol);
+    // 1) Construir el perfil fiscal (sin datos sensibles)
+const perfilFiscal: PerfilFiscal = {
+  viaVerificacion: datosFiscales ? 'cuit_padron' : 'cuil_nombre',
+  receptorParaFactura: datosFiscales ? 'CUIT' : 'CONSUMIDOR_FINAL',
+  razonSocial: datosFiscales?.razonSocial ?? null,
+  condicionImpositiva: datosFiscales?.condicionImpositiva ?? null,
+  domicilio: datosFiscales?.domicilio ?? null,
+  localidad: datosFiscales?.localidad ?? null,
+  provincia: datosFiscales?.provincia ?? null,
+  codigopostal: datosFiscales?.codigopostal ?? null,
+  emailReceptor: data.email,
+  verifiedAt: new Date().toISOString(),
+  proveedor: undefined,
+  cuitGuardado: 'none',
+};
+
+const dataToStore = { ...data, informacionFiscal: datosFiscales, perfilFiscal }; // ← ESTA LÍNEA
+
+console.log('Datos del formulario VALIDADOS y listos para pasar a selfie:', dataToStore);
+console.log('Registrando como:', rol);
+
 
     try {
       sessionStorage.setItem('registroFormData', JSON.stringify(dataToStore));

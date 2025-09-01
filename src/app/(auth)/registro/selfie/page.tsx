@@ -10,6 +10,7 @@ import { ref, getDownloadURL, uploadBytes } from 'firebase/storage';
 // --- INICIO DE CAMBIOS ---
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { InformacionFiscal } from '@/types/informacionFiscal';
+import type { PerfilFiscal } from '@/types/perfilFiscal'; // ← agregado
 // --- FIN DE CAMBIOS ---
 import bcrypt from 'bcryptjs';
 import Button from '@/components/ui/Button';
@@ -42,6 +43,7 @@ interface StoredFormData {
   descripcion?: string;
   telefono?: string;
   informacionFiscal?: InformacionFiscal;
+  perfilFiscal?: PerfilFiscal; // ← agregado
 }
 // --- FIN DE CAMBIOS ---
 
@@ -122,6 +124,31 @@ export default function SelfiePage() {
         console.log('informacionFiscal/current guardado correctamente.');
       }
       // --- FIN DE CAMBIOS ---
+
+      // --- INICIO DE CAMBIOS (perfil fiscal) ---
+      // Llamada al endpoint para guardar el PERFIL (sin números sensibles)
+      if (formData.perfilFiscal) {
+        try {
+          const resp = await fetch('/api/informacion-fiscal', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              uid: user.uid,
+              rol, // el endpoint lo valida; si no coincide, resuelve colección automáticamente
+              perfil: formData.perfilFiscal,
+            }),
+          });
+          if (!resp.ok) {
+            const txt = await resp.text();
+            console.warn('No se pudo guardar el perfil fiscal:', txt);
+          } else {
+            console.log('Perfil fiscal guardado correctamente.');
+          }
+        } catch (e) {
+          console.warn('Error de red al guardar el perfil fiscal:', e);
+        }
+      }
+      // --- FIN DE CAMBIOS (perfil fiscal) ---
 
       setUiMessage('¡Registro exitoso! Redirigiendo...');
       setTimeout(() => router.push('/bienvenida'), 2000);

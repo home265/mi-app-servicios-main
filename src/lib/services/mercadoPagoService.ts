@@ -10,10 +10,12 @@ type CreatePrefArgs = {
   title: string;
   quantity: number;
   unit_price: number;             // ARS
-  external_reference: string;     // ej: PA-{creatorId}-{ts} o creatorId|campaignId
+  external_reference: string;     // ej: uid del usuario
   notification_url: string;
   back_urls?: { success: string; failure: string; pending: string };
   itemId?: string;                // opcional: si querés controlar el ID del item
+  metadata?: Record<string, unknown>; // opcional: para adjuntar info (p.ej., perfil fiscal)
+  payerEmail?: string;            // opcional: para precargar email del pagador
 };
 
 export async function createPreference({
@@ -24,6 +26,8 @@ export async function createPreference({
   back_urls,
   notification_url,
   itemId,
+  metadata,
+  payerEmail,
 }: CreatePrefArgs): Promise<string> {
   const pref = new Preference(mp);
 
@@ -43,6 +47,8 @@ export async function createPreference({
       auto_return: 'approved',
       notification_url,
       statement_descriptor: 'MI-APP',
+      ...(metadata ? { metadata } : {}),
+      ...(payerEmail ? { payer: { email: payerEmail } } : {}),
     },
   });
 

@@ -147,6 +147,76 @@ function isInformacionFiscalDoc(x: unknown): x is InformacionFiscalDoc {
   );
 }
 
+// ---- Nuevo: lector del PERFIL FISCAL ligero (sin números sensibles) ----
+type ViaVerificacion = 'cuit_padron' | 'cuil_nombre';
+type ReceptorParaFactura = 'CUIT' | 'CONSUMIDOR_FINAL';
+type CondicionImpositivaMin =
+  | 'RESPONSABLE_INSCRIPTO'
+  | 'MONOTRIBUTO'
+  | 'EXENTO'
+  | 'CONSUMIDOR_FINAL'
+  | 'NO_CATEGORIZADO';
+
+interface PerfilFiscalLigero {
+  viaVerificacion: ViaVerificacion;
+  receptorParaFactura: ReceptorParaFactura;
+  razonSocial?: string | null;
+  condicionImpositiva?: CondicionImpositivaMin | null;
+  domicilio?: string | null;
+  localidad?: string | null;
+  provincia?: string | null;
+  codigopostal?: string | null;
+  emailReceptor: string;
+  verifiedAt: string;
+  proveedor?: { tusFacturasClienteId?: string };
+  cuitGuardado: 'none';
+}
+
+function isPerfilFiscalLigero(x: unknown): x is PerfilFiscalLigero {
+  if (!x || typeof x !== 'object') return false;
+  const o = x as Record<string, unknown>;
+
+  if (o.viaVerificacion !== 'cuit_padron' && o.viaVerificacion !== 'cuil_nombre') return false;
+  if (o.receptorParaFactura !== 'CUIT' && o.receptorParaFactura !== 'CONSUMIDOR_FINAL') return false;
+  if (typeof o.emailReceptor !== 'string') return false;
+  if (typeof o.verifiedAt !== 'string') return false;
+  if (o.cuitGuardado !== 'none') return false;
+
+  // opcionales coherentes: strings o null o undefined
+  const opt = (v: unknown) => typeof v === 'string' || v === null || typeof v === 'undefined';
+  if (!opt(o.razonSocial)) return false;
+  if (!(typeof o.condicionImpositiva === 'undefined'
+    || o.condicionImpositiva === null
+    || ['RESPONSABLE_INSCRIPTO','MONOTRIBUTO','EXENTO','CONSUMIDOR_FINAL','NO_CATEGORIZADO'].includes(String(o.condicionImpositiva))
+  )) return false;
+  if (!opt(o.domicilio)) return false;
+  if (!opt(o.localidad)) return false;
+  if (!opt(o.provincia)) return false;
+  if (!opt(o.codigopostal)) return false;
+
+  if (typeof o.proveedor !== 'undefined') {
+    if (!o.proveedor || typeof o.proveedor !== 'object') return false;
+    const p = o.proveedor as Record<string, unknown>;
+    if (typeof p.tusFacturasClienteId !== 'undefined' && typeof p.tusFacturasClienteId !== 'string') {
+      return false;
+    }
+  }
+  return true;
+}
+
+/** Lee el campo 'perfil' en .../informacionFiscal/current (si existe). */
+async function readPerfilLigero(uid: string): Promise<PerfilFiscalLigero | null> {
+  const col = await findUserCollection(uid);
+  if (!col) return null;
+  const ref = db.collection(col).doc(uid).collection('informacionFiscal').doc('current');
+  const snap = await ref.get();
+  if (!snap.exists) return null;
+  const data = snap.data() as Record<string, unknown>;
+  const perfil = data?.perfil;
+  return isPerfilFiscalLigero(perfil) ? (perfil as PerfilFiscalLigero) : null;
+}
+
+
 async function readFiscalProfile(uid: string): Promise<InformacionFiscalDoc | null> {
   const col = await findUserCollection(uid);
   if (!col) return null;
@@ -304,41 +374,70 @@ export const mercadoPagoWebhook = functions.https.onRequest(
           return;
         }
 
-        // (OPCIONAL) Leer perfil fiscal y emitir factura si hay credenciales
-        try {
-          const fiscal = await readFiscalProfile(creatorId);
-          if (!fiscal) {
-            console.log(`[TF] Perfil fiscal ausente para ${creatorId}. Se omite emisión.`);
-          } else {
-            // Determinar email destino según preferencias (si el usuario desactiva email, no se envía)
-            const enviaPorMail = fiscal.preferenciasEnvio?.email !== false;
-            const emailFactura =
-              enviaPorMail ? (fiscal.emailFactura ?? payment.payer?.email) : undefined;
+        // (OPCIONAL) Leer PERFIL (nuevo) y, si no está, caer al esquema legacy
+try {
+  const perfil = await readPerfilLigero(creatorId);
+  const legacy = await readFiscalProfile(creatorId); // fallback
 
-            const condicionIVA = fiscal.condicionIVA ?? mapCondicionImpositivaToIVA(fiscal.condicionImpositiva);
+  if (!perfil && !legacy) {
+    console.log(`[TF] Perfil fiscal ausente para ${creatorId}. Se omite emisión.`);
+  } else {
+    // ¿A quién facturamos?
+    const receptor: ReceptorParaFactura =
+      (perfil?.receptorParaFactura ?? 'CONSUMIDOR_FINAL');
 
-            // transaction_amount no está tipado en el SDK; leemos por seguridad
-            const amount =
-              typeof (payment as unknown as { transaction_amount?: number }).transaction_amount === 'number'
-                ? (payment as unknown as { transaction_amount: number }).transaction_amount
-                : 0;
+    // Mail: desde perfil.emailReceptor si está; si no, desde MP payer.email si existe.
+    const enviaPorMail = true; // si luego agregás preferencias, respetalas acá
+    const emailFactura =
+      perfil?.emailReceptor ?? (payment.payer?.email ?? undefined);
 
-            await tryEmitTFInvoice({
-              external_reference: externalRefRaw,
-              amount,
-              razonSocial: fiscal.razonSocial,
-              emailFactura,
-              cuit: fiscal.cuit,
-              cuil: fiscal.cuil,
-              condicionIVA,
-              enviaPorMail,
-              // Si querés forzar un tipo, pasalo aquí; si no, se calcula por condicionIVA:
-              // tipo: facturaTipoFromCondicionIVA(condicionIVA),
-            });
-          }
-        } catch (err) {
-          console.error('[TF] Error al preparar/emisión de factura (no bloquea activación):', err);
-        }
+    // Condición IVA: preferir la del PERFIL; si no, mapear legacy
+    const condIVA: CondicionIVA = perfil?.condicionImpositiva
+      ? mapCondicionImpositivaToIVA(perfil.condicionImpositiva)
+      : (legacy ? mapCondicionImpositivaToIVA(legacy.condicionImpositiva) : 'NR');
+
+    // Razón social: preferir la del PERFIL; si no, la legacy
+    const razonSocial = perfil?.razonSocial ?? legacy?.razonSocial ?? 'Consumidor Final';
+
+    // Monto (SDK no tipa bien transaction_amount)
+    const amount =
+      typeof (payment as unknown as { transaction_amount?: number }).transaction_amount === 'number'
+        ? (payment as unknown as { transaction_amount: number }).transaction_amount
+        : 0;
+
+    if (receptor === 'CUIT') {
+      // Emisión a CUIT: si no guardás el número, el proveedor lo resuelve por clienteId (si lo usás)
+      await tryEmitTFInvoice({
+        external_reference: externalRefRaw,
+        amount,
+        razonSocial,
+        emailFactura,
+        // cuit/cuil opcional: si no los guardás, dejalos undefined
+        cuit: legacy?.cuit,
+        cuil: legacy?.cuil,
+        condicionIVA: condIVA,
+        enviaPorMail,
+        // tipo: facturaTipoFromCondicionIVA(condIVA),
+      });
+    } else {
+      // Consumidor Final
+      await tryEmitTFInvoice({
+        external_reference: externalRefRaw,
+        amount,
+        razonSocial: 'Consumidor Final',
+        emailFactura,
+        cuit: undefined,
+        cuil: undefined,
+        condicionIVA: 'CF',
+        enviaPorMail,
+        // tipo: 'FACTURA B', // opcional
+      });
+    }
+  }
+} catch (err) {
+  console.error('[TF] Error al preparar/emisión de factura (no bloquea activación):', err);
+}
+
 
         // Activar la suscripción
         const now = Timestamp.now();
