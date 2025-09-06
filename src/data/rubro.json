@@ -45,7 +45,9 @@
         { "nombre": "Escribano", "requiereMatricula": true },
         { "nombre": "Contador", "requiereMatricula": true },
         { "nombre": "Ingeniero Industrial", "requiereMatricula": true },
+        { "nombre": "Ingeniero Civil", "requiereMatricula": true },
         { "nombre": "Ingeniero Eléctrico", "requiereMatricula": true },
+        { "nombre": "Maestro Mayor de Obra", "requiereMatricula": true },
         { "nombre": "Ingeniero Electrónico", "requiereMatricula": true },
         { "nombre": "Ingeniero Agrónomo", "requiereMatricula": true },
         { "nombre": "Diseñador Gráfico", "requiereMatricula": false }
@@ -145,6 +147,112 @@
       "nombre": "Insumos Agrícolas",
       "subrubros": [],
       "requiereMatricula": false
+    },
+    {
+      "nombre": "Salud Mascotas",
+      "subrubros": [{ "nombre": "Veterinario,General", "requiereMatricula": true },{ "nombre": "Veterinario Animales de Granja", "requiereMatricula": true }],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Panadería",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+      {
+      "nombre": "Glute free",
+      "subrubros": [{ "nombre": "Panderias", "requiereMatricula": false },{ "nombre": "Dieteticas", "requiereMatricula": false },{ "nombre": "Comidas Listas", "requiereMatricula": false }],"requiereMatricula": false
+    },
+    {
+      "nombre": "Supermercados",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+
+    {
+      "nombre": "Estaciones de servicios",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "kioscos",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Inmobiliarias",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Consecionarias",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Motos y artículos de motos",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Almacenes",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Carnicerías",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Mayoristas",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Tornería",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Neumáticos",
+      "subrubros": [{ "nombre": "Venta", "requiereMatricula": false },{ "nombre": "Gomería", "requiereMatricula": false },{ "nombre": "Alineacíon y Balanceo", "requiereMatricula": false }],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Bodegas",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Vinotecas",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Distribuidoras",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Indumentaria",
+      "subrubros": [{ "nombre": "Calzado", "requiereMatricula": false },{ "nombre": "Ropa Hombre", "requiereMatricula": false },{ "nombre": "Ropa Mujer", "requiereMatricula": false },{ "nombre": "Ropa Tecnica", "requiereMatricula": false },{ "nombre": "Ropa Interior", "requiereMatricula": false },{ "nombre": "Ropa de Trabajo", "requiereMatricula": false },{ "nombre": "Ropa Adolescente", "requiereMatricula": false },{ "nombre": "Ropa Niños", "requiereMatricula": false }],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Artículos de Caza y Pesca",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Pescadería",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Hierros y Aceros",
+      "subrubros": [],
+      "requiereMatricula": false
     }
+
   ]
 }

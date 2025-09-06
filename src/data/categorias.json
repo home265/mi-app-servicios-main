@@ -81,11 +81,6 @@
       "requiereMatricula": false
     },
     {
-      "nombre": "Veterinario",
-      "subcategorias": ["General", "Animales de Granja"],
-      "requiereMatricula": true
-    },
-    {
       "nombre": "Repartidor",
       "subcategorias": ["Moto", "Bicicleta", "Auto"],
       "requiereMatricula": false
@@ -93,6 +88,36 @@
     {
       "nombre": "Herrero",
       "subcategorias": ["Herrería General", "Herrería Industrial"],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Constructor en Seco",
+      "subcategorias": ["General", "Industrial"],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Mecanico de Motos",
+      "subcategorias": ["General"],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Mecanica Pesada",
+      "subcategorias": ["General"],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Musicalización de Eventos",
+      "subcategorias": ["Fiestas General", "Eventos"],
+      "requiereMatricula": false
+    },
+     {
+      "nombre": "Salones de Fiestas",
+      "subcategorias": ["General"],
+      "requiereMatricula": false
+    },
+     {
+      "nombre": "Catering",
+      "subcategorias": ["General"],
       "requiereMatricula": false
     }
   ]
