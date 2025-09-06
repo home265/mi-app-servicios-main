@@ -252,6 +252,21 @@
       "nombre": "Hierros y Aceros",
       "subrubros": [],
       "requiereMatricula": false
+    },
+    {
+      "nombre": "Sanitarios",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "Maderas",
+      "subrubros": [],
+      "requiereMatricula": false
+    },
+    {
+      "nombre": "vivero",
+      "subrubros": [],
+      "requiereMatricula": false
     }
 
   ]
