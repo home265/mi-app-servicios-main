@@ -1,0 +1,61 @@
+
+{
+  "mappings": [
+    {
+      "categoria": "Albañil",
+      "rubros_insumos": ["Construcción", "Ferretería", "Sanitarios", "Hierros y Aceros", "Maderas"]
+    },
+    {
+      "categoria": "Mecánico",
+      "rubros_insumos": ["Repuestos de Automotores", "Lubricentros", "Ferretería", "Neumáticos"]
+    },
+    {
+      "categoria": "Mecanico de Motos",
+      "rubros_insumos": ["Motos y artículos de motos", "Lubricentros", "Ferretería", "Neumáticos"]
+    },
+    {
+      "categoria": "Mecanica Pesada",
+      "rubros_insumos": ["Repuestos de Automotores", "Lubricentros", "Insumos Agrícolas"]
+    },
+    {
+      "categoria": "Electricista",
+      "rubros_insumos": ["Electricidad", "Ferretería"]
+    },
+    {
+      "categoria": "Gasista",
+      "rubros_insumos": ["Sanitarios", "Ferretería", "Construcción"]
+    },
+    {
+      "categoria": "Plomero",
+      "rubros_insumos": ["Sanitarios", "Ferretería", "Construcción"]
+    },
+    {
+      "categoria": "Carpintero",
+      "rubros_insumos": ["Maderas", "Ferretería", "Pinturería"]
+    },
+    {
+      "categoria": "Pintor",
+      "rubros_insumos": ["Pinturería", "Ferretería"]
+    },
+    {
+      "categoria": "Herrero",
+      "rubros_insumos": ["Hierros y Aceros", "Ferretería"]
+    },
+    {
+      "categoria": "Jardinero",
+      "rubros_insumos": ["Insumos Agrícolas", "Vivero", "Ferretería"]
+    },
+    {
+      "categoria": "Constructor en Seco",
+      "rubros_insumos": ["Construcción", "Maderas", "Ferretería", "Pinturería"]
+    },
+    {
+      "categoria": "Limpieza Domiciliaria",
+      "rubros_insumos": ["Artículos de Limpieza"]
+    },
+    {
+      "categoria": "Técnicos Electrónicos",
+      "rubros_insumos": ["Artículos de Electrónica"]
+    }
+  ]
+}

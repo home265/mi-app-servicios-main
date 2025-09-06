@@ -148,8 +148,6 @@ export const deletePaginaAmarilla = async (creatorId: string): Promise<void> => 
   await deleteDoc(doc(db, PAGINAS_AMARILLAS_COLLECTION, creatorId));
 };
 
-// --- INICIO: SECCIÓN ACTUALIZADA ---
-
 /** Opciones para la función de listar páginas amarillas. */
 export interface ListPaginasAmarillasOptions {
   soloSuscritos?: boolean;
@@ -169,7 +167,18 @@ export const listPaginasAmarillasByFilter = async (
   if (filtros.provincia) qc.push(where('provincia', '==', filtros.provincia));
   if (filtros.localidad) qc.push(where('localidad', '==', filtros.localidad));
   if (filtros.rol) qc.push(where('creatorRole', '==', filtros.rol));
-  if (filtros.rubro) qc.push(where('rubro', '==', filtros.rubro));
+  
+  if (filtros.rubros && filtros.rubros.length > 0) {
+    if (filtros.rubros.length > 10) {
+      console.warn("La búsqueda intentó filtrar por más de 10 rubros. Se limitará a los primeros 10.");
+      qc.push(where('rubro', 'in', filtros.rubros.slice(0, 10)));
+    } else {
+      qc.push(where('rubro', 'in', filtros.rubros));
+    }
+  } else if (filtros.rubro) {
+    qc.push(where('rubro', '==', filtros.rubro));
+  }
+  
   if (filtros.subRubro) qc.push(where('subRubro', '==', filtros.subRubro));
   if (filtros.categoria) qc.push(where('categoria', '==', filtros.categoria));
   if (filtros.subCategoria) qc.push(where('subCategoria', '==', filtros.subCategoria));
@@ -225,4 +234,3 @@ export const listPaginasAmarillasByFilter = async (
     return serializableData;
   });
 };
-// --- FIN: SECCIÓN ACTUALIZADA ---

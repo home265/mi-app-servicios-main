@@ -21,6 +21,9 @@ import AyudaBienvenida from '@/components/ayuda-contenido/AyudaBienvenida';
 import BotonDeAccion from '@/components/bienvenida/BotonDeAccion';
 import { useUserStore } from '@/store/userStore';
 import useHelpContent from '@/lib/hooks/useHelpContent';
+import ContenedorCalculadoras from './components/ContenedorCalculadoras';
+import BotonInsumos from './components/BotonInsumos';
+
 
 const toTitleCase = (s: string) =>
   s
@@ -205,6 +208,10 @@ export default function BienvenidaPage() {
                 </BotonDeAccion>
               );
             })}
+            
+            {/* --- AQUÍ SE AÑADE EL COMPONENTE DE CALCULADORAS --- */}
+            <ContenedorCalculadoras />
+            <BotonInsumos />
           </div>
         </main>
       </div>

@@ -94,6 +94,7 @@ export interface PaginaAmarillaFiltros {
   provincia?: string;
   localidad?: string;
   rubro?: string;
+  rubros?: string[]; // <--- ÚNICA LÍNEA AÑADIDA
   subRubro?: string;
   categoria?: string;
   subCategoria?: string;
